@@ -28,6 +28,14 @@
     <maven>2.2.1</maven>
   </prerequisites>
 
+  <repositories>
+    <repository>
+      <id>CRBS</id>
+      <name>CRBS Maven Repo</name>
+      <url>http://maven.crbs.ucsd.edu/nexus/content/repositories/NIF-snapshot</url>
+    </repository>
+  </repositories>
+
   <inceptionYear>2014</inceptionYear>
 
   <properties>
@@ -64,6 +72,7 @@
             <email>condit@sdsc.edu</email>
           </properties>
           <excludes>
+            <exclude>**/LICENSE</exclude>
             <exclude>**/README.md</exclude>
             <exclude>src/test/resources/**</exclude>
             <exclude>src/main/resources/**</exclude>
@@ -213,5 +222,18 @@
     </dependency>
 
   </dependencies>
+
+  <distributionManagement>
+    <repository>
+      <id>releases</id>
+      <name>Internal Releases</name>
+      <url>http://maven.crbs.ucsd.edu/nexus/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>NIF-MAVEN</id>
+      <name>Internal Snapshots</name>
+      <url>http://maven.crbs.ucsd.edu/nexus/content/repositories/NIF-snapshot</url>
+    </snapshotRepository>
+  </distributionManagement>
 
 </project>
