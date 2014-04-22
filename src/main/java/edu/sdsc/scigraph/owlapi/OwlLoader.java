@@ -140,7 +140,11 @@ public class OwlLoader {
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
       manager.addIRIMapper(mapper);
       for (String url: config.getOntologyUrls()) {
-        manager.loadOntology(IRI.create(url));
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+          manager.loadOntology(IRI.create(url));
+        } else {
+          manager.loadOntologyFromOntologyDocument(new File(url));
+        }
       }
       logger.info(format("loaded ontologies with owlapi in %d seconds", timer.elapsed(TimeUnit.SECONDS)));
       return new OWLOntologyWalker(manager.getOntologies());
