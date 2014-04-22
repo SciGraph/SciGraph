@@ -149,7 +149,6 @@ public class OwlLoader {
   }
 
   public static void main(String[] args) throws OWLOntologyCreationException, JsonParseException, JsonMappingException, IOException {
-    logger.info("Starting to load ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
     CommandLineParser parser = new PosixParser();
     CommandLine cmd = null;
@@ -163,8 +162,9 @@ public class OwlLoader {
     }
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c')), OwlLoadConfiguration.class);
+    OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c').trim()), OwlLoadConfiguration.class);
 
+    logger.info("Starting to load ontologies...");
     Injector i = Guice.createInjector(new Neo4jModule(config.getOntologyConfiguration()), new OwlLoaderModule(config));
 
     OwlLoader loader = i.getInstance(OwlLoader.class);
