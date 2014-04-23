@@ -259,7 +259,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectIntersectionOf desc) {
     Node subjectNode = graph.getOrCreateNode(getUri(desc));
-    graph.setProperty(subjectNode, "type", OWLObjectIntersectionOf.class.getSimpleName());
+    graph.setProperty(subjectNode, CommonProperties.TYPE, OWLObjectIntersectionOf.class.getSimpleName());
     graph.setProperty(subjectNode, NodeProperties.ANONYMOUS, true);
     for (OWLClassExpression expression: desc.getOperands()) {
       Node object = graph.getOrCreateNode(getUri(expression));
