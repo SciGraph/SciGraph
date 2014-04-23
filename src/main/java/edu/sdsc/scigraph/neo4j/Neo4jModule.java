@@ -19,6 +19,8 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -87,7 +89,16 @@ public class Neo4jModule extends AbstractModule {
   @Singleton
   GraphDatabaseService getGraphDatabaseService(@Named("neo4j.location") String neo4jLocation) throws IOException {
     try {
-      final GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(neo4jLocation);
+      Map<String, String> config = new HashMap<>();
+      config.put("neostore.nodestore.db.mapped_memory", "500M");
+      config.put("neostore.relationshipstore.db.mapped_memory", "500M");
+      config.put("neostore.propertystore.db.mapped_memory", "500M");
+      config.put("neostore.propertystore.db.strings.mapped_memory", "500M");
+      config.put("neostore.propertystore.db.arrays.mapped_memory", "500M");
+      final GraphDatabaseService graphDb = new GraphDatabaseFactory()
+      .newEmbeddedDatabaseBuilder(neo4jLocation)
+      .setConfig(config)
+      .newGraphDatabase();
 
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override
