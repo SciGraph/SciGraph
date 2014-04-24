@@ -222,7 +222,7 @@ public class GraphTest extends GraphTestBase {
     String uri = BASE_URI + "#createdNode";
     Node node = graph.getOrCreateNode(uri);
     graph.setProperty(node, NodeProperties.LABEL, "foo");
-    assertThat(graph.getOrCreateFramedNode(uri).getLabels(), contains("foo"));
+    assertThat(graph.getOrCreateFramedNode(uri).getLabel(), is("foo"));
   }
 
   @Test

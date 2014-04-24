@@ -59,7 +59,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   Concept buildConcept(String uri, String label, String curie, String ... categories) {
     Concept concept = graph.getOrCreateFramedNode(uri);
-    concept.addLabel(label);
+    concept.setLabel(label);
     concept.setCurie(curie);
     concept.asVertex().setProperty(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
     for (String category: categories) {
