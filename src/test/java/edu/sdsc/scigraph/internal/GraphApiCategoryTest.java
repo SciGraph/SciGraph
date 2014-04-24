@@ -29,7 +29,7 @@ import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
-public class GraphApiTest extends GraphTestBase {
+public class GraphApiCategoryTest extends GraphTestBase {
 
   GraphApi graphApi;
 
