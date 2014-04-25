@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
@@ -178,6 +179,21 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
+  @Ignore
+  //TODO: Fix this
+  public void testGetConceptFromCurriePrefix() {
+    Query query = new Vocabulary.Query.Builder("Hp").build();
+    System.out.println(vocabulary.getConceptsFromPrefix(query));
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus));
+  }
+
+  @Test
+  public void testGetConceptFromFragmentPrefix() {
+    Query query = new Vocabulary.Query.Builder("birnlex").build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampalFormation));
+  }
+
+  @Test
   public void testGetConceptsFromPrefixWithSpace() {
     Query query = new Vocabulary.Query.Builder("hippocampus str").build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampusStructure));
@@ -254,7 +270,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     Query query = new Vocabulary.Query.Builder("parkinsons disease").build();
     assertThat(vocabulary.getConceptsFromTerm(query), contains(parkinsons));
   }
-  
+
   @Test
   public void testLeadingAndTrailingPunctuation() {
     Query query = new Vocabulary.Query.Builder("hippocampus,").build();

@@ -111,7 +111,8 @@ public class OwlVisitorTest {
   public void testConcreteSubclass() {
     Node mother = graph.getNode(ROOT + "/Mother").get();
     Node woman = graph.getNode(ROOT + "/Woman").get();
-    assertThat(graph.hasRelationship(mother, woman, EdgeType.SUBCLASS_OF), is(true));
+    assertThat(graph.hasRelationship(mother, woman, EdgeType.SUBCLASS_OF, 
+        OwlVisitor.RDFS_PREFIX + "subClassOf"), is(true));
   }
 
   @Test
@@ -146,14 +147,14 @@ public class OwlVisitorTest {
   public void testSameIndividual() {
     Node james = graph.getNode(ROOT + "/James").get();
     Node jim = graph.getNode(ROOT + "/Jim").get();
-    assertThat(graph.hasRelationship(james, jim, EdgeType.SAME_AS), is(true));
+    assertThat(graph.hasRelationship(james, jim, EdgeType.SAME_AS, OwlVisitor.OWL_PREFIX + "sameAs"), is(true));
   }
 
   @Test
   public void testDifferentIndividual() {
     Node john = graph.getNode(ROOT + "/John").get();
     Node bill = graph.getNode(ROOT + "/Bill").get();
-    assertThat(graph.hasRelationship(john, bill, EdgeType.DIFFERENT_FROM), is(true));
+    assertThat(graph.hasRelationship(john, bill, EdgeType.DIFFERENT_FROM, OwlVisitor.OWL_PREFIX + "differentFrom"), is(true));
   }
 
   @Test
@@ -189,22 +190,22 @@ public class OwlVisitorTest {
   public void testClassEquivalenceRelationships() {
     Node adult = graph.getNode(ROOT + "/Adult").get();
     Node grownup = graph.getNode(OTHER_ROOT + "/Grownup").get();
-    assertThat(graph.hasRelationship(adult, grownup, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(grownup, adult, EdgeType.EQUIVALENT_TO), is(true));
+    assertThat(graph.hasRelationship(adult, grownup, EdgeType.EQUIVALENT_TO, OwlVisitor.OWL_PREFIX + "equivalentClass"), is(true));
+    assertThat(graph.hasRelationship(grownup, adult, EdgeType.EQUIVALENT_TO, OwlVisitor.OWL_PREFIX + "equivalentClass"), is(true));
   }
 
   @Test
   public void testDisjointClasses() {
     Node man = graph.getNode(ROOT + "/Man").get();
     Node woman = graph.getNode(ROOT + "/Woman").get();
-    assertThat(graph.hasRelationship(man, woman, EdgeType.DISJOINT_WITH), is(true));
+    assertThat(graph.hasRelationship(man, woman, EdgeType.DISJOINT_WITH, OwlVisitor.OWL_PREFIX + "disjointWith"), is(true));
   }
 
   @Test
   public void testObjectUnionOf() {
     Node parent = graph.getNode(ROOT + "/Parent").get();
     Node intersection = graph.getOrCreateNode("http://ontology.neuinfo.org/anon/412251922");
-    assertThat(graph.hasRelationship(parent, intersection, EdgeType.EQUIVALENT_TO), is(true));
+    assertThat(graph.hasRelationship(parent, intersection, EdgeType.EQUIVALENT_TO, OwlVisitor.OWL_PREFIX + "equivalentClass"), is(true));
     Node mother = graph.getNode(ROOT + "/Mother").get();
     Node father = graph.getNode(ROOT + "/Father").get();
     assertThat(graph.hasRelationship(intersection, mother, EdgeType.REL), is(true));

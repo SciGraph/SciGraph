@@ -145,14 +145,15 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
   public List<N> getConceptsFromPrefix(Query query) {
     BooleanQuery finalQuery = new BooleanQuery();
     try {
+      BooleanQuery subQuery = new BooleanQuery();
+      subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL, LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
+      subQuery.add(parser.parse(formatQuery("%s:%s*", CommonProperties.CURIE, query.getInput())), Occur.SHOULD);
+      subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())), Occur.SHOULD);
+      
       if (query.isIncludeSynonyms()) {
-        BooleanQuery subQuery = new BooleanQuery();
-        subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL, LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
         subQuery.add(parser.parse(formatQuery("%s%s:%s*", Concept.SYNONYM, LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
-        finalQuery.add(subQuery, Occur.MUST);
-      } else {
-        finalQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL, LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.MUST);
       }
+      finalQuery.add(subQuery, Occur.MUST);
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parser query", e);
     }
