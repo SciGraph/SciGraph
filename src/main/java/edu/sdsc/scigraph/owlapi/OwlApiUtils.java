@@ -23,11 +23,6 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplBoolean;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplDouble;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplFloat;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplInteger;
-
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.neo4j.Graph;
@@ -41,20 +36,20 @@ public class OwlApiUtils {
    * @return an optional correctly typed Java object from the OWLLiteral
    */
   public static Optional<Object> getTypedLiteralValue(OWLLiteral literal) {
-    //HACK: Ignore non-english literals for now
-    if (literal.hasLang() && !literal.getLang().equals("en")) {
-      return Optional.absent();
-    }
     Object literalValue = null;
-    if (literal instanceof OWLLiteralImplBoolean) {
-      literalValue = Boolean.valueOf(literal.getLiteral());
-    } else if (literal instanceof OWLLiteralImplInteger) {
-      literalValue = Integer.valueOf(literal.getLiteral());
-    } else if (literal instanceof OWLLiteralImplFloat) {
-      literalValue = Float.valueOf(literal.getLiteral());
-    } else if (literal instanceof OWLLiteralImplDouble) {
-      literalValue = Double.valueOf(literal.getLiteral());
+    if (literal.isBoolean()) {
+      literalValue = literal.parseBoolean();
+    } else if (literal.isInteger()) {
+      literalValue = literal.parseInteger();
+    } else if (literal.isFloat()) {
+      literalValue = literal.parseFloat();
+    } else if (literal.isDouble()) {
+      literalValue = literal.parseDouble();
     } else {
+      //HACK: Ignore non-english literals for now
+      if (literal.hasLang() && !literal.getLang().equals("en")) {
+        return Optional.absent();
+      }
       literalValue = literal.getLiteral();
     }
     return Optional.of(literalValue);

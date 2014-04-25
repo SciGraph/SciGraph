@@ -28,52 +28,47 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDatatype;
-
-import edu.sdsc.scigraph.owlapi.OwlApiUtils;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImpl;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplBoolean;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplDouble;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplFloat;
-import uk.ac.manchester.cs.owl.owlapi.OWLLiteralImplInteger;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLLiteral;
 
 public class OwlApiUtilsTest {
 
-  OWLDatatype type;
+  OWLDataFactory factory;
 
   @Before
   public void setup() {
-    type = mock(OWLDatatype.class);
+    factory = OWLManager.getOWLDataFactory();
   }
 
   @Test
   public void testGetBooleanTypedLiteral() {
-    OWLLiteralImplBoolean bool = new OWLLiteralImplBoolean(false);
+    OWLLiteral bool = factory.getOWLLiteral(false);
     assertThat(OwlApiUtils.getTypedLiteralValue(bool).get(), IsInstanceOf.instanceOf(Boolean.class));
     assertThat((Boolean)OwlApiUtils.getTypedLiteralValue(bool).get(), is(false));
   }
 
   @Test
   public void testGetNumericTypedLiterals() {
-    OWLLiteralImplDouble doub = new OWLLiteralImplDouble(3.14, type);
+    OWLLiteral doub = factory.getOWLLiteral(3.14);
     assertThat((Double)OwlApiUtils.getTypedLiteralValue(doub).get(), is(equalTo(3.14)));
-    OWLLiteralImplFloat flt = new OWLLiteralImplFloat(3.14f, type);
+    OWLLiteral flt = factory.getOWLLiteral(3.14f);
     assertThat((Float)OwlApiUtils.getTypedLiteralValue(flt).get(), is(equalTo(3.14f)));
-    OWLLiteralImplInteger i = new OWLLiteralImplInteger(3, type);
+    OWLLiteral i = factory.getOWLLiteral(3);
     assertThat((Integer)OwlApiUtils.getTypedLiteralValue(i).get(), is(equalTo(3)));
   }
 
   @Test
   public void testGetStringTypedLiterals() {
-    OWLLiteralImpl literal = new OWLLiteralImpl("hello", null, type);
+    OWLLiteral literal = factory.getOWLLiteral("hello", "en");
     assertThat((String)OwlApiUtils.getTypedLiteralValue(literal).get(), is(equalTo("hello")));
   }
 
   @Test
   public void testLiteralLanguages() {
-    OWLLiteralImpl literalEnLang = new OWLLiteralImpl("hello", "en", null);
-    OWLLiteralImpl literalEsLang = new OWLLiteralImpl("hola", "es", null);
+    OWLLiteral literalEnLang = factory.getOWLLiteral("hello", "en");
+    OWLLiteral literalEsLang = factory.getOWLLiteral("hello", "es");
     assertThat((String)OwlApiUtils.getTypedLiteralValue(literalEnLang).get(), is(equalTo("hello")));
     assertThat(OwlApiUtils.getTypedLiteralValue(literalEsLang).isPresent(), is(false));
   }
