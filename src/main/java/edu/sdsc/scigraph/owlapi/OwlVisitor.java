@@ -88,6 +88,10 @@ import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
+  private static final String RDFS_PREFIX = "http://www.w3.org/2000/01/rdf-schema#";
+  private static final String OWL_PREFIX = "http://www.w3.org/2002/07/owl#";
+  private static final String RDF_PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+  
   private static final Logger logger = Logger.getLogger(OwlVisitor.class.getName());
 
   private final Graph<Concept> graph;
