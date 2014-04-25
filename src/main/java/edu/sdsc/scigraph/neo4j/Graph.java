@@ -194,6 +194,10 @@ public class Graph<N> {
     return factory.getOrCreate(UNIQUE_PROPERTY, uri.toString());
   }
 
+  public Optional<Node> getNode(String uri) {
+    return getNode(getURI(uri));
+  }
+
   public Optional<Node> getNode(final URI uri) {
     if (nodeExists(uri)) {
       return Optional.of(getOrCreateNode(uri));
