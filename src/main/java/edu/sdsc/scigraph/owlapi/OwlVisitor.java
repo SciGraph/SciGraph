@@ -176,10 +176,15 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         Optional<Object> literal = getTypedLiteralValue((OWLLiteral)(axiom.getValue()));
         if (literal.isPresent()) {
           try {
-            graph.addProperty(subject, property, literal.get());
             if (property.equals(NodeProperties.LABEL)) {
-              graph.addProperty(subject, property + LuceneUtils.EXACT_SUFFIX, literal.get());
+              // HACK: This effectively limits the model to a single label when in reality there 
+              // may be more than one.
+              graph.setProperty(subject, property, literal.get());
+              graph.setProperty(subject, property + LuceneUtils.EXACT_SUFFIX, literal.get());
+            } else {
+              graph.addProperty(subject, property, literal.get());
             }
+
             if (mappedProperties.containsKey(property)) {
               graph.addProperty(subject, mappedProperties.get(property), literal.get());
             }
