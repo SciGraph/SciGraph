@@ -174,6 +174,15 @@ public class GraphTest extends GraphTestBase {
   }
 
   @Test
+  public void testWhiteSpaceProperty() {
+    Node node = graph.getOrCreateNode(BASE_URI);
+    graph.setProperty(node, "foo", " ");
+    assertThat(node.hasProperty("foo"), is(false));
+    graph.addProperty(node, "foo", " ");
+    assertThat(node.hasProperty("foo"), is(false));
+  }
+
+  @Test
   public void testOtherPropertyTypes() {
     Node node = graph.getOrCreateNode(BASE_URI);
     graph.addProperty(node, "foo", 1);

@@ -48,6 +48,7 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.index.UniqueFactory;
 import org.neo4j.helpers.collection.MapUtil;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -304,6 +305,12 @@ public class Graph<N> {
    */
   @Transactional
   public void setProperty(PropertyContainer container, String property, Object value) {
+    if (value instanceof String) {
+      // Ignore whitespace properties
+      if (CharMatcher.WHITESPACE.matchesAllOf((String)value)) {
+        return;
+      }
+    }
     container.setProperty(property, value);
     if (EXACT_PROPERTIES.contains(property)) {
       container.setProperty(property + LuceneUtils.EXACT_SUFFIX, value);
@@ -323,6 +330,12 @@ public class Graph<N> {
    */
   @Transactional
   public void addProperty(PropertyContainer container, String property, Object value) {
+    if (value instanceof String) {
+      // Ignore whitespace properties
+      if (CharMatcher.WHITESPACE.matchesAllOf((String)value)) {
+        return;
+      }
+    }
     if (container.hasProperty(property)) {
       // We might be creating or updating an array - read everything into a Set<>
       Object origValue = (Object)container.getProperty(property);
