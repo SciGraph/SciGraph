@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import org.apache.lucene.analysis.StopAnalyzer;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -306,8 +307,9 @@ public class Graph<N> {
   @Transactional
   public void setProperty(PropertyContainer container, String property, Object value) {
     if (value instanceof String) {
-      // Ignore whitespace properties
-      if (CharMatcher.WHITESPACE.matchesAllOf((String)value)) {
+      // Ignore whitespace properties and stop words
+      if (CharMatcher.WHITESPACE.matchesAllOf((String)value) 
+          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains((String)value)) {
         return;
       }
     }
@@ -331,8 +333,9 @@ public class Graph<N> {
   @Transactional
   public void addProperty(PropertyContainer container, String property, Object value) {
     if (value instanceof String) {
-      // Ignore whitespace properties
-      if (CharMatcher.WHITESPACE.matchesAllOf((String)value)) {
+      // Ignore whitespace properties and stop words
+      if (CharMatcher.WHITESPACE.matchesAllOf((String)value) 
+          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains((String)value)) {
         return;
       }
     }

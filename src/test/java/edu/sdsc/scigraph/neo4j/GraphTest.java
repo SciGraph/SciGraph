@@ -285,4 +285,11 @@ public class GraphTest extends GraphTestBase {
     assertThat(graph.getProperty(a, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, String.class).get(), is(equalTo("test")));
   }
 
+  @Test
+  public void testStopwordProperties() {
+    // HACK: Don't store stopword properties becuase it ruins indexing...
+    graph.setProperty(a, NodeProperties.LABEL, "a");
+    assertThat(a.hasProperty(NodeProperties.LABEL), is(false));
+  }
+
 }
