@@ -84,6 +84,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     cerebellum.setOntology("http://bar.org");
     specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz", "foo bar");
     parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
+    parkinsons.addSynonym("the");
 
     vocabulary = new VocabularyNeo4jImpl<Concept>(graph, null);
   }
@@ -277,6 +278,14 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampus));
     query = new Vocabulary.Query.Builder(",hippocampal formations,").build();
     assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampalFormation));
+  }
+
+  @Test
+  @Ignore
+  public void testStopWordOnlyQuery() {
+    // TODO: Make sure that stopwords don't return...
+    Query query = new Vocabulary.Query.Builder("a").build();
+    assertThat(vocabulary.getConceptsFromTerm(query), is(empty()));
   }
 
 }
