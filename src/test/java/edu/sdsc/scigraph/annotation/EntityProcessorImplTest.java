@@ -1,0 +1,124 @@
+package edu.sdsc.scigraph.annotation;
+
+import static java.util.Collections.singleton;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class EntityProcessorImplTest {
+
+  EntityProcessorImpl processor;
+  EntityFormatConfiguration config = mock(EntityFormatConfiguration.class);
+
+  final static String text = "Sentence about Spinal muscular atrophy (SMA).";
+
+  List<EntityAnnotation> expectedAnnotations = new ArrayList<>();
+
+  Entity mockEntity = new Entity("SMA", "1");
+  Entity mockEntity2 = new Entity("muscular atrophy", "1");
+
+  List<EntityAnnotation> annotationList = new ArrayList<>();
+
+  @Before
+  public void setUp() throws Exception {
+    when(config.getDataAttrName()).thenReturn("data-entity");
+    EntityRecognizer recognizer = mock(EntityRecognizer.class);
+
+    when(recognizer.getEntities("Spinal muscular atrophy", config)).thenReturn(
+        singleton(mockEntity));
+    when(recognizer.getEntities("muscular atrophy", config)).thenReturn(singleton(mockEntity2));
+    when(recognizer.getEntities("SMA", config)).thenReturn(singleton(mockEntity));
+    when(recognizer.getCssClass()).thenReturn("mock");
+    processor = new EntityProcessorImpl(recognizer);
+
+    expectedAnnotations.add(new EntityAnnotation(mockEntity, 15, 38));
+    expectedAnnotations.add(new EntityAnnotation(mockEntity2, 22, 38));
+    expectedAnnotations.add(new EntityAnnotation(mockEntity, 39, 45));
+  }
+
+  @Test
+  public void testGetAnnotations() throws IOException, InterruptedException {
+    List<EntityAnnotation> annotations = processor.getAnnotations(text, config);
+    assertThat(annotations, equalTo(expectedAnnotations));
+  }
+
+  @Test
+  public void testInsertAllSpans() throws Exception {
+    String expected = "Sentence about <span class=\"mock\" data-entity=\"SMA,1,|muscular atrophy,1,\">Spinal muscular atrophy</span>"
+        + " <span class=\"mock\" data-entity=\"SMA,1,\">(SMA).</span>";
+    assertThat(processor.insertSpans(expectedAnnotations, text, config), is(equalTo(expected)));
+  }
+
+  @Test
+  public void testInsertLongestOnlySpans() throws Exception {
+    when(config.isLongestOnly()).thenReturn(true);
+    String expected = "Sentence about <span class=\"mock\" data-entity=\"SMA,1,\">Spinal muscular atrophy</span>"
+        + " <span class=\"mock\" data-entity=\"SMA,1,\">(SMA).</span>";
+    assertThat(processor.insertSpans(expectedAnnotations, text, config), is(equalTo(expected)));
+  }
+
+  @Test
+  public void testGetSeparateAnnotationGroups() {
+    EntityAnnotation annot1 = new EntityAnnotation(mockEntity, 0, 4); 
+    EntityAnnotation annot2 = new EntityAnnotation(mockEntity2, 5, 10);
+    annotationList.add(annot1);
+    annotationList.add(annot2);
+    EntityAnnotationGroup expected1 = new EntityAnnotationGroup();
+    expected1.add(annot2);
+    EntityAnnotationGroup expected2 = new EntityAnnotationGroup();
+    expected2.add(annot1);
+    assertThat(EntityProcessorImpl.getAnnotationGroups(annotationList, false), contains(expected1, expected2));
+  }
+
+  @Test
+  public void testGetJoinedAnnotationGroups() {
+    EntityAnnotation annot1 = new EntityAnnotation(mockEntity, 0, 4); 
+    EntityAnnotation annot2 = new EntityAnnotation(mockEntity2, 3, 5);
+    annotationList.add(annot1);
+    annotationList.add(annot2);
+    EntityAnnotationGroup expected = new EntityAnnotationGroup();
+    expected.add(annot1);
+    expected.add(annot2);
+    assertThat(EntityProcessorImpl.getAnnotationGroups(annotationList, false), contains(expected));
+  }
+
+  @Test
+  public void testGetLongestAnnotationGroups() {
+    EntityAnnotation annot1 = new EntityAnnotation(mockEntity, 0, 4); 
+    EntityAnnotation annot2 = new EntityAnnotation(mockEntity2, 3, 5);
+    annotationList.add(annot1);
+    annotationList.add(annot2);
+    EntityAnnotationGroup expected = new EntityAnnotationGroup();
+    expected.add(annot1);
+    assertThat(EntityProcessorImpl.getAnnotationGroups(annotationList, true), contains(expected));
+  }
+
+  @Test
+  public void testUniqueAnnotations() {
+    EntityAnnotation annot1 = new EntityAnnotation(mockEntity, 0, 4); 
+    EntityAnnotation annot2 = new EntityAnnotation(mockEntity, 3, 5);
+    annotationList.add(annot1);
+    annotationList.add(annot2);
+    EntityAnnotationGroup group1 = new EntityAnnotationGroup();
+    group1.add(annot1);
+    assertThat(EntityProcessorImpl.getAnnotationGroups(annotationList, true), contains(group1));
+  }
+
+  @Test
+  public void testGetBase() throws MalformedURLException {
+    assertThat(EntityProcessorImpl.getBase(new URL("http://example.org:9000/foo/bar.html")), is(equalTo("http://example.org:9000/foo/")));
+  }
+
+}

@@ -116,6 +116,8 @@ public interface Vocabulary<N> {
     private final String input;
     private final int limit;
     private final boolean includeSynonyms;
+    private final boolean includeAcronyms;
+    private final boolean includeAbbreviations;
     private final Collection<String> ontologies;
     private final Collection<String> categories;
 
@@ -123,6 +125,8 @@ public interface Vocabulary<N> {
       private final String input;
       private int limit = 1000;
       private boolean includeSynonyms = true;
+      private boolean includeAcronyms = false;
+      private boolean includeAbbreviations = false;
       private Collection<String> ontologies = new HashSet<>();
       private Collection<String> categories = new HashSet<>();
 
@@ -145,6 +149,14 @@ public interface Vocabulary<N> {
 
       public Builder includeSynonyms(boolean include) {
         this.includeSynonyms = include; return this;
+      }
+
+      public Builder includeAcronyms(boolean include) {
+        this.includeAcronyms = include; return this;
+      }
+
+      public Builder includeAbbreviations(boolean include) {
+        this.includeAbbreviations = include; return this;
       }
 
       /***
@@ -176,6 +188,8 @@ public interface Vocabulary<N> {
       this.input = builder.input;
       this.limit = builder.limit;
       this.includeSynonyms = builder.includeSynonyms;
+      this.includeAcronyms = builder.includeAcronyms;
+      this.includeAbbreviations = builder.includeAbbreviations;
       this.ontologies = builder.ontologies;
       this.categories = builder.categories;
     }
@@ -190,6 +204,14 @@ public interface Vocabulary<N> {
 
     public boolean isIncludeSynonyms() {
       return includeSynonyms;
+    }
+
+    public boolean isIncludeAcronyms() {
+      return includeAcronyms;
+    }
+
+    public boolean isIncludeAbbreviations() {
+      return includeAbbreviations;
     }
 
     public Collection<String> getOntologies() {
