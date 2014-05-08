@@ -308,8 +308,9 @@ public class Graph<N> {
   public void setProperty(PropertyContainer container, String property, Object value) {
     if (value instanceof String) {
       // Ignore whitespace properties and stop words
+      // HACK: This stop word check should be done at OWL load time
       if (CharMatcher.WHITESPACE.matchesAllOf((String)value) 
-          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains((String)value)) {
+          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(((String)value).toLowerCase())) {
         return;
       }
     }
@@ -334,8 +335,9 @@ public class Graph<N> {
   public void addProperty(PropertyContainer container, String property, Object value) {
     if (value instanceof String) {
       // Ignore whitespace properties and stop words
+      // HACK: This stop word check should be done at OWL load time
       if (CharMatcher.WHITESPACE.matchesAllOf((String)value) 
-          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains((String)value)) {
+          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(((String)value).toLowerCase())) {
         return;
       }
     }
