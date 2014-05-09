@@ -30,7 +30,7 @@ public final class EntityAnnotation extends Token<Entity> implements Comparable<
 
   @Override
   public int compareTo(EntityAnnotation o) {
-    if (equals(o))
+    if (range.equals(o.range))
       return 0;
     else if (getEnd() > o.getEnd())
       return 1;
