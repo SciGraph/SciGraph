@@ -16,10 +16,13 @@ public class ReachabilityEvaluator implements Evaluator {
 
 	private TreeMap <Long, Pair<TreeSet<Long>,TreeSet<Long>>> inMemoryIdx;
 	private Direction direction ;
+	private long thingId;   // node id for owl:Thing.
 	
-	public ReachabilityEvaluator (TreeMap <Long, Pair<TreeSet<Long>,TreeSet<Long>>> inMemoryIdx, Direction direction) {
+	public ReachabilityEvaluator (TreeMap <Long, Pair<TreeSet<Long>,TreeSet<Long>>> inMemoryIdx, Direction direction,
+			                    long thingId) {
 		this.inMemoryIdx = inMemoryIdx;
 		this.direction = direction;
+		this.thingId = thingId;
 	}
 	
 	@Override
@@ -27,6 +30,9 @@ public class ReachabilityEvaluator implements Evaluator {
 
 		Node cur = path.endNode();    // u or w
 		long curId = cur.getId();
+		
+		// don't traverse owl:Thing node.
+		if ( curId == thingId)	return Evaluation.EXCLUDE_AND_PRUNE;
 
 		Node secondLast= path.startNode();   // Vi
 		long secId = secondLast.getId();

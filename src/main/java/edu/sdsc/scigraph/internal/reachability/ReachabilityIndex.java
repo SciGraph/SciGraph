@@ -30,6 +30,9 @@ public class ReachabilityIndex {
 	
 	public static final String dataDictionaryURI = "http://scigraph.scichruch.com/metadata";
 	
+	public static final String thingURI = "http://www.w3.org/2002/07/owl#Thing";
+
+	
 	private static final String indexExists ="ReachablilityIndexExists";
 	protected static final String propInList  = "ReachablilityIndexInList";
 	protected static final String propOutList = "ReachablilityIndexOutList";
@@ -37,6 +40,7 @@ public class ReachabilityIndex {
 	private Graph<Concept> graph;
 	private GraphDatabaseService graphDb;
 	private boolean opened;   // flag if there an index to use.
+	private long thingId;     // node id for entity "http://www.w3.org/2002/07/owl#Thing"
 	
     private static final Logger logger = Logger.getLogger(ReachabilityIndex.class.getName());
 
@@ -54,6 +58,14 @@ public class ReachabilityIndex {
 			opened= false;
 	    } else {
 	    	opened = (boolean)opt.get().getProperty(indexExists, false);
+	    }
+		
+        opt = graph.getNode(thingURI);
+		
+		if (opt.isPresent()) {
+			thingId = opt.get().getId();
+	    } else {
+	    	thingId = -1;
 	    }
 	}
 
@@ -81,11 +93,11 @@ public class ReachabilityIndex {
 	    
 	    TraversalDescription tdi = Traversal.description().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL)
 	    		               .expand(new DirectionalPathExpender(Direction.INCOMING))
-	    		               .evaluator(new ReachabilityEvaluator(inMemoryIdx, Direction.INCOMING));
+	    		               .evaluator(new ReachabilityEvaluator(inMemoryIdx, Direction.INCOMING, thingId));
 
 	    TraversalDescription tdo = Traversal.description().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL)
 	               .expand(new DirectionalPathExpender(Direction.OUTGOING))
-	               .evaluator(new ReachabilityEvaluator(inMemoryIdx, Direction.OUTGOING));
+	               .evaluator(new ReachabilityEvaluator(inMemoryIdx, Direction.OUTGOING, thingId));
 
 	    for (AbstractMap.SimpleEntry<Long,Integer> e : l ) {
 	    	Node workingNode = graphDb.getNodeById(e.getKey());
@@ -109,6 +121,7 @@ public class ReachabilityIndex {
 	    tx.finish();
 	    
         opened = true;
+        logger.info("Reachability index created.");
 	}
 	
 	
@@ -132,6 +145,7 @@ public class ReachabilityIndex {
 	        tx.finish();
 	        
 	        opened = false;
+	        logger.info("Reachability ndex dropped.");
 	    } else {
 	    	logger.info("Index doesn't exist.");
 	    	throw new ReachabilityIndexException("Index does't exist.");
