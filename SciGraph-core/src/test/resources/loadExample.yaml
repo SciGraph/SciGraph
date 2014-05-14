@@ -1,0 +1,27 @@
+ontologyConfiguration:
+
+    # The location of the graph. 
+    # If this location does not exist it will be created.
+    # Loading will append content to existing graphs.
+    graphLocation: target/graph
+
+# A list of ontologies to import. 
+ontologyUrls:
+  # Files can be local paths...
+  - src/test/resources/ontologies/family.owl
+  # Or URIs
+  #- http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine.rdf
+
+curies:
+    http://example.com/owl/families/ : FAM
+
+# Categories are used for vocabulary term filtering and are inherited to 
+# subclasses of their parent.
+categories:
+    http://example.com/owl/families/Person : category
+
+# All properties are stored but can optionally be added to a new node property
+mappedProperties:
+  - name: aged # The name of the new property
+    properties: # The list of properties mapped to the new property
+    - http://example.com/owl/families/hasAge
