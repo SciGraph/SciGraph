@@ -76,35 +76,37 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
   private final QueryParser parser;
 
   @Inject
-  public VocabularyNeo4jImpl(Graph<N> graph, 
-      @Nullable @Named("neo4j.location") String neo4jLocation) throws IOException {
+  public VocabularyNeo4jImpl(Graph<N> graph, @Nullable @Named("neo4j.location") String neo4jLocation)
+      throws IOException {
     this.graph = graph;
     if (null != neo4jLocation) {
-      Directory indexDirectory = FSDirectory.open(new File(new File(neo4jLocation), "index/lucene/node/node_auto_index"));
-      Directory spellDirectory = FSDirectory.open(new File(FileUtils.getTempDirectory(), "spellchecker"));
+      Directory indexDirectory = FSDirectory.open(new File(new File(neo4jLocation),
+          "index/lucene/node/node_auto_index"));
+      Directory spellDirectory = FSDirectory.open(new File(FileUtils.getTempDirectory(),
+          "spellchecker"));
       spellChecker = new SpellChecker(spellDirectory);
       try (IndexReader reader = IndexReader.open(indexDirectory)) {
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new KeywordAnalyzer());
-        spellChecker.indexDictionary(new LuceneDictionary(reader, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX), config, true);
+        spellChecker.indexDictionary(new LuceneDictionary(reader, NodeProperties.LABEL
+            + LuceneUtils.EXACT_SUFFIX), config, true);
       }
     }
     parser = new QueryParser(Version.LUCENE_36, NodeProperties.LABEL, new VocabularyQueryAnalyzer());
   }
 
-  static String formatQuery(String format, Object ... args) {
+  static String formatQuery(String format, Object... args) {
     return format(format, transform(newArrayList(args), new Function<Object, Object>() {
       @Override
       public Object apply(Object input) {
-        return (input instanceof String) ? 
-            QueryParser.escape((String)input).replaceAll(" ", "\\\\ ")
-            : input;
+        return (input instanceof String) ? QueryParser.escape((String) input).replaceAll(" ",
+            "\\\\ ") : input;
       }
     }).toArray());
   }
 
   static void addCommonConstraints(BooleanQuery indexQuery, Query query) {
     BooleanQuery categoryQueries = new BooleanQuery();
-    for (String category: query.getCategories()) {
+    for (String category : query.getCategories()) {
       categoryQueries.add(new TermQuery(new Term(Concept.CATEGORY, category)), Occur.SHOULD);
     }
     if (!query.getCategories().isEmpty()) {
@@ -112,15 +114,16 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     }
 
     BooleanQuery ontoloogyQueries = new BooleanQuery();
-    for (String ontology: query.getOntologies()) {
-      ontoloogyQueries.add(new TermQuery(new Term(CommonProperties.ONTOLOGY, ontology)), Occur.SHOULD);
+    for (String ontology : query.getOntologies()) {
+      ontoloogyQueries.add(new TermQuery(new Term(CommonProperties.ONTOLOGY, ontology)),
+          Occur.SHOULD);
     }
     if (!query.getOntologies().isEmpty()) {
       indexQuery.add(new BooleanClause(ontoloogyQueries, Occur.MUST));
     }
   }
 
-  //TODO: Can this be done in the query?
+  // TODO: Can this be done in the query?
   List<N> limitHits(IndexHits<Node> hits, Query query) {
     return newArrayList(limit(graph.getOrCreateFramedNodes(hits), query.getLimit()));
   }
@@ -146,12 +149,17 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     BooleanQuery finalQuery = new BooleanQuery();
     try {
       BooleanQuery subQuery = new BooleanQuery();
-      subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL, LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
-      subQuery.add(parser.parse(formatQuery("%s:%s*", CommonProperties.CURIE, query.getInput())), Occur.SHOULD);
-      subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())), Occur.SHOULD);
-      
+      subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL,
+          LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
+      subQuery.add(parser.parse(formatQuery("%s:%s*", CommonProperties.CURIE, query.getInput())),
+          Occur.SHOULD);
+      subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
+          Occur.SHOULD);
+
       if (query.isIncludeSynonyms()) {
-        subQuery.add(parser.parse(formatQuery("%s%s:%s*", Concept.SYNONYM, LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
+        subQuery.add(
+            parser.parse(formatQuery("%s%s:%s*", Concept.SYNONYM, LuceneUtils.EXACT_SUFFIX,
+                query.getInput())), Occur.SHOULD);
       }
       finalQuery.add(subQuery, Occur.MUST);
     } catch (ParseException e) {
@@ -173,7 +181,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
         finalQuery.add(subQuery, Occur.MUST);
       } else {
         finalQuery.add(parser.parse(query.getInput()), Occur.MUST);
-      } 
+      }
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parser query", e);
     }
@@ -199,6 +207,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
       logger.log(Level.WARNING, "Failed to parser query", e);
     }
     addCommonConstraints(finalQuery, query);
+    logger.finest(finalQuery.toString());
     IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
     return limitHits(hits, query);
   }
@@ -208,17 +217,18 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     return Suppliers.memoize(new Supplier<Set<String>>() {
       @Override
       public Set<String> get() {
-        ExecutionResult result = graph.getExecutionEngine().execute("START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
+        ExecutionResult result = graph.getExecutionEngine().execute(
+            "START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
         Set<String> categories = new HashSet<>();
         while (result.iterator().hasNext()) {
           Map<String, Object> col = result.iterator().next();
           Object category = col.get("(n.category)");
           if (category.getClass().isArray()) {
-            for (String cat: (String[])category) {
+            for (String cat : (String[]) category) {
               categories.add(cat);
             }
           } else {
-            categories.add((String)col.get("(n.category)"));
+            categories.add((String) col.get("(n.category)"));
           }
         }
         return categories;
@@ -231,11 +241,12 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     return Suppliers.memoize(new Supplier<Set<String>>() {
       @Override
       public Set<String> get() {
-        ExecutionResult result = graph.getExecutionEngine().execute("START n = node(*) WHERE has(n.ontology) RETURN distinct(n.ontology)");
+        ExecutionResult result = graph.getExecutionEngine().execute(
+            "START n = node(*) WHERE has(n.ontology) RETURN distinct(n.ontology)");
         Set<String> ontologies = new HashSet<>();
         while (result.iterator().hasNext()) {
           Map<String, Object> col = result.iterator().next();
-          ontologies.add((String)col.get("(n.ontology)"));
+          ontologies.add((String) col.get("(n.ontology)"));
         }
         return ontologies;
       }
