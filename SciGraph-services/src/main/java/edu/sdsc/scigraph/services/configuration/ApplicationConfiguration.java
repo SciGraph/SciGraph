@@ -33,11 +33,6 @@ public class ApplicationConfiguration extends Configuration {
   @Valid
   @NotNull
   @JsonProperty
-  private FederationConfiguration federationConfiguration = new FederationConfiguration();
-
-  @Valid
-  @NotNull
-  @JsonProperty
   private OntologyConfiguration graphConfiguration = new OntologyConfiguration();
 
   @Valid
@@ -47,10 +42,6 @@ public class ApplicationConfiguration extends Configuration {
 
   public String getApplicationContextPath() {
     return applicationContextPath;
-  }
-
-  public FederationConfiguration getFederationConfiguration() {
-    return federationConfiguration;
   }
 
   public OntologyConfiguration getGraphConfiguration() {
