@@ -132,9 +132,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     /*environment.jersey().register(
         new CachingAuthenticator<BasicCredentials, Subject>(
             environment.metrics(), 
-            new BasicAuthProvider<Subject>(new BasicAuthenticator(), "NIF"),
+            new BasicAuthProvider<Subject>(new BasicAuthenticator(), "SciGraph"),
             configuration.getAuthenticationCachePolicy()));*/
-    environment.jersey().register(new BasicAuthProvider<Subject>(new BasicAuthenticator(), "NIF"));
+    environment.jersey().register(new BasicAuthProvider<Subject>(new BasicAuthenticator(), "SciGraph"));
   }
 
   @Override
@@ -153,12 +153,12 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     environment.lifecycle().manage(i.getInstance(Neo4jManager.class));
 
     //Add health checks
-    for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.nif.services.health")) {
+    for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.health")) {
       environment.healthChecks().register("Neo4j health check", (HealthCheck)i.getInstance(classInfo.load()));
     }
 
     //Add resources
-    for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.nif.services.resources")) {
+    for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.resources")) {
       environment.jersey().register(i.getInstance(classInfo.load()));
     }
 

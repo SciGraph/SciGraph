@@ -82,8 +82,8 @@ public class EntityFormatConfiguration {
     private Set<String> includeCategories = Collections.emptySet();
     private Set<String> excludeCategories = DEFAULT_IGNORABLE_CATEGORIES;
 
-    private String spanClassName = "nif-annotation";
-    private String dataAttrName = "data-nif";
+    private String spanClassName = "graph-annotation";
+    private String dataAttrName = "data-sciGraph";
 
     private int minLength = 3;
 

@@ -277,7 +277,6 @@ public class GraphService extends BaseResource {
     LinkedList<ConceptDTO> dtos = new LinkedList<>();
 
     RelationshipType type = DynamicRelationshipType.withName(relationship);
-    //type = edu.sdsc.nif.ontology.neo4j.EdgeType.SUPERCLASS_OF;
 
     //TODO: include equivalences
     for (org.neo4j.graphdb.Path path: Traversal.description()
