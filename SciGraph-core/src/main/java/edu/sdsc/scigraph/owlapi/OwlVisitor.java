@@ -206,7 +206,11 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLNamedIndividual individual) {
     Node node = graph.getOrCreateNode(getUri(individual));
     graph.addProperty(node, CommonProperties.TYPE, OWLIndividual.class.getSimpleName());
-    return super.visit(individual);
+    Optional<String> curie = getCurie(getUri(individual).toString());
+    if (curie.isPresent()) {
+      graph.setProperty(node, CommonProperties.CURIE, curie.get());
+    }
+    return null;
   }
 
   @Override
