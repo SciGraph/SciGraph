@@ -49,6 +49,12 @@
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-hibernate</artifactId>
       <version>${dropwizard.version}</version>
+      <exclusions>
+      	<exclusion>
+      		<artifactId>hibernate-core</artifactId>
+      		<groupId>org.hibernate</groupId>
+      	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.dropwizard</groupId>
