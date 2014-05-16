@@ -3,7 +3,7 @@ SciGraph
 
 A Neo4j backed ontology store.
 
-You can run local copy by running the following:
+You can run local copy (you'll need git, Maven, and java 7) by running the following:
 
     curl http://goo.gl/RBonro | sh
 
