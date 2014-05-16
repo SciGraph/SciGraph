@@ -138,7 +138,9 @@ public class OwlVisitorTest {
   public void testNonLiteralAnnotationAssertionAxiom() {
     Node person = graph.getNode(ROOT + "/Person").get();
     Node fazz = graph.getNode(ROOT + "/Fazz").get();
-    assertThat(graph.hasRelationship(person, fazz, EdgeType.AnnotationAssertionAxiom, ROOT + "/fizz"), is(true));
+    assertThat(graph.hasRelationship(person, fazz, DynamicRelationshipType.withName("fizz"), ROOT + "/fizz"), is(true));
+    Relationship r = graph.getOrCreateRelationship(person, fazz, DynamicRelationshipType.withName("fizz"));
+    assertThat(graph.getProperty(r, CommonProperties.TYPE, String.class).get(), is(equalTo("OWLAnnotationAssertionAxiom")));
   }
 
   @Test

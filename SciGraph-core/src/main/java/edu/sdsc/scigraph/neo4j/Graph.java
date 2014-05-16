@@ -174,6 +174,16 @@ public class Graph<N> {
   static String getLastPathFragment(URI uri) {
     return uri.getPath().replaceFirst(".*/([^/?]+).*", "$1");
   }
+  
+  public static String getFragment(URI uri) {
+    if (null != uri.getFragment()) {
+      return uri.getFragment();
+    } else if (uri.toString().startsWith("mailto:")) {
+      return uri.toString().substring("mailto:".length());
+    } else {
+      return getLastPathFragment(uri);
+    }
+  }
 
   public Node getOrCreateNode(final URI uri) {
     checkNotNull(uri);
@@ -183,13 +193,7 @@ public class Graph<N> {
       protected void initialize(Node created, Map<String, Object> properties) {
         logger.fine("Creating node: " + properties.get(UNIQUE_PROPERTY));
         created.setProperty(UNIQUE_PROPERTY, properties.get(UNIQUE_PROPERTY));
-        if (null != uri.getFragment()) {
-          created.setProperty(CommonProperties.FRAGMENT, uri.getFragment());
-        } else if (uri.toString().startsWith("mailto:")) {
-          created.setProperty(CommonProperties.FRAGMENT, uri.toString().substring("mailto:".length()));
-        } else {
-          created.setProperty(CommonProperties.FRAGMENT, getLastPathFragment(uri));
-        }
+        created.setProperty(CommonProperties.FRAGMENT, getFragment(uri));
       }
     };
 
@@ -274,9 +278,7 @@ public class Graph<N> {
         Relationship r =  a.createRelationshipTo(b, type);
         if (uri.isPresent()) {
           r.setProperty(CommonProperties.URI, uri.get().toString());
-          if (null != uri.get().getFragment()) {
-            r.setProperty(CommonProperties.FRAGMENT, uri.get().getFragment());
-          }
+          r.setProperty(CommonProperties.FRAGMENT, getFragment(uri.get()));
         }
         return r;
       }

@@ -90,7 +90,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   static final String RDFS_PREFIX = "http://www.w3.org/2000/01/rdf-schema#";
   static final String OWL_PREFIX = "http://www.w3.org/2002/07/owl#";
   static final String RDF_PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-  
+
   private static final Logger logger = Logger.getLogger(OwlVisitor.class.getName());
 
   private final Graph<Concept> graph;
@@ -193,7 +193,11 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         }
       } else if (axiom.getValue() instanceof IRI){
         Node object = graph.getOrCreateNode(((IRI)axiom.getValue()).toURI());
-        graph.getOrCreateRelationship(subject, object, EdgeType.AnnotationAssertionAxiom, property);
+        URI uri = Graph.getURI(property);
+
+        RelationshipType type = DynamicRelationshipType.withName(Graph.getFragment(uri));
+        Relationship r = graph.getOrCreateRelationship(subject, object, type, property);
+        r.setProperty(CommonProperties.TYPE, OWLAnnotationAssertionAxiom.class.getSimpleName());
       }
     } else {
       logger.fine("Ignoring non IRI assertion axiom: " + axiom.toString());
