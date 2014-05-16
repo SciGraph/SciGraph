@@ -98,6 +98,10 @@ public class GraphService extends BaseResource {
     @JsonProperty("lbl")
     String label;
 
+    @XmlElement
+    @JsonProperty
+    Map<String, Object> meta = new HashMap<>();
+
     Vertex() {}
 
     Vertex(String id, String label) {
@@ -123,7 +127,7 @@ public class GraphService extends BaseResource {
     @XmlElement
     @JsonProperty
     Map<String, Object> meta = new HashMap<>();
-    
+
     Edge() {}
 
     Edge(String subject, String object, String predicate) {
@@ -155,7 +159,11 @@ public class GraphService extends BaseResource {
         Concept c = graph.getOrCreateFramedNode(input);
         //TODO: Chooses first label as a convention
         List<String> labels = graph.getProperties(graph.getNode((String)c.asVertex().getProperty(CommonProperties.URI)).get(), NodeProperties.LABEL, String.class);
-        return new Vertex(c.getFragment(), getFirst(labels, null));
+        Vertex v = new Vertex(c.getFragment(), getFirst(labels, null));
+        if (Iterables.count(c.getCategories()) > 0) {
+          v.meta.put("categories", newArrayList(c.getCategories()));
+        }
+        return v;
       }
     }));
 
@@ -326,7 +334,7 @@ public class GraphService extends BaseResource {
     GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(dtos.getLast()){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }
-  
+
   @GET
   @Path("/neighbors/{id}")
   @ApiOperation(value = "Get neighbors", response = ConceptDTO .class)
