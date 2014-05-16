@@ -22,8 +22,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import io.dropwizard.jersey.caching.CacheControl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -55,6 +57,7 @@ import org.neo4j.kernel.Traversal;
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -115,6 +118,10 @@ public class GraphService extends BaseResource {
     @JsonProperty("pred")
     String predicate;
 
+    @XmlElement
+    @JsonProperty
+    Map<String, Object> meta = new HashMap<>();
+    
     Edge() {}
 
     Edge(String subject, String object, String predicate) {
@@ -153,9 +160,14 @@ public class GraphService extends BaseResource {
     graphPath.edges = newArrayList(transform(path.relationships(), new Function<Relationship, Edge>() {
       @Override
       public Edge apply(Relationship input) {
-        return new Edge((String)input.getStartNode().getProperty(CommonProperties.FRAGMENT),
+        Edge e = new Edge((String)input.getStartNode().getProperty(CommonProperties.FRAGMENT),
             (String)input.getEndNode().getProperty(CommonProperties.FRAGMENT),
             input.getType().name());
+        Optional<String> uri = graph.getProperty(input, CommonProperties.URI, String.class);
+        if (uri.isPresent()) {
+          e.meta.put("uri", uri.get());
+        }
+        return e;
       }
     }));
     return graphPath;
