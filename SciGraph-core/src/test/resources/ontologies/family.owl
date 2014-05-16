@@ -60,6 +60,11 @@
      <IRI>Person</IRI>
      <Literal xml:lang="es">Persona</Literal>
    </AnnotationAssertion>
+   <AnnotationAssertion>
+     <AnnotationProperty IRI="fizz"/>
+     <IRI>Person</IRI>
+     <IRI>Fazz</IRI>
+   </AnnotationAssertion>
    <Declaration>
      <Class IRI="Woman"/>
    </Declaration>

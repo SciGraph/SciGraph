@@ -21,6 +21,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
 
@@ -36,9 +37,8 @@ public class ApplicationConfiguration extends Configuration {
   private OntologyConfiguration graphConfiguration = new OntologyConfiguration();
 
   @Valid
-  @NotNull
-  @JsonProperty
-  private ApiConfiguration apiConfiguration = new ApiConfiguration();
+  @JsonProperty(required=false)
+  private Optional<ApiConfiguration> apiConfiguration = Optional.absent();
 
   public String getApplicationContextPath() {
     return applicationContextPath;
@@ -48,7 +48,7 @@ public class ApplicationConfiguration extends Configuration {
     return graphConfiguration;
   }
 
-  public ApiConfiguration getApiConfiguration() {
+  public Optional<ApiConfiguration> getApiConfiguration() {
     return apiConfiguration;
   }
 

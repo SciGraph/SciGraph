@@ -142,7 +142,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     environment.getApplicationContext().setContextPath("/" + configuration.getApplicationContextPath());
     configureJersey(environment.jersey());
     configureSwagger(environment);
-    configureAuthentication(configuration.getApiConfiguration(), environment);
+    if (configuration.getApiConfiguration().isPresent()) {
+      configureAuthentication(configuration.getApiConfiguration().get(), environment);
+    }
 
     Injector i = Guice.createInjector(
         new Neo4jModule(configuration.getGraphConfiguration()),
