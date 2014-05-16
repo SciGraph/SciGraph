@@ -135,6 +135,13 @@ public class OwlVisitorTest {
   }
 
   @Test
+  public void testNonLiteralAnnotationAssertionAxiom() {
+    Node person = graph.getNode(ROOT + "/Person").get();
+    Node fazz = graph.getNode(ROOT + "/Fazz").get();
+    assertThat(graph.hasRelationship(person, fazz, EdgeType.AnnotationAssertionAxiom, ROOT + "/fizz"), is(true));
+  }
+
+  @Test
   public void testNamedIndividualTypes() {
     assertThat(graph.nodeExists(ROOT + "/Bill"), is(true));
     Node john = graph.getNode(ROOT + "/John").get();
@@ -175,15 +182,6 @@ public class OwlVisitorTest {
     Node meg = graph.getNode(ROOT + "/Meg").get();
     Relationship relationship = graph.getOrCreateRelationship(susan, meg, DynamicRelationshipType.withName("hasAncestor"));
     assertThat(graph.getProperty(relationship, EdgeProperties.TRANSITIVE, Boolean.class).get(), is(true));
-  }
-
-  @Test
-  public void testNegativeObjectPropertyAssertions() {
-    Node bill = graph.getNode(ROOT + "/Bill").get();
-    Node mary = graph.getNode(ROOT + "/Mary").get();
-    assertThat(graph.hasRelationship(bill, mary, EdgeType.REL), is(true));
-    Relationship relationship = graph.getOrCreateRelationship(bill, mary, EdgeType.REL, ROOT + "/hasWife");
-    assertThat(graph.getProperty(relationship, NodeProperties.NEGATED, Boolean.class).get(), is(true));
   }
 
   @Test

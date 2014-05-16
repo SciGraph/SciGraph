@@ -52,7 +52,6 @@ import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
@@ -194,7 +193,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         }
       } else if (axiom.getValue() instanceof IRI){
         Node object = graph.getOrCreateNode(((IRI)axiom.getValue()).toURI());
-        graph.getOrCreateRelationship(subject, object, EdgeType.ANNOTATION, property);
+        graph.getOrCreateRelationship(subject, object, EdgeType.AnnotationAssertionAxiom, property);
       }
     } else {
       logger.fine("Ignoring non IRI assertion axiom: " + axiom.toString());
@@ -312,13 +311,6 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectPropertyAssertionAxiom axiom) {
     getObjectPropertyRelationship(axiom);
-    return null;
-  }
-
-  @Override
-  public Void visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
-    Relationship relationship = getObjectPropertyRelationship(axiom);
-    graph.setProperty(relationship, EdgeProperties.NEGATED, true);
     return null;
   }
 
