@@ -1,4 +1,14 @@
 SciGraph
 ========
 
-A Neo4j backed ontology store
+A Neo4j backed ontology store.
+
+You can run local copy by running the following:
+
+    curl http://goo.gl/RBonro | sh
+
+This will download a recent copy of the Monarch graph (about 5GB unzipped),
+clone the git repository, build the project, and finally start the server
+running. Point your browser to
+[http://localhost:9000/scigraph/docs/](http://localhost:9000/scigraph/docs/)
+ to get started.
