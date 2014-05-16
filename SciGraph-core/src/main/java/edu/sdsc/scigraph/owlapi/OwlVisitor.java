@@ -296,7 +296,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     Node subject = graph.getOrCreateNode(getUri(axiom.getSubject()));
     URI property = getUri(axiom.getProperty());
     Node object = graph.getOrCreateNode(getUri(axiom.getObject()));
-    RelationshipType type = EdgeType.REL;
+    RelationshipType type = EdgeType.OWLObjectPropertyAssertionAxiom;
     if (null != property.getFragment()) {
       type = DynamicRelationshipType.withName(property.getFragment());
     }
