@@ -23,9 +23,11 @@ import io.dropwizard.jersey.caching.CacheControl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -246,6 +248,14 @@ public class GraphService extends BaseResource {
 
       @Override
       public Iterable<Relationship> expand(org.neo4j.graphdb.Path path, BranchState<Void> state) {
+        Set<Node> seenNodes = new HashSet<>();
+        for (Node node: path.nodes()) {
+          if (seenNodes.contains(node)) {
+            return Iterables.empty();
+          } else {
+            seenNodes.add(node);
+          }
+        }
         return path.endNode().getRelationships();
       }
 
