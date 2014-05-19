@@ -21,7 +21,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 public interface NodeProperties extends CommonProperties, VertexFrame {
 
-  public static final String LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
+  public static final String LABEL = "label";
   public static final String INFERRED = "inferred";
   public static final String ANONYMOUS = "anonymous";
 

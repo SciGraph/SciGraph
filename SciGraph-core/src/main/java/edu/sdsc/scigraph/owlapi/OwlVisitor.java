@@ -80,7 +80,6 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
@@ -175,14 +174,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         Optional<Object> literal = getTypedLiteralValue((OWLLiteral)(axiom.getValue()));
         if (literal.isPresent()) {
           try {
-            if (property.equals(NodeProperties.LABEL)) {
-              // HACK: This effectively limits the model to a single label when in reality there 
-              // may be more than one.
-              graph.setProperty(subject, property, literal.get());
-              graph.setProperty(subject, property + LuceneUtils.EXACT_SUFFIX, literal.get());
-            } else {
-              graph.addProperty(subject, property, literal.get());
-            }
+            graph.addProperty(subject, property, literal.get());
 
             if (mappedProperties.containsKey(property)) {
               graph.addProperty(subject, mappedProperties.get(property), literal.get());
