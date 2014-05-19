@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.annotation;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
@@ -42,7 +43,7 @@ public class EntityRecognizerTest {
   @Before
   public void setUp() throws Exception {
     Vocabulary<Concept> vocabulary = mock(Vocabulary.class);
-    when(concept.getLabel()).thenReturn("foo");
+    when(concept.getLabels()).thenReturn(newArrayList("foo"));
     when(concept.getCategories()).thenReturn(Collections.<String> emptySet());
     when(vocabulary.getConceptsFromTerm(any(Query.class))).thenReturn(singletonList(concept));
     recognizer = new EntityRecognizer(vocabulary);

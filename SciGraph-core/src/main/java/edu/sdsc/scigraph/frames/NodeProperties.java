@@ -26,10 +26,10 @@ public interface NodeProperties extends CommonProperties, VertexFrame {
   public static final String ANONYMOUS = "anonymous";
 
   @Property(LABEL)
-  public void setLabel(String label);
+  public void addLabel(String label);
 
   @Property(LABEL)
-  public String getLabel();
+  public Iterable<String> getLabels();
 
   @Property(INFERRED)
   public void setInferred(boolean inferred);

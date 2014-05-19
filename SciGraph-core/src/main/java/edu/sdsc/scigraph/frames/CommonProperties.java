@@ -74,9 +74,9 @@ public interface CommonProperties {
   public String getOntologyVersion();
 
   @Property(TYPE)
-  public void setType(String type);
+  public void addType(String type);
 
   @Property(TYPE)
-  public String getType();
+  public Iterable<String> getTypes();
 
 }

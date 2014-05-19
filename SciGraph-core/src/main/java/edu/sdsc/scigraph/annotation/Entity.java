@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.annotation;
 
 import static com.google.common.collect.Iterables.getFirst;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 
 import java.util.Collections;
@@ -36,7 +37,7 @@ import edu.sdsc.scigraph.frames.Concept;
 public class Entity {
 
   @XmlValue
-  private final String term;
+  private final Set<String> term;
 
   @XmlAttribute
   private final String id;
@@ -44,21 +45,25 @@ public class Entity {
   @XmlAttribute
   private Set<String> categories;
 
+  public Entity(Iterable<String> terms, String id) {
+    this(terms, id, Collections.<String> emptySet());
+  }
+
   public Entity(String term, String id) {
-    this(term, id, Collections.<String> emptySet());
+    this(newArrayList(term), id, Collections.<String> emptySet());
   }
 
   public Entity(Concept concept) {
-    this(concept.getLabel(), concept.getUri(), concept.getCategories());
+    this(concept.getLabels(), concept.getUri(), concept.getCategories());
   }
 
-  public Entity(String term, String id, Iterable<String> categories) {
-    this.term = term;
+  public Entity(Iterable<String> terms, String id, Iterable<String> categories) {
+    this.term = ImmutableSet.copyOf(terms);
     this.id = id;
     this.categories = ImmutableSet.copyOf(categories);
   }
 
-  public String getTerm() {
+  public Set<String> getTerms() {
     return term;
   }
 
@@ -79,7 +84,7 @@ public class Entity {
    */
   public String serialize() {
     return Joiner.on(",")
-        .join(escape(getTerm()), escape(getId()), escape(getFirst(categories, "")));
+        .join(escape(getFirst(getTerms(), "")), escape(getId()), escape(getFirst(categories, "")));
   }
 
   @Override

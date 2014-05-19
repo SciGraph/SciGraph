@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -54,7 +55,7 @@ public class VocabularyServiceTest {
   public void setup() {
     when(vocabulary.getConceptFromUri("http://example.org/none")).thenReturn(Optional.<Concept>absent());
     when(vocabulary.getConceptFromUri("http://example.org/foo")).thenReturn(Optional.of(hippocampus));
-    when(hippocampus.getLabel()).thenReturn("Hippocampus");
+    when(hippocampus.getLabels()).thenReturn(newArrayList("Hippocampus"));
   }
 
   @Test(expected=UniformInterfaceException.class)

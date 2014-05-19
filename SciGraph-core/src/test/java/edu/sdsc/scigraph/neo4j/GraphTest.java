@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -231,7 +232,7 @@ public class GraphTest extends GraphTestBase {
     String uri = BASE_URI + "#createdNode";
     Node node = graph.getOrCreateNode(uri);
     graph.setProperty(node, NodeProperties.LABEL, "foo");
-    assertThat(graph.getOrCreateFramedNode(uri).getLabel(), is("foo"));
+    assertThat(getOnlyElement(graph.getOrCreateFramedNode(uri).getLabels()), is("foo"));
   }
 
   @Test

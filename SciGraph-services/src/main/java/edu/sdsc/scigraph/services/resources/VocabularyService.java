@@ -165,9 +165,7 @@ public class VocabularyService extends BaseResource {
 
   static List<String> getCompletion(Query query, Concept result) {
     List<String> completions = new ArrayList<>();
-    if (StringUtils.startsWithIgnoreCase(result.getLabel(), query.getInput())) {
-      completions.add(result.getLabel());
-    }
+    completions.addAll(getMatchingCompletions(query.getInput(), result.getLabels()));
     if (query.isIncludeSynonyms()) {
       completions.addAll(getMatchingCompletions(query.getInput(), result.getSynonyms()));
     }

@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.annotation;
 
+import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.disjoint;
 
@@ -50,10 +51,7 @@ public class EntityRecognizer {
     if (!disjoint(config.getExcludeCategories(), conceptCategories)) {
       return false;
     }
-    if (concept.getLabel().length() < config.getMinLength()) {
-      return false;
-    }
-    if (!config.isIncludeNumbers() && concept.getLabel().matches("(\\d|\\-|_)+")) {
+    if (!config.isIncludeNumbers() && getFirst(concept.getLabels(), "").matches("(\\d|\\-|_)+")) {
       return false;
     }
 

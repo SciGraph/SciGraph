@@ -162,6 +162,7 @@ public class GraphService extends BaseResource {
         Vertex v = new Vertex(c.getFragment(), getFirst(labels, null));
         if (Iterables.count(c.getCategories()) > 0) {
           v.meta.put("categories", newArrayList(c.getCategories()));
+          v.meta.put("type", newArrayList(c.getTypes()));
         }
         return v;
       }

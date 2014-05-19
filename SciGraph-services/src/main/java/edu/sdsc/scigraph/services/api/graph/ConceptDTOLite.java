@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class ConceptDTOLite {
 
   private String uri;
-  private String label;
+  private Collection<String> labels;
   private String fragment;
   private String curie;
   private Collection<String> categories;
@@ -47,12 +47,12 @@ public class ConceptDTOLite {
     this.uri = uri;
   }
 
-  public String getLabel() {
-    return label;
+  public Collection<String> getLabels() {
+    return labels;
   }
 
-  public void setLabel(String label) {
-    this.label = label;
+  public void setLabels(Collection<String> labels) {
+    this.labels = labels;
   }
 
   @XmlAttribute

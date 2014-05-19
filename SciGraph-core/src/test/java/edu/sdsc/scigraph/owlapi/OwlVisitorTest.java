@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -98,7 +99,7 @@ public class OwlVisitorTest {
   @Test
   public void testConcreteClassCreation() {
     assertThat(graph.nodeExists(ROOT + "/Mother"), is(true));
-    assertThat(graph.getFramedNode(ROOT + "/Mother").get().getType(), is(equalTo("OWLClass")));
+    assertThat(getOnlyElement(graph.getFramedNode(ROOT + "/Mother").get().getTypes()), is(equalTo("OWLClass")));
   }
 
   @Test
@@ -149,7 +150,7 @@ public class OwlVisitorTest {
     Node john = graph.getNode(ROOT + "/John").get();
     Node father = graph.getNode(ROOT + "/Father").get();
     assertThat(graph.hasRelationship(john, father, EdgeType.IS_A), is(true));
-    assertThat(graph.getFramedNode((String)john.getProperty(CommonProperties.URI)).get().getType(), is(equalTo("OWLIndividual")));
+    assertThat(getOnlyElement(graph.getFramedNode((String)john.getProperty(CommonProperties.URI)).get().getTypes()), is(equalTo("OWLIndividual")));
   }
 
   @Test

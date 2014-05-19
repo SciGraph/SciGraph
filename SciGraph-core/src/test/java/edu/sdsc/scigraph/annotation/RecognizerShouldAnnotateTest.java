@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.annotation;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.is;
@@ -38,7 +39,7 @@ public class RecognizerShouldAnnotateTest {
   @Before
   public void setUp() throws Exception {
     recognizer = new EntityRecognizer(null);
-    when(concept.getLabel()).thenReturn("Label");
+    when(concept.getLabels()).thenReturn(newArrayList("Label"));
     when(concept.getCategories()).thenReturn(Collections.<String> emptySet());
     when(config.getExcludeCategories()).thenReturn(Collections.<String> emptySet());
   }
@@ -78,22 +79,16 @@ public class RecognizerShouldAnnotateTest {
   }
 
   @Test
-  public void testLengthExclusion() {
-    when(config.getMinLength()).thenReturn(1000);
-    assertThat(recognizer.shouldAnnotate(concept, config), is(false));
-  }
-
-  @Test
   public void testNumericExclusion() {
     when(config.isIncludeNumbers()).thenReturn(false);
-    when(concept.getLabel()).thenReturn("123");
+    when(concept.getLabels()).thenReturn(newArrayList("123"));
     assertThat(recognizer.shouldAnnotate(concept, config), is(false));
   }
 
   @Test
   public void testNumericInclusion() {
     when(config.isIncludeNumbers()).thenReturn(true);
-    when(concept.getLabel()).thenReturn("123");
+    when(concept.getLabels()).thenReturn(newArrayList("123"));
     assertThat(recognizer.shouldAnnotate(concept, config), is(true));
   }
 

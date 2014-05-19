@@ -37,7 +37,7 @@ public class VocabularyServiceCompletionTest {
   @Before
   public void setup() {
     result = mock(Concept.class);
-    when(result.getLabel()).thenReturn("Hippocampus");
+    when(result.getLabels()).thenReturn(newArrayList("Hippocampus"));
     when(result.getSynonyms()).thenReturn(newArrayList("Amon's horn", "Hippocampal region"));
   }
 
