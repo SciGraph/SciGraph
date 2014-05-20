@@ -369,6 +369,9 @@ public class Graph<N> {
     } else {
       container.setProperty(property, value);
     }
+    if (EXACT_PROPERTIES.contains(property)) {
+      addProperty(container, property + LuceneUtils.EXACT_SUFFIX, value);
+    }
   }
 
   /***
