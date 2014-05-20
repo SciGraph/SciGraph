@@ -180,7 +180,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
               graph.addProperty(subject, mappedProperties.get(property), literal.get());
             }
           } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to add property", e);
+            logger.log(Level.WARNING, "Failed to add property: " + property + " with value " + literal.get().toString(), e);
           }
         }
       } else if (axiom.getValue() instanceof IRI){
