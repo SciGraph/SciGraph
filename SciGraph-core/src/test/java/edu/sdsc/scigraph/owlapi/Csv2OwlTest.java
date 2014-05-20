@@ -28,8 +28,8 @@ import java.io.StringReader;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -37,27 +37,37 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
-@Ignore
 public class Csv2OwlTest {
 
   OWLOntology ontology;
   OWLDataFactory df = OWLManager.getOWLDataFactory();
 
+  OWLClass parent = mock(OWLClass.class);
+  OWLClass term = mock(OWLClass.class);
+  OWLClass term2 = mock(OWLClass.class);
+
   @Before
   public void setUp() throws Exception {
     Csv2Owl converter = new Csv2Owl();
     Reader reader = new StringReader("1\tterm\tcomment\n2\tterm1\t\n");
-    ontology = converter.convert("http://example.org", reader);
+    ontology = converter.convert("http://example.org", reader, "http://example.org/parent");
+    when(parent.getIRI()).thenReturn(IRI.create("http://example.org/parent"));
+    when(term.getIRI()).thenReturn(IRI.create("http://example.org#1"));
+    when(term2.getIRI()).thenReturn(IRI.create("http://example.org#2"));
   }
 
   @Test
   public void verifyClassCreation() throws Exception {
-    OWLClass term = mock(OWLClass.class);
-    when(term.getIRI()).thenReturn(IRI.create("http://example.org#1"));
-    OWLClass term2 = mock(OWLClass.class);
-    when(term2.getIRI()).thenReturn(IRI.create("http://example.org#2"));
-    assertThat(ontology.getClassesInSignature(), contains(term2, term));
+    assertThat(ontology.getClassesInSignature(), contains(parent, term2, term));
+  }
+
+  @Test
+  public void testSubclassCreation() throws Exception {
+    for (OWLSubClassOfAxiom axiom: ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
+      assertThat(axiom.getSuperClass().asOWLClass(), is(equalTo(parent)));
+    }
   }
 
   @Test

@@ -37,15 +37,22 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class Csv2Owl { 
 
-  static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+  OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
   OWLDataFactory df = OWLManager.getOWLDataFactory(); 
+
+  public OWLOntologyManager getManager() {
+    return manager;
+  }
 
   OWLClass addClass(String iri) {
     return df.getOWLClass(IRI.create(iri));
   }
 
-  OWLOntology convert(String ontologyIri, Reader reader) throws FileNotFoundException, IOException, OWLOntologyCreationException {
+  OWLOntology convert(String ontologyIri, Reader reader, String parentIri) throws FileNotFoundException, IOException, OWLOntologyCreationException {
     OWLOntology ontology = manager.createOntology(IRI.create(ontologyIri));
+    OWLClass parent = df.getOWLClass(IRI.create(parentIri));
+    manager.applyChange(new AddAxiom(ontology, df.getOWLDeclarationAxiom(parent)));
     try (CSVReader csvReader = new CSVReader(reader, '\t')) {
       String[] columns = null;
       while ((columns = csvReader.readNext()) != null) {
@@ -54,6 +61,8 @@ public class Csv2Owl {
         OWLAnnotation labelAnnotation = df.getOWLAnnotation(df.getRDFSLabel(), df.getOWLLiteral(columns[1]));
         OWLAxiom axiom = df.getOWLAnnotationAssertionAxiom(concept.getIRI(), labelAnnotation);
         manager.applyChange(new AddAxiom(ontology, axiom));
+        axiom = df.getOWLSubClassOfAxiom(concept, parent);
+        manager.applyChange(new AddAxiom(ontology, axiom));
       }
     }
     return ontology;
@@ -61,8 +70,8 @@ public class Csv2Owl {
 
   public static void main(String[] args) throws OWLOntologyCreationException, FileNotFoundException, IOException, OWLOntologyStorageException {
     Csv2Owl converter = new Csv2Owl();
-    OWLOntology ontology = converter.convert("http://example.org/ontology", new FileReader("/users/condit/nodc_by_name.tsv"));
-    manager.saveOntology(ontology, IRI.create(new File("/temp/shipNames.owl")));
+    OWLOntology ontology = converter.convert("http://earthcube.org/ships", new FileReader("/temp/nodc_by_name.tsv"), "http://earthcube.org/ships");
+    converter.getManager().saveOntology(ontology, IRI.create(new File("/temp/shipNames.owl")));
   }
 
 }
