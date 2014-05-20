@@ -201,7 +201,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
-  public void testGetConceptsFromPrefixWithCaregory() {
+  public void testGetConceptsFromPrefixWithCategory() {
     Query query = new Vocabulary.Query.Builder("hip").categories(newArrayList("baz")).build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampusStructure));
   }
