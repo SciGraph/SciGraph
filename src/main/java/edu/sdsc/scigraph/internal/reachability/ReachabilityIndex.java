@@ -69,6 +69,23 @@ public class ReachabilityIndex {
 	    }
 	}
 
+    
+    /**
+     * Initialize a reachability index object on graphDb. 
+     * @param graph
+     */
+    public ReachabilityIndex(GraphDatabaseService graphdb) {
+		graphDb = graphdb;
+		graph = null;
+
+		Node n = graphDb.getNodeById(0);
+		
+    	opened = (boolean)n.getProperty(indexExists, false);
+	    
+    	thingId = -1;
+	}
+
+    
     /**
      * Create a reachability index on a graph.
      * 
@@ -83,8 +100,15 @@ public class ReachabilityIndex {
 	    
 	    // create the index
 
-	    // calculate the 
+	    // calculate the
+	    
+	    long stime = System.currentTimeMillis();
+	    
 	    TreeSet<AbstractMap.SimpleEntry<Long,Integer>> l = getHopCoverages();
+	    
+	    long etime = System.currentTimeMillis();
+	    
+	    logger.info("Takes " + (etime - stime)/1000 + " secend(s) to calculate HopCoverage" );
 	    
 	    // Hold the partially built index in memory. Key is the Node id. Value is a Pair. 
 	    // First element in the pair is inList, second element is outList.
@@ -99,23 +123,39 @@ public class ReachabilityIndex {
 	               .expand(new DirectionalPathExpender(Direction.OUTGOING))
 	               .evaluator(new ReachabilityEvaluator(inMemoryIdx, Direction.OUTGOING, thingId));
 
+	    long bfst = 0, rbfst=0;
 	    for (AbstractMap.SimpleEntry<Long,Integer> e : l ) {
 	    	Node workingNode = graphDb.getNodeById(e.getKey());
+	    	stime = System.currentTimeMillis();
 	    	for ( Path p :tdi.traverse(workingNode) );
+	    	etime = System.currentTimeMillis() ;
+	    	rbfst += etime - stime;
+	    	
 	    	for ( Path p : tdo.traverse(workingNode) );
+	    	bfst += System.currentTimeMillis() - etime;
 	    }
 	    
+	    logger.info("BFS index building time: " + (bfst/1000) + " sec(s), RBFS index building time: " + (rbfst/1000) + " sec(s).");
 	    // store the inMemoryIdx into db.
 	    Transaction tx = graphDb.beginTx();
 	    
+	    int counter=0;
 	    for(Map.Entry<Long, Pair<TreeSet<Long>,TreeSet<Long>>> e: inMemoryIdx.entrySet() ) {
 	    	Node node = graphDb.getNodeById(e.getKey());
+	    	counter++;
+	    	if ( counter % 500000 == 0 ) {
+	    		logger.info("commit transaction when populating in-out list.");
+				tx.success();
+				tx.finish();
+				tx = graphDb.beginTx();	
+	    	}
+	    	
 	    	node.setProperty(propInList, getPrimitiveArray(e.getValue().first()));
 	    	node.setProperty(propOutList, getPrimitiveArray(e.getValue().other()));
 	    }
 	    
         //set the flag.
-		Node n = graph.getOrCreateNode(dataDictionaryURI);
+		Node n = graph == null ? graphDb.getNodeById(0): graph.getOrCreateNode(dataDictionaryURI);
 	    n.setProperty(indexExists, true);
 	    tx.success();
 	    tx.finish();
@@ -128,24 +168,27 @@ public class ReachabilityIndex {
 	public void dropIndex() throws ReachabilityIndexException {
 		if ( opened) {
 
-		   Optional<Node> opt = graph.getNode(dataDictionaryURI);
-		
-   		   Transaction tx = graphDb.beginTx();
-
-     		// ... cleanup the index.
+	      Transaction tx = graphDb.beginTx();
+		  Node n0;	
+		   if ( graph != null ) {	
+		      n0 = graph.getNode(dataDictionaryURI).get();
+		   } else {
+			  n0 = graphDb.getNodeById(0);   
+		   }
+     		  // ... cleanup the index.
    	   	   for ( Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
-			  n.removeProperty(propInList);
-			  n.removeProperty(propOutList);
+			    n.removeProperty(propInList);
+			    n.removeProperty(propOutList);
    		   };
    		    
-   		    // reset the flag.
-     		opt.get().setProperty(indexExists, false);
-	     
-	        tx.success();
-	        tx.finish();
+   		   // reset the flag.
+   		   n0.setProperty(indexExists, false);
+   		   
+	       tx.success();
+	       tx.finish();
 	        
 	        opened = false;
-	        logger.info("Reachability ndex dropped.");
+	        logger.info("Reachability index dropped.");
 	    } else {
 	    	logger.info("Index doesn't exist.");
 	    	throw new ReachabilityIndexException("Index does't exist.");
@@ -198,8 +241,8 @@ public class ReachabilityIndex {
 	 * @return
 	 * @throws Exception 
 	 */
-	public boolean canReach(Node node1, Node node2) throws Exception {
-		if ( ! opened) throw new Exception ("Reachability index not exists."); 
+	public boolean canReach(Node node1, Node node2) throws ReachabilityIndexException {
+		if ( ! opened) throw new ReachabilityIndexException ("Reachability index not exists."); 
 		long[] l1 = (long[])node1.getProperty(propOutList);
 		long[] l2 = (long[])node2.getProperty(propInList);
 		int i=0,j=0;
