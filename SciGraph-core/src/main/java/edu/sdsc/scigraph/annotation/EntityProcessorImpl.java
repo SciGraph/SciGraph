@@ -97,9 +97,12 @@ class EntityProcessorImpl implements EntityProcessor {
       List<Token<String>> tokens = queue.take();
       if (tokens.equals(ShingleProducer.END_TOKEN)) {
         break;
-      }
+      } 
 
       String candidate = combineTokens(tokens);
+      if (candidate.length() < config.getMinLength()) {
+        continue;
+      }
       int start = tokens.get(0).getStart();
       int end = tokens.get(tokens.size() - 1).getEnd();
       for (Entity entity: recognizer.getEntities(candidate, config)) {

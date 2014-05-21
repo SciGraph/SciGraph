@@ -19,6 +19,7 @@ import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -67,6 +68,13 @@ public class EntityProcessorImplTest {
   public void testGetAnnotations() throws IOException, InterruptedException {
     List<EntityAnnotation> annotations = processor.getAnnotations(text, config);
     assertThat(annotations, equalTo(expectedAnnotations));
+  }
+
+  @Test
+  public void testGetAnnotationsWithMinLength() throws Exception {
+    when(config.getMinLength()).thenReturn(Integer.MAX_VALUE);
+    List<EntityAnnotation> annotations = processor.getAnnotations(text, config);
+    assertThat(annotations, is(empty()));
   }
 
   @Test
