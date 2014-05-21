@@ -35,7 +35,7 @@ public class LuceneUtils {
   public static Version getVersion() {
     return Version.LUCENE_36;
   }
-  
+
   public static Set<?> caseSensitiveStopSet;
 
   static {
@@ -46,6 +46,25 @@ public class LuceneUtils {
       stopWords.add(Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase());
     }
     caseSensitiveStopSet = StopFilter.makeStopSet(getVersion(), stopWords, false);
+  }
+
+  static boolean isStopword(String word) {
+    for (Iterator<?> stopWord = StopAnalyzer.ENGLISH_STOP_WORDS_SET.iterator(); stopWord.hasNext(); ) {
+      String stopword = new String((char[])stopWord.next());
+      if (stopword.equalsIgnoreCase(word)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static boolean isAllStopwords(List<String> words) {
+    for (String word: words) {
+      if (!isStopword(word)) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }
