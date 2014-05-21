@@ -176,7 +176,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     try {
       if (query.isIncludeSynonyms()) {
         BooleanQuery subQuery = new BooleanQuery();
-        subQuery.add(parser.parse(query.getInput()), Occur.SHOULD);
+        subQuery.add(LuceneUtils.getBoostedQuery(parser, query.getInput(), 10.0f), Occur.SHOULD);
         subQuery.add(parser.parse(Concept.SYNONYM + ":" + query.getInput()), Occur.SHOULD);
         finalQuery.add(subQuery, Occur.MUST);
       } else {
@@ -197,7 +197,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     try {
       if (query.isIncludeSynonyms()) {
         BooleanQuery subQuery = new BooleanQuery();
-        subQuery.add(parser.parse(exactQuery), Occur.SHOULD);
+        subQuery.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
         subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
         finalQuery.add(subQuery, Occur.MUST);
       } else {

@@ -21,6 +21,9 @@ import java.util.Set;
 
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
 
 import com.google.common.collect.Lists;
@@ -48,7 +51,7 @@ public class LuceneUtils {
     caseSensitiveStopSet = StopFilter.makeStopSet(getVersion(), stopWords, false);
   }
 
-  static boolean isStopword(String word) {
+  public static boolean isStopword(String word) {
     for (Iterator<?> stopWord = StopAnalyzer.ENGLISH_STOP_WORDS_SET.iterator(); stopWord.hasNext(); ) {
       String stopword = new String((char[])stopWord.next());
       if (stopword.equalsIgnoreCase(word)) {
@@ -58,13 +61,19 @@ public class LuceneUtils {
     return false;
   }
 
-  static boolean isAllStopwords(List<String> words) {
+  public static boolean isAllStopwords(List<String> words) {
     for (String word: words) {
       if (!isStopword(word)) {
         return false;
       }
     }
     return true;
+  }
+
+  public static Query getBoostedQuery(QueryParser parser, String queryString, float boost) throws ParseException {
+    Query query = parser.parse(queryString);
+    query.setBoost(boost);
+    return query;
   }
 
 }
