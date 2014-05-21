@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.annotation;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -55,12 +56,16 @@ public class EntityProcessorImplTest {
     when(recognizer.getEntities("Spinal muscular atrophy", config)).thenReturn(
         singleton(mockEntity));
     when(recognizer.getEntities("muscular atrophy", config)).thenReturn(singleton(mockEntity2));
+    when(recognizer.getEntities("cerebellum", config)).thenReturn(singleton(mockEntity));
+    when(recognizer.getEntities("in cerebellum", config)).thenReturn(singleton(mockEntity));
+    when(recognizer.getEntities("in cerebellum of", config)).thenReturn(singleton(mockEntity));
+    when(recognizer.getEntities("cerebellum of", config)).thenReturn(singleton(mockEntity));
     when(recognizer.getEntities("SMA", config)).thenReturn(singleton(mockEntity));
     when(recognizer.getCssClass()).thenReturn("mock");
     processor = new EntityProcessorImpl(recognizer);
 
-    expectedAnnotations.add(new EntityAnnotation(mockEntity, 15, 38));
     expectedAnnotations.add(new EntityAnnotation(mockEntity2, 22, 38));
+    expectedAnnotations.add(new EntityAnnotation(mockEntity, 15, 38));
     expectedAnnotations.add(new EntityAnnotation(mockEntity, 39, 45));
   }
 
@@ -75,6 +80,15 @@ public class EntityProcessorImplTest {
     when(config.getMinLength()).thenReturn(Integer.MAX_VALUE);
     List<EntityAnnotation> annotations = processor.getAnnotations(text, config);
     assertThat(annotations, is(empty()));
+  }
+
+  @Test
+  public void testGetAnnotationsWithEdgeStopWords() throws Exception {
+    when(config.isLongestOnly()).thenReturn(true);
+    List<EntityAnnotation> annotations = processor.getAnnotations("female in cerebellum of cells", config);
+
+    assertThat(getOnlyElement(annotations).getStart(), is(equalTo(10)));
+    assertThat(getOnlyElement(annotations).getEnd(), is(equalTo(20)));
   }
 
   @Test
@@ -125,6 +139,17 @@ public class EntityProcessorImplTest {
     annotationList.add(annot2);
     EntityAnnotationGroup expected = new EntityAnnotationGroup();
     expected.add(annot1);
+    assertThat(EntityProcessorImpl.getAnnotationGroups(annotationList, true), contains(expected));
+  }
+
+  @Test
+  public void testGetMultipleLongestAnnotationGroups() {
+    EntityAnnotation annot1 = new EntityAnnotation(mockEntity, 0, 4); 
+    EntityAnnotation annot2 = new EntityAnnotation(mockEntity2, 3, 10);
+    annotationList.add(annot1);
+    annotationList.add(annot2);
+    EntityAnnotationGroup expected = new EntityAnnotationGroup();
+    expected.add(annot2);
     assertThat(EntityProcessorImpl.getAnnotationGroups(annotationList, true), contains(expected));
   }
 

@@ -18,6 +18,8 @@ package edu.sdsc.scigraph.annotation;
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.getFirst;
+import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -58,6 +60,8 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 
+import edu.sdsc.scigraph.lucene.LuceneUtils;
+
 class EntityProcessorImpl implements EntityProcessor {
 
   private static final Logger logger = Logger.getLogger(EntityProcessorImpl.class.getName());
@@ -97,7 +101,11 @@ class EntityProcessorImpl implements EntityProcessor {
       List<Token<String>> tokens = queue.take();
       if (tokens.equals(ShingleProducer.END_TOKEN)) {
         break;
-      } 
+      }
+      if (LuceneUtils.isStopword(getFirst(tokens, null).getToken()) || 
+          LuceneUtils.isStopword(getLast(tokens).getToken())) {
+        continue;
+      }
 
       String candidate = combineTokens(tokens);
       if (candidate.length() < config.getMinLength()) {
@@ -109,7 +117,13 @@ class EntityProcessorImpl implements EntityProcessor {
         annotations.add(new EntityAnnotation(entity, start, end));
       }
     }
-    return annotations;
+
+    List<EntityAnnotation> ret = newArrayList();
+    for (EntityAnnotationGroup group : getAnnotationGroups(annotations, config.isLongestOnly())) {
+      ret.addAll(group);
+    }
+    Collections.sort(ret);
+    return ret;
   }
 
   /***
