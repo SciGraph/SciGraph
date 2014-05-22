@@ -24,7 +24,7 @@ import com.google.common.base.Objects;
 
 import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
 
-class OwlLoadConfiguration {
+public class OwlLoadConfiguration {
 
   private OntologyConfiguration ontologyConfiguration;
   private List<String> ontologyUrls;

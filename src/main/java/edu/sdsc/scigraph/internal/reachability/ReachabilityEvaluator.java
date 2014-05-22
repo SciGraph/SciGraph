@@ -1,98 +1,71 @@
 package edu.sdsc.scigraph.internal.reachability;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.Set;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
-import org.neo4j.helpers.Pair;
+
+import com.google.common.collect.ImmutableSet;
 
 public class ReachabilityEvaluator implements Evaluator {
 
-	private TreeMap <Long, Pair<TreeSet<Long>,TreeSet<Long>>> inMemoryIdx;
-	private Direction direction ;
-	private long thingId;   // node id for owl:Thing.
-	
-	public ReachabilityEvaluator (TreeMap <Long, Pair<TreeSet<Long>,TreeSet<Long>>> inMemoryIdx, Direction direction,
-			                    long thingId) {
-		this.inMemoryIdx = inMemoryIdx;
-		this.direction = direction;
-		this.thingId = thingId;
-	}
-	
-	@Override
-	public Evaluation evaluate(Path path) {
+  private final MemoryReachabilityIndex inMemoryIdx;
+  private final Direction direction;
+  private final Set<Long> forbiddenNodes;
 
-		Node cur = path.endNode();    // u or w
-		long curId = cur.getId();
-		
-		// don't traverse owl:Thing node.
-		if ( curId == thingId)	return Evaluation.EXCLUDE_AND_PRUNE;
+  public ReachabilityEvaluator (MemoryReachabilityIndex inMemoryIdx, 
+      Direction direction,
+      Collection<Long> forbiddenNodes) {
+    this.inMemoryIdx = inMemoryIdx;
+    this.direction = direction;
+    this.forbiddenNodes = ImmutableSet.copyOf(forbiddenNodes);
+  }
 
-		Node secondLast= path.startNode();   // Vi
-		long secId = secondLast.getId();
+  @Override
+  public Evaluation evaluate(Path path) {
+    long startId = path.startNode().getId(); //Vi
+    long currentId = path.endNode().getId();
 
-		if ( curId == secId) {    // first node in the traverse
-			// add itself to the in-out list
-			Pair <TreeSet<Long>,TreeSet<Long>> listPair = inMemoryIdx.get(curId);
-			
-			if ( listPair == null) {  // create the list pair 
-				// first is in-list, second is out-list
-				listPair = Pair.of(new TreeSet<Long>(),new TreeSet<Long>());
-				inMemoryIdx.put(curId, listPair);
-			} 
-			listPair.first().add(cur.getId());
-			listPair.other().add(cur.getId());
-			
-			return Evaluation.INCLUDE_AND_CONTINUE;
-		}
-		
-        if ( direction == Direction.INCOMING ) { // doing reverse BFS
-        	if ( nodesAreConnected(curId, secId) ) {
-        		return Evaluation.EXCLUDE_AND_PRUNE;
-        	} else {
-        		Pair <TreeSet<Long>,TreeSet<Long>> listPair = inMemoryIdx.get(curId);
-        		if ( listPair == null) {
-        			listPair = Pair.of(new TreeSet<Long>(),new TreeSet<Long>());
-        			inMemoryIdx.put(curId, listPair);
-        		}
-        		listPair.other().add(secId);
-  //      		System.out.println("add " +  secId + " to L_out of " + curId);
-        		return Evaluation.INCLUDE_AND_CONTINUE;
-        	}
-        	
-        } else {   //doing BFS
-        	if ( nodesAreConnected(secId,curId) ) {   // cur is w
-        		return Evaluation.EXCLUDE_AND_PRUNE;
-        	} else {
-        		Pair <TreeSet<Long>,TreeSet<Long>> listPair = inMemoryIdx.get(curId);
-        		if ( listPair == null) {
-        			listPair = Pair.of(new TreeSet<Long>(),new TreeSet<Long>());
-        			inMemoryIdx.put(curId,listPair);
-        		}
-        		listPair.first().add(secondLast.getId());
-//        		System.out.println("add " + secId + " to L_in of " + curId );
-        		return Evaluation.INCLUDE_AND_CONTINUE;
-        	}
-        }
-	}
+    if (forbiddenNodes.contains(currentId)) {
+      return Evaluation.EXCLUDE_AND_PRUNE;
+    }
 
-	private boolean nodesAreConnected(long nodeIdOut, long nodeIdIn) {
-		
-		if ( inMemoryIdx.get(nodeIdOut) == null || inMemoryIdx.get(nodeIdIn) == null )
-			return false;
-		
-		TreeSet<Long> outList = inMemoryIdx.get(nodeIdOut).other();
-		TreeSet<Long> inList = inMemoryIdx.get(nodeIdIn).first();
-		
-		if ( outList == null || inList == null) return false;
-		
-		return !Collections.disjoint(outList, inList);
-	}
-	
+    if (0 == path.length()) {
+      // first node in the traverse - add itself to the in-out list
+      InOutList listPair = inMemoryIdx.get(currentId);
+      listPair.getInList().add(currentId);
+      listPair.getOutList().add(currentId);
+      return Evaluation.INCLUDE_AND_CONTINUE;
+    }
+    else if (direction == Direction.INCOMING ) {
+      // doing reverse BFS
+      if (nodesAreConnectedInIndex(currentId, startId)) {
+        return Evaluation.EXCLUDE_AND_PRUNE;
+      } else {
+        InOutList listPair = inMemoryIdx.get(currentId);
+        listPair.getOutList().add(startId);
+        return Evaluation.INCLUDE_AND_CONTINUE;
+      }
+    } else {
+      //doing BFS
+      if ( nodesAreConnectedInIndex(startId,currentId)) { // cur is w
+        return Evaluation.EXCLUDE_AND_PRUNE;
+      } else {
+        InOutList listPair = inMemoryIdx.get(currentId);
+        listPair.getInList().add(startId);
+        return Evaluation.INCLUDE_AND_CONTINUE;
+      }
+    }
+  }
+
+  private boolean nodesAreConnectedInIndex(long nodeIdOut, long nodeIdIn) {
+    Set<Long> outList = inMemoryIdx.get(nodeIdOut).getOutList();
+    Set<Long> inList = inMemoryIdx.get(nodeIdIn).getInList();
+    return !Collections.disjoint(outList, inList);
+  }
+
 }

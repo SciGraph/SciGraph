@@ -1,17 +1,10 @@
 package edu.sdsc.scigraph.internal.reachability;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertTrue;
-
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -29,81 +22,51 @@ import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.owlapi.OwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.OwlVisitor;
 
 public class ReachabilityIndexTest {
 
-	  static GraphDatabaseService graphDb;
-	  static Graph<Concept> graph;
-	  static final String ROOT = "http://example.com/owl/families";
-	  static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
-	  static ReachabilityIndex irx;
-	  
+  static Graph<Concept> graph;
+  static final String ROOT = "http://example.com/owl/families";
+  static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
+  static ReachabilityIndex irx;
 
-	  @BeforeClass
-	  public static void setup() throws Exception {
-	    graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-	    graph = new Graph<Concept>(graphDb, Concept.class);
-	    String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
-	    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-	    IRI iri = IRI.create(uri);
-	    manager.loadOntologyFromOntologyDocument(iri);
-	    OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
-	    Map<String, String> curieMap = new HashMap<>();
-	    curieMap.put("http://example.org/otherOntologies/families/", "otherOnt");
-	    Map<String, String> categoryMap = new HashMap<>();
-	    Transaction tx = graphDb.beginTx();
+  @BeforeClass
+  public static void setup() throws Exception {
+    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
+    graph = new Graph<Concept>(graphDb, Concept.class);
+    String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
+    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    IRI iri = IRI.create(uri);
+    manager.loadOntologyFromOntologyDocument(iri);
+    OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
+    Transaction tx = graphDb.beginTx();
 
-	    List<MappedProperty> propertyMap = new ArrayList<>();
-	    MappedProperty age = mock(MappedProperty.class);
-	    when(age.getName()).thenReturn("isAged");
-	    when(age.getProperties()).thenReturn(newArrayList(ROOT + "/hasAge"));
-	    propertyMap.add(age);
+    OwlVisitor visitor = new OwlVisitor(walker, graph, 
+        new HashMap<String, String>(), new HashMap<String, String>(), new ArrayList<MappedProperty>());
+    walker.walkStructure(visitor);
+    tx.success();
+    tx.finish();
 
-	    OwlVisitor visitor = new OwlVisitor(walker, graph, curieMap, categoryMap, propertyMap);
-	    walker.walkStructure(visitor);
-	    visitor.postProcess();
-	    tx.success();
-	    tx.finish();
-	    
-	    irx = new ReachabilityIndex(graph);
-	    try { 
-	    	irx.creatIndex();
-	    }catch (ReachabilityIndexException e) {
-	    	fail(e.getMessage());
-	    }
+    irx = new ReachabilityIndex(graph);
+    irx.creatIndex();
+  }
 
-	  }
+  @AfterClass
+  public static void destroyTestDatabase() {
+    irx.dropIndex();
+    graph.shutdown();
+  }
 
-	  @AfterClass
-	  public static void destroyTestDatabase() {
-	    try {
-				irx.dropIndex();
-	    } catch (ReachabilityIndexException e) {
-         	fail(e.getMessage());
-	    }
-	    
-	    graphDb.shutdown();
-	    irx = null;
-	    graphDb = null;
-	    graph = null;
-	  }
+  @Test
+  public void testReachabilityIdxAccess() {
+    Node parent = graph.getNode("http://example.com/owl/families/Parent").get();
+    Node john = graph.getNode("http://example.com/owl/families/John").get();
+    Node female = graph.getNode("http://example.com/owl/families/Female").get();
+    assertThat(irx.canReach(john, parent), is(true));
+    assertThat(irx.canReach(parent, john), is(false));
+    assertThat(irx.canReach(parent, female), is(false));
+  }
 
-	  @Test
-	  public void testReachabilityIdxAccess()  {
-	    Node n1 = graph.getNode("http://example.com/owl/families/Parent").get();
-	    Node n2 = graph.getNode("http://example.com/owl/families/John").get();
-	    Node n3 = graph.getNode("http://example.com/owl/families/Female").get();
-	    try { 
-	      assertTrue( irx.canReach(n2, n1));	
-	      assertTrue(!irx.canReach(n1, n2));
-	      assertTrue(!irx.canReach(n1, n3));
-	    }catch (ReachabilityIndexException e) {
-	    	fail(e.getMessage());
-	    }
-	  }
-
-
-	
 }

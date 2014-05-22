@@ -107,7 +107,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private OWLOntology parentOntology = null;
 
   @Inject
-  OwlVisitor(OWLOntologyWalker walker, Graph<Concept> graph, 
+  public OwlVisitor(OWLOntologyWalker walker, Graph<Concept> graph, 
       Map<String, String> curieMap,
       Map<String, String> categoryMap,
       List<MappedProperty> mappedProperties) {
