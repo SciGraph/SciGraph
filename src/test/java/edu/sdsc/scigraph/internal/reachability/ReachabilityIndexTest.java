@@ -1,5 +1,6 @@
 package edu.sdsc.scigraph.internal.reachability;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -49,7 +50,9 @@ public class ReachabilityIndexTest {
     tx.success();
     tx.finish();
 
-    irx = new ReachabilityIndex(graph);
+    Node owlThing = graph.getNode("http://www.w3.org/2002/07/owl#Thing").get();
+    
+    irx = new ReachabilityIndex(graph.getGraphDb(), newHashSet(owlThing.getId()));
     irx.creatIndex();
   }
 

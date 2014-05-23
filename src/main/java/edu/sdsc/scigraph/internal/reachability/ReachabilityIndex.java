@@ -1,12 +1,11 @@
 package edu.sdsc.scigraph.internal.reachability;
 
-
 import static com.google.common.collect.Iterables.size;
 import static java.lang.String.format;
 
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
@@ -24,71 +23,43 @@ import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Longs;
-
-import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.neo4j.Graph;
 
 public class ReachabilityIndex {
 
   private static final Logger logger = Logger.getLogger(ReachabilityIndex.class.getName());
 
-  public static final String dataDictionaryURI = "http://scigraph.scichruch.com/metadata";
-
-  public static final String thingURI = "http://www.w3.org/2002/07/owl#Thing";
-
   private static final String INDEX_EXISTS_PROPERTY = "ReachablilityIndexExists";
-  protected static final String propInList  = "ReachablilityIndexInList";
-  protected static final String propOutList = "ReachablilityIndexOutList";
+  private static final String IN_LIST_PROPERTY  = "ReachablilityIndexInList";
+  private static final String OUT_LIST_PROPERTY = "ReachablilityIndexOutList";
 
-  private Graph<Concept> graph;
   private GraphDatabaseService graphDb;
-  private boolean indexExists; // flag if there is an index to use.
-  private final Set<Long> forbiddenNodes = new HashSet<>(); // node id for entity "http://www.w3.org/2002/07/owl#Thing"
+  private final Set<Long> forbiddenNodes;
+  private final Node metaDataNode;
 
   /**
-   * Initialize a reachability index object on graph. 
+   * Initialize a reachability index object on a graph 
    * @param graph
+   * @param forbiddenNodes
    */
-  public ReachabilityIndex(Graph<Concept> graph) {
-    this.graph = graph;
-    graphDb = graph.getGraphDb();
-
-    Optional<Node> opt = graph.getNode(dataDictionaryURI);
-
-    if (!opt.isPresent()) {
-      indexExists= false;
-    } else {
-      indexExists = graph.getProperty(opt.get(), INDEX_EXISTS_PROPERTY, Boolean.class).or(false);
-    }
-
-    opt = graph.getNode(thingURI);
-    if (opt.isPresent()) {
-      forbiddenNodes.add(opt.get().getId());
-    }
-  }
-
-  /**
-   * Initialize a reachability index object on graphDb. 
-   * @param graph
-   */
-  public ReachabilityIndex(GraphDatabaseService graphdb) {
+  public ReachabilityIndex(GraphDatabaseService graphdb, Collection<Long> forbiddenNodes) {
     graphDb = graphdb;
-    graph = null;
+    this.forbiddenNodes = ImmutableSet.copyOf(forbiddenNodes);
 
-    Node n = graphDb.getNodeById(0);
-
-    indexExists = (boolean)n.getProperty(INDEX_EXISTS_PROPERTY, false);
+    metaDataNode = graphDb.getNodeById(0);
   }
 
+  public boolean indexExists() {
+    return (boolean)metaDataNode.getProperty(INDEX_EXISTS_PROPERTY, false);
+  }
 
   /**
    * Create a reachability index on a graph.
    */
   public void creatIndex() {
-    if (indexExists) {
-      throw new IllegalStateException("Reachability index already exists. Drop it first then create again.");
+    if (indexExists()) {
+      throw new IllegalStateException("Reachability index already exists. Drop it first and then recreate it.");
     }
 
     long startTime = System.currentTimeMillis();
@@ -140,41 +111,31 @@ public class ReachabilityIndex {
         tx = graphDb.beginTx();
       }
 
-      node.setProperty(propInList, Longs.toArray(e.getValue().getInList()));
-      node.setProperty(propOutList, Longs.toArray(e.getValue().getOutList()));
+      node.setProperty(IN_LIST_PROPERTY, Longs.toArray(e.getValue().getInList()));
+      node.setProperty(OUT_LIST_PROPERTY, Longs.toArray(e.getValue().getOutList()));
     }
 
-    Node n = (null == graph) ? graphDb.getNodeById(0): graph.getOrCreateNode(dataDictionaryURI);
-    n.setProperty(INDEX_EXISTS_PROPERTY, true);
+    metaDataNode.setProperty(INDEX_EXISTS_PROPERTY, true);
     tx.success();
     tx.finish();
-
-    indexExists = true;
     logger.info("Reachability index created.");
   }
 
   public void dropIndex() {
-    if (indexExists) {
+    if (indexExists()) {
       Transaction tx = graphDb.beginTx();
-      Node n0;
-      if (graph != null ) {
-        n0 = graph.getNode(dataDictionaryURI).get();
-      } else {
-        n0 = graphDb.getNodeById(0);
-      }
+
       // ...cleanup the index.
       for (Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
-        n.removeProperty(propInList);
-        n.removeProperty(propOutList);
+        n.removeProperty(IN_LIST_PROPERTY);
+        n.removeProperty(OUT_LIST_PROPERTY);
       }
 
       // reset the flag.
-      n0.setProperty(INDEX_EXISTS_PROPERTY, false);
+      metaDataNode.setProperty(INDEX_EXISTS_PROPERTY, false);
 
       tx.success();
       tx.finish();
-
-      indexExists = false;
       logger.info("Reachability index dropped.");
     } else {
       logger.warning("There was no reachability index to drop.");
@@ -208,11 +169,11 @@ public class ReachabilityIndex {
    * @return Return true if startNode can reach endNode
    */
   public boolean canReach(Node startNode, Node endNode) {
-    if (!indexExists) {
+    if (!indexExists()) {
       throw new IllegalStateException("Reachability index must be created first."); 
     }
-    long[] outList = (long[])startNode.getProperty(propOutList);
-    long[] inList = (long[])endNode.getProperty(propInList);
+    long[] outList = (long[])startNode.getProperty(OUT_LIST_PROPERTY);
+    long[] inList = (long[])endNode.getProperty(IN_LIST_PROPERTY);
     int i=0, j=0;
 
     while (i < outList.length && j < inList.length) {
