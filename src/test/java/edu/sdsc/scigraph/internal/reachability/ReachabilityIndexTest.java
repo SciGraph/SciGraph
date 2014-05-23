@@ -1,75 +1,93 @@
 package edu.sdsc.scigraph.internal.reachability;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.util.OWLOntologyWalker;
-
-import com.google.common.io.Resources;
-
-import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
-import edu.sdsc.scigraph.owlapi.OwlVisitor;
 
 public class ReachabilityIndexTest {
 
-  static Graph<Concept> graph;
-  static final String ROOT = "http://example.com/owl/families";
-  static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
-  static ReachabilityIndex irx;
+  static final RelationshipType type = DynamicRelationshipType.withName("foo");
+
+  static ReachabilityIndex index;
+  static Node a, b, c, d, e, f;
 
   @BeforeClass
-  public static void setup() throws Exception {
+  public static void setup() {
     GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    graph = new Graph<Concept>(graphDb, Concept.class);
-    String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
-    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-    IRI iri = IRI.create(uri);
-    manager.loadOntologyFromOntologyDocument(iri);
-    OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
     Transaction tx = graphDb.beginTx();
+    a = graphDb.createNode();
+    b = graphDb.createNode();
+    a.createRelationshipTo(b, type);
+    c = graphDb.createNode();
+    a.createRelationshipTo(c, type);
+    c.createRelationshipTo(a, type);
 
-    OwlVisitor visitor = new OwlVisitor(walker, graph, 
-        new HashMap<String, String>(), new HashMap<String, String>(), new ArrayList<MappedProperty>());
-    walker.walkStructure(visitor);
+    d = graphDb.createNode();
+
+    e = graphDb.createNode();
+    f = graphDb.createNode();
+    e.createRelationshipTo(f, type);
+    a.createRelationshipTo(e, type);
+
     tx.success();
     tx.finish();
-
-    Node owlThing = graph.getNode("http://www.w3.org/2002/07/owl#Thing").get();
-    
-    irx = new ReachabilityIndex(graph.getGraphDb(), newHashSet(owlThing.getId()));
-    irx.creatIndex();
-  }
-
-  @AfterClass
-  public static void destroyTestDatabase() {
-    irx.dropIndex();
-    graph.shutdown();
+    index = new ReachabilityIndex(graphDb, newHashSet(e.getId()));
+    index.createIndex();
   }
 
   @Test
-  public void testReachabilityIdxAccess() {
-    Node parent = graph.getNode("http://example.com/owl/families/Parent").get();
-    Node john = graph.getNode("http://example.com/owl/families/John").get();
-    Node female = graph.getNode("http://example.com/owl/families/Female").get();
-    assertThat(irx.canReach(john, parent), is(true));
-    assertThat(irx.canReach(parent, john), is(false));
-    assertThat(irx.canReach(parent, female), is(false));
+  public void testEmptyGraph() {
+    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
+    new ReachabilityIndex(graphDb);
+  }
+
+  @Test(expected=IllegalStateException.class)
+  public void testUncreatedIndex() {
+    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
+    ReachabilityIndex index = new ReachabilityIndex(graphDb);
+    index.canReach(a, b);
+  }
+
+  @Test
+  public void testSelfReachability() {
+    assertThat(index.canReach(a, a), is(true));
+  }
+
+  @Test
+  public void testDirectionalReachability() {
+    assertThat(index.canReach(a, b), is(true));
+    assertThat(index.canReach(b, a), is(false));
+  }
+
+  @Test
+  public void testBidirectionalReachability() {
+    assertThat(index.canReach(a, c), is(true));
+    assertThat(index.canReach(b, c), is(false));
+  }
+
+  @Test
+  public void testDisconnectedNode() {
+    for (Node n: newArrayList(a, b, c)) {
+      assertThat(index.canReach(n, d), is(false));
+      assertThat(index.canReach(d, n), is(false));
+    }
+  }
+
+  @Test
+  public void testForbiddenNodes() {
+    assertThat(index.canReach(a, f), is(false));
+    assertThat(index.canReach(e, f), is(true));
+    assertThat(index.canReach(a, e), is(true));
   }
 
 }
