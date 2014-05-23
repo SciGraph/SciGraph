@@ -74,11 +74,8 @@ public class ReachabilityIndex {
     }
 
     long startTime = System.currentTimeMillis();
-
     Set<Entry<Long, Integer>> hopCoverages = getHopCoverages();
-
     long endTime = System.currentTimeMillis();
-
     logger.fine(format("Takes %d second(s) to calculate HopCoverage",
         TimeUnit.MILLISECONDS.toSeconds(endTime - startTime)));
 
@@ -108,7 +105,11 @@ public class ReachabilityIndex {
     }
 
     logger.fine("BFS index building time: " + (bfsTime/1000) + " sec(s), RBFS index building time: " + (rbfsTime /1000) + " sec(s).");
-    // store the inMemoryIdx into db.
+    commitIndexToGraph(inMemoryIndex);
+    logger.info("Reachability index created.");
+  }
+
+  void commitIndexToGraph(MemoryReachabilityIndex inMemoryIndex) {
     Transaction tx = graphDb.beginTx();
 
     int operationCount = 0;
@@ -128,7 +129,6 @@ public class ReachabilityIndex {
     metaDataNode.setProperty(INDEX_EXISTS_PROPERTY, true);
     tx.success();
     tx.finish();
-    logger.info("Reachability index created.");
   }
 
   public void dropIndex() {
