@@ -5,6 +5,7 @@ import static java.lang.String.format;
 
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -34,22 +35,32 @@ public class ReachabilityIndex {
   private static final String IN_LIST_PROPERTY  = "ReachablilityIndexInList";
   private static final String OUT_LIST_PROPERTY = "ReachablilityIndexOutList";
 
-  private GraphDatabaseService graphDb;
+  private final GraphDatabaseService graphDb;
   private final Set<Long> forbiddenNodes;
   private final Node metaDataNode;
 
+  /***
+   * Manage a reachability index object on a graph
+   * @param graphDb The graph on which to build the reachability index
+   */
+  public ReachabilityIndex(GraphDatabaseService graphDb) {
+    this(graphDb, Collections.<Long>emptySet());
+  }
+
   /**
-   * Initialize a reachability index object on a graph 
-   * @param graph
-   * @param forbiddenNodes
+   * Manage a reachability index object on a graph.
+   * @param graph The graph on which to build the reachability index
+   * @param forbiddenNodes Nodes that should be not be traversed during index building
    */
   public ReachabilityIndex(GraphDatabaseService graphdb, Collection<Long> forbiddenNodes) {
-    graphDb = graphdb;
+    this.graphDb = graphdb;
     this.forbiddenNodes = ImmutableSet.copyOf(forbiddenNodes);
-
     metaDataNode = graphDb.getNodeById(0);
   }
 
+  /***
+   * @return if a reachability index has already been created on this graph.
+   */
   public boolean indexExists() {
     return (boolean)metaDataNode.getProperty(INDEX_EXISTS_PROPERTY, false);
   }
@@ -57,7 +68,7 @@ public class ReachabilityIndex {
   /**
    * Create a reachability index on a graph.
    */
-  public void creatIndex() {
+  public void createIndex() {
     if (indexExists()) {
       throw new IllegalStateException("Reachability index already exists. Drop it first and then recreate it.");
     }
@@ -68,49 +79,49 @@ public class ReachabilityIndex {
 
     long endTime = System.currentTimeMillis();
 
-    logger.info(format("Takes %d second(s) to calculate HopCoverage",
+    logger.fine(format("Takes %d second(s) to calculate HopCoverage",
         TimeUnit.MILLISECONDS.toSeconds(endTime - startTime)));
 
-    MemoryReachabilityIndex inMemoryIdx = new MemoryReachabilityIndex();
+    MemoryReachabilityIndex inMemoryIndex = new MemoryReachabilityIndex();
 
     TraversalDescription incomingTraversal = Traversal.description().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL)
         .expand(new DirectionalPathExpander(Direction.INCOMING))
-        .evaluator(new ReachabilityEvaluator(inMemoryIdx, Direction.INCOMING, forbiddenNodes));
+        .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.INCOMING, forbiddenNodes));
 
     TraversalDescription outgoingTraversal = Traversal.description().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL)
         .expand(new DirectionalPathExpander(Direction.OUTGOING))
-        .evaluator(new ReachabilityEvaluator(inMemoryIdx, Direction.OUTGOING, forbiddenNodes));
+        .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.OUTGOING, forbiddenNodes));
 
     long bfsTime = 0, rbfsTime = 0;
     for (Entry<Long, Integer> coverage : hopCoverages) {
       Node workingNode = graphDb.getNodeById(coverage.getKey());
       startTime = System.currentTimeMillis();
       for (Path p: incomingTraversal.traverse(workingNode)) {
-        logger.fine(p.toString()); // Avoids unused variable warning
+        logger.finest(p.toString()); // Avoids unused variable warning
       }
       endTime = System.currentTimeMillis() ;
       rbfsTime  += endTime - startTime;
       for (Path p :outgoingTraversal.traverse(workingNode)) {
-        logger.fine(p.toString()); // Avoids unused variable warning 
+        logger.finest(p.toString()); // Avoids unused variable warning 
       }
       bfsTime += System.currentTimeMillis() - endTime;
     }
 
-    logger.info("BFS index building time: " + (bfsTime/1000) + " sec(s), RBFS index building time: " + (rbfsTime /1000) + " sec(s).");
+    logger.fine("BFS index building time: " + (bfsTime/1000) + " sec(s), RBFS index building time: " + (rbfsTime /1000) + " sec(s).");
     // store the inMemoryIdx into db.
     Transaction tx = graphDb.beginTx();
 
-    int counter=0;
-    for(Entry<Long, InOutList> e: inMemoryIdx.entrySet() ) {
+    int operationCount = 0;
+    System.out.println(inMemoryIndex);
+    for(Entry<Long, InOutList> e: inMemoryIndex.entrySet() ) {
       Node node = graphDb.getNodeById(e.getKey());
-      counter++;
-      if ( counter % 500000 == 0 ) {
-        logger.info("commit transaction when populating in-out list.");
+      operationCount++;
+      if ( operationCount % 500000 == 0 ) {
+        logger.fine("commit transaction when populating in-out list.");
         tx.success();
         tx.finish();
         tx = graphDb.beginTx();
       }
-
       node.setProperty(IN_LIST_PROPERTY, Longs.toArray(e.getValue().getInList()));
       node.setProperty(OUT_LIST_PROPERTY, Longs.toArray(e.getValue().getOutList()));
     }
@@ -174,7 +185,7 @@ public class ReachabilityIndex {
     }
     long[] outList = (long[])startNode.getProperty(OUT_LIST_PROPERTY);
     long[] inList = (long[])endNode.getProperty(IN_LIST_PROPERTY);
-    int i=0, j=0;
+    int i = 0, j = 0;
 
     while (i < outList.length && j < inList.length) {
       if (outList[i] < inList[j]) { 
