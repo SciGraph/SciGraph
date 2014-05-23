@@ -11,13 +11,13 @@ import org.neo4j.graphdb.traversal.Evaluator;
 
 import com.google.common.collect.ImmutableSet;
 
-public class ReachabilityEvaluator implements Evaluator {
+class ReachabilityEvaluator implements Evaluator {
 
   private final MemoryReachabilityIndex inMemoryIdx;
   private final Direction direction;
   private final Set<Long> forbiddenNodes;
 
-  public ReachabilityEvaluator (MemoryReachabilityIndex inMemoryIdx, 
+  ReachabilityEvaluator (MemoryReachabilityIndex inMemoryIdx, 
       Direction direction,
       Collection<Long> forbiddenNodes) {
     this.inMemoryIdx = inMemoryIdx;

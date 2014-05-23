@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 import com.google.common.collect.ForwardingMap;
 
-public class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList>{
+class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList>{
 
   TreeMap<Long, InOutList> delegate = new TreeMap<>();
 
