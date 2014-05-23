@@ -112,7 +112,6 @@ public class ReachabilityIndex {
     Transaction tx = graphDb.beginTx();
 
     int operationCount = 0;
-    System.out.println(inMemoryIndex);
     for(Entry<Long, InOutList> e: inMemoryIndex.entrySet() ) {
       Node node = graphDb.getNodeById(e.getKey());
       operationCount++;
