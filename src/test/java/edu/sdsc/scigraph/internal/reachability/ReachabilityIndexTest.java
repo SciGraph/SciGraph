@@ -1,7 +1,6 @@
 package edu.sdsc.scigraph.internal.reachability;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -13,6 +12,8 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
+
+import com.google.common.base.Predicate;
 
 public class ReachabilityIndexTest {
 
@@ -41,8 +42,13 @@ public class ReachabilityIndexTest {
 
     tx.success();
     tx.finish();
-    index = new ReachabilityIndex(graphDb, newHashSet(e.getId()));
-    index.createIndex();
+    index = new ReachabilityIndex(graphDb);
+    index.createIndex(new Predicate<Node>() {
+      @Override
+      public boolean apply(Node input) {
+        return !input.equals(e);
+      }
+    });
   }
 
   @Test

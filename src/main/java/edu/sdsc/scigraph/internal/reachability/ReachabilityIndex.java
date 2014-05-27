@@ -5,8 +5,6 @@ import static com.google.common.collect.Iterables.size;
 import static java.lang.String.format;
 
 import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,7 +23,8 @@ import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.primitives.Longs;
 
 public class ReachabilityIndex {
@@ -37,7 +36,6 @@ public class ReachabilityIndex {
   private static final String OUT_LIST_PROPERTY = "ReachablilityIndexOutList";
 
   private final GraphDatabaseService graphDb;
-  private final Set<Long> forbiddenNodes;
   private final Node metaDataNode;
 
   /***
@@ -45,17 +43,7 @@ public class ReachabilityIndex {
    * @param graphDb The graph on which to build the reachability index
    */
   public ReachabilityIndex(GraphDatabaseService graphDb) {
-    this(graphDb, Collections.<Long>emptySet());
-  }
-
-  /**
-   * Manage a reachability index object on a graph.
-   * @param graph The graph on which to build the reachability index
-   * @param forbiddenNodes Nodes that should be not be traversed during index building
-   */
-  public ReachabilityIndex(GraphDatabaseService graphdb, Collection<Long> forbiddenNodes) {
-    this.graphDb = graphdb;
-    this.forbiddenNodes = ImmutableSet.copyOf(forbiddenNodes);
+    this.graphDb = graphDb;
     metaDataNode = graphDb.getNodeById(0);
   }
 
@@ -66,11 +54,15 @@ public class ReachabilityIndex {
     return (boolean)metaDataNode.getProperty(INDEX_EXISTS_PROPERTY, false);
   }
 
+  public void createIndex() throws InterruptedException {
+    createIndex(Predicates.<Node>alwaysTrue());
+  }
+
   /**
    * Create a reachability index on a graph.
    * @throws InterruptedException 
    */
-  public void createIndex() throws InterruptedException {
+  public void createIndex(Predicate<Node> nodePredicate) throws InterruptedException {
     if (indexExists()) {
       throw new IllegalStateException("Reachability index already exists. Drop it first and then recreate it.");
     }
@@ -85,11 +77,11 @@ public class ReachabilityIndex {
 
     TraversalDescription incomingTraversal = Traversal.description().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL)
         .expand(new DirectionalPathExpander(Direction.INCOMING))
-        .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.INCOMING, forbiddenNodes));
+        .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.INCOMING, nodePredicate));
 
     TraversalDescription outgoingTraversal = Traversal.description().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL)
         .expand(new DirectionalPathExpander(Direction.OUTGOING))
-        .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.OUTGOING, forbiddenNodes));
+        .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.OUTGOING, nodePredicate));
 
     for (Entry<Long, Integer> coverage : hopCoverages) {
       Node workingNode = graphDb.getNodeById(coverage.getKey());
@@ -161,6 +153,7 @@ public class ReachabilityIndex {
   private SortedSet<Entry<Long,Integer>> getHopCoverages(){
     SortedSet<Entry<Long,Integer>> nodeSet = new TreeSet<Entry<Long,Integer>>(
         new Comparator<Entry<Long,Integer>>() {
+          @Override
           public int compare(Entry<Long,Integer> a, Entry<Long,Integer> b) {
             int difference = b.getValue() - a.getValue();
             return (0 != difference) ? difference : (int)(a.getKey() - b.getKey());

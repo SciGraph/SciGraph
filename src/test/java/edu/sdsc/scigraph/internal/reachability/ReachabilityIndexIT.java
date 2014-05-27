@@ -1,6 +1,5 @@
 package edu.sdsc.scigraph.internal.reachability;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -19,6 +18,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
+import com.google.common.base.Predicate;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.Concept;
@@ -50,10 +50,15 @@ public class ReachabilityIndexIT {
     tx.success();
     tx.finish();
 
-    Node owlThing = graph.getNode("http://www.w3.org/2002/07/owl#Thing").get();
-    
-    irx = new ReachabilityIndex(graph.getGraphDb(), newHashSet(owlThing.getId()));
-    irx.createIndex();
+    final Node owlThing = graph.getNode("http://www.w3.org/2002/07/owl#Thing").get();
+
+    irx = new ReachabilityIndex(graph.getGraphDb());
+    irx.createIndex(new Predicate<Node>() {
+      @Override
+      public boolean apply(Node input) {
+        return !input.equals(owlThing);
+      }
+    });
   }
 
   @AfterClass

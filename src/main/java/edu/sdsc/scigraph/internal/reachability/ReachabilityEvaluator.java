@@ -1,38 +1,38 @@
 package edu.sdsc.scigraph.internal.reachability;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Predicate;
 
 class ReachabilityEvaluator implements Evaluator {
 
   private final MemoryReachabilityIndex inMemoryIdx;
   private final Direction direction;
-  private final Set<Long> forbiddenNodes;
+  private final Predicate<Node> nodePredicate;
 
   ReachabilityEvaluator (MemoryReachabilityIndex inMemoryIdx, 
       Direction direction,
-      Collection<Long> forbiddenNodes) {
+      Predicate<Node> nodePredicate) {
     this.inMemoryIdx = inMemoryIdx;
     this.direction = direction;
-    this.forbiddenNodes = ImmutableSet.copyOf(forbiddenNodes);
+    this.nodePredicate = nodePredicate;
   }
 
   @Override
   public Evaluation evaluate(Path path) {
-    long startId = path.startNode().getId(); //Vi
-    long currentId = path.endNode().getId();
-
-    if (forbiddenNodes.contains(currentId)) {
+    if (!nodePredicate.apply(path.endNode())) {
       return Evaluation.EXCLUDE_AND_PRUNE;
     }
+
+    long startId = path.startNode().getId(); // Vi
+    long currentId = path.endNode().getId();
 
     if (0 == path.length()) {
       // first node in the traverse - add itself to the in-out list
