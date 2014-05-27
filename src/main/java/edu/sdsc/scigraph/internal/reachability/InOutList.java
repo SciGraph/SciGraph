@@ -1,14 +1,14 @@
 package edu.sdsc.scigraph.internal.reachability;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.google.common.base.Objects;
 
 class InOutList {
 
-  Set<Long> inList = new HashSet<>();
-  Set<Long> outList = new HashSet<>();
+  Set<Long> inList = new TreeSet<>();
+  Set<Long> outList = new TreeSet<>();
 
   Set<Long> getInList() {
     return inList;

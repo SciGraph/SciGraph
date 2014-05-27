@@ -67,6 +67,7 @@ public class ReachabilityIndex {
 
   /**
    * Create a reachability index on a graph.
+ * @throws InterruptedException 
    */
   public void createIndex() {
     if (indexExists()) {
@@ -93,9 +94,20 @@ public class ReachabilityIndex {
     for (Entry<Long, Integer> coverage : hopCoverages) {
       Node workingNode = graphDb.getNodeById(coverage.getKey());
       startTime = System.currentTimeMillis();
-      for (Path p: incomingTraversal.traverse(workingNode)) {
-        logger.finest(p.toString()); // Avoids unused variable warning
-      }
+      
+      InOutListTraverser incomingListTaverser = new InOutListTraverser(incomingTraversal,workingNode);
+      incomingListTaverser.start();
+      
+      InOutListTraverser outgoingListTaverser = new InOutListTraverser(outgoingTraversal,workingNode);
+      outgoingListTaverser.start();
+      
+  	  try {
+		incomingListTaverser.join();
+     	outgoingListTaverser.join();
+	  } catch (InterruptedException e) {
+		throw new RuntimeException ("Reachability index creation inerrupted.");
+	  }
+
       endTime = System.currentTimeMillis() ;
       rbfsTime  += endTime - startTime;
       for (Path p :outgoingTraversal.traverse(workingNode)) {
@@ -197,4 +209,28 @@ public class ReachabilityIndex {
     }
     return false;
   }
+  
+  
+  protected class InOutListTraverser  extends Thread {
+	  
+	  TraversalDescription traversalDescription = null;
+	  Node startNode = null;
+	  
+	  protected InOutListTraverser(TraversalDescription td, Node starter) {
+		  this.traversalDescription = td;  
+		  this.startNode = starter;
+	  }
+	  
+	  public void run() {
+		 if (startNode == null) {
+			 logger.info("null pointer for startNode");
+			 return;
+		 }
+		  for (Path p: traversalDescription.traverse(startNode)) {
+	          logger.finest(p.toString()); // Avoids unused variable warning
+	        }
+	  }
+	  
+  }
+  
 }
