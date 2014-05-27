@@ -1,5 +1,6 @@
 package edu.sdsc.scigraph.internal.reachability;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.size;
 import static java.lang.String.format;
 
@@ -67,9 +68,9 @@ public class ReachabilityIndex {
 
   /**
    * Create a reachability index on a graph.
- * @throws InterruptedException 
+   * @throws InterruptedException 
    */
-  public void createIndex() {
+  public void createIndex() throws InterruptedException {
     if (indexExists()) {
       throw new IllegalStateException("Reachability index already exists. Drop it first and then recreate it.");
     }
@@ -93,19 +94,15 @@ public class ReachabilityIndex {
     for (Entry<Long, Integer> coverage : hopCoverages) {
       Node workingNode = graphDb.getNodeById(coverage.getKey());
       startTime = System.currentTimeMillis();
-      
+
       InOutListTraverser incomingListTaverser = new InOutListTraverser(incomingTraversal,workingNode);
       incomingListTaverser.start();
-      
+
       InOutListTraverser outgoingListTaverser = new InOutListTraverser(outgoingTraversal,workingNode);
       outgoingListTaverser.start();
-      
-  	  try {
-		incomingListTaverser.join();
-     	outgoingListTaverser.join();
-	  } catch (InterruptedException e) {
-		throw new RuntimeException ("Reachability index creation inerrupted.");
-	  }
+
+      incomingListTaverser.join();
+      outgoingListTaverser.join();
 
       endTime = System.currentTimeMillis();
     }
@@ -168,8 +165,7 @@ public class ReachabilityIndex {
             int difference = b.getValue() - a.getValue();
             return (0 != difference) ? difference : (int)(a.getKey() - b.getKey());
           }
-        }
-        );
+        });
 
     for (Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
       int relationshipCount = size(n.getRelationships());
@@ -203,28 +199,25 @@ public class ReachabilityIndex {
     }
     return false;
   }
-  
-  
-  protected class InOutListTraverser  extends Thread {
-	  
-	  TraversalDescription traversalDescription = null;
-	  Node startNode = null;
-	  
-	  protected InOutListTraverser(TraversalDescription td, Node starter) {
-		  this.traversalDescription = td;  
-		  this.startNode = starter;
-	  }
-	  
-	  public void run() {
-		 if (startNode == null) {
-			 logger.info("null pointer for startNode");
-			 return;
-		 }
-		  for (Path p: traversalDescription.traverse(startNode)) {
-	          logger.finest(p.toString()); // Avoids unused variable warning
-	        }
-	  }
-	  
+
+  static class InOutListTraverser extends Thread {
+
+    private final TraversalDescription traversalDescription;
+    private final Node startNode;
+
+    InOutListTraverser(TraversalDescription td, Node startNode) {
+      checkNotNull(startNode, "startNode must not be null.");
+      this.traversalDescription = td;
+      this.startNode = startNode;
+    }
+
+    @Override
+    public void run() {
+      for (Path p: traversalDescription.traverse(startNode)) {
+        logger.finest(p.toString()); // Avoids unused variable warning
+      }
+    }
+
   }
-  
+
 }
