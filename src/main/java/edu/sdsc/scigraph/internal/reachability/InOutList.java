@@ -1,14 +1,17 @@
 package edu.sdsc.scigraph.internal.reachability;
 
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Objects;
 
+@ThreadSafe
 class InOutList {
 
-  Set<Long> inList = new TreeSet<>();
-  Set<Long> outList = new TreeSet<>();
+  Set<Long> inList = new ConcurrentSkipListSet<>();
+  Set<Long> outList = new ConcurrentSkipListSet<>();
 
   Set<Long> getInList() {
     return inList;

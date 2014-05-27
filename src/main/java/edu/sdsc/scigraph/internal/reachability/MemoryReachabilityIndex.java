@@ -1,13 +1,16 @@
 package edu.sdsc.scigraph.internal.reachability;
 
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.collect.ForwardingMap;
 
+@ThreadSafe
 class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList>{
 
-  Map<Long, InOutList> delegate = new TreeMap<>();
+  ConcurrentSkipListMap<Long, InOutList> delegate = new ConcurrentSkipListMap<>();
 
   @Override
   protected Map<Long, InOutList> delegate() {
@@ -16,10 +19,7 @@ class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList>{
 
   @Override
   public InOutList get(Object key) {
-    if (!containsKey(key)) {
-      super.put((Long)key, new InOutList());
-    }
-    return super.get(key);
+    return delegate.putIfAbsent((Long) key, new InOutList());
   }
 
 }
