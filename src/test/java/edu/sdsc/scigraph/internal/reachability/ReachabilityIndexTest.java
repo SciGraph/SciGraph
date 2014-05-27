@@ -22,7 +22,7 @@ public class ReachabilityIndexTest {
   static Node a, b, c, d, e, f;
 
   @BeforeClass
-  public static void setup() {
+  public static void setup() throws InterruptedException {
     GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
     Transaction tx = graphDb.beginTx();
     a = graphDb.createNode();
