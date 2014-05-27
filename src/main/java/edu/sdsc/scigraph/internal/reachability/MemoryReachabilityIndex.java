@@ -8,7 +8,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.google.common.collect.ForwardingMap;
 
 @ThreadSafe
-class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList>{
+class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList> {
 
   ConcurrentSkipListMap<Long, InOutList> delegate = new ConcurrentSkipListMap<>();
 
@@ -19,7 +19,8 @@ class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList>{
 
   @Override
   public InOutList get(Object key) {
-    return delegate.putIfAbsent((Long) key, new InOutList());
+    delegate.putIfAbsent((Long) key, new InOutList());
+    return delegate.get(key);
   }
 
 }
