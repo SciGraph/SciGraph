@@ -89,11 +89,21 @@ public class ReachabilityIndexTest {
     }
   }
 
-  @Test
-  public void testForbiddenNodes() {
+  @Test 
+  public void testForbiddenNode() {
     assertThat(index.canReach(a, f), is(false));
+  }
+
+  
+  @Test (expected=IllegalArgumentException.class)
+  public void testForbiddenStartNode() {
     assertThat(index.canReach(e, f), is(true));
+  }
+  
+  @Test (expected=IllegalArgumentException.class)
+  public void testForbiddenEndNode() {
     assertThat(index.canReach(a, e), is(true));
   }
+  
 
 }
