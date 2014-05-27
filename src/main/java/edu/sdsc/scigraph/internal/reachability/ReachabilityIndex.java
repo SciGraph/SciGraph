@@ -90,7 +90,6 @@ public class ReachabilityIndex {
         .expand(new DirectionalPathExpander(Direction.OUTGOING))
         .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.OUTGOING, forbiddenNodes));
 
-    long bfsTime = 0, rbfsTime = 0;
     for (Entry<Long, Integer> coverage : hopCoverages) {
       Node workingNode = graphDb.getNodeById(coverage.getKey());
       startTime = System.currentTimeMillis();
@@ -108,15 +107,10 @@ public class ReachabilityIndex {
 		throw new RuntimeException ("Reachability index creation inerrupted.");
 	  }
 
-      endTime = System.currentTimeMillis() ;
-      rbfsTime  += endTime - startTime;
-      for (Path p :outgoingTraversal.traverse(workingNode)) {
-        logger.finest(p.toString()); // Avoids unused variable warning 
-      }
-      bfsTime += System.currentTimeMillis() - endTime;
+      endTime = System.currentTimeMillis();
     }
 
-    logger.fine("BFS index building time: " + (bfsTime/1000) + " sec(s), RBFS index building time: " + (rbfsTime /1000) + " sec(s).");
+    logger.fine("InMemoryReachability index building time: " + ((endTime-startTime)/1000) + " sec(s).");
     commitIndexToGraph(inMemoryIndex);
     logger.info("Reachability index created.");
   }
