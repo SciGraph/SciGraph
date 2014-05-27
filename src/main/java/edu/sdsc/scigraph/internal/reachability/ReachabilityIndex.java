@@ -177,11 +177,7 @@ public class ReachabilityIndex {
     if (!indexExists()) {
       throw new IllegalStateException("Reachability index must be created first."); 
     }
-    
-    if( this.forbiddenNodes.contains(startNode.getId()) || this.forbiddenNodes.contains(endNode.getId()) ) {
-    	throw new IllegalArgumentException("ForbiddenNode can't be start or end node in ReachabilityIndex.canReach function."); 
-    }
-    
+
     long[] outList = (long[])startNode.getProperty(OUT_LIST_PROPERTY);
     long[] inList = (long[])endNode.getProperty(IN_LIST_PROPERTY);
     int i = 0, j = 0;
