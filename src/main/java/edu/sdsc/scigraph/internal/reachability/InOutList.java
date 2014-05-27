@@ -14,7 +14,7 @@ class InOutList {
     return inList;
   }
 
-  public Set<Long> getOutList() {
+  Set<Long> getOutList() {
     return outList;
   }
 

@@ -17,7 +17,7 @@ class ReachabilityEvaluator implements Evaluator {
   private final Direction direction;
   private final Predicate<Node> nodePredicate;
 
-  ReachabilityEvaluator (MemoryReachabilityIndex inMemoryIdx, 
+  ReachabilityEvaluator(MemoryReachabilityIndex inMemoryIdx,
       Direction direction,
       Predicate<Node> nodePredicate) {
     this.inMemoryIdx = inMemoryIdx;
@@ -62,7 +62,7 @@ class ReachabilityEvaluator implements Evaluator {
     }
   }
 
-  private boolean nodesAreConnectedInIndex(long nodeIdOut, long nodeIdIn) {
+  boolean nodesAreConnectedInIndex(long nodeIdOut, long nodeIdIn) {
     Set<Long> outList = inMemoryIdx.get(nodeIdOut).getOutList();
     Set<Long> inList = inMemoryIdx.get(nodeIdIn).getInList();
     return !Collections.disjoint(outList, inList);

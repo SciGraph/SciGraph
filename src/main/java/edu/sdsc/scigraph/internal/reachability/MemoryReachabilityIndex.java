@@ -7,7 +7,7 @@ import com.google.common.collect.ForwardingMap;
 
 class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList>{
 
-  TreeMap<Long, InOutList> delegate = new TreeMap<>();
+  Map<Long, InOutList> delegate = new TreeMap<>();
 
   @Override
   protected Map<Long, InOutList> delegate() {
