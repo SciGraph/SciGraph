@@ -22,11 +22,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,8 +76,11 @@ class FileCachingIRIMapper implements OWLOntologyIRIMapper {
   @Inject
   FileCachingIRIMapper() throws IOException {
     super();
-    cacheDirectory = new File(FileUtils.getTempDirectory(), "owlapi");
-    FileUtils.forceMkdir(cacheDirectory);
+    Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxrwxrwx");
+    Path tempPath = Files
+        .createTempDirectory("owlapi", PosixFilePermissions.asFileAttribute(perms));
+    cacheDirectory = tempPath.toFile();
+
     validityHelper = new FileValidity(TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES));
   }
 
