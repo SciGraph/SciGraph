@@ -22,11 +22,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import io.dropwizard.jersey.caching.CacheControl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -40,8 +38,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
@@ -57,7 +53,6 @@ import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.Traversal;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
@@ -68,6 +63,9 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.representations.monarch.GraphPath;
+import edu.sdsc.scigraph.representations.monarch.GraphPath.Edge;
+import edu.sdsc.scigraph.representations.monarch.GraphPath.Vertex;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTO;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
@@ -86,69 +84,6 @@ public class GraphService extends BaseResource {
   GraphService(Vocabulary<Concept> vocabulary, Graph<Concept> graph) {
     this.vocabulary = vocabulary;
     this.graph = graph;
-  }
-
-  @XmlRootElement
-  static class Vertex {
-    @XmlElement
-    @JsonProperty
-    String id;
-
-    @XmlElement
-    @JsonProperty("lbl")
-    String label;
-
-    @XmlElement
-    @JsonProperty
-    Map<String, Object> meta = new HashMap<>();
-
-    Vertex() {}
-
-    Vertex(String id, String label) {
-      this.id = id;
-      this.label = label;
-    }
-  }
-
-  @XmlRootElement
-  static class Edge {
-    @XmlElement
-    @JsonProperty("sub")
-    String subject;
-
-    @XmlElement
-    @JsonProperty("obj")
-    String object;
-
-    @XmlElement
-    @JsonProperty("pred")
-    String predicate;
-
-    @XmlElement
-    @JsonProperty
-    Map<String, Object> meta = new HashMap<>();
-
-    Edge() {}
-
-    Edge(String subject, String object, String predicate) {
-      this.subject = subject;
-      this.object = object;
-      this.predicate = predicate;
-    }
-
-  }
-
-  @XmlRootElement
-  static class GraphPath {
-
-    @XmlElement
-    @JsonProperty
-    List<Vertex> nodes = new ArrayList<>();
-
-    @XmlElement
-    @JsonProperty
-    List<Edge> edges = new ArrayList<>();
-
   }
 
   GraphPath getGraphPathFromPath(org.neo4j.graphdb.Path path) {
