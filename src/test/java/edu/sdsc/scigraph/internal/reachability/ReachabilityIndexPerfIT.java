@@ -36,6 +36,8 @@ import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 public class ReachabilityIndexPerfIT extends AbstractBenchmark {
 
   final File graph;
+  ReachabilityIndex index;
+  GraphDatabaseService graphDb;
 
   public ReachabilityIndexPerfIT(File graph) {
     checkArgument(graph.exists(), graph + " doesn't exist!");
@@ -47,9 +49,6 @@ public class ReachabilityIndexPerfIT extends AbstractBenchmark {
     Object[][] data = new Object[][] {new File("performanceGraphs").listFiles()};
     return Arrays.asList(data);
   }
-
-  ReachabilityIndex index;
-  GraphDatabaseService graphDb;
 
   @Before
   public void setup() {
