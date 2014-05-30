@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Christopher Condit (condit@sdsc.edu)
+ * Copyright (C) 2014 The SciGraph authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import com.tinkerpop.blueprints.oupls.jung.GraphJung;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphConfiguration;
 import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.modules.AbstractModule;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
@@ -66,7 +67,7 @@ import edu.sdsc.scigraph.frames.util.MultiPropertyMethodHandler;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
 
-public class Graph<N> {
+public class Graph<N extends VertexFrame> {
 
   private static final Logger logger = Logger.getLogger(Graph.class.getName()); 
 
@@ -110,7 +111,7 @@ public class Graph<N> {
     });
     Neo4jGraph neo4jGraph = new Neo4jGraph(graphDb);
     framedGraph = factory.create((com.tinkerpop.blueprints.Graph) (neo4jGraph));
-    jungGraph = new GraphJung<com.tinkerpop.blueprints.Graph>((com.tinkerpop.blueprints.Graph) (neo4jGraph));
+    jungGraph = new GraphJung<com.tinkerpop.blueprints.Graph>((neo4jGraph));
   }
 
   private void setupIndex(AutoIndexer<?> index, Set<String> properties) {
@@ -209,6 +210,11 @@ public class Graph<N> {
       return Optional.of(getOrCreateNode(uri));
     }
     return Optional.absent();
+  }
+
+  public Node getNode(N framedNode) {
+    long id = (Long) framedNode.asVertex().getId();
+    return graphDb.getNodeById(id);
   }
 
   @SuppressWarnings("unchecked")
@@ -345,7 +351,7 @@ public class Graph<N> {
     }
     if (container.hasProperty(property)) {
       // We might be creating or updating an array - read everything into a Set<>
-      Object origValue = (Object)container.getProperty(property);
+      Object origValue = container.getProperty(property);
       Class<?> clazz = value.getClass();
       Set<Object> valueSet = new LinkedHashSet<>();
       if (container.getProperty(property).getClass().isArray()) {
@@ -353,7 +359,7 @@ public class Graph<N> {
           valueSet.add(Array.get(origValue, i));
         }
       } else {
-        valueSet.add((Object)origValue);
+        valueSet.add(origValue);
       }
       valueSet.add(value);
 

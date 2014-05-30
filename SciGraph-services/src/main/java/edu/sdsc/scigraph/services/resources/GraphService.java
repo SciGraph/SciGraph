@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Christopher Condit (condit@sdsc.edu)
+ * Copyright (C) 2014 The SciGraph authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,6 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.representations.monarch.GraphPath;
 import edu.sdsc.scigraph.representations.monarch.GraphPath.Edge;
@@ -92,13 +91,12 @@ public class GraphService extends BaseResource {
       @Override
       public Vertex apply(Node input) {
         Concept c = graph.getOrCreateFramedNode(input);
-        //TODO: Chooses first label as a convention
-        List<String> labels = graph.getProperties(graph.getNode((String)c.asVertex().getProperty(CommonProperties.URI)).get(), NodeProperties.LABEL, String.class);
-        Vertex v = new Vertex(c.getFragment(), getFirst(labels, null));
+        // HACK: Chooses first label as a convention
+        Vertex v = new Vertex(c.getFragment(), getFirst(c.getLabels(), null));
         if (Iterables.count(c.getCategories()) > 0) {
           v.meta.put("categories", newArrayList(c.getCategories()));
-          v.meta.put("type", newArrayList(c.getTypes()));
         }
+        v.meta.put("type", newArrayList(c.getTypes()));
         return v;
       }
     }));
@@ -135,11 +133,11 @@ public class GraphService extends BaseResource {
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(startId).build();
     Concept startConcept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node startNode = graph.getOrCreateNode(startConcept.getUri());
+    Node startNode = graph.getNode(startConcept.getUri()).get();
 
     query = new Vocabulary.Query.Builder(endId).build();
     Concept endConcept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node endNode = graph.getOrCreateNode(endConcept.getUri());
+    Node endNode = graph.getNode(endConcept.getUri()).get();
 
     PathExpander<Void> expander = new PathExpander<Void>() {
 

@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (C) 2014 Christopher Condit (condit@sdsc.edu)
+    Copyright (C) 2014 The SciGraph authors
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@
     <blueprints.version>2.5.0</blueprints.version>
     <openrdf.version>2.7.6</openrdf.version>
   </properties>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.neo4j</groupId>
@@ -145,5 +145,29 @@
       <version>2.3</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jvnet.jaxb2.maven2</groupId>
+        <artifactId>maven-jaxb2-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <forceRegenerate>false</forceRegenerate>
+          <schemas>
+            <schema>
+              <url>http://cgi7.cs.rpi.edu/research/groups/pb/punin/public_html/XGMML/xgmml.xsd</url>
+            </schema>
+          </schemas>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

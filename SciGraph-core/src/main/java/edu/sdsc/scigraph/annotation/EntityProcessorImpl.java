@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Christopher Condit (condit@sdsc.edu)
+ * Copyright (C) 2014 The SciGraph authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class EntityProcessorImpl implements EntityProcessor {
       if (LuceneUtils.isStopword(getFirst(tokens, null).getToken()) || 
           LuceneUtils.isStopword(getLast(tokens).getToken())) {
         continue;
-      }
+      } 
 
       String candidate = combineTokens(tokens);
       if (candidate.length() < config.getMinLength()) {
