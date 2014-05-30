@@ -18,6 +18,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
@@ -37,6 +38,8 @@ public class ReachabilityIndex {
 
   private final GraphDatabaseService graphDb;
   private final Node metaDataNode;
+  
+  private int transactionBatchSize = 500000;   //default transaction size.
 
   /***
    * Manage a reachability index object on a graph
@@ -58,6 +61,12 @@ public class ReachabilityIndex {
     createIndex(Predicates.<Node>alwaysTrue());
   }
 
+  
+  public String getInListPropertyName() { return IN_LIST_PROPERTY;}
+  public String getOutListPropertyName() { return OUT_LIST_PROPERTY;}
+  
+  public void setTransactionBatchSize(int size) { this.transactionBatchSize = size;}
+  
   /**
    * Create a reachability index on a graph.
    * @throws InterruptedException 
@@ -68,9 +77,9 @@ public class ReachabilityIndex {
     }
 
     long startTime = System.currentTimeMillis();
-    Set<Entry<Long, Integer>> hopCoverages = getHopCoverages();
+    Set<Entry<Long, Integer>> hopCoverages = getHopCoverages(nodePredicate);
     long endTime = System.currentTimeMillis();
-    logger.fine(format("Takes %d second(s) to calculate HopCoverage",
+    logger.info(format("Takes %d second(s) to calculate HopCoverage",
         TimeUnit.MILLISECONDS.toSeconds(endTime - startTime)));
 
     MemoryReachabilityIndex inMemoryIndex = new MemoryReachabilityIndex();
@@ -83,23 +92,30 @@ public class ReachabilityIndex {
         .expand(new DirectionalPathExpander(Direction.OUTGOING))
         .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.OUTGOING, nodePredicate));
 
+    startTime = System.currentTimeMillis();
+    
     for (Entry<Long, Integer> coverage : hopCoverages) {
+    
       Node workingNode = graphDb.getNodeById(coverage.getKey());
-      startTime = System.currentTimeMillis();
 
-      InOutListTraverser incomingListTaverser = new InOutListTraverser(incomingTraversal,workingNode);
-      incomingListTaverser.start();
+      if ( coverage.getValue()<0 ) {
+    	inMemoryIndex.put(coverage.getKey(), new InOutList()) ; 
+      } else {
+        InOutListTraverser incomingListTaverser = new InOutListTraverser(incomingTraversal,workingNode);
+        incomingListTaverser.start();
 
-      InOutListTraverser outgoingListTaverser = new InOutListTraverser(outgoingTraversal,workingNode);
-      outgoingListTaverser.start();
+        InOutListTraverser outgoingListTaverser = new InOutListTraverser(outgoingTraversal,workingNode);
+        outgoingListTaverser.start();
 
-      incomingListTaverser.join();
-      outgoingListTaverser.join();
+        incomingListTaverser.join();
+        outgoingListTaverser.join();
+      }
 
-      endTime = System.currentTimeMillis();
     }
 
-    logger.fine("InMemoryReachability index building time: " + ((endTime-startTime)/1000) + " sec(s).");
+    endTime = System.currentTimeMillis();
+
+    logger.info("InMemoryReachability index building time: " + ((endTime-startTime)/1000) + " sec(s).");
     commitIndexToGraph(inMemoryIndex);
     logger.info("Reachability index created.");
   }
@@ -111,7 +127,7 @@ public class ReachabilityIndex {
     for(Entry<Long, InOutList> e: inMemoryIndex.entrySet() ) {
       Node node = graphDb.getNodeById(e.getKey());
       operationCount++;
-      if ( operationCount % 500000 == 0 ) {
+      if ( operationCount % transactionBatchSize == 0 ) {
         logger.fine("commit transaction when populating in-out list.");
         tx.success();
         tx.finish();
@@ -131,9 +147,17 @@ public class ReachabilityIndex {
       Transaction tx = graphDb.beginTx();
 
       // ...cleanup the index.
+      int counter = 0;
       for (Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
         n.removeProperty(IN_LIST_PROPERTY);
         n.removeProperty(OUT_LIST_PROPERTY);
+    	counter ++;
+    	if ( counter % transactionBatchSize == 0) {
+    		logger.fine("commit transaction when populating in-out list.");
+            tx.success();
+            tx.finish();
+            tx = graphDb.beginTx();
+    	}
       }
 
       // reset the flag.
@@ -150,7 +174,7 @@ public class ReachabilityIndex {
   /** 
    * @return The hopCoverage for each node and sort them in descending order.
    */
-  private SortedSet<Entry<Long,Integer>> getHopCoverages(){
+  private SortedSet<Entry<Long,Integer>> getHopCoverages(Predicate<Node> nodePredicate){
     SortedSet<Entry<Long,Integer>> nodeSet = new TreeSet<Entry<Long,Integer>>(
         new Comparator<Entry<Long,Integer>>() {
           @Override
@@ -161,8 +185,11 @@ public class ReachabilityIndex {
         });
 
     for (Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
-      int relationshipCount = size(n.getRelationships());
-      nodeSet.add(new AbstractMap.SimpleEntry<Long, Integer>(n.getId(), relationshipCount));
+      if ( n.getId() > 0 ) {
+        int relationshipCount = nodePredicate.apply(n) ? 	  
+    		  size(n.getRelationships()) : -1;
+        nodeSet.add(new AbstractMap.SimpleEntry<Long, Integer>(n.getId(), relationshipCount));
+      }
     }
 
     return nodeSet;

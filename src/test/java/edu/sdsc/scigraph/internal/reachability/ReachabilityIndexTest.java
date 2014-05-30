@@ -92,8 +92,8 @@ public class ReachabilityIndexTest {
   @Test
   public void testForbiddenNodes() {
     assertThat(index.canReach(a, f), is(false));
-    assertThat(index.canReach(e, f), is(true));
-    assertThat(index.canReach(a, e), is(true));
+    assertThat(index.canReach(e, f), is(false));
+    assertThat(index.canReach(a, e), is(false));
   }
 
 }
