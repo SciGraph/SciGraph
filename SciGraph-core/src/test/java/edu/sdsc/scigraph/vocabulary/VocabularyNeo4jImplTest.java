@@ -38,8 +38,6 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.util.GraphTestBase;
-import edu.sdsc.scigraph.vocabulary.Vocabulary;
-import edu.sdsc.scigraph.vocabulary.VocabularyNeo4jImpl;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
 /***
@@ -57,6 +55,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   Concept hippocampalFormation;
   Concept specialChars;
   Concept parkinsons;
+  Concept als;
 
   Concept buildConcept(String uri, String label, String curie, String ... categories) {
     Concept concept = graph.getOrCreateFramedNode(uri);
@@ -85,6 +84,14 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz", "foo bar");
     parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
     parkinsons.addSynonym("the");
+    als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis", "", "");
+    als.addSynonym("Lou Gehrig's");
+    graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+        "Lou Gehrig's");
+    als.addSynonym("motor neuron disease, bulbar");
+    graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+        "motor neuron disease, bulbar");
+    
 
     vocabulary = new VocabularyNeo4jImpl<Concept>(graph, null);
   }
@@ -177,6 +184,20 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testGetConceptsFromPrefix() {
     Query query = new Vocabulary.Query.Builder("hip").build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure, hippocampalFormation));
+  }
+
+  @Test
+  public void testGetConceptsFromPrefixWithApos() {
+    Query query = new Vocabulary.Query.Builder("parkinson").includeSynonyms(false).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(parkinsons));
+    query = new Vocabulary.Query.Builder("parkinsons").includeSynonyms(false).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(parkinsons));
+    query = new Vocabulary.Query.Builder("parkinson's").includeSynonyms(false).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(parkinsons));
+    query = new Vocabulary.Query.Builder("parkinsons disease").includeSynonyms(false).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(parkinsons));
+    query = new Vocabulary.Query.Builder("parkinson's disease").includeSynonyms(false).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(parkinsons));
   }
 
   @Test
@@ -278,6 +299,12 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampus));
     query = new Vocabulary.Query.Builder(",hippocampal formations,").build();
     assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampalFormation));
+  }
+
+  @Test
+  public void testLouPrefix() {
+    Query query = new Vocabulary.Query.Builder("lou geh").build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(als));
   }
 
   @Test

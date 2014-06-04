@@ -42,6 +42,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryParser.analyzing.AnalyzingQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -91,7 +92,8 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
             + LuceneUtils.EXACT_SUFFIX), config, true);
       }
     }
-    parser = new QueryParser(Version.LUCENE_36, NodeProperties.LABEL, new VocabularyQueryAnalyzer());
+    parser = new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
+        new VocabularyQueryAnalyzer());
   }
 
   static String formatQuery(String format, Object... args) {

@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.lucene;
 
 import java.io.Reader;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.Analyzer;
@@ -27,11 +28,14 @@ import org.apache.lucene.util.Version;
 
 final class ExactAnalyzer extends Analyzer {
 
+  private static final Pattern pattern = Pattern.compile("'");
+
   @Override
   public TokenStream tokenStream(String fieldName, Reader reader) {
     Tokenizer tokenizer = new KeywordTokenizer(reader);
     TokenStream result = new LowerCaseFilter(Version.LUCENE_36, tokenizer);
     result = new ASCIIFoldingFilter(result);
+    result = new PatternReplaceFilter(result, pattern, "", true);
     return result;
   }
 
