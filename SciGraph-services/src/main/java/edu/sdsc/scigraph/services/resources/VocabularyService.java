@@ -43,6 +43,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.analysis.Analyzer;
 import org.dozer.DozerBeanMapper;
 
 import com.codahale.metrics.annotation.Timed;
@@ -58,6 +59,8 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.lucene.ExactAnalyzer;
+import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTO;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTOLite;
 import edu.sdsc.scigraph.services.api.vocabulary.Completion;
@@ -74,6 +77,8 @@ public class VocabularyService extends BaseResource {
 
   private final Vocabulary<Concept> vocabulary;
   private final DozerBeanMapper mapper;
+  
+  private static final Analyzer analyzer = new ExactAnalyzer();
 
   private Function<Concept, ConceptDTO> conceptDtoTransformer = new Function<Concept, ConceptDTO>() {
 
@@ -155,8 +160,12 @@ public class VocabularyService extends BaseResource {
 
   static Set<String> getMatchingCompletions(String prefix, Iterable<String> candidates) {
     Set<String> matches = new HashSet<>();
+
+    String tokenizedPrefix = LuceneUtils.getTokenization(analyzer, prefix);
+
     for (String candidate: candidates) {
-      if (StringUtils.startsWithIgnoreCase(candidate, prefix)) {
+      String tokenizedCandidate = LuceneUtils.getTokenization(analyzer, candidate);
+      if (StringUtils.startsWithIgnoreCase(tokenizedCandidate, tokenizedPrefix)) {
         matches.add(candidate);
       }
     }

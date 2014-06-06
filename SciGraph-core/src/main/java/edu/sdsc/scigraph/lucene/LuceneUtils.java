@@ -15,17 +15,23 @@
  */
 package edu.sdsc.scigraph.lucene;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 public class LuceneUtils {
@@ -74,6 +80,27 @@ public class LuceneUtils {
     Query query = parser.parse(queryString);
     query.setBoost(boost);
     return query;
+  }
+
+  public static String getTokenization(Analyzer analyzer, String term) {
+    List<String> ret = getTokenization(analyzer, (CharSequence) term);
+    return Joiner.on(", ").join(ret);
+  }
+
+  public static List<String> getTokenization(Analyzer analyzer, CharSequence term) {
+    List<String> ret = Lists.newArrayList();
+
+    try {
+      TokenStream stream = analyzer.tokenStream("", new StringReader(term.toString()));
+      CharTermAttribute token = stream.getAttribute(CharTermAttribute.class);
+      stream.reset();
+      while (stream.incrementToken()) {
+        ret.add(token.toString());
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return ret;
   }
 
 }

@@ -26,7 +26,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.util.Version;
 
-final class ExactAnalyzer extends Analyzer {
+public final class ExactAnalyzer extends Analyzer {
 
   private static final Pattern pattern = Pattern.compile("'");
 
