@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -137,8 +138,9 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
 
   @Override
   public Collection<N> getConceptFromId(Query query) {
-    TermQuery fragmentQuery = new TermQuery(new Term(CommonProperties.FRAGMENT, query.getInput()));
-    TermQuery curieQuery = new TermQuery(new Term(CommonProperties.CURIE, query.getInput()));
+    String idQuery = StringUtils.strip(query.getInput(), "\"");
+    TermQuery fragmentQuery = new TermQuery(new Term(CommonProperties.FRAGMENT, idQuery));
+    TermQuery curieQuery = new TermQuery(new Term(CommonProperties.CURIE, idQuery));
     BooleanQuery finalQuery = new BooleanQuery();
     finalQuery.add(fragmentQuery, Occur.SHOULD);
     finalQuery.add(curieQuery, Occur.SHOULD);

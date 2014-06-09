@@ -308,6 +308,12 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
+  public void testQuotedIdQuery() {
+    Query query = new Vocabulary.Query.Builder("\"HP:0008\"").build();
+    assertThat(vocabulary.getConceptFromId(query), contains(hippocampus));
+  }
+
+  @Test
   @Ignore
   public void testStopWordOnlyQuery() {
     // TODO: Make sure that stopwords don't return...
