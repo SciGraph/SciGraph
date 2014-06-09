@@ -37,8 +37,8 @@ import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 
 @Path("/literature")
 //@Api(value = "/pmid", description = "test")
-@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, 
-  CustomMediaTypes.APPLICATION_RIS, CustomMediaTypes.TEXT_CSV})
+@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
+    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_RIS, CustomMediaTypes.TEXT_CSV })
 public class LiteratureService extends BaseResource {
 
   @XmlRootElement

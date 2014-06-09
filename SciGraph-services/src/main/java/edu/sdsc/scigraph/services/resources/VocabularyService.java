@@ -72,7 +72,8 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
 @Path("/vocabulary") 
 @Api(value = "/vocabulary", description = "Vocabulary services")
-@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_JSONP})
+@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
+    MediaType.APPLICATION_XML, })
 public class VocabularyService extends BaseResource {
 
   private final Vocabulary<Concept> vocabulary;

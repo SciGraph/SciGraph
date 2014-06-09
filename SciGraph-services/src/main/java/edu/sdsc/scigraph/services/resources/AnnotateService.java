@@ -68,7 +68,8 @@ import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 
 @Path("/annotations")
 @Api(value = "/annotations", description = "Annotation services")
-@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP})
+@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
+    MediaType.APPLICATION_XML })
 public class AnnotateService extends BaseResource {
 
   private static final Logger logger = Logger.getLogger(AnnotateService.class.getName());
