@@ -29,18 +29,27 @@ import edu.sdsc.scigraph.services.api.graph.ConceptDTOLite;
 public class Completion implements Comparable<Completion> {
 
   final String completion;
+  final String type;
   final ConceptDTOLite concept;
 
-  Completion() {this(null, null);}
+  Completion() {
+    this(null, null, null);
+  }
 
-  public Completion(String completion, ConceptDTOLite concept) {
+  public Completion(String completion, String type, ConceptDTOLite concept) {
     this.completion = completion;
+    this.type = type;
     this.concept = concept;
   }
 
   @XmlAttribute
   public String getCompletion() {
     return completion;
+  }
+
+  @XmlAttribute
+  public String getType() {
+    return type;
   }
 
   @XmlElement(name="class")

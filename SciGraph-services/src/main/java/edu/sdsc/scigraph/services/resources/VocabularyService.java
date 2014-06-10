@@ -38,7 +38,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -48,7 +47,6 @@ import org.dozer.DozerBeanMapper;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.util.JSONWrappedObject;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
@@ -78,7 +76,7 @@ public class VocabularyService extends BaseResource {
 
   private final Vocabulary<Concept> vocabulary;
   private final DozerBeanMapper mapper;
-  
+
   private static final Analyzer analyzer = new ExactAnalyzer();
 
   private Function<Concept, ConceptDTO> conceptDtoTransformer = new Function<Concept, ConceptDTO>() {
@@ -182,6 +180,24 @@ public class VocabularyService extends BaseResource {
     return completions;
   }
 
+  List<Completion> getCompletions(Query query, List<Concept> concepts) {
+    List<Completion> completions = new ArrayList<>();
+    for (Concept concept : concepts) {
+      for (String completion : getMatchingCompletions(query.getInput(), concept.getLabels())) {
+        completions.add(new Completion(completion, "label", conceptDtoLiteTransformer
+            .apply(concept)));
+      }
+      if (query.isIncludeSynonyms()) {
+        for (String completion : getMatchingCompletions(query.getInput(), concept.getSynonyms())) {
+          completions.add(new Completion(completion, "synonym", conceptDtoLiteTransformer
+              .apply(concept)));
+        }
+      }
+    }
+    sort(completions);
+    return completions;
+  }
+
   @GET
   @Path("/prefix/{prefix}")
   @ApiOperation(value = "Find a concept by its prefix",
@@ -208,21 +224,10 @@ public class VocabularyService extends BaseResource {
         includeSynonyms(searchSynonyms).
         limit(limit.get());
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
-    List<Completion> completions = new ArrayList<>();
-    for (Concept concept: concepts) {
-      for (String completion: getCompletion(builder.build(), concept)) {
-        completions.add(new Completion(completion, conceptDtoLiteTransformer.apply(concept)));
-      }
-    }
-    sort(completions);
+    List<Completion> completions = getCompletions(builder.build(), concepts);
     CompletionWrapper wrapper = new CompletionWrapper(completions);
     GenericEntity<CompletionWrapper> response = new GenericEntity<CompletionWrapper>(wrapper){};
-    if (JaxRsUtil.isVariant(request, CustomMediaTypes.APPLICATION_JSONP_TYPE)) {
-      return new JSONWrappedObject(callback + "(", ");", response.getEntity());
-    } else {
-      return Response.ok(response).build();
-    }
-    //return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request, response, callback);
   }
 
   @GET
@@ -366,7 +371,7 @@ public class VocabularyService extends BaseResource {
       list.addAll(items);
     }
   }
-  
+
   @XmlRootElement(name="completions")
   private static class CompletionWrapper {
     @XmlElement(name="completion")
