@@ -155,7 +155,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
       BooleanQuery subQuery = new BooleanQuery();
       subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL,
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
-      subQuery.add(parser.parse(formatQuery("%s:%s*", CommonProperties.CURIE, query.getInput())),
+      subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.CURIE, query.getInput())),
           Occur.SHOULD);
       subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
           Occur.SHOULD);

@@ -49,6 +49,7 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
     fieldAnalyzers.put(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
     fieldAnalyzers.put(Concept.SYNONYM, new TermAnalyzer());
     fieldAnalyzers.put(Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
+    fieldAnalyzers.put(Concept.CURIE, new ExactAnalyzer());
     analyzer = new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), fieldAnalyzers);
   }
 

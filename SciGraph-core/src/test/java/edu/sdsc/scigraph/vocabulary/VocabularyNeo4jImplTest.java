@@ -201,10 +201,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
-  @Ignore
-  //TODO: Fix this
   public void testGetConceptFromCurriePrefix() {
-    Query query = new Vocabulary.Query.Builder("Hp").build();
+    Query query = new Vocabulary.Query.Builder("HP:0008").build();
     System.out.println(vocabulary.getConceptsFromPrefix(query));
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus));
   }
