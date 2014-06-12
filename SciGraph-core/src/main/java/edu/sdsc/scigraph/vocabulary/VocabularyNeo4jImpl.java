@@ -139,13 +139,18 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
   @Override
   public Collection<N> getConceptFromId(Query query) {
     String idQuery = StringUtils.strip(query.getInput(), "\"");
-    TermQuery fragmentQuery = new TermQuery(new Term(CommonProperties.FRAGMENT, idQuery));
-    TermQuery curieQuery = new TermQuery(new Term(CommonProperties.CURIE, idQuery));
-    BooleanQuery finalQuery = new BooleanQuery();
-    finalQuery.add(fragmentQuery, Occur.SHOULD);
-    finalQuery.add(curieQuery, Occur.SHOULD);
-    IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
-    return limitHits(hits, query);
+    idQuery = QueryParser.escape(idQuery);
+    String queryString = format("%s:%s %s:%s", CommonProperties.FRAGMENT, idQuery,
+        CommonProperties.CURIE, idQuery);
+    IndexHits<Node> hits;
+    try {
+      hits = graph.getNodeAutoIndex().query(parser.parse(queryString));
+      return limitHits(hits, query);
+    } catch (ParseException e) {
+      logger.log(Level.WARNING, "Failed to parse an ID query", e);
+      return Collections.emptySet();
+    }
+
   }
 
   @Override
