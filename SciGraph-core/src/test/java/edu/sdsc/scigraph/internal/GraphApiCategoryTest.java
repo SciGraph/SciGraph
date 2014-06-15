@@ -18,9 +18,14 @@ package edu.sdsc.scigraph.internal;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
@@ -64,5 +69,17 @@ public class GraphApiCategoryTest extends GraphTestBase {
   public void testUnconnectedClass() {
     assertThat(graphApi.classIsInCategory(b, c), is(false));
   }
+  
+  @Test
+  public void testSelfLoop() {
+	Set<Relationship> s = new HashSet<Relationship>(); 
+    assertThat(graphApi.getSelfLoops(), is(s));
+    Node t = graphApi.getGraph().getOrCreateNode(BASE_URI + "#fozz");
+    Relationship r = graphApi.getGraph().
+    		getOrCreateRelationship(t, t, EdgeType.SUBCLASS_OF);
+    s.add(r);
+    assertThat (graphApi.getSelfLoops(), is (s));
+    
+  }  
 
 }
