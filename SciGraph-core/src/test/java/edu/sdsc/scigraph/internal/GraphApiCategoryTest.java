@@ -16,11 +16,9 @@
 package edu.sdsc.scigraph.internal;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +27,6 @@ import org.neo4j.graphdb.Relationship;
 
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -37,6 +34,7 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 public class GraphApiCategoryTest extends GraphTestBase {
 
   GraphApi graphApi;
+  Graph<Concept> graph;
 
   static String BASE_URI = "http://example.org/";
 
@@ -49,7 +47,7 @@ public class GraphApiCategoryTest extends GraphTestBase {
 
   @Before
   public void addNodes() throws Exception {
-    Graph<Concept> graph = new Graph<Concept>(graphDb, Concept.class);
+    graph = new Graph<Concept>(graphDb, Concept.class);
     a = graph.getOrCreateNode(uri);
     graph.setProperty(a, NodeProperties.TYPE, "OWLClass");
     b = graph.getOrCreateNode(uri2);
@@ -69,17 +67,16 @@ public class GraphApiCategoryTest extends GraphTestBase {
   public void testUnconnectedClass() {
     assertThat(graphApi.classIsInCategory(b, c), is(false));
   }
-  
+
+  /***
+   * TODO: Move this to a GraphApiTest class
+   */
   @Test
   public void testSelfLoop() {
-	Set<Relationship> s = new HashSet<Relationship>(); 
-    assertThat(graphApi.getSelfLoops(), is(s));
-    Node t = graphApi.getGraph().getOrCreateNode(BASE_URI + "#fozz");
-    Relationship r = graphApi.getGraph().
-    		getOrCreateRelationship(t, t, EdgeType.SUBCLASS_OF);
-    s.add(r);
-    assertThat (graphApi.getSelfLoops(), is (s));
-    
-  }  
+    assertThat(graphApi.getSelfLoops(), is(empty()));
+    Node t = graph.getOrCreateNode(BASE_URI + "#fozz");
+    Relationship r = graph.getOrCreateRelationship(t, t, EdgeType.SUBCLASS_OF);
+    assertThat(graphApi.getSelfLoops(), contains(r));
+  }
 
 }

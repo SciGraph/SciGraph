@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -62,12 +61,13 @@ public class GraphApi {
     return classIsInCategory(candidate, parentConcept, EdgeType.SUBCLASS_OF);
   }
 
-  public boolean classIsInCategory(Node candidate, Node parent, RelationshipType... relationships ) {
+  public boolean classIsInCategory(Node candidate, Node parent, RelationshipType... relationships) {
     TraversalDescription description = Traversal.description().depthFirst()
         .evaluator(new Evaluator() {
           @Override
           public Evaluation evaluate(Path path) {
-            Optional<String> type = graph.getProperty(path.endNode(), NodeProperties.TYPE, String.class);
+            Optional<String> type = graph.getProperty(path.endNode(), NodeProperties.TYPE,
+                String.class);
             if (type.isPresent() && "OWLClass".equals(type.get())) {
               return Evaluation.INCLUDE_AND_CONTINUE;
             } else {
@@ -75,11 +75,11 @@ public class GraphApi {
             }
           }
         });
-    for (RelationshipType type: relationships) {
+    for (RelationshipType type : relationships) {
       description.relationships(type, Direction.OUTGOING);
     }
 
-    for ( Path position : description.traverse( candidate ) ) {
+    for (Path position : description.traverse(candidate)) {
       if (position.endNode().equals(parent)) {
         return true;
       }
@@ -89,6 +89,7 @@ public class GraphApi {
 
   /***
    * TODO: Add a boolean for equivalent classes
+   * 
    * @param parent
    * @param type
    * @param direction
@@ -96,12 +97,8 @@ public class GraphApi {
    */
   Collection<Node> getEntailment(Node parent, RelationshipType type, Direction direction) {
     Set<Node> entailment = new HashSet<>();
-    for (Path path: Traversal.description()
-        .depthFirst()
-        .relationships(type, direction)
-        .evaluator(Evaluators.fromDepth(1))
-        .evaluator(Evaluators.all())
-        .traverse(parent)) {
+    for (Path path : Traversal.description().depthFirst().relationships(type, direction)
+        .evaluator(Evaluators.fromDepth(1)).evaluator(Evaluators.all()).traverse(parent)) {
       entailment.add(path.endNode());
     }
     return entailment;
@@ -117,8 +114,10 @@ public class GraphApi {
   /***
    * Get "inferred" classes.
    * 
-   * <p>"Inferred" classes are a legacy NIF graph pattern. They are sometimes called "defined" classes.
+   * <p>
+   * "Inferred" classes are a legacy NIF graph pattern. They are sometimes called "defined" classes.
    * They translate to the following graph pattern:
+   * 
    * <pre>
    * c-EQUIVALENT_TO->ANON (SomeValuesFrom)->PROPERTY->birnlex_17
    *                   |
@@ -126,21 +125,27 @@ public class GraphApi {
    *                   |
    *                 someRole<-birnlex_17-inferredClass
    * </pre>
+   * 
    * @param c
    * @return The inferred classes related to c
    */
   public Collection<Concept> getInferredClasses(Concept c) {
     Node parent = graph.getOrCreateNode(c.getUri());
     Collection<Node> inferredClasses = new ArrayList<>();
-    for (Relationship r: parent.getRelationships(Direction.OUTGOING, EdgeType.EQUIVALENT_TO)) {
-      Optional<String> endType = graph.getProperty(r.getEndNode(), CommonProperties.TYPE, String.class);
+    for (Relationship r : parent.getRelationships(Direction.OUTGOING, EdgeType.EQUIVALENT_TO)) {
+      Optional<String> endType = graph.getProperty(r.getEndNode(), CommonProperties.TYPE,
+          String.class);
       if (endType.isPresent() && "OWLObjectSomeValuesFrom".equals(endType.get())) {
-        Relationship property = getOnlyElement(r.getEndNode().getRelationships(Direction.OUTGOING, EdgeType.PROPERTY), null);
-        if ((null != property) && 
-            "http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17".equals(property.getEndNode().getProperty("uri"))) {
-          for (Relationship bearerOf: r.getEndNode().getRelationships(Direction.OUTGOING, EdgeType.CLASS)) {
+        Relationship property = getOnlyElement(
+            r.getEndNode().getRelationships(Direction.OUTGOING, EdgeType.PROPERTY), null);
+        if ((null != property)
+            && "http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17"
+                .equals(property.getEndNode().getProperty("uri"))) {
+          for (Relationship bearerOf : r.getEndNode().getRelationships(Direction.OUTGOING,
+              EdgeType.CLASS)) {
             Node role = bearerOf.getEndNode();
-            inferredClasses.addAll(getEntailment(role, DynamicRelationshipType.withName("birnlex_17"), Direction.INCOMING));
+            inferredClasses.addAll(getEntailment(role,
+                DynamicRelationshipType.withName("birnlex_17"), Direction.INCOMING));
           }
         }
       }
@@ -150,22 +155,21 @@ public class GraphApi {
 
   /**
    * Get all the self loops in the Neo4j graph.
-   * @return  A Set of self loop edges. An empty set will be returned 
-   *   if no self loops are found in in the graph. 
+   * 
+   * @return A set of self loop edges. An empty set will be returned if no self loops are found in
+   *         in the graph.
    */
   public Set<Relationship> getSelfLoops() {
-	  GraphDatabaseService graphDb = graph.getGraphDb();
-	  
-	  Set<Relationship> result = new HashSet<Relationship> ();
-	  
-	  for (Relationship n : GlobalGraphOperations.at(graphDb).getAllRelationships()) {
-		if ( n.getStartNode().equals(n.getEndNode())) {
-			result.add(n);
-		}
-	  }
-	  return result;
+    GraphDatabaseService graphDb = graph.getGraphDb();
+
+    Set<Relationship> result = new HashSet<Relationship>();
+
+    for (Relationship n : GlobalGraphOperations.at(graphDb).getAllRelationships()) {
+      if (n.getStartNode().equals(n.getEndNode())) {
+        result.add(n);
+      }
+    }
+    return result;
   }
-  
-  public Graph<Concept> getGraph() {return graph;}
-  
+
 }
