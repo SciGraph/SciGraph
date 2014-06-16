@@ -22,11 +22,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -36,6 +38,7 @@ import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.kernel.Traversal;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -145,4 +148,24 @@ public class GraphApi {
     return transform(inferredClasses, conceptTransformer);
   }
 
+  /**
+   * Get all the self loops in the Neo4j graph.
+   * @return  A Set of self loop edges. An empty set will be returned 
+   *   if no self loops are found in in the graph. 
+   */
+  public Set<Relationship> getSelfLoops() {
+	  GraphDatabaseService graphDb = graph.getGraphDb();
+	  
+	  Set<Relationship> result = new HashSet<Relationship> ();
+	  
+	  for (Relationship n : GlobalGraphOperations.at(graphDb).getAllRelationships()) {
+		if ( n.getStartNode().equals(n.getEndNode())) {
+			result.add(n);
+		}
+	  }
+	  return result;
+  }
+  
+  public Graph<Concept> getGraph() {return graph;}
+  
 }
