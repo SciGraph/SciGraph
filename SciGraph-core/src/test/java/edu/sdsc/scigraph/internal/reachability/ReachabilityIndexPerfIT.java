@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.internal.reachability;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.emptyList;
 
 import java.io.File;
 import java.util.Arrays;
@@ -48,8 +49,14 @@ public class ReachabilityIndexPerfIT extends AbstractBenchmark {
 
   @Parameters
   public static Collection<Object[]> data() {
-    Object[][] data = new Object[][] {new File("performanceGraphs").listFiles()};
-    return Arrays.asList(data);
+    File graphDir = new File("performanceGraphs");
+    if (graphDir.exists()) {
+      Object[][] data = new Object[][] { new File("performanceGraphs").listFiles() };
+      return Arrays.asList(data);
+    } else {
+      return emptyList();
+    }
+
   }
 
   @Before
