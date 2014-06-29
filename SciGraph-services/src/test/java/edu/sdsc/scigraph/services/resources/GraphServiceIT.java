@@ -32,20 +32,20 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 public class GraphServiceIT {
 
   @SuppressWarnings("unchecked")
-  private static final Vocabulary<Concept> vocabulary = (Vocabulary<Concept>) mock(Vocabulary.class);
+  private static final Vocabulary<Concept> vocabulary = mock(Vocabulary.class);
   @SuppressWarnings("unchecked")
-  private static final Graph<Concept> graph = (Graph<Concept>) mock(Vocabulary.class);
+  private static final Graph<Concept> graph = mock(Graph.class);
 
   private final Concept foo = mock(Concept.class);
 
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
-  .addResource(new GraphService(vocabulary, graph))
-  .build();
+      .addResource(new GraphService(vocabulary, graph)).build();
 
   @Before
   public void setup() {
-    when(vocabulary.getConceptFromUri("http://example.org/none")).thenReturn(Optional.<Concept>absent());
+    when(vocabulary.getConceptFromUri("http://example.org/none")).thenReturn(
+        Optional.<Concept> absent());
     when(vocabulary.getConceptFromUri("http://example.org/foo")).thenReturn(Optional.of(foo));
   }
 
