@@ -35,7 +35,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.index.IndexReader;
@@ -84,8 +83,8 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     if (null != neo4jLocation) {
       Directory indexDirectory = FSDirectory.open(new File(new File(neo4jLocation),
           "index/lucene/node/node_auto_index"));
-      Directory spellDirectory = FSDirectory.open(new File(FileUtils.getTempDirectory(),
-          "spellchecker"));
+      Directory spellDirectory = FSDirectory.open(new File(new File(neo4jLocation),
+          "index/lucene/spellchecker"));
       spellChecker = new SpellChecker(spellDirectory);
       try (IndexReader reader = IndexReader.open(indexDirectory)) {
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new KeywordAnalyzer());
