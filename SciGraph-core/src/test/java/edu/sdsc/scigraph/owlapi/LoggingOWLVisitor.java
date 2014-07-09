@@ -463,13 +463,13 @@ public class LoggingOWLVisitor extends OWLOntologyWalkerVisitor<Object> {
 
   @Override
   public Object visit(OWLDataProperty property) {
-    logger.info(property.toString());
+    logger.info("OWLDataProperty: " + property.toString());
     return super.visit(property);
   }
 
   @Override
   public Object visit(OWLObjectProperty property) {
-    logger.info(property.toString());
+    logger.info("OWLObjectProperty: " + property.toString());
     return super.visit(property);
   }
 
