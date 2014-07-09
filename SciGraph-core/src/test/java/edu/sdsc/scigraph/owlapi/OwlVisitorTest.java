@@ -19,6 +19,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -315,6 +316,19 @@ public class OwlVisitorTest {
   public void testPunning() {
     Node eagle = graph.getOrCreateNode(ROOT + "/Eagle");
     assertThat(graph.getProperties(eagle, NodeProperties.TYPE, String.class), containsInAnyOrder("OWLClass", "OWLIndividual"));
+  }
+
+  @Test
+  public void testDataProperties() {
+    assertThat(graph.nodeExists(ROOT + "/hasAge"), is(true));
+    assertThat(graph.getFramedNode(ROOT + "/hasAge").get().getTypes(), contains("OWLDataProperty"));
+  }
+
+  @Test
+  public void testObjectProperties() {
+    assertThat(graph.nodeExists(ROOT + "/hasParent"), is(true));
+    assertThat(graph.getFramedNode(ROOT + "/hasParent").get().getTypes(),
+        contains("OWLObjectProperty"));
   }
 
 }

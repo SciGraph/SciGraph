@@ -45,6 +45,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
@@ -59,6 +60,7 @@ import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
 import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
@@ -162,6 +164,20 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     if (curie.isPresent()) {
       graph.setProperty(node, CommonProperties.CURIE, curie.get());
     }
+    return null;
+  }
+
+  @Override
+  public Void visit(OWLDataProperty property) {
+    Node node = graph.getOrCreateNode(property.getIRI().toURI());
+    graph.addProperty(node, CommonProperties.TYPE, OWLDataProperty.class.getSimpleName());
+    return null;
+  }
+
+  @Override
+  public Void visit(OWLObjectProperty property) {
+    Node node = graph.getOrCreateNode(property.getIRI().toURI());
+    graph.addProperty(node, CommonProperties.TYPE, OWLObjectProperty.class.getSimpleName());
     return null;
   }
 
