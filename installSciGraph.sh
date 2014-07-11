@@ -15,7 +15,7 @@
 #
 
 if [ ! -d "monarchGraph" ]; then
-  wget http://nif-crawler.neuinfo.org/database/graphs/monarchGraph.zip
+  curl -O http://nif-crawler.neuinfo.org/database/graphs/monarchGraph.zip
   unzip monarchGraph.zip
   rm monarchGraph.zip
 fi  
