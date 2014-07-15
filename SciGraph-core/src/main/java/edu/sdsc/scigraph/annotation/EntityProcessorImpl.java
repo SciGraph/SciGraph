@@ -55,7 +55,6 @@ import net.htmlparser.jericho.StreamedSource;
 import org.apache.lucene.analysis.Analyzer;
 
 import com.google.common.base.Function;
-import com.google.common.base.Strings;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
@@ -102,10 +101,10 @@ class EntityProcessorImpl implements EntityProcessor {
       if (tokens.equals(ShingleProducer.END_TOKEN)) {
         break;
       }
-      if (LuceneUtils.isStopword(getFirst(tokens, null).getToken()) || 
-          LuceneUtils.isStopword(getLast(tokens).getToken())) {
+      if (LuceneUtils.isStopword(getFirst(tokens, null).getToken())
+          || LuceneUtils.isStopword(getLast(tokens).getToken())) {
         continue;
-      } 
+      }
 
       String candidate = combineTokens(tokens);
       if (candidate.length() < config.getMinLength()) {
@@ -113,7 +112,7 @@ class EntityProcessorImpl implements EntityProcessor {
       }
       int start = tokens.get(0).getStart();
       int end = tokens.get(tokens.size() - 1).getEnd();
-      for (Entity entity: recognizer.getEntities(candidate, config)) {
+      for (Entity entity : recognizer.getEntities(candidate, config)) {
         annotations.add(new EntityAnnotation(entity, start, end));
       }
     }
@@ -192,7 +191,7 @@ class EntityProcessorImpl implements EntityProcessor {
       terms.clear();
       for (Entity entity : group.getAnnotations()) {
         String serialized = entity.serialize();
-        if (!Strings.isNullOrEmpty(serialized)) {
+        if (!isNullOrEmpty(serialized)) {
           terms.add(serialized);
         }
         cssClasses.add(recognizer.getCssClass());
@@ -218,7 +217,7 @@ class EntityProcessorImpl implements EntityProcessor {
     buffer.append(url.getProtocol());
     buffer.append("://");
     buffer.append(url.getHost());
-    if ((url.getPort() > 0) && (80 != url.getPort())) {
+    if (url.getPort() > 0 && 80 != url.getPort()) {
       buffer.append(':');
       buffer.append(url.getPort());
     }
@@ -233,7 +232,7 @@ class EntityProcessorImpl implements EntityProcessor {
   private static void injectStyles(Writer writer, List<String> styles) throws IOException {
     for (String style : styles) {
       writer
-      .write(format("<link rel=\"stylesheet\" style=\"text/css\" href=\"%s\"></link>", style));
+          .write(format("<link rel=\"stylesheet\" style=\"text/css\" href=\"%s\"></link>", style));
     }
   }
 
@@ -257,18 +256,14 @@ class EntityProcessorImpl implements EntityProcessor {
         break;
       }
 
-      if (tag.containsKey("id")) {
-        if (config.getTargetIds().contains(tag.get("id"))) {
-          shouldAnnotate = true;
-        }
+      if (tag.containsKey("id") && config.getTargetIds().contains(tag.get("id"))) {
+        shouldAnnotate = true;
       }
 
       if (tag.containsKey("class")) {
         for (String clazz : tag.get("class").split("\\s+")) {
-          if (!clazz.isEmpty()) {
-            if (config.getTargetClasses().contains(clazz)) {
-              shouldAnnotate = true;
-            }
+          if (!clazz.isEmpty() && config.getTargetClasses().contains(clazz)) {
+            shouldAnnotate = true;
           }
         }
       }
@@ -292,14 +287,14 @@ class EntityProcessorImpl implements EntityProcessor {
           StartTag tag = (StartTag) segment;
           config.getWriter().write(segment.toString());
 
-          if ((tag.getTagType() == StartTagType.NORMAL) &&
-              // Jericho is not generating end events for minimized element - don't
-              // add them to the stack
-              (!tag.toString().endsWith("/>") && !tag.toString().endsWith("/ >"))) {
+          if (tag.getTagType() == StartTagType.NORMAL &&
+          // Jericho is not generating end events for minimized element - don't
+          // add them to the stack
+              !tag.toString().endsWith("/>") && !tag.toString().endsWith("/ >")) {
             eltStack.push(new Element(tag.getName(), tag.getAttributes()));
           }
 
-          if ((config.getUrl() != null) && HTMLElementName.HEAD.equals(tag.getName())) {
+          if (config.getUrl() != null && HTMLElementName.HEAD.equals(tag.getName())) {
             config.getWriter().write("<base href=\"" + getBase(config.getUrl()) + "\"></base>");
             injectStyles(config.getWriter(), config.getStylesheets());
             injectScripts(config.getWriter(), config.getScripts());
@@ -343,7 +338,7 @@ class EntityProcessorImpl implements EntityProcessor {
 
     Element(String name, Iterable<Attribute> attrs) {
       this.name = name;
-      for (Attribute attr: attrs) {
+      for (Attribute attr : attrs) {
         put(attr.getName(), attr.getValue());
       }
     }
