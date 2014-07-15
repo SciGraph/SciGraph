@@ -26,8 +26,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.google.common.collect.Sets;
-
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
@@ -67,7 +65,7 @@ public class EntityRecognizer {
     Query query = new Vocabulary.Query.Builder(token).build();
     List<Concept> terms = vocabulary.getConceptsFromTerm(query);
 
-    Set<Entity> entities = Sets.newHashSet();
+    Set<Entity> entities = newHashSet();
     for (Concept term : terms) {
       if (shouldAnnotate(term, config)) {
         entities.add(new Entity(term));
