@@ -45,7 +45,7 @@ public class LuceneUtils {
     return Version.LUCENE_36;
   }
 
-  public static Set<?> caseSensitiveStopSet;
+  public static final Set<?> caseSensitiveStopSet;
 
   static {
     List<String> stopWords = Lists.newArrayList();
