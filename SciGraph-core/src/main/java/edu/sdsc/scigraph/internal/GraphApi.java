@@ -138,7 +138,7 @@ public class GraphApi {
       if (endType.isPresent() && "OWLObjectSomeValuesFrom".equals(endType.get())) {
         Relationship property = getOnlyElement(
             r.getEndNode().getRelationships(Direction.OUTGOING, EdgeType.PROPERTY), null);
-        if ((null != property)
+        if (null != property
             && "http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17"
                 .equals(property.getEndNode().getProperty("uri"))) {
           for (Relationship bearerOf : r.getEndNode().getRelationships(Direction.OUTGOING,
