@@ -17,6 +17,13 @@ package edu.sdsc.scigraph.frames.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.tinkerpop.frames.ClassUtilities.isAddMethod;
+import static com.tinkerpop.frames.ClassUtilities.isGetMethod;
+import static com.tinkerpop.frames.ClassUtilities.isRemoveMethod;
+import static com.tinkerpop.frames.ClassUtilities.isSetMethod;
+import static com.tinkerpop.frames.ClassUtilities.returnsIterable;
+import static edu.sdsc.scigraph.frames.util.ClassUtilities2.isHasMethod;
+import static edu.sdsc.scigraph.frames.util.ClassUtilities2.isIterable;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,9 +34,6 @@ import java.util.Set;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.tinkerpop.blueprints.Element;
-
-import static edu.sdsc.scigraph.frames.util.ClassUtilities2.*;
-
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.MethodHandler;
@@ -107,7 +111,7 @@ public class MultiPropertyMethodHandler implements MethodHandler<Property> {
     } else if (isRemoveMethod(method)) {
       node.removeProperty(property);
     } else if (isHasMethod(method)) {
-      return (null != node.getProperty(property));
+      return null != node.getProperty(property);
     }
     return null;
   }
@@ -115,7 +119,7 @@ public class MultiPropertyMethodHandler implements MethodHandler<Property> {
   public void processAdd(Element node, String property, Object value, Method method) {
     checkNotNull(value, "Property values should not be null. Consider using a removeX method instead.");
     if (null != node.getProperty(property)) {
-      Object orig = (Object)node.getProperty(property);
+      Object orig = node.getProperty(property);
       if (isIterable(node.getProperty(property))) {
         List<Object> origValue = node.getProperty(property);
         origValue.add(value);
@@ -141,7 +145,7 @@ public class MultiPropertyMethodHandler implements MethodHandler<Property> {
       if (null == node.getProperty(property)) {
         return new ArrayList<>();
       } else if (isIterable(node.getProperty(property))) {
-        return (List<?>)node.getProperty(property);
+        return node.getProperty(property);
       } else {
         return newArrayList(node.getProperty(property));
       }
