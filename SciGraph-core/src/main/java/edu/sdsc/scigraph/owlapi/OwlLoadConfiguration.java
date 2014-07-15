@@ -24,16 +24,20 @@ import com.google.common.base.Objects;
 
 import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
 
-class OwlLoadConfiguration {
+public class OwlLoadConfiguration {
 
   private OntologyConfiguration ontologyConfiguration;
-  private List<String> ontologyUrls;
+  private List<String> ontologyUrls = new ArrayList<>();
   private Map<String, String> curies = new HashMap<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
 
   public OntologyConfiguration getOntologyConfiguration() {
     return ontologyConfiguration;
+  }
+
+  public void setOntologyConfiguration(OntologyConfiguration ontologyConfiguration) {
+    this.ontologyConfiguration = ontologyConfiguration;
   }
 
   public List<String> getOntologyUrls() {

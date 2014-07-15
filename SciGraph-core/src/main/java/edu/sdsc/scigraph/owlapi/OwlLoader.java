@@ -152,8 +152,17 @@ public class OwlLoader {
 
   }
 
-  public static void main(String[] args) throws OWLOntologyCreationException, JsonParseException, JsonMappingException, IOException {
+  public static void load(OwlLoadConfiguration config) {
+    Injector i = Guice.createInjector(new Neo4jModule(config.getOntologyConfiguration()),
+        new OwlLoaderModule(config));
+    OwlLoader loader = i.getInstance(OwlLoader.class);
+    logger.info("Starting to load ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
+    loader.loadOntology();
+    logger.info(format("Processing took %d minutes", timer.elapsed(TimeUnit.MINUTES)));
+  }
+
+  public static void main(String[] args) throws OWLOntologyCreationException, JsonParseException, JsonMappingException, IOException {
     CommandLineParser parser = new PosixParser();
     CommandLine cmd = null;
     try {
@@ -167,13 +176,7 @@ public class OwlLoader {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c').trim()), OwlLoadConfiguration.class);
-
-    logger.info("Starting to load ontologies...");
-    Injector i = Guice.createInjector(new Neo4jModule(config.getOntologyConfiguration()), new OwlLoaderModule(config));
-
-    OwlLoader loader = i.getInstance(OwlLoader.class);
-    loader.loadOntology();
-    logger.info(format("Processing took %d minutes", timer.elapsed(TimeUnit.MINUTES)));
+    load(config);
   }
 
 }
