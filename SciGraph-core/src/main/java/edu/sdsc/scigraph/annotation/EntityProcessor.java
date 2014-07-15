@@ -28,7 +28,7 @@ public interface EntityProcessor {
    * @return A list of entities found in the content
    * @throws IOException
    */
-  public List<EntityAnnotation> annotateEntities(EntityFormatConfiguration configuration)
+  List<EntityAnnotation> annotateEntities(EntityFormatConfiguration configuration)
       throws IOException;
 
 }
