@@ -69,21 +69,20 @@ import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
 
 public class Graph<N extends VertexFrame> {
 
-  private static final Logger logger = Logger.getLogger(Graph.class.getName()); 
+  private static final Logger logger = Logger.getLogger(Graph.class.getName());
 
   public static final String UNIQUE_PROPERTY = CommonProperties.URI;
 
-  private static final Set<String> NODE_PROPERTIES_TO_INDEX = 
-      newHashSet(CommonProperties.URI, NodeProperties.LABEL, 
-          NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, CommonProperties.CURIE,
-          CommonProperties.ONTOLOGY,
-          CommonProperties.FRAGMENT, Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
+  private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
+      NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
+      CommonProperties.CURIE, CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
+      Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
   private static final Set<String> RELATIONSHIP_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI);
-  private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL, Concept.SYNONYM);
+  private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL,
+      Concept.SYNONYM);
 
-  private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(
-      IndexManager.PROVIDER, "lucene",
-      "analyzer", VocabularyIndexAnalyzer.class.getName());
+  private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
+      "lucene", "analyzer", VocabularyIndexAnalyzer.class.getName());
 
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;
@@ -111,11 +110,11 @@ public class Graph<N extends VertexFrame> {
     });
     Neo4jGraph neo4jGraph = new Neo4jGraph(graphDb);
     framedGraph = factory.create((com.tinkerpop.blueprints.Graph) (neo4jGraph));
-    jungGraph = new GraphJung<com.tinkerpop.blueprints.Graph>((neo4jGraph));
+    jungGraph = new GraphJung<com.tinkerpop.blueprints.Graph>(neo4jGraph);
   }
 
   private void setupIndex(AutoIndexer<?> index, Set<String> properties) {
-    for (String property: properties) {
+    for (String property : properties) {
       index.startAutoIndexingProperty(property);
     }
     index.setEnabled(true);
@@ -165,7 +164,7 @@ public class Graph<N extends VertexFrame> {
   public boolean nodeExists(URI uri) {
     checkNotNull(uri);
     Node node = nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
-    return (null != node);
+    return null != node;
   }
 
   public Node getOrCreateNode(String uri) {
@@ -175,7 +174,7 @@ public class Graph<N extends VertexFrame> {
   static String getLastPathFragment(URI uri) {
     return uri.getPath().replaceFirst(".*/([^/?]+).*", "$1");
   }
-  
+
   public static String getFragment(URI uri) {
     if (null != uri.getFragment()) {
       return uri.getFragment();
@@ -247,7 +246,7 @@ public class Graph<N extends VertexFrame> {
   }
 
   public boolean hasRelationship(Node a, Node b, RelationshipType type) {
-    return hasRelationship(a, b, type, Optional.<URI>absent());
+    return hasRelationship(a, b, type, Optional.<URI> absent());
   }
 
   public boolean hasRelationship(Node a, Node b, RelationshipType type, String uri) {
@@ -255,9 +254,12 @@ public class Graph<N extends VertexFrame> {
   }
 
   public boolean hasRelationship(Node a, Node b, RelationshipType type, Optional<URI> uri) {
-    checkNotNull(a); checkNotNull(b); checkNotNull(type); checkNotNull(uri);
-    for (Relationship r: a.getRelationships(type)) {
-      if (uri.isPresent() && (r.getEndNode().equals(b))) {
+    checkNotNull(a);
+    checkNotNull(b);
+    checkNotNull(type);
+    checkNotNull(uri);
+    for (Relationship r : a.getRelationships(type)) {
+      if (uri.isPresent() && r.getEndNode().equals(b)) {
         if (r.getProperty(CommonProperties.URI).equals(uri.get().toString())) {
           return true;
         }
@@ -268,20 +270,26 @@ public class Graph<N extends VertexFrame> {
     return false;
   }
 
-  public Relationship getOrCreateRelationship(Node a, Node b, RelationshipType type) { 
-    return getOrCreateRelationship(a, b, type, Optional.<URI>absent());
+  public Relationship getOrCreateRelationship(Node a, Node b, RelationshipType type) {
+    return getOrCreateRelationship(a, b, type, Optional.<URI> absent());
   }
-  public Relationship getOrCreateRelationship(Node a, Node b, RelationshipType type, String uri) { 
+
+  public Relationship getOrCreateRelationship(Node a, Node b, RelationshipType type, String uri) {
     return getOrCreateRelationship(a, b, type, Optional.of(getURI(uri)));
   }
 
-  public Relationship getOrCreateRelationship(final Node a, final Node b, final RelationshipType type, final Optional<URI> uri) {
-    checkNotNull(a); checkNotNull(b); checkNotNull(type); checkNotNull(uri);
+  public Relationship getOrCreateRelationship(final Node a, final Node b,
+      final RelationshipType type, final Optional<URI> uri) {
+    checkNotNull(a);
+    checkNotNull(b);
+    checkNotNull(type);
+    checkNotNull(uri);
 
-    UniqueFactory<Relationship> factory = new UniqueFactory.UniqueRelationshipFactory(graphDb, "uniqueRelationshipIndex") {
+    UniqueFactory<Relationship> factory = new UniqueFactory.UniqueRelationshipFactory(graphDb,
+        "uniqueRelationshipIndex") {
       @Override
       protected Relationship create(Map<String, Object> properties) {
-        Relationship r =  a.createRelationshipTo(b, type);
+        Relationship r = a.createRelationshipTo(b, type);
         if (uri.isPresent()) {
           r.setProperty(CommonProperties.URI, uri.get().toString());
           r.setProperty(CommonProperties.FRAGMENT, getFragment(uri.get()));
@@ -290,13 +298,15 @@ public class Graph<N extends VertexFrame> {
       }
     };
 
-    return factory.getOrCreate("relationship", a.getProperty(CommonProperties.URI) + type.name() + b.getProperty(CommonProperties.URI));
+    return factory.getOrCreate("relationship", a.getProperty(CommonProperties.URI) + type.name()
+        + b.getProperty(CommonProperties.URI));
   }
 
-  public Collection<Relationship> getOrCreateRelationshipPairwise(Collection<Node> nodes, RelationshipType type, Optional<URI> uri) {
+  public Collection<Relationship> getOrCreateRelationshipPairwise(Collection<Node> nodes,
+      RelationshipType type, Optional<URI> uri) {
     Set<Relationship> relationships = new HashSet<>();
-    for (Node start: nodes) {
-      for (Node end: nodes) {
+    for (Node start : nodes) {
+      for (Node end : nodes) {
         if (start.equals(end)) {
           continue;
         }
@@ -308,19 +318,20 @@ public class Graph<N extends VertexFrame> {
 
   /***
    * Set property to single valued value for node or relationship
-   * @param container node or relationship
+   * 
+   * @param container
+   *          node or relationship
    * @param property
    * @param value
    */
   @Transactional
   public void setProperty(PropertyContainer container, String property, Object value) {
-    if (value instanceof String) {
-      // Ignore whitespace properties and stop words
-      // HACK: This stop word check should be done at OWL load time
-      if (CharMatcher.WHITESPACE.matchesAllOf((String)value) 
-          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(((String)value).toLowerCase())) {
-        return;
-      }
+    // Ignore whitespace properties and stop words
+    // HACK: This stop word check should be done at OWL load time
+    if (value instanceof String
+        && (CharMatcher.WHITESPACE.matchesAllOf((String) value) || StopAnalyzer.ENGLISH_STOP_WORDS_SET
+            .contains(((String) value).toLowerCase()))) {
+      return;
     }
     container.setProperty(property, value);
     if (EXACT_PROPERTIES.contains(property)) {
@@ -330,24 +341,26 @@ public class Graph<N extends VertexFrame> {
 
   /***
    * Add value to property for a node or relationship.
-   * <p>If necessary this will concatenate value to an array. 
+   * <p>
+   * If necessary this will concatenate value to an array.
    * <ul>
    * <li>Duplicate values for the same property will be ignored.</li>
    * <li>Property value insertion order will be preserved.</li>
    * </ul>
-   * @param container node or relationship
+   * 
+   * @param container
+   *          node or relationship
    * @param property
    * @param value
    */
   @Transactional
   public void addProperty(PropertyContainer container, String property, Object value) {
-    if (value instanceof String) {
-      // Ignore whitespace properties and stop words
-      // HACK: This stop word check should be done at OWL load time
-      if (CharMatcher.WHITESPACE.matchesAllOf((String)value) 
-          || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(((String)value).toLowerCase())) {
-        return;
-      }
+    // Ignore whitespace properties and stop words
+    // HACK: This stop word check should be done at OWL load time
+    if (value instanceof String
+        && (CharMatcher.WHITESPACE.matchesAllOf((String) value) || StopAnalyzer.ENGLISH_STOP_WORDS_SET
+            .contains(((String) value).toLowerCase()))) {
+      return;
     }
     if (container.hasProperty(property)) {
       // We might be creating or updating an array - read everything into a Set<>
@@ -367,7 +380,7 @@ public class Graph<N extends VertexFrame> {
       if (valueSet.size() > 1) {
         Object newArray = Array.newInstance(clazz, valueSet.size());
         int i = 0;
-        for (Object obj: valueSet) {
+        for (Object obj : valueSet) {
           Array.set(newArray, i++, clazz.cast(obj));
         }
         container.setProperty(property, newArray);
@@ -386,10 +399,10 @@ public class Graph<N extends VertexFrame> {
    * @param type
    * @return the single property value for node with the supplied type
    */
-  public <T> Optional<T> getProperty(PropertyContainer container, String property, Class<T> type)  {
-    Optional<T> value = Optional.<T>absent();
+  public <T> Optional<T> getProperty(PropertyContainer container, String property, Class<T> type) {
+    Optional<T> value = Optional.<T> absent();
     if (container.hasProperty(property)) {
-      value = Optional.<T>of(type.cast(container.getProperty(property)));
+      value = Optional.<T> of(type.cast(container.getProperty(property)));
     }
     return value;
   }
@@ -404,7 +417,7 @@ public class Graph<N extends VertexFrame> {
     List<T> list = new ArrayList<>();
     if (container.hasProperty(property)) {
       if (container.getProperty(property).getClass().isArray()) {
-        for (Object o: (Object[])container.getProperty(property)) {
+        for (Object o : (Object[]) container.getProperty(property)) {
           list.add(type.cast(o));
         }
       } else {
@@ -415,7 +428,7 @@ public class Graph<N extends VertexFrame> {
     return list;
   }
 
-  public ResourceIterator<Map<String,Object>> runCypherQuery(String query) {
+  public ResourceIterator<Map<String, Object>> runCypherQuery(String query) {
     ExecutionResult result = engine.execute(query);
     return result.iterator();
   }
