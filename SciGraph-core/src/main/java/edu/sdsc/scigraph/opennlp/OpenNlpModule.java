@@ -40,7 +40,8 @@ public class OpenNlpModule extends AbstractModule {
     install(ThrowingProviderBinder.forModule(this));
   }
 
-  public static interface TokenizerProvider extends CheckedProvider<Tokenizer> {
+  public interface TokenizerProvider extends CheckedProvider<Tokenizer> {
+    @Override
     Tokenizer get() throws IOException;
   }
 
@@ -52,7 +53,8 @@ public class OpenNlpModule extends AbstractModule {
     }
   }
 
-  public static interface SentenceDetectorProvider extends CheckedProvider<SentenceDetectorME> {
+  public interface SentenceDetectorProvider extends CheckedProvider<SentenceDetectorME> {
+    @Override
     SentenceDetectorME get() throws IOException;
   }
 
@@ -64,7 +66,8 @@ public class OpenNlpModule extends AbstractModule {
     }
   }
 
-  public static interface PosTaggerProvider extends CheckedProvider<POSTaggerME> {
+  public interface PosTaggerProvider extends CheckedProvider<POSTaggerME> {
+    @Override
     POSTaggerME get() throws IOException;
   }
 
@@ -76,7 +79,8 @@ public class OpenNlpModule extends AbstractModule {
     }
   }
 
-  public static interface ChunkerProvider extends CheckedProvider<ChunkerME> {
+  public interface ChunkerProvider extends CheckedProvider<ChunkerME> {
+    @Override
     ChunkerME get() throws IOException;
   }
 

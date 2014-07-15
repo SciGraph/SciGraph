@@ -39,7 +39,7 @@ public interface Vocabulary<N> {
    * @param uri  the URI
    * @return an optional concept matching the URI
    */
-  public Optional<N> getConceptFromUri(String uri);
+  Optional<N> getConceptFromUri(String uri);
 
   /***
    * Get concepts that match either a URI fragment or a CURIE.
@@ -56,7 +56,7 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the fragment or CURIE as input
    * @return concepts matching the query. Uniqueness is probable but not guaranteed.
    */
-  public Collection<N> getConceptFromId(Query query);
+  Collection<N> getConceptFromId(Query query);
 
   /***
    * Gets concepts from a prefix string - useful for auto-complete
@@ -64,7 +64,7 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the prefix as input
    * @return a list of matching concepts
    */
-  public List<N> getConceptsFromPrefix(Query query);
+  List<N> getConceptsFromPrefix(Query query);
 
   /***
    * Search concepts as free text.
@@ -74,7 +74,7 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the term as input
    * @return a list of matching concepts
    */
-  public List<N> searchConcepts(Query query);
+  List<N> searchConcepts(Query query);
 
   /***
    * Attempts to match the label of a concept as closely as possible ("exact-ish" match).
@@ -90,29 +90,29 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the term as input
    * @return a list of matching concepts
    */
-  public List<N> getConceptsFromTerm(Query query);
+  List<N> getConceptsFromTerm(Query query);
 
   /***
    * @return a set of categories in the vocabulary
    */
-  public Set<String> getAllCategories();
+  Set<String> getAllCategories();
 
   /*** 
    * @return a set of ontologies in the vocabulary
    */
-  public Set<String> getAllOntologies();
+  Set<String> getAllOntologies();
 
   /***
    * Provides "did you mean" functionality based on the labels of concepts in the vocabulary.
    * @param query  a query string
    * @return a list of suggestions
    */
-  public List<String> getSuggestions(String query);
+  List<String> getSuggestions(String query);
 
   /***
    * A builder class with common query refinement options.
    */
-  public static class Query {
+  class Query {
     private final String input;
     private final int limit;
     private final boolean includeSynonyms;

@@ -100,7 +100,8 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     return format(format, transform(newArrayList(args), new Function<Object, Object>() {
       @Override
       public Object apply(Object input) {
-        return (input instanceof String) ? QueryParser.escape((String) input).replaceAll(" ",
+        return input instanceof String ? QueryParser.escape((String) input)
+            .replaceAll(" ",
             "\\\\ ") : input;
       }
     }).toArray());
