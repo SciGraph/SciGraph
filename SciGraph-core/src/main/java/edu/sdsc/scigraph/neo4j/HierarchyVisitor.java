@@ -87,7 +87,7 @@ public class HierarchyVisitor {
 
   }
 
-  public static interface Callback {
+  public interface Callback {
     void processPath(List<Node> path);
   }
 
@@ -137,9 +137,8 @@ public class HierarchyVisitor {
           public Iterable<Relationship> expand(Path path, BranchState<Void> state) {
             Set<RelationshipType> types = new HashSet<>();
             types.add(EdgeType.SUPERCLASS_OF);
-            if (includeEquivalentClasses &&
-                (null != path.lastRelationship()) &&
-                !path.lastRelationship().isType(EdgeType.EQUIVALENT_TO)) {
+            if (includeEquivalentClasses && null != path.lastRelationship()
+                && !path.lastRelationship().isType(EdgeType.EQUIVALENT_TO)) {
               types.add(EdgeType.EQUIVALENT_TO);
             }
             return path.endNode().getRelationships(Direction.OUTGOING, 
