@@ -20,33 +20,33 @@ import com.tinkerpop.frames.Property;
 
 public interface EdgeProperties extends CommonProperties, EdgeFrame {
 
-  public final static String TRANSITIVE = "transitive";
-  public final static String REFLEXIVE = "reflexive";
-  public final static String SYMMETRIC = "symmetric";
-  public final static String QUANTIFICATION_TYPE = "quantificationType";
+  String TRANSITIVE = "transitive";
+  String REFLEXIVE = "reflexive";
+  String SYMMETRIC = "symmetric";
+  String QUANTIFICATION_TYPE = "quantificationType";
 
   @Property(TRANSITIVE)
-  public void setTransitive(boolean transitive);
+  void setTransitive(boolean transitive);
 
   @Property(TRANSITIVE)
-  public boolean isTransitive();
+  boolean isTransitive();
 
   @Property(REFLEXIVE)
-  public void setReflexive(boolean reflexive);
+  void setReflexive(boolean reflexive);
 
   @Property(REFLEXIVE)
-  public boolean isReflexive();
+  boolean isReflexive();
 
   @Property(SYMMETRIC)
-  public void setSymmetric(boolean symmetric);
+  void setSymmetric(boolean symmetric);
 
   @Property(SYMMETRIC)
-  public boolean isSymmetric();
+  boolean isSymmetric();
 
   @Property(QUANTIFICATION_TYPE)
-  public void setQuantificationType(String type);
+  void setQuantificationType(String type);
 
   @Property(QUANTIFICATION_TYPE)
-  public String getQuantificationType();
+  String getQuantificationType();
 
 }

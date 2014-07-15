@@ -21,35 +21,35 @@ import com.tinkerpop.frames.VertexFrame;
 
 public interface NodeProperties extends CommonProperties, VertexFrame {
 
-  public static final String LABEL = "label";
-  public static final String INFERRED = "inferred";
-  public static final String ANONYMOUS = "anonymous";
+  String LABEL = "label";
+  String INFERRED = "inferred";
+  String ANONYMOUS = "anonymous";
 
   @Property(LABEL)
-  public void addLabel(String label);
+  void addLabel(String label);
 
   @Property(LABEL)
-  public Iterable<String> getLabels();
+  Iterable<String> getLabels();
 
   @Property(INFERRED)
-  public void setInferred(boolean inferred);
+  void setInferred(boolean inferred);
 
   @Property(INFERRED)
-  public void isInferred();
+  void isInferred();
 
   @Property(ANONYMOUS)
-  public void setAnonymous(boolean anonymous);
+  void setAnonymous(boolean anonymous);
 
   @Property(ANONYMOUS)
-  public boolean isAnonymous();
+  boolean isAnonymous();
 
   @Adjacency(label="SUPERCLASS_OF")
-  public Iterable<Concept> getSubclasses();
+  Iterable<Concept> getSubclasses();
 
   @Adjacency(label="SUBCLASS_OF")
-  public Iterable<Concept> getSuperclasses();
+  Iterable<Concept> getSuperclasses();
   
   @Adjacency(label="EQUIVALENT_TO")
-  public Iterable<Concept> getEquivalentClasses();
+  Iterable<Concept> getEquivalentClasses();
 
 }

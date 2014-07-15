@@ -19,47 +19,47 @@ import com.tinkerpop.frames.Property;
 
 public interface Concept extends NodeProperties {
 
-  public static final String PREFERRED_LABEL = "preferedLabel";
-  public static final String SYNONYM = "synonym";
-  public static final String ACRONYM = "acronym";
-  public static final String ABREVIATION = "abbreviation";
-  public static final String DEFINITION = "definition";
-  public static final String CATEGORY = "category"; 
+  String PREFERRED_LABEL = "preferedLabel";
+  String SYNONYM = "synonym";
+  String ACRONYM = "acronym";
+  String ABREVIATION = "abbreviation";
+  String DEFINITION = "definition";
+  String CATEGORY = "category";
 
   @Property(PREFERRED_LABEL)
-  public void setPreferredLabel(String preferredLabel);
+  void setPreferredLabel(String preferredLabel);
 
   @Property(PREFERRED_LABEL)
-  public String getPreferredLabel();
+  String getPreferredLabel();
 
   @Property(SYNONYM)
-  public Iterable<String> getSynonyms();
+  Iterable<String> getSynonyms();
 
   @Property(SYNONYM)
-  public void addSynonym(String synonym);
+  void addSynonym(String synonym);
 
   @Property(ACRONYM)
-  public Iterable<String> getAcronyms();
+  Iterable<String> getAcronyms();
 
   @Property(ACRONYM)
-  public void addAcronym(String acronym);
+  void addAcronym(String acronym);
 
   @Property(ABREVIATION)
-  public Iterable<String> getAbbreviations();
+  Iterable<String> getAbbreviations();
 
   @Property(ABREVIATION)
-  public void addAbbreviation(String abbreviation);
+  void addAbbreviation(String abbreviation);
 
   @Property(DEFINITION)
-  public void setDefinition(String term);
+  void setDefinition(String term);
 
   @Property(DEFINITION)
-  public String getDefinition();
+  String getDefinition();
 
   @Property(CATEGORY)
-  public void addCategory(String category);
+  void addCategory(String category);
 
   @Property(CATEGORY)
-  public Iterable<String> getCategories();
+  Iterable<String> getCategories();
 
 }

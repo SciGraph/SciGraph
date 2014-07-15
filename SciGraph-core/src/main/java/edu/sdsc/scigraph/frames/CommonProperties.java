@@ -22,61 +22,61 @@ import com.tinkerpop.frames.Property;
  */
 public interface CommonProperties {
 
-  public final static String URI = "uri";
-  public final static String FRAGMENT = "fragment";
-  public final static String CURIE = "curie";
-  public final static String TYPE = "type"; // TODO: Could be replaced by neo4j 2.0 labels
-  public final static String NEGATED = "negated";
-  public static final String PARENT_ONTOLOGY = "parentOntology";
-  public static final String ONTOLOGY = "ontology";
-  public static final String ONTOLOGY_VERSION = "ontologyVersion";
+  String URI = "uri";
+  String FRAGMENT = "fragment";
+  String CURIE = "curie";
+  String TYPE = "type"; // TODO: Could be replaced by neo4j 2.0 labels
+  String NEGATED = "negated";
+  String PARENT_ONTOLOGY = "parentOntology";
+  String ONTOLOGY = "ontology";
+  String ONTOLOGY_VERSION = "ontologyVersion";
 
   @Property(URI)
-  public void setUri(String uri);
+  void setUri(String uri);
 
   @Property(URI)
-  public String getUri();
+  String getUri();
 
   @Property(FRAGMENT)
-  public void setFragment(String uri);
+  void setFragment(String uri);
 
   @Property(FRAGMENT)
-  public String getFragment();
+  String getFragment();
 
   @Property(CURIE)
-  public void setCurie(String curie);
+  void setCurie(String curie);
 
   @Property(CURIE)
-  public String getCurie();
+  String getCurie();
 
   @Property(NEGATED)
-  public void setNegated(boolean negated);
+  void setNegated(boolean negated);
 
   @Property(NEGATED)
-  public boolean isNegated();
+  boolean isNegated();
 
   @Property(PARENT_ONTOLOGY)
-  public void setParentOntology(String ontology);
+  void setParentOntology(String ontology);
 
   @Property(PARENT_ONTOLOGY)
-  public String getParentOntology();
+  String getParentOntology();
   
   @Property(ONTOLOGY)
-  public void setOntology(String ontology);
+  void setOntology(String ontology);
 
   @Property(ONTOLOGY)
-  public String getOntology();
+  String getOntology();
 
   @Property(ONTOLOGY_VERSION)
-  public void setOntologyVersion(String version);
+  void setOntologyVersion(String version);
 
   @Property(ONTOLOGY_VERSION)
-  public String getOntologyVersion();
+  String getOntologyVersion();
 
   @Property(TYPE)
-  public void addType(String type);
+  void addType(String type);
 
   @Property(TYPE)
-  public Iterable<String> getTypes();
+  Iterable<String> getTypes();
 
 }
