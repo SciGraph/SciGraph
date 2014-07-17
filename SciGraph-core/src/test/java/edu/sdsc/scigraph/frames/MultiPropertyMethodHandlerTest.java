@@ -32,17 +32,16 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.impls.neo4j2.Neo4j2Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.Property;
 
-import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.util.FramedMultivalueGraphFactory;
 
 public class MultiPropertyMethodHandlerTest {
 
   FramedGraph<Graph> framedGraph;
-  Neo4jGraph graph;
+  Neo4j2Graph graph;
   TestNode node;
 
   static interface TestNode extends CommonProperties {
@@ -92,7 +91,7 @@ public class MultiPropertyMethodHandlerTest {
   @Before
   public void setUp() throws Exception {
     GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    graph = new Neo4jGraph(graphDb);
+    graph = new Neo4j2Graph(graphDb);
     framedGraph = new FramedMultivalueGraphFactory().create((Graph)graph);
     node = framedGraph.addVertex(1, TestNode.class);
   }

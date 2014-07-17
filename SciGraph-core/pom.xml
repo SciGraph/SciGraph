@@ -28,7 +28,7 @@
 
   <properties>
     <lucene.version>3.6.2</lucene.version>
-    <neo4j.version>1.9.8</neo4j.version>
+    <neo4j.version>2.1.2</neo4j.version>
     <blueprints.version>2.5.0</blueprints.version>
     <openrdf.version>2.7.6</openrdf.version>
   </properties>
@@ -59,7 +59,7 @@
     </dependency>
     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
-      <artifactId>blueprints-neo4j-graph</artifactId>
+      <artifactId>blueprints-neo4j2-graph</artifactId>
       <version>${blueprints.version}</version>
       <exclusions>
         <exclusion>

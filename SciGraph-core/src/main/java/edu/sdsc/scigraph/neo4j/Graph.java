@@ -52,7 +52,7 @@ import org.neo4j.helpers.collection.MapUtil;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.impls.neo4j2.Neo4j2Graph;
 import com.tinkerpop.blueprints.oupls.jung.GraphJung;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphConfiguration;
@@ -108,7 +108,7 @@ public class Graph<N extends VertexFrame> {
         config.addMethodHandler(new MultiPropertyMethodHandler());
       }
     });
-    Neo4jGraph neo4jGraph = new Neo4jGraph(graphDb);
+    Neo4j2Graph neo4jGraph = new Neo4j2Graph(graphDb);
     framedGraph = factory.create((com.tinkerpop.blueprints.Graph) (neo4jGraph));
     jungGraph = new GraphJung<com.tinkerpop.blueprints.Graph>(neo4jGraph);
   }
