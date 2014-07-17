@@ -39,24 +39,25 @@ public class ReachabilityIndexTest {
 
   @BeforeClass
   public static void setup() throws InterruptedException {
-    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    Transaction tx = graphDb.beginTx();
-    a = graphDb.createNode();
-    b = graphDb.createNode();
-    a.createRelationshipTo(b, type);
-    c = graphDb.createNode();
-    a.createRelationshipTo(c, type);
-    c.createRelationshipTo(a, type);
+    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+        .newGraphDatabase();
+    try (Transaction tx = graphDb.beginTx()) {
+      a = graphDb.createNode();
+      b = graphDb.createNode();
+      a.createRelationshipTo(b, type);
+      c = graphDb.createNode();
+      a.createRelationshipTo(c, type);
+      c.createRelationshipTo(a, type);
 
-    d = graphDb.createNode();
+      d = graphDb.createNode();
 
-    e = graphDb.createNode();
-    f = graphDb.createNode();
-    e.createRelationshipTo(f, type);
-    a.createRelationshipTo(e, type);
+      e = graphDb.createNode();
+      f = graphDb.createNode();
+      e.createRelationshipTo(f, type);
+      a.createRelationshipTo(e, type);
 
-    tx.success();
-    tx.finish();
+      tx.success();
+    }
     index = new ReachabilityIndex(graphDb);
     index.createIndex(new Predicate<Node>() {
       @Override
@@ -68,13 +69,15 @@ public class ReachabilityIndexTest {
 
   @Test
   public void testEmptyGraph() {
-    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
+    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+        .newGraphDatabase();
     new ReachabilityIndex(graphDb);
   }
 
-  @Test(expected=IllegalStateException.class)
+  @Test(expected = IllegalStateException.class)
   public void testUncreatedIndex() {
-    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
+    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+        .newGraphDatabase();
     ReachabilityIndex index = new ReachabilityIndex(graphDb);
     index.canReach(a, b);
   }
@@ -98,7 +101,7 @@ public class ReachabilityIndexTest {
 
   @Test
   public void testDisconnectedNode() {
-    for (Node n: newArrayList(a, b, c)) {
+    for (Node n : newArrayList(a, b, c)) {
       assertThat(index.canReach(n, d), is(false));
       assertThat(index.canReach(d, n), is(false));
     }
