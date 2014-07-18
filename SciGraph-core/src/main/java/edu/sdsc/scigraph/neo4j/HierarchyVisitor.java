@@ -113,7 +113,8 @@ public class HierarchyVisitor {
       ResourceIterator<Map<String,Object>> result = graph.runCypherQuery(
           String.format("START n = node(*) " + 
               "MATCH (n)-[:%1$s]->(s) " +
-              "WHERE not(()-[:%1$s]->n) AND n.anonymous? = false " +
+ "WHERE not(()-[:%1$s]->n) AND (not(has(n.anonymous)) OR n.anonymous = false) "
+              +
               "RETURN DISTINCT n", edgeType.toString()));
       while (result.hasNext()) {
         Map<String, Object> map = result.next();
