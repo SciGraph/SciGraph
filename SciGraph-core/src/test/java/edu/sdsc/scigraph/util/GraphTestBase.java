@@ -30,6 +30,7 @@ public class GraphTestBase {
 
   protected static GraphDatabaseService graphDb;
   Transaction tx;
+  protected static boolean cleanup = true;
 
   @BeforeClass
   public static void setupDb() {
@@ -49,9 +50,15 @@ public class GraphTestBase {
   @After
   public void teardown() throws Exception {
     tx.success();
-    tx.finish();
+    try {
+      tx.finish();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     tx = null;
-    cleanDatabase();
+    if (cleanup) {
+      cleanDatabase();
+    }
   }
 
   void cleanDatabase() {

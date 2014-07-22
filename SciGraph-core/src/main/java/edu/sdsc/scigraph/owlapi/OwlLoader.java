@@ -85,11 +85,12 @@ public class OwlLoader {
     try {
       logger.info("Walking ontology structure...");
       walker.walkStructure(visitor);
-      logger.info(format("Walking ontology structure took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
+      logger.info(format("Walking ontology structure took %d seconds",
+          timer.elapsed(TimeUnit.SECONDS)));
       timer.reset();
       timer.start();
       logger.info("Postprocessing...");
-      visitor.postProcess();
+      // visitor.postProcess();
       tx.success();
       logger.info(format("Postprocessing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
     } finally {
@@ -99,15 +100,18 @@ public class OwlLoader {
       tx.finish();
       logger.info(format("Committing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
     }
-    int nodes = size(GlobalGraphOperations.at(graph.getGraphDb()).getAllNodes());
-    int edges = size(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationships());
+    try (Transaction tx2 = graph.getGraphDb().beginTx()) {
+      int nodes = size(GlobalGraphOperations.at(graph.getGraphDb()).getAllNodes());
+      int edges = size(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationships());
+      logger.info(format("...done. Graph contains %s nodes and %s edges.", nodes, edges));
+      tx2.success();
+    }
     graph.shutdown();
-    logger.info(format("...done. Graph contains %s nodes and %s edges.", nodes, edges));
-    
   }
 
   protected static Options getOptions() {
-    Option configPath = new Option("c", "configpath", true, "The location of the configuration file");
+    Option configPath = new Option("c", "configpath", true,
+        "The location of the configuration file");
     configPath.setRequired(true);
     Options options = new Options();
     options.addOption(configPath);
@@ -129,24 +133,27 @@ public class OwlLoader {
     @Provides
     @Singleton
     OwlVisitor getVisitor(OWLOntologyWalker walker, Graph<Concept> graph) {
-      return new OwlVisitor(walker, graph, config.getCuries(), config.getCategories(), config.getMappedProperties());
+      return new OwlVisitor(walker, graph, config.getCuries(), config.getCategories(),
+          config.getMappedProperties());
     }
 
     @Provides
     @Singleton
-    OWLOntologyWalker getOntologyWalker(FileCachingIRIMapper mapper) throws OWLOntologyCreationException {
+    OWLOntologyWalker getOntologyWalker(FileCachingIRIMapper mapper)
+        throws OWLOntologyCreationException {
       logger.info("Loading ontologies with owlapi...");
       Stopwatch timer = Stopwatch.createStarted();
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
       manager.addIRIMapper(mapper);
-      for (String url: config.getOntologyUrls()) {
+      for (String url : config.getOntologyUrls()) {
         if (url.startsWith("http://") || url.startsWith("https://")) {
           manager.loadOntology(IRI.create(url));
         } else {
           manager.loadOntologyFromOntologyDocument(new File(url));
         }
       }
-      logger.info(format("loaded ontologies with owlapi in %d seconds", timer.elapsed(TimeUnit.SECONDS)));
+      logger.info(format("loaded ontologies with owlapi in %d seconds",
+          timer.elapsed(TimeUnit.SECONDS)));
       return new OWLOntologyWalker(manager.getOntologies());
     }
 
@@ -162,7 +169,8 @@ public class OwlLoader {
     logger.info(format("Processing took %d minutes", timer.elapsed(TimeUnit.MINUTES)));
   }
 
-  public static void main(String[] args) throws OWLOntologyCreationException, JsonParseException, JsonMappingException, IOException {
+  public static void main(String[] args) throws OWLOntologyCreationException, JsonParseException,
+      JsonMappingException, IOException {
     CommandLineParser parser = new PosixParser();
     CommandLine cmd = null;
     try {
@@ -175,7 +183,8 @@ public class OwlLoader {
     }
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c').trim()), OwlLoadConfiguration.class);
+    OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c').trim()),
+        OwlLoadConfiguration.class);
     load(config);
   }
 

@@ -15,7 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static com.google.common.collect.Iterables.getFirst;
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getTypedLiteralValue;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getUri;
@@ -455,14 +455,14 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     ResourceIterator<Map<String, Object>> results = graph.runCypherQuery(
         "START svf = node(*) " +
             "MATCH n-[:SUBCLASS_OF]->svf " +
-            "WHERE svf.type! = 'OWLObjectSomeValuesFrom' " +
+ "WHERE (not(has(svf.type)) OR svf.type = 'OWLObjectSomeValuesFrom') " +
         "RETURN n, svf");
     while (results.hasNext()) {
       Map<String, Object> result = results.next();
       Node subject = (Node)result.get("n");
       Node svf = (Node)result.get("svf");
-      Node property = getFirst(svf.getRelationships(EdgeType.PROPERTY), null).getEndNode();
-      Node object = getFirst(svf.getRelationships(EdgeType.CLASS), null).getEndNode();
+      Node property = getOnlyElement(svf.getRelationships(EdgeType.PROPERTY)).getEndNode();
+      Node object = getOnlyElement(svf.getRelationships(EdgeType.CLASS)).getEndNode();
       String relationshipName = graph.getProperty(property, CommonProperties.FRAGMENT, String.class).get();
       RelationshipType type = DynamicRelationshipType.withName(relationshipName);
       String propertyUri = graph.getProperty(property, CommonProperties.URI, String.class).get();

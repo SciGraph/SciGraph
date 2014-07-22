@@ -46,8 +46,6 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
-import edu.sdsc.scigraph.neo4j.EdgeType;
-import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class GraphTest extends GraphTestBase {
@@ -108,7 +106,8 @@ public class GraphTest extends GraphTestBase {
     assertEquals(b, r.getEndNode());
     assertTrue(graph.hasRelationship(a, b, EdgeType.REL));
     assertThat("There should be one relationship", newArrayList(GlobalGraphOperations.at(graphDb).getAllRelationships()), hasSize(1));
-    assertThat("One relationship should exist", GlobalGraphOperations.at(graphDb).getAllRelationships(), hasItems(r));
+    assertThat("One relationship should exist", GlobalGraphOperations.at(graphDb)
+        .getAllRelationships(), hasItems(r));
   }
 
   @Test
@@ -116,7 +115,8 @@ public class GraphTest extends GraphTestBase {
     Relationship r = graph.getOrCreateRelationship(a, b, EdgeType.REL);
     Relationship r1 = graph.getOrCreateRelationship(a, b, EdgeType.REL);
     assertEquals(r, r1);
-    assertThat("There should be one relationship", newArrayList(GlobalGraphOperations.at(graphDb).getAllRelationships()), hasSize(1));
+    assertThat("There should be one relationship", newArrayList(GlobalGraphOperations.at(graphDb)
+        .getAllRelationships()), hasSize(1));
     assertThat("The graph should have r", GlobalGraphOperations.at(graphDb).getAllRelationships(), contains(r));
     graph.getOrCreateRelationship(a, b, EdgeType.SUBCLASS_OF);
     assertThat("There should be two relationships", newArrayList(GlobalGraphOperations.at(graphDb).getAllRelationships()), hasSize(2));

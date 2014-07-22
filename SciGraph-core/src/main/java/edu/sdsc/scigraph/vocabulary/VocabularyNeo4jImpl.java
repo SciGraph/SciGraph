@@ -54,6 +54,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexHits;
 
 import com.google.common.base.Function;
@@ -101,8 +102,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
       @Override
       public Object apply(Object input) {
         return input instanceof String ? QueryParser.escape((String) input)
-            .replaceAll(" ",
-            "\\\\ ") : input;
+            .replaceAll(" ", "\\\\ ") : input;
       }
     }).toArray());
   }
@@ -217,8 +217,11 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     }
     addCommonConstraints(finalQuery, query);
     logger.finest(finalQuery.toString());
-    IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
-    return limitHits(hits, query);
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
+      tx.success();
+      return limitHits(hits, query);
+    }
   }
 
   @Override

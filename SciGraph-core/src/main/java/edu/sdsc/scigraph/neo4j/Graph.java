@@ -43,6 +43,7 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.AutoIndexer;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.index.ReadableIndex;
@@ -121,10 +122,13 @@ public class Graph<N extends VertexFrame> {
   }
 
   private void setupAutoIndexing() {
-    graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
-    setupIndex(graphDb.index().getNodeAutoIndexer(), NODE_PROPERTIES_TO_INDEX);
-    graphDb.index().forRelationships("relationship_auto_index", INDEX_CONFIG);
-    setupIndex(graphDb.index().getRelationshipAutoIndexer(), RELATIONSHIP_PROPERTIES_TO_INDEX);
+    try (Transaction tx = graphDb.beginTx()) {
+      graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
+      setupIndex(graphDb.index().getNodeAutoIndexer(), NODE_PROPERTIES_TO_INDEX);
+      graphDb.index().forRelationships("relationship_auto_index", INDEX_CONFIG);
+      setupIndex(graphDb.index().getRelationshipAutoIndexer(), RELATIONSHIP_PROPERTIES_TO_INDEX);
+      tx.success();
+    }
   }
 
   public void shutdown() {
@@ -161,10 +165,12 @@ public class Graph<N extends VertexFrame> {
     return nodeExists(getURI(uri));
   }
 
+  @Transactional
   public boolean nodeExists(URI uri) {
     checkNotNull(uri);
-    Node node = nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
-    return null != node;
+    // try (Transaction tx = graphDb.beginTx()) {
+      return null != nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
+    // }
   }
 
   public Node getOrCreateNode(String uri) {
@@ -187,17 +193,22 @@ public class Graph<N extends VertexFrame> {
 
   public Node getOrCreateNode(final URI uri) {
     checkNotNull(uri);
-
-    UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory(graphDb, "uniqueNodeIndex") {
-      @Override
-      protected void initialize(Node created, Map<String, Object> properties) {
-        logger.fine("Creating node: " + properties.get(UNIQUE_PROPERTY));
-        created.setProperty(UNIQUE_PROPERTY, properties.get(UNIQUE_PROPERTY));
-        created.setProperty(CommonProperties.FRAGMENT, getFragment(uri));
-      }
-    };
-
-    return factory.getOrCreate(UNIQUE_PROPERTY, uri.toString());
+    try (Transaction tx = graphDb.beginTx()) {
+      UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory(graphDb, "uniqueNodeIndex") {
+        @Override
+        protected void initialize(Node created, Map<String, Object> properties) {
+          logger.fine("Creating node: " + properties.get(UNIQUE_PROPERTY));
+          try (Transaction tx = graphDb.beginTx()) {
+            created.setProperty(UNIQUE_PROPERTY, properties.get(UNIQUE_PROPERTY));
+            created.setProperty(CommonProperties.FRAGMENT, getFragment(uri));
+            tx.success();
+          }
+        }
+      };
+      Node n = factory.getOrCreate(UNIQUE_PROPERTY, uri.toString());
+      tx.success();
+      return n;
+    }
   }
 
   public Optional<Node> getNode(String uri) {
@@ -258,16 +269,21 @@ public class Graph<N extends VertexFrame> {
     checkNotNull(b);
     checkNotNull(type);
     checkNotNull(uri);
-    for (Relationship r : a.getRelationships(type)) {
-      if (uri.isPresent() && r.getEndNode().equals(b)) {
-        if (r.getProperty(CommonProperties.URI).equals(uri.get().toString())) {
+    try (Transaction tx = graphDb.beginTx()) {
+      for (Relationship r : a.getRelationships(type)) {
+        if (uri.isPresent() && r.getEndNode().equals(b)) {
+          if (r.getProperty(CommonProperties.URI).equals(uri.get().toString())) {
+            tx.success();
+            return true;
+          }
+        } else if (!uri.isPresent() && r.getEndNode().equals(b)) {
+          tx.success();
           return true;
         }
-      } else if (!uri.isPresent() && r.getEndNode().equals(b)) {
-        return true;
       }
+      tx.success();
+      return false;
     }
-    return false;
   }
 
   public Relationship getOrCreateRelationship(Node a, Node b, RelationshipType type) {
@@ -285,21 +301,28 @@ public class Graph<N extends VertexFrame> {
     checkNotNull(type);
     checkNotNull(uri);
 
-    UniqueFactory<Relationship> factory = new UniqueFactory.UniqueRelationshipFactory(graphDb,
-        "uniqueRelationshipIndex") {
-      @Override
-      protected Relationship create(Map<String, Object> properties) {
-        Relationship r = a.createRelationshipTo(b, type);
-        if (uri.isPresent()) {
-          r.setProperty(CommonProperties.URI, uri.get().toString());
-          r.setProperty(CommonProperties.FRAGMENT, getFragment(uri.get()));
+    try (Transaction tx = graphDb.beginTx()) {
+      UniqueFactory<Relationship> factory = new UniqueFactory.UniqueRelationshipFactory(graphDb,
+          "uniqueRelationshipIndex") {
+        @Override
+        protected Relationship create(Map<String, Object> properties) {
+          try (Transaction tx = graphDb.beginTx()) {
+            Relationship r = a.createRelationshipTo(b, type);
+            if (uri.isPresent()) {
+              r.setProperty(CommonProperties.URI, uri.get().toString());
+              r.setProperty(CommonProperties.FRAGMENT, getFragment(uri.get()));
+            }
+            tx.success();
+            return r;
+          }
         }
-        return r;
-      }
-    };
+      };
 
-    return factory.getOrCreate("relationship", a.getProperty(CommonProperties.URI) + type.name()
-        + b.getProperty(CommonProperties.URI));
+      Relationship r = factory.getOrCreate("relationship", a.getProperty(CommonProperties.URI)
+          + type.name() + b.getProperty(CommonProperties.URI));
+      tx.success();
+      return r;
+    }
   }
 
   public Collection<Relationship> getOrCreateRelationshipPairwise(Collection<Node> nodes,

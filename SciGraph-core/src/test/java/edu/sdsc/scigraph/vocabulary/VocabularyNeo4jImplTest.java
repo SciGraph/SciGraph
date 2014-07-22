@@ -135,6 +135,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testSearchConcepts() {
     Query query = new Vocabulary.Query.Builder("hippocampus").build();
+    System.out.println(vocabulary.searchConcepts(query));
     assertThat(vocabulary.searchConcepts(query), contains(hippocampus, structureOfHippocampus, hippocampusStructure, hippocampalFormation));
   }
 
