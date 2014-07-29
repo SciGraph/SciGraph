@@ -138,7 +138,8 @@ public class OwlLoader {
       logger.info("Loading ontologies with owlapi...");
       Stopwatch timer = Stopwatch.createStarted();
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-      manager.addIRIMapper(mapper);
+      // TODO: Removes IRI mapper for now
+      // manager.addIRIMapper(mapper);
       for (String url: config.getOntologyUrls()) {
         if (url.startsWith("http://") || url.startsWith("https://")) {
           manager.loadOntology(IRI.create(url));
