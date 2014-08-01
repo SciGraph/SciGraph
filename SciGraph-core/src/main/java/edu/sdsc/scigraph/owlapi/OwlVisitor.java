@@ -462,11 +462,15 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       Node subject = (Node)result.get("n");
       Node svf = (Node)result.get("svf");
       Node property = getOnlyElement(svf.getRelationships(EdgeType.PROPERTY)).getEndNode();
-      Node object = getOnlyElement(svf.getRelationships(EdgeType.CLASS)).getEndNode();
-      String relationshipName = graph.getProperty(property, CommonProperties.FRAGMENT, String.class).get();
-      RelationshipType type = DynamicRelationshipType.withName(relationshipName);
-      String propertyUri = graph.getProperty(property, CommonProperties.URI, String.class).get();
-      graph.getOrCreateRelationship(subject, object, type, propertyUri);
+      // TODO: This could contain multiple nodes
+      for (Relationship r : svf.getRelationships(EdgeType.CLASS)) {
+        Node object = r.getEndNode();
+        String relationshipName = graph.getProperty(property, CommonProperties.FRAGMENT,
+            String.class).get();
+        RelationshipType type = DynamicRelationshipType.withName(relationshipName);
+        String propertyUri = graph.getProperty(property, CommonProperties.URI, String.class).get();
+        graph.getOrCreateRelationship(subject, object, type, propertyUri);
+      }
     }
   }
 

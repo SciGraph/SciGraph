@@ -90,7 +90,7 @@ public class OwlLoader {
       timer.reset();
       timer.start();
       logger.info("Postprocessing...");
-      // visitor.postProcess();
+      visitor.postProcess();
       tx.success();
       logger.info(format("Postprocessing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
     } finally {
