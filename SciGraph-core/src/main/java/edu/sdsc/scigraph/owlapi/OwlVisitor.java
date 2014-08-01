@@ -15,7 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getTypedLiteralValue;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getUri;
@@ -461,7 +461,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       Map<String, Object> result = results.next();
       Node subject = (Node)result.get("n");
       Node svf = (Node)result.get("svf");
-      Node property = getOnlyElement(svf.getRelationships(EdgeType.PROPERTY)).getEndNode();
+      Node property = getFirst(svf.getRelationships(EdgeType.PROPERTY), null).getEndNode();
       // TODO: This could contain multiple nodes
       for (Relationship r : svf.getRelationships(EdgeType.CLASS)) {
         Node object = r.getEndNode();
