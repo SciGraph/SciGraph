@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -84,16 +83,9 @@ public class OwlVisitorTest extends GraphTestBase {
 
       OwlVisitor visitor = new OwlVisitor(walker, graph, curieMap, categoryMap, propertyMap);
       walker.walkStructure(visitor);
-      // visitor.postProcess();
+      visitor.postProcess();
       tx.success();
     }
-  }
-
-  @AfterClass
-  public static void destroyTestDatabase() {
-    graphDb.shutdown();
-    graphDb = null;
-    graph = null;
   }
 
   @Test

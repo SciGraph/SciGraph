@@ -455,7 +455,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     ResourceIterator<Map<String, Object>> results = graph.runCypherQuery(
         "START svf = node(*) " +
             "MATCH n-[:SUBCLASS_OF]->svf " +
- "WHERE (not(has(svf.type)) OR svf.type = 'OWLObjectSomeValuesFrom') " +
+ "WHERE (has(svf.type) AND svf.type = 'OWLObjectSomeValuesFrom') " +
         "RETURN n, svf");
     while (results.hasNext()) {
       Map<String, Object> result = results.next();
