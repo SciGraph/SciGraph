@@ -36,11 +36,6 @@
   <dependencies>
     <dependency>
       <groupId>org.neo4j</groupId>
-      <artifactId>neo4j</artifactId>
-      <version>${neo4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.neo4j</groupId>
       <artifactId>neo4j-cypher</artifactId>
       <version>${neo4j.version}</version>
     </dependency>
@@ -64,6 +59,10 @@
       <exclusions>
         <exclusion>
           <artifactId>neo4j-ha</artifactId>
+          <groupId>org.neo4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>neo4j</artifactId>
           <groupId>org.neo4j</groupId>
         </exclusion>
       </exclusions>
