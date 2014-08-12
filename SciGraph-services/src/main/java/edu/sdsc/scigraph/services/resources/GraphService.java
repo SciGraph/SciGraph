@@ -80,11 +80,11 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
     MediaType.APPLICATION_XML })
 public class GraphService extends BaseResource {
 
-  private final Vocabulary<Concept> vocabulary;
-  private final Graph<Concept> graph;
+  private final Vocabulary vocabulary;
+  private final Graph graph;
 
   @Inject
-  GraphService(Vocabulary<Concept> vocabulary, Graph<Concept> graph) {
+  GraphService(Vocabulary vocabulary, Graph graph) {
     this.vocabulary = vocabulary;
     this.graph = graph;
   }

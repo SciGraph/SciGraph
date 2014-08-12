@@ -52,7 +52,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4j;
@@ -66,7 +65,7 @@ public class OwlLoader {
   AtomicBoolean inTransaction;
 
   @Inject
-  Graph<Concept> graph;
+  Graph graph;
 
   @Inject
   OWLOntologyWalker walker;
@@ -132,7 +131,7 @@ public class OwlLoader {
 
     @Provides
     @Singleton
-    OwlVisitor getVisitor(OWLOntologyWalker walker, Graph<Concept> graph) {
+    OwlVisitor getVisitor(OWLOntologyWalker walker, Graph graph) {
       return new OwlVisitor(walker, graph, config.getCuries(), config.getCategories(),
           config.getMappedProperties());
     }

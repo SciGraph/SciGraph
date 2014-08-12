@@ -15,41 +15,41 @@
  */
 package edu.sdsc.scigraph.frames;
 
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
+import java.util.HashSet;
+import java.util.Set;
 
-public interface NodeProperties extends CommonProperties, VertexFrame {
+public class NodeProperties extends CommonProperties {
 
-  String LABEL = "label";
-  String INFERRED = "inferred";
-  String ANONYMOUS = "anonymous";
+  public static final String LABEL = "label";
+  public static final String INFERRED = "inferred";
+  public static final String ANONYMOUS = "anonymous";
 
-  @Property(LABEL)
-  void addLabel(String label);
+  private Set<String> labels = new HashSet<>();
+  private boolean inferred;
+  private boolean anonymous;
 
-  @Property(LABEL)
-  Iterable<String> getLabels();
+  public void addLabel(String label) {
+    labels.add(label);
+  }
 
-  @Property(INFERRED)
-  void setInferred(boolean inferred);
+  public Iterable<String> getLabels() {
+    return labels;
+  }
 
-  @Property(INFERRED)
-  void isInferred();
+  public void setInferred(boolean inferred) {
+    this.inferred = inferred;
+  }
 
-  @Property(ANONYMOUS)
-  void setAnonymous(boolean anonymous);
+  public boolean isInferred() {
+    return inferred;
+  }
 
-  @Property(ANONYMOUS)
-  boolean isAnonymous();
+  public void setAnonymous(boolean anonymous) {
+    this.anonymous = anonymous;
+  }
 
-  @Adjacency(label="SUPERCLASS_OF")
-  Iterable<Concept> getSubclasses();
-
-  @Adjacency(label="SUBCLASS_OF")
-  Iterable<Concept> getSuperclasses();
-  
-  @Adjacency(label="EQUIVALENT_TO")
-  Iterable<Concept> getEquivalentClasses();
+  public boolean isAnonymous() {
+    return anonymous;
+  }
 
 }

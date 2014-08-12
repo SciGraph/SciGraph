@@ -32,10 +32,10 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
 public class EntityRecognizer {
 
-  private final Vocabulary<Concept> vocabulary;
+  private final Vocabulary vocabulary;
 
   @Inject
-  EntityRecognizer(Vocabulary<Concept> vocabulary) throws IOException {
+  EntityRecognizer(Vocabulary vocabulary) throws IOException {
     this.vocabulary = vocabulary;
   }
 

@@ -15,38 +15,29 @@
  */
 package edu.sdsc.scigraph.frames;
 
-import com.tinkerpop.frames.EdgeFrame;
-import com.tinkerpop.frames.Property;
+public class EdgeProperties extends CommonProperties {
 
-public interface EdgeProperties extends CommonProperties, EdgeFrame {
+  public static final String TRANSITIVE = "transitive";
+  public static final String REFLEXIVE = "reflexive";
+  public static final String SYMMETRIC = "symmetric";
+  public static final String QUANTIFICATION_TYPE = "quantificationType";
 
-  String TRANSITIVE = "transitive";
-  String REFLEXIVE = "reflexive";
-  String SYMMETRIC = "symmetric";
-  String QUANTIFICATION_TYPE = "quantificationType";
-
-  @Property(TRANSITIVE)
-  void setTransitive(boolean transitive);
-
-  @Property(TRANSITIVE)
-  boolean isTransitive();
-
-  @Property(REFLEXIVE)
-  void setReflexive(boolean reflexive);
-
-  @Property(REFLEXIVE)
-  boolean isReflexive();
-
-  @Property(SYMMETRIC)
-  void setSymmetric(boolean symmetric);
-
-  @Property(SYMMETRIC)
-  boolean isSymmetric();
-
-  @Property(QUANTIFICATION_TYPE)
-  void setQuantificationType(String type);
-
-  @Property(QUANTIFICATION_TYPE)
-  String getQuantificationType();
+  /*
+   * void setTransitive(boolean transitive);
+   * 
+   * boolean isTransitive();
+   * 
+   * void setReflexive(boolean reflexive);
+   * 
+   * boolean isReflexive();
+   * 
+   * void setSymmetric(boolean symmetric);
+   * 
+   * boolean isSymmetric();
+   * 
+   * void setQuantificationType(String type);
+   * 
+   * String getQuantificationType();
+   */
 
 }

@@ -15,51 +15,85 @@
  */
 package edu.sdsc.scigraph.frames;
 
-import com.tinkerpop.frames.Property;
+import java.util.HashSet;
+import java.util.Set;
 
-public interface Concept extends NodeProperties {
+public class Concept extends NodeProperties {
 
-  String PREFERRED_LABEL = "preferedLabel";
-  String SYNONYM = "synonym";
-  String ACRONYM = "acronym";
-  String ABREVIATION = "abbreviation";
-  String DEFINITION = "definition";
-  String CATEGORY = "category";
+  public static final String PREFERRED_LABEL = "preferedLabel";
+  public static final String SYNONYM = "synonym";
+  public static final String ACRONYM = "acronym";
+  public static final String ABREVIATION = "abbreviation";
+  public static final String DEFINITION = "definition";
+  public static final String CATEGORY = "category";
 
-  @Property(PREFERRED_LABEL)
-  void setPreferredLabel(String preferredLabel);
+  private String preferredLabel;
+  private Set<String> definitions = new HashSet<>();
+  private Set<String> categories = new HashSet<>();
+  private Set<String> synonyms = new HashSet<>();
+  private Set<String> acronyms = new HashSet<>();
+  private Set<String> abbreviations = new HashSet<>();
 
-  @Property(PREFERRED_LABEL)
-  String getPreferredLabel();
+  public void setPreferredLabel(String preferredLabel) {
+    this.preferredLabel = preferredLabel;
+  }
 
-  @Property(SYNONYM)
-  Iterable<String> getSynonyms();
+  public String getPreferredLabel() {
+    return preferredLabel;
+  }
 
-  @Property(SYNONYM)
-  void addSynonym(String synonym);
+  public Iterable<String> getSynonyms() {
+    return synonyms;
+  }
 
-  @Property(ACRONYM)
-  Iterable<String> getAcronyms();
+  public void addSynonym(String synonym) {
+    synonyms.add(synonym);
+  }
 
-  @Property(ACRONYM)
-  void addAcronym(String acronym);
+  public Iterable<String> getAcronyms() {
+    return acronyms;
+  }
 
-  @Property(ABREVIATION)
-  Iterable<String> getAbbreviations();
+  public void addAcronym(String acronym) {
+    acronyms.add(acronym);
+  }
 
-  @Property(ABREVIATION)
-  void addAbbreviation(String abbreviation);
+  public Iterable<String> getAbbreviations() {
+    return abbreviations;
+  }
 
-  @Property(DEFINITION)
-  void setDefinition(String term);
+  public void addAbbreviation(String abbreviation) {
+    abbreviations.add(abbreviation);
+  }
 
-  @Property(DEFINITION)
-  String getDefinition();
+  public void addDefinition(String definition) {
+    this.definitions.add(definition);
+  }
 
-  @Property(CATEGORY)
-  void addCategory(String category);
+  public Iterable<String> getDefinitions() {
+    return definitions;
+  }
 
-  @Property(CATEGORY)
-  Iterable<String> getCategories();
+  public void addCategory(String category) {
+    categories.add(category);
+  }
+
+  public Iterable<String> getCategories() {
+    return categories;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Concept) {
+      return ((Concept) obj).getId() == getId();
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return new Long(getId()).hashCode();
+  }
 
 }

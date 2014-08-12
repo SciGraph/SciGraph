@@ -22,15 +22,14 @@ import org.neo4j.graphdb.Transaction;
 
 import com.codahale.metrics.health.HealthCheck;
 
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.Graph;
 
 public class Neo4jHealthCheck extends HealthCheck {
 
-  private final Graph<Concept> graph;
+  private final Graph graph;
 
   @Inject
-  Neo4jHealthCheck(Graph<Concept> graph) {
+  Neo4jHealthCheck(Graph graph) {
     this.graph = graph;
   }
 

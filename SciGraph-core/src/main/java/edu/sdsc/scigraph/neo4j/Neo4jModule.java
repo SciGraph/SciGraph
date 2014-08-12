@@ -74,8 +74,9 @@ public class Neo4jModule extends AbstractModule {
 
   @Provides
   @Singleton
-  Vocabulary<Concept> getVocabulary(Graph<Concept> graph, @Named("neo4j.location") String graphLocation) throws IOException {
-    return new VocabularyNeo4jImpl<Concept>(graph, graphLocation);
+  Vocabulary getVocabulary(Graph graph, @Named("neo4j.location") String graphLocation)
+      throws IOException {
+    return new VocabularyNeo4jImpl(graph, graphLocation);
   }
 
   @Provides

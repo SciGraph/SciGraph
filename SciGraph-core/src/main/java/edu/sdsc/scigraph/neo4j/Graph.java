@@ -53,22 +53,14 @@ import org.neo4j.helpers.collection.MapUtil;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.impls.neo4j2.Neo4j2Graph;
-import com.tinkerpop.blueprints.oupls.jung.GraphJung;
-import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphConfiguration;
-import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.VertexFrame;
-import com.tinkerpop.frames.modules.AbstractModule;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.frames.util.MultiPropertyMethodHandler;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
 
-public class Graph<N extends VertexFrame> {
+public class Graph {
 
   private static final Logger logger = Logger.getLogger(Graph.class.getName());
 
@@ -88,8 +80,6 @@ public class Graph<N extends VertexFrame> {
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;
   private final ReadableIndex<Node> nodeAutoIndex;
-  private final FramedGraph<com.tinkerpop.blueprints.Graph> framedGraph;
-  private final GraphJung<com.tinkerpop.blueprints.Graph> jungGraph;
 
   private final Class<?> nodeType;
 
@@ -102,16 +92,6 @@ public class Graph<N extends VertexFrame> {
       setupAutoIndexing();
     }
     this.nodeAutoIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-
-    FramedGraphFactory factory = new FramedGraphFactory(new AbstractModule() {
-      @Override
-      protected void doConfigure(FramedGraphConfiguration config) {
-        config.addMethodHandler(new MultiPropertyMethodHandler());
-      }
-    });
-    Neo4j2Graph neo4jGraph = new Neo4j2Graph(graphDb);
-    framedGraph = factory.create((com.tinkerpop.blueprints.Graph) (neo4jGraph));
-    jungGraph = new GraphJung<com.tinkerpop.blueprints.Graph>(neo4jGraph);
   }
 
   private void setupIndex(AutoIndexer<?> index, Set<String> properties) {
@@ -157,10 +137,6 @@ public class Graph<N extends VertexFrame> {
     return nodeAutoIndex;
   }
 
-  public GraphJung<com.tinkerpop.blueprints.Graph> getJungGraph() {
-    return jungGraph;
-  }
-
   public boolean nodeExists(String uri) {
     return nodeExists(getURI(uri));
   }
@@ -169,7 +145,7 @@ public class Graph<N extends VertexFrame> {
   public boolean nodeExists(URI uri) {
     checkNotNull(uri);
     // try (Transaction tx = graphDb.beginTx()) {
-      return null != nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
+    return null != nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
     // }
   }
 
@@ -222,34 +198,76 @@ public class Graph<N extends VertexFrame> {
     return Optional.absent();
   }
 
-  public Node getNode(N framedNode) {
-    long id = (Long) framedNode.asVertex().getId();
+  public Node getNode(Concept framedNode) {
+    long id = framedNode.getId();
     return graphDb.getNodeById(id);
   }
 
-  @SuppressWarnings("unchecked")
-  public N getOrCreateFramedNode(String uri) {
+  Concept getVertex(long id) {
+    Concept concept = new Concept();
+    try (Transaction tx = graphDb.beginTx()) {
+      Node n = graphDb.getNodeById(id);
+      concept.setAnonymous((boolean) n.getProperty(Concept.ANONYMOUS, false));
+      concept.setInferred((boolean) n.getProperty(Concept.INFERRED, false));
+      concept.setNegated((boolean) n.getProperty(Concept.NEGATED, false));
+      concept.setCurie((String) n.getProperty(Concept.CURIE, null));
+
+      concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
+      concept.setId(id);
+      concept.setOntology((String) n.getProperty(Concept.ONTOLOGY, null));
+      concept.setOntologyVersion((String) n.getProperty(Concept.ONTOLOGY_VERSION, null));
+      concept.setParentOntology((String) n.getProperty(Concept.PARENT_ONTOLOGY, null));
+      concept.setPreferredLabel((String) n.getProperty(Concept.PREFERRED_LABEL, null));
+      concept.setUri((String) n.getProperty(Concept.URI, null));
+
+      for (String definition : getProperties(n, Concept.DEFINITION, String.class)) {
+        concept.addDefinition(definition);
+      }
+      for (String abbreviation : getProperties(n, Concept.ABREVIATION, String.class)) {
+        concept.addAbbreviation(abbreviation);
+      }
+      for (String acronym : getProperties(n, Concept.ACRONYM, String.class)) {
+        concept.addAcronym(acronym);
+      }
+      for (String category : getProperties(n, Concept.CATEGORY, String.class)) {
+        concept.addCategory(category);
+      }
+      for (String label : getProperties(n, Concept.LABEL, String.class)) {
+        concept.addLabel(label);
+      }
+      for (String synonym : getProperties(n, Concept.SYNONYM, String.class)) {
+        concept.addSynonym(synonym);
+      }
+      for (String type : getProperties(n, Concept.TYPE, String.class)) {
+        concept.addType(type);
+      }
+      tx.success();
+    }
+
+    return concept;
+  }
+
+  public Concept getOrCreateFramedNode(String uri) {
     Node n = getOrCreateNode(uri);
-    return (N) framedGraph.getVertex(n.getId(), nodeType);
+    return getVertex(n.getId());
   }
 
-  @SuppressWarnings("unchecked")
-  public N getOrCreateFramedNode(Node node) {
-    return (N) framedGraph.getVertex(node.getId(), nodeType);
+  public Concept getOrCreateFramedNode(Node node) {
+    return getVertex(node.getId());
   }
 
-  public Iterable<N> getOrCreateFramedNodes(Iterable<Node> nodes) {
-    return transform(nodes, new Function<Node, N>() {
+  public Iterable<Concept> getOrCreateFramedNodes(Iterable<Node> nodes) {
+    return transform(nodes, new Function<Node, Concept>() {
 
       @Override
-      public N apply(Node node) {
+      public Concept apply(Node node) {
         return getOrCreateFramedNode(node);
       }
 
     });
   }
 
-  public Optional<N> getFramedNode(String uri) {
+  public Optional<Concept> getFramedNode(String uri) {
     if (nodeExists(uri)) {
       return Optional.of(getOrCreateFramedNode(uri));
     }

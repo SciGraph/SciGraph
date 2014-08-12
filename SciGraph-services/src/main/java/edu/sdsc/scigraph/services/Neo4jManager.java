@@ -21,17 +21,16 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.Graph;
 
 public class Neo4jManager implements Managed {
 
   private final Logger logger = Logger.getLogger(Neo4jManager.class.getName());
   
-  private final Graph<Concept> graph;
+  private final Graph graph;
 
   @Inject
-  public Neo4jManager(Graph<Concept> graph) {
+  public Neo4jManager(Graph graph) {
     this.graph = graph;
   }
 

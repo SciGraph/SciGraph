@@ -50,21 +50,21 @@ import edu.sdsc.scigraph.frames.NodeProperties;
  */
 public class HierarchyVisitor {
 
-  private final Graph<?> graph;
+  private final Graph graph;
   private final RelationshipType edgeType;
   private final Set<String> rootUris;
   private final boolean includeEquivalentClasses;
   private final Callback callback;
 
   public static class Builder {
-    private final Graph<?> graph;
+    private final Graph graph;
     private final RelationshipType edgeType;
     private final Callback callback;
 
     private Set<String> rootUris = new HashSet<>();
     private boolean includeEquivalentClasses = true;
 
-    public Builder(Graph<?> graph, RelationshipType edgeType, Callback callback) {
+    public Builder(Graph graph, RelationshipType edgeType, Callback callback) {
       this.graph = graph;
       this.edgeType = edgeType;
       this.callback = callback;

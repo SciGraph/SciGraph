@@ -39,10 +39,9 @@ public class EntityRecognizerTest {
   Concept concept = mock(Concept.class);
   EntityRecognizer recognizer;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() throws Exception {
-    Vocabulary<Concept> vocabulary = mock(Vocabulary.class);
+    Vocabulary vocabulary = mock(Vocabulary.class);
     when(concept.getLabels()).thenReturn(newArrayList("foo"));
     when(concept.getCategories()).thenReturn(Collections.<String> emptySet());
     when(vocabulary.getConceptsFromTerm(any(Query.class))).thenReturn(singletonList(concept));

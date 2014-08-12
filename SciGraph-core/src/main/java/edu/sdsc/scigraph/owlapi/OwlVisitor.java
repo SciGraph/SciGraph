@@ -94,7 +94,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private static final Logger logger = Logger.getLogger(OwlVisitor.class.getName());
 
-  private final Graph<Concept> graph;
+  private final Graph graph;
 
   private OWLOntology ontology;
 
@@ -107,7 +107,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private OWLOntology parentOntology = null;
 
   @Inject
-  OwlVisitor(OWLOntologyWalker walker, Graph<Concept> graph, 
+  OwlVisitor(OWLOntologyWalker walker, Graph graph,
       Map<String, String> curieMap,
       Map<String, String> categoryMap,
       List<MappedProperty> mappedProperties) {
