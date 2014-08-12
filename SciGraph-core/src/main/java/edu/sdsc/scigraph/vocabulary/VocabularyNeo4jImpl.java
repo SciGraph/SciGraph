@@ -143,8 +143,9 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     String queryString = format("%s:%s %s:%s", CommonProperties.FRAGMENT, idQuery,
         CommonProperties.CURIE, idQuery);
     IndexHits<Node> hits;
-    try {
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
       hits = graph.getNodeAutoIndex().query(parser.parse(queryString));
+      tx.success();
       return limitHits(hits, query);
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parse an ID query", e);
@@ -175,8 +176,13 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
       logger.log(Level.WARNING, "Failed to parser query", e);
     }
     addCommonConstraints(finalQuery, query);
-    IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
+    IndexHits<Node> hits = null;
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      hits = graph.getNodeAutoIndex().query(finalQuery);
+      tx.success();
+    }
     return limitHits(hits, query);
+
   }
 
   @Override
