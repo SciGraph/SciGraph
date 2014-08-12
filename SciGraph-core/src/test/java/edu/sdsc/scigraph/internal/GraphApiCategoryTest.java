@@ -34,7 +34,7 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 public class GraphApiCategoryTest extends GraphTestBase {
 
   GraphApi graphApi;
-  Graph<Concept> graph;
+  Graph graph;
 
   static String BASE_URI = "http://example.org/";
 
@@ -47,7 +47,7 @@ public class GraphApiCategoryTest extends GraphTestBase {
 
   @Before
   public void addNodes() throws Exception {
-    graph = new Graph<Concept>(graphDb, Concept.class);
+    graph = new Graph(graphDb, Concept.class);
     a = graph.getOrCreateNode(uri);
     graph.setProperty(a, NodeProperties.TYPE, "OWLClass");
     b = graph.getOrCreateNode(uri2);

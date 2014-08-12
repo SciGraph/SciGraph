@@ -94,7 +94,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private static final Logger logger = Logger.getLogger(OwlVisitor.class.getName());
 
-  private final Graph<Concept> graph;
+  private final Graph graph;
 
   private OWLOntology ontology;
 
@@ -107,7 +107,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private OWLOntology parentOntology = null;
 
   @Inject
-  OwlVisitor(OWLOntologyWalker walker, Graph<Concept> graph, 
+  OwlVisitor(OWLOntologyWalker walker, Graph graph,
       Map<String, String> curieMap,
       Map<String, String> categoryMap,
       List<MappedProperty> mappedProperties) {
@@ -455,18 +455,22 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     ResourceIterator<Map<String, Object>> results = graph.runCypherQuery(
         "START svf = node(*) " +
             "MATCH n-[:SUBCLASS_OF]->svf " +
-            "WHERE svf.type! = 'OWLObjectSomeValuesFrom' " +
+ "WHERE (has(svf.type) AND svf.type = 'OWLObjectSomeValuesFrom') " +
         "RETURN n, svf");
     while (results.hasNext()) {
       Map<String, Object> result = results.next();
       Node subject = (Node)result.get("n");
       Node svf = (Node)result.get("svf");
       Node property = getFirst(svf.getRelationships(EdgeType.PROPERTY), null).getEndNode();
-      Node object = getFirst(svf.getRelationships(EdgeType.CLASS), null).getEndNode();
-      String relationshipName = graph.getProperty(property, CommonProperties.FRAGMENT, String.class).get();
-      RelationshipType type = DynamicRelationshipType.withName(relationshipName);
-      String propertyUri = graph.getProperty(property, CommonProperties.URI, String.class).get();
-      graph.getOrCreateRelationship(subject, object, type, propertyUri);
+      // TODO: This could contain multiple nodes
+      for (Relationship r : svf.getRelationships(EdgeType.CLASS)) {
+        Node object = r.getEndNode();
+        String relationshipName = graph.getProperty(property, CommonProperties.FRAGMENT,
+            String.class).get();
+        RelationshipType type = DynamicRelationshipType.withName(relationshipName);
+        String propertyUri = graph.getProperty(property, CommonProperties.URI, String.class).get();
+        graph.getOrCreateRelationship(subject, object, type, propertyUri);
+      }
     }
   }
 

@@ -50,21 +50,21 @@ import edu.sdsc.scigraph.frames.NodeProperties;
  */
 public class HierarchyVisitor {
 
-  private final Graph<?> graph;
+  private final Graph graph;
   private final RelationshipType edgeType;
   private final Set<String> rootUris;
   private final boolean includeEquivalentClasses;
   private final Callback callback;
 
   public static class Builder {
-    private final Graph<?> graph;
+    private final Graph graph;
     private final RelationshipType edgeType;
     private final Callback callback;
 
     private Set<String> rootUris = new HashSet<>();
     private boolean includeEquivalentClasses = true;
 
-    public Builder(Graph<?> graph, RelationshipType edgeType, Callback callback) {
+    public Builder(Graph graph, RelationshipType edgeType, Callback callback) {
       this.graph = graph;
       this.edgeType = edgeType;
       this.callback = callback;
@@ -113,7 +113,8 @@ public class HierarchyVisitor {
       ResourceIterator<Map<String,Object>> result = graph.runCypherQuery(
           String.format("START n = node(*) " + 
               "MATCH (n)-[:%1$s]->(s) " +
-              "WHERE not(()-[:%1$s]->n) AND n.anonymous? = false " +
+ "WHERE not(()-[:%1$s]->n) AND (not(has(n.anonymous)) OR n.anonymous = false) "
+              +
               "RETURN DISTINCT n", edgeType.toString()));
       while (result.hasNext()) {
         Map<String, Object> map = result.next();

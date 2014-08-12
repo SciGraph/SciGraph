@@ -24,6 +24,7 @@ import java.util.Set;
 
 import com.google.common.base.Optional;
 
+import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 
 /***
@@ -32,14 +33,14 @@ import edu.sdsc.scigraph.frames.NodeProperties;
  * 
  * @param N The {@link NodeProperties} to return
  */
-public interface Vocabulary<N> {
+public interface Vocabulary {
 
   /***
    * Get a concept from a URI
    * @param uri  the URI
    * @return an optional concept matching the URI
    */
-  Optional<N> getConceptFromUri(String uri);
+  Optional<Concept> getConceptFromUri(String uri);
 
   /***
    * Get concepts that match either a URI fragment or a CURIE.
@@ -56,7 +57,7 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the fragment or CURIE as input
    * @return concepts matching the query. Uniqueness is probable but not guaranteed.
    */
-  Collection<N> getConceptFromId(Query query);
+  Collection<Concept> getConceptFromId(Query query);
 
   /***
    * Gets concepts from a prefix string - useful for auto-complete
@@ -64,7 +65,7 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the prefix as input
    * @return a list of matching concepts
    */
-  List<N> getConceptsFromPrefix(Query query);
+  List<Concept> getConceptsFromPrefix(Query query);
 
   /***
    * Search concepts as free text.
@@ -74,7 +75,7 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the term as input
    * @return a list of matching concepts
    */
-  List<N> searchConcepts(Query query);
+  List<Concept> searchConcepts(Query query);
 
   /***
    * Attempts to match the label of a concept as closely as possible ("exact-ish" match).
@@ -90,7 +91,7 @@ public interface Vocabulary<N> {
    * @param query  a {@link Query} with the term as input
    * @return a list of matching concepts
    */
-  List<N> getConceptsFromTerm(Query query);
+  List<Concept> getConceptsFromTerm(Query query);
 
   /***
    * @return a set of categories in the vocabulary

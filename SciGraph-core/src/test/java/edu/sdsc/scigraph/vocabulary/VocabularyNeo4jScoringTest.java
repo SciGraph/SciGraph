@@ -35,8 +35,8 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
  */
 public class VocabularyNeo4jScoringTest extends GraphTestBase {
 
-  VocabularyNeo4jImpl<Concept> vocabulary;
-  Graph<Concept> graph;
+  VocabularyNeo4jImpl vocabulary;
+  Graph graph;
 
   Concept cell;
   Concept onCell;
@@ -45,7 +45,8 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
     Concept concept = graph.getOrCreateFramedNode(uri);
     concept.addLabel(label);
     concept.setCurie(curie);
-    concept.asVertex().setProperty(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
+    graph.getGraphDb().getNodeById(concept.getId())
+        .setProperty(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
     for (String category: categories) {
       concept.addCategory(category);
     }
@@ -54,11 +55,11 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
 
   @Before
   public void setupGraph() throws IOException {
-    graph = new Graph<Concept>(graphDb, Concept.class);
+    graph = new Graph(graphDb, Concept.class);
     cell = buildConcept("http://example.org/#birnlex5", "Cell", "BL:5");
     onCell = buildConcept("http://example.org/#birnlex6", "Something on cell", "HP:0008");
     onCell.addSynonym("on cell");
-    vocabulary = new VocabularyNeo4jImpl<Concept>(graph, null);
+    vocabulary = new VocabularyNeo4jImpl(graph, null);
   }
 
   @Test

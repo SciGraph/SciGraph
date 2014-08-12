@@ -30,6 +30,8 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Optional;
 
@@ -45,8 +47,8 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
  */
 public class VocabularyNeo4jImplTest extends GraphTestBase {
 
-  VocabularyNeo4jImpl<Concept> vocabulary;
-  Graph<Concept> graph;
+  VocabularyNeo4jImpl vocabulary;
+  Graph graph;
 
   Concept hippocampus;
   Concept hippocampusStructure;
@@ -57,43 +59,51 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   Concept parkinsons;
   Concept als;
 
-  Concept buildConcept(String uri, String label, String curie, String ... categories) {
-    Concept concept = graph.getOrCreateFramedNode(uri);
-    concept.addLabel(label);
-    concept.setCurie(curie);
-    concept.asVertex().setProperty(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
-    for (String category: categories) {
-      concept.addCategory(category);
+  Concept buildConcept(String uri, String label, String curie, String... categories) {
+    Node concept = graph.getOrCreateNode(uri);
+    graph.addProperty(concept, Concept.LABEL, label);
+    graph.setProperty(concept, Concept.CURIE, curie);
+    graph.setProperty(concept, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
+    for (String category : categories) {
+      graph.addProperty(concept, Concept.CATEGORY, category);
     }
-    return concept;
+    return graph.getOrCreateFramedNode(concept);
   }
 
   @Before
   public void setupGraph() throws IOException {
-    graph = new Graph<Concept>(graphDb, Concept.class);
-    hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation", "BL:5");
-    hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "HP:0008", "foo", "fizz");
-    hippocampus.setOntology("http://foo.org");
-    hippocampus.addSynonym("cornu ammonis");
-    hippocampus.asVertex().setProperty(Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX, "cornu ammonis");
-    hippocampusStructure = buildConcept("http://example.org/#hippocampusStructure", "Hippocampus structure", "HP", "baz");
-    hippocampusStructure.setOntology("http://baz.org");
-    structureOfHippocampus = buildConcept("http://example.org/#structureOfHippocampus", "Structure of hippocampus", "baz");
-    cerebellum = buildConcept("http://example.org/#cerebellum", "Cerebellum", "baz", "foo");
-    cerebellum.setOntology("http://bar.org");
-    specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz", "foo bar");
-    parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
-    parkinsons.addSynonym("the");
-    als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis", "", "");
-    als.addSynonym("Lou Gehrig's");
-    graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
-        "Lou Gehrig's");
-    als.addSynonym("motor neuron disease, bulbar");
-    graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
-        "motor neuron disease, bulbar");
-    
+    graph = new Graph(graphDb, Concept.class);
+    try (Transaction tx = graphDb.beginTx()) {
+      hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation",
+          "BL:5");
+      hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "HP:0008",
+          "foo", "fizz");
+      graph.setProperty(graph.getNode(hippocampus), Concept.ONTOLOGY, "http://foo.org");
+      graph.addProperty(graph.getNode(hippocampus), Concept.SYNONYM, "cornu ammonis");
+      graph.addProperty(graph.getNode(hippocampus), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+          "cornu ammonis");
+      hippocampusStructure = buildConcept("http://example.org/#hippocampusStructure",
+          "Hippocampus structure", "HP", "baz");
+      graph.setProperty(graph.getNode(hippocampusStructure), Concept.ONTOLOGY, "http://baz.org");
+      structureOfHippocampus = buildConcept("http://example.org/#structureOfHippocampus",
+          "Structure of hippocampus", "baz");
+      cerebellum = buildConcept("http://example.org/#cerebellum", "Cerebellum", "baz", "foo");
+      graph.setProperty(graph.getNode(cerebellum), Concept.ONTOLOGY, "http://baz.org");
+      specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz",
+          "foo bar");
+      parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
+      graph.addProperty(graph.getNode(parkinsons), Concept.SYNONYM, "the");
+      als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis", "", "");
+      graph.addProperty(graph.getNode(als), Concept.SYNONYM, "Lou Gehrig's");
+      graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+          "Lou Gehrig's");
+      graph.addProperty(graph.getNode(als), Concept.SYNONYM, "motor neuron disease, bulbar");
+      graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+          "motor neuron disease, bulbar");
+      tx.success();
+    }
 
-    vocabulary = new VocabularyNeo4jImpl<Concept>(graph, null);
+    vocabulary = new VocabularyNeo4jImpl(graph, null);
   }
 
   @Test
@@ -135,7 +145,9 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testSearchConcepts() {
     Query query = new Vocabulary.Query.Builder("hippocampus").build();
-    assertThat(vocabulary.searchConcepts(query), contains(hippocampus, structureOfHippocampus, hippocampusStructure, hippocampalFormation));
+    System.out.println(vocabulary.searchConcepts(query));
+    assertThat(vocabulary.searchConcepts(query),
+        contains(hippocampus, structureOfHippocampus, hippocampusStructure, hippocampalFormation));
   }
 
   @Test
@@ -146,7 +158,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   @Test
   public void testSearchConceptsWithCategory() {
-    Query query = new Vocabulary.Query.Builder("hippocampus").categories(newArrayList("foo")).build();
+    Query query = new Vocabulary.Query.Builder("hippocampus").categories(newArrayList("foo"))
+        .build();
     assertThat(vocabulary.searchConcepts(query), contains(hippocampus));
   }
 
@@ -176,14 +189,16 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   @Test
   public void testSearchconceptsWithNonexistantCategory() {
-    Query query = new Vocabulary.Query.Builder("hippocampus").categories(newArrayList("doesntExist")).build();
+    Query query = new Vocabulary.Query.Builder("hippocampus").categories(
+        newArrayList("doesntExist")).build();
     assertThat(vocabulary.searchConcepts(query), is(empty()));
   }
 
   @Test
   public void testGetConceptsFromPrefix() {
     Query query = new Vocabulary.Query.Builder("hip").build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure, hippocampalFormation));
+    assertThat(vocabulary.getConceptsFromPrefix(query),
+        contains(hippocampus, hippocampusStructure, hippocampalFormation));
   }
 
   @Test
@@ -226,19 +241,22 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   @Test
   public void testGetConceptsFromPrefixWithMultipleCategories() {
-    Query query = new Vocabulary.Query.Builder("hip").categories(newArrayList("baz", "foo")).build();
+    Query query = new Vocabulary.Query.Builder("hip").categories(newArrayList("baz", "foo"))
+        .build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampusStructure, hippocampus));
   }
 
   @Test
   public void testGetConceptsFromPrefixWithOntology() {
-    Query query = new Vocabulary.Query.Builder("hip").ontologies(newHashSet("http://foo.org")).build();
+    Query query = new Vocabulary.Query.Builder("hip").ontologies(newHashSet("http://foo.org"))
+        .build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus));
   }
 
   @Test
   public void testGetConceptsFromPrefixWithMultipleOntologies() {
-    Query query = new Vocabulary.Query.Builder("hip").ontologies(newHashSet("http://foo.org", "http://baz.org")).build();
+    Query query = new Vocabulary.Query.Builder("hip").ontologies(
+        newHashSet("http://foo.org", "http://baz.org")).build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
   }
 
@@ -275,7 +293,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetAllOntologies() {
     Set<String> ontologies = vocabulary.getAllOntologies();
-    assertThat(ontologies, hasItems("http://foo.org", "http://bar.org"));
+    assertThat(ontologies, hasItems("http://foo.org", "http://baz.org"));
   }
 
   @Test

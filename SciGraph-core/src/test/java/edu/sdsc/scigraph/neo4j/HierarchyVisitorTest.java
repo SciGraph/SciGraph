@@ -32,15 +32,12 @@ import com.google.common.base.Function;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.neo4j.EdgeType;
-import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.neo4j.HierarchyVisitor;
 import edu.sdsc.scigraph.neo4j.HierarchyVisitor.Callback;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class HierarchyVisitorTest extends GraphTestBase {
 
-  Graph<Concept> graph;
+  Graph graph;
   Node a, b, c, d, e, f, g, h, i, j;
 
   Callback emptyCallback = new Callback() {
@@ -79,7 +76,7 @@ public class HierarchyVisitorTest extends GraphTestBase {
    **********/
   @Before
   public void createNodes() {
-    graph = new Graph<Concept>(graphDb, Concept.class);
+    graph = new Graph(graphDb, Concept.class);
     a = createNode("a");
     b = createNode("b");
     c = createNode("c");

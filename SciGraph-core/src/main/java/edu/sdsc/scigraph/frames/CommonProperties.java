@@ -15,68 +15,104 @@
  */
 package edu.sdsc.scigraph.frames;
 
-import com.tinkerpop.frames.Property;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /***
  * Properties common to both nodes and edges.
  */
-public interface CommonProperties {
+public class CommonProperties {
 
-  String URI = "uri";
-  String FRAGMENT = "fragment";
-  String CURIE = "curie";
-  String TYPE = "type"; // TODO: Could be replaced by neo4j 2.0 labels
-  String NEGATED = "negated";
-  String PARENT_ONTOLOGY = "parentOntology";
-  String ONTOLOGY = "ontology";
-  String ONTOLOGY_VERSION = "ontologyVersion";
+  public static final String URI = "uri";
+  public static final String FRAGMENT = "fragment";
+  public static final String CURIE = "curie";
+  public static final String TYPE = "type"; // TODO: Could be replaced by neo4j 2.0 labels
+  public static final String NEGATED = "negated";
+  public static final String PARENT_ONTOLOGY = "parentOntology";
+  public static final String ONTOLOGY = "ontology";
+  public static final String ONTOLOGY_VERSION = "ontologyVersion";
 
-  @Property(URI)
-  void setUri(String uri);
+  private long id;
+  private String uri;
+  private String fragment;
+  private String curie;
+  private boolean negated;
+  private String parentOntology;
+  private String ontology;
+  private String ontologyVersion;
+  private Set<String> types = new HashSet<>();
 
-  @Property(URI)
-  String getUri();
+  public void setId(long id) {
+    this.id = id;
+  }
 
-  @Property(FRAGMENT)
-  void setFragment(String uri);
+  public long getId() {
+    return id;
+  }
 
-  @Property(FRAGMENT)
-  String getFragment();
+  public void setUri(String uri) {
+    this.uri = uri;
+  }
 
-  @Property(CURIE)
-  void setCurie(String curie);
+  public String getUri() {
+    return uri;
+  }
 
-  @Property(CURIE)
-  String getCurie();
+  public void setFragment(String fragment) {
+    this.fragment = fragment;
+  }
 
-  @Property(NEGATED)
-  void setNegated(boolean negated);
+  public String getFragment() {
+    return fragment;
+  }
 
-  @Property(NEGATED)
-  boolean isNegated();
+  public void setCurie(String curie) {
+    this.curie = curie;
+  }
 
-  @Property(PARENT_ONTOLOGY)
-  void setParentOntology(String ontology);
+  public String getCurie() {
+    return curie;
+  }
 
-  @Property(PARENT_ONTOLOGY)
-  String getParentOntology();
+  public void setNegated(boolean negated) {
+    this.negated = negated;
+  }
+
+  public boolean isNegated() {
+    return negated;
+  }
+
+  public void setParentOntology(String ontology) {
+    this.parentOntology = ontology;
+  }
+
+  public String getParentOntology() {
+    return parentOntology;
+  }
   
-  @Property(ONTOLOGY)
-  void setOntology(String ontology);
+  public void setOntology(String ontology) {
+    this.ontology = ontology;
+  }
 
-  @Property(ONTOLOGY)
-  String getOntology();
+  public String getOntology() {
+    return ontology;
+  }
 
-  @Property(ONTOLOGY_VERSION)
-  void setOntologyVersion(String version);
+  public void setOntologyVersion(String version) {
+    this.ontologyVersion = version;
+  }
 
-  @Property(ONTOLOGY_VERSION)
-  String getOntologyVersion();
+  public String getOntologyVersion() {
+    return ontologyVersion;
+  }
 
-  @Property(TYPE)
-  void addType(String type);
+  public void addType(String type) {
+    types.add(type);
+  }
 
-  @Property(TYPE)
-  Iterable<String> getTypes();
+  public Iterable<String> getTypes() {
+    return types;
+  }
 
 }

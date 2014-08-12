@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -54,6 +54,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexHits;
 
 import com.google.common.base.Function;
@@ -68,16 +69,16 @@ import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyQueryAnalyzer;
 import edu.sdsc.scigraph.neo4j.Graph;
 
-public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary<N> {
+public class VocabularyNeo4jImpl implements Vocabulary {
 
   private static final Logger logger = Logger.getLogger(VocabularyNeo4jImpl.class.getName());
 
-  private final Graph<N> graph;
+  private final Graph graph;
   private SpellChecker spellChecker;
   private final QueryParser parser;
 
   @Inject
-  public VocabularyNeo4jImpl(Graph<N> graph, @Nullable @Named("neo4j.location") String neo4jLocation)
+  public VocabularyNeo4jImpl(Graph graph, @Nullable @Named("neo4j.location") String neo4jLocation)
       throws IOException {
     this.graph = graph;
     if (null != neo4jLocation) {
@@ -101,8 +102,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
       @Override
       public Object apply(Object input) {
         return input instanceof String ? QueryParser.escape((String) input)
-            .replaceAll(" ",
-            "\\\\ ") : input;
+            .replaceAll(" ", "\\\\ ") : input;
       }
     }).toArray());
   }
@@ -127,24 +127,34 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
   }
 
   // TODO: Can this be done in the query?
-  List<N> limitHits(IndexHits<Node> hits, Query query) {
-    return newArrayList(limit(graph.getOrCreateFramedNodes(hits), query.getLimit()));
+  List<Concept> limitHits(IndexHits<Node> hits, Query query) {
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      Iterable<Concept> limitedHits = limit(graph.getOrCreateFramedNodes(hits), query.getLimit());
+      List<Concept> ret = newArrayList(limitedHits);
+      for (Concept c : ret) {
+        System.out.println(c.getUri());
+      }
+      tx.success();
+      return ret;
+    }
+
   }
 
   @Override
-  public Optional<N> getConceptFromUri(String uri) {
+  public Optional<Concept> getConceptFromUri(String uri) {
     return graph.getFramedNode(uri);
   }
 
   @Override
-  public Collection<N> getConceptFromId(Query query) {
+  public Collection<Concept> getConceptFromId(Query query) {
     String idQuery = StringUtils.strip(query.getInput(), "\"");
     idQuery = QueryParser.escape(idQuery);
     String queryString = format("%s:%s %s:%s", CommonProperties.FRAGMENT, idQuery,
         CommonProperties.CURIE, idQuery);
     IndexHits<Node> hits;
-    try {
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
       hits = graph.getNodeAutoIndex().query(parser.parse(queryString));
+      tx.success();
       return limitHits(hits, query);
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parse an ID query", e);
@@ -154,7 +164,7 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
   }
 
   @Override
-  public List<N> getConceptsFromPrefix(Query query) {
+  public List<Concept> getConceptsFromPrefix(Query query) {
     BooleanQuery finalQuery = new BooleanQuery();
     try {
       BooleanQuery subQuery = new BooleanQuery();
@@ -175,12 +185,17 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
       logger.log(Level.WARNING, "Failed to parser query", e);
     }
     addCommonConstraints(finalQuery, query);
-    IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
+    IndexHits<Node> hits = null;
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      hits = graph.getNodeAutoIndex().query(finalQuery);
+      tx.success();
+    }
     return limitHits(hits, query);
+
   }
 
   @Override
-  public List<N> searchConcepts(Query query) {
+  public List<Concept> searchConcepts(Query query) {
     BooleanQuery finalQuery = new BooleanQuery();
     try {
       if (query.isIncludeSynonyms()) {
@@ -195,12 +210,16 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
       logger.log(Level.WARNING, "Failed to parser query", e);
     }
     addCommonConstraints(finalQuery, query);
-    IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
+    IndexHits<Node> hits = null;
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      hits = graph.getNodeAutoIndex().query(finalQuery);
+      tx.success();
+    }
     return limitHits(hits, query);
   }
 
   @Override
-  public List<N> getConceptsFromTerm(Query query) {
+  public List<Concept> getConceptsFromTerm(Query query) {
     String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
     BooleanQuery finalQuery = new BooleanQuery();
     try {
@@ -217,8 +236,11 @@ public class VocabularyNeo4jImpl<N extends NodeProperties> implements Vocabulary
     }
     addCommonConstraints(finalQuery, query);
     logger.finest(finalQuery.toString());
-    IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
-    return limitHits(hits, query);
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
+      tx.success();
+      return limitHits(hits, query);
+    }
   }
 
   @Override

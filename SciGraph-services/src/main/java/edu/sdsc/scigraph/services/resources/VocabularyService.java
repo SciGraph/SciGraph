@@ -74,7 +74,7 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
     MediaType.APPLICATION_XML, })
 public class VocabularyService extends BaseResource {
 
-  private final Vocabulary<Concept> vocabulary;
+  private final Vocabulary vocabulary;
   private final DozerBeanMapper mapper;
 
   private static final Analyzer analyzer = new ExactAnalyzer();
@@ -98,7 +98,7 @@ public class VocabularyService extends BaseResource {
   };
 
   @Inject
-  VocabularyService(Vocabulary<Concept> vocabulary, DozerBeanMapper mapper) {
+  VocabularyService(Vocabulary vocabulary, DozerBeanMapper mapper) {
     this.vocabulary = vocabulary;
     this.mapper = mapper;
   }

@@ -50,10 +50,10 @@ import edu.sdsc.scigraph.neo4j.Graph;
 
 public class GraphApi {
 
-  private final Graph<Concept> graph;
+  private final Graph graph;
 
   @Inject
-  GraphApi(Graph<Concept> graph) {
+  GraphApi(Graph graph) {
     this.graph = graph;
   }
 

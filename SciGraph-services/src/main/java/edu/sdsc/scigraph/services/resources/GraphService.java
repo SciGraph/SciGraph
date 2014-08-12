@@ -38,6 +38,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
@@ -53,6 +55,7 @@ import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.Traversal;
 
 import com.codahale.metrics.annotation.Timed;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
@@ -77,11 +80,11 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
     MediaType.APPLICATION_XML })
 public class GraphService extends BaseResource {
 
-  private final Vocabulary<Concept> vocabulary;
-  private final Graph<Concept> graph;
+  private final Vocabulary vocabulary;
+  private final Graph graph;
 
   @Inject
-  GraphService(Vocabulary<Concept> vocabulary, Graph<Concept> graph) {
+  GraphService(Vocabulary vocabulary, Graph graph) {
     this.vocabulary = vocabulary;
     this.graph = graph;
   }
@@ -293,8 +296,26 @@ public class GraphService extends BaseResource {
         .traverse(node)) {
       graphPaths.add(getGraphPathFromPath(path));
     }
-    GenericEntity<List<GraphPath>> response = new GenericEntity<List<GraphPath>>(graphPaths){};
+    GenericEntity<GraphPathWrapper> response = new GenericEntity<GraphPathWrapper>(
+        new GraphPathWrapper(graphPaths)) {
+    };
     return JaxRsUtil.wrapJsonp(request, response, callback);
+  }
+
+  @XmlRootElement
+  static class GraphPathWrapper {
+
+    @XmlElement
+    @JsonProperty
+    List<GraphPath> paths;
+
+    public GraphPathWrapper() {
+    }
+
+    public GraphPathWrapper(List<GraphPath> paths) {
+      this.paths = paths;
+    }
+
   }
 
 }
