@@ -131,9 +131,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     try (Transaction tx = graph.getGraphDb().beginTx()) {
       Iterable<Concept> limitedHits = limit(graph.getOrCreateFramedNodes(hits), query.getLimit());
       List<Concept> ret = newArrayList(limitedHits);
-      for (Concept c : ret) {
-        System.out.println(c.getUri());
-      }
       tx.success();
       return ret;
     }
