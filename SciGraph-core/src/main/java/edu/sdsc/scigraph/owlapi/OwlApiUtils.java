@@ -19,6 +19,7 @@ import java.net.URI;
 
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
@@ -53,6 +54,10 @@ public class OwlApiUtils {
       literalValue = literal.getLiteral();
     }
     return Optional.of(literalValue);
+  }
+
+  public static URI getUri(OWLDeclarationAxiom expression) {
+    return expression.getEntity().getIRI().toURI();
   }
 
   public static URI getUri(OWLClassExpression expression) {

@@ -84,6 +84,7 @@ import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
@@ -203,7 +204,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         Node object = graph.getOrCreateNode(((IRI)axiom.getValue()).toURI());
         URI uri = Graph.getURI(property);
 
-        RelationshipType type = DynamicRelationshipType.withName(Graph.getFragment(uri));
+        RelationshipType type = DynamicRelationshipType.withName(GraphUtil.getFragment(uri));
         Relationship r = graph.getOrCreateRelationship(subject, object, type, property);
         r.setProperty(CommonProperties.TYPE, OWLAnnotationAssertionAxiom.class.getSimpleName());
       }

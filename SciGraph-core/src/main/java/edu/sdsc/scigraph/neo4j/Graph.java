@@ -144,27 +144,15 @@ public class Graph {
   @Transactional
   public boolean nodeExists(URI uri) {
     checkNotNull(uri);
-    // try (Transaction tx = graphDb.beginTx()) {
-    return null != nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
-    // }
+    try (Transaction tx = graphDb.beginTx()) {
+      boolean exists = null != nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
+      tx.success();
+      return exists;
+    }
   }
 
   public Node getOrCreateNode(String uri) {
     return getOrCreateNode(getURI(uri));
-  }
-
-  static String getLastPathFragment(URI uri) {
-    return uri.getPath().replaceFirst(".*/([^/?]+).*", "$1");
-  }
-
-  public static String getFragment(URI uri) {
-    if (null != uri.getFragment()) {
-      return uri.getFragment();
-    } else if (uri.toString().startsWith("mailto:")) {
-      return uri.toString().substring("mailto:".length());
-    } else {
-      return getLastPathFragment(uri);
-    }
   }
 
   public Node getOrCreateNode(final URI uri) {
@@ -176,7 +164,7 @@ public class Graph {
           logger.fine("Creating node: " + properties.get(UNIQUE_PROPERTY));
           try (Transaction tx = graphDb.beginTx()) {
             created.setProperty(UNIQUE_PROPERTY, properties.get(UNIQUE_PROPERTY));
-            created.setProperty(CommonProperties.FRAGMENT, getFragment(uri));
+            created.setProperty(CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
             tx.success();
           }
         }
@@ -328,7 +316,7 @@ public class Graph {
             Relationship r = a.createRelationshipTo(b, type);
             if (uri.isPresent()) {
               r.setProperty(CommonProperties.URI, uri.get().toString());
-              r.setProperty(CommonProperties.FRAGMENT, getFragment(uri.get()));
+              r.setProperty(CommonProperties.FRAGMENT, GraphUtil.getFragment(uri.get()));
             }
             tx.success();
             return r;
@@ -408,7 +396,7 @@ public class Graph {
       Object origValue = container.getProperty(property);
       Class<?> clazz = value.getClass();
       Set<Object> valueSet = new LinkedHashSet<>();
-      if (container.getProperty(property).getClass().isArray()) {
+      if (origValue.getClass().isArray()) {
         for (int i = 0; i < Array.getLength(origValue); i++) {
           valueSet.add(Array.get(origValue, i));
         }
