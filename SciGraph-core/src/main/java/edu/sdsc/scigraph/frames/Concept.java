@@ -18,6 +18,8 @@ package edu.sdsc.scigraph.frames;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
+
 public class Concept extends NodeProperties {
 
   public static final String PREFERRED_LABEL = "preferedLabel";
@@ -94,6 +96,11 @@ public class Concept extends NodeProperties {
   @Override
   public int hashCode() {
     return new Long(getId()).hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s (%s)", Iterables.toString(getLabels()), this.getFragment());
   }
 
 }
