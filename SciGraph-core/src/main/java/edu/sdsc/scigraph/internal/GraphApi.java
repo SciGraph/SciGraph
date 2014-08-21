@@ -119,11 +119,11 @@ public class GraphApi {
    * They translate to the following graph pattern:
    * 
    * <pre>
-   * c-EQUIVALENT_TO->ANON (SomeValuesFrom)->PROPERTY->birnlex_17
-   *                   |
-   *                 CLASS
-   *                   |
-   *                 someRole<-birnlex_17-inferredClass
+   * (c)-[:EQUIVALENT_TO]->(SomeValuesFrom)->[:PROPERTY]->(birnlex_17)
+   *                              |
+   *                            [:CLASS]
+   *                              |
+   *                           (someRole)<-[:birnlex_17]-(inferredClass)
    * </pre>
    * 
    * @param c
