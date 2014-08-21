@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.google.common.collect.ForwardingConcurrentMap;
 
 /***
- * A map of IRIs to internal Neo4j IDs for keeping track of IRIs during a bulk load.
+ * A map of external unique keys to internal Neo4j IDs for keeping track of these mappings during a
+ * bulk load.
  *
  * TODO: This could be switched to MapDB if this structure needs to persist.
  *
@@ -24,8 +25,8 @@ public class IdMap extends ForwardingConcurrentMap<String, Long> {
 
   @Override
   public Long get(Object key) {
-    putIfAbsent((String) key, idCounter.getAndIncrement());
-    return super.get(key);
+    delegate.putIfAbsent((String) key, idCounter.getAndIncrement());
+    return delegate.get(key);
   }
 
 }
