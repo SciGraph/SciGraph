@@ -3,9 +3,12 @@ package edu.sdsc.scigraph.neo4j;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.filter;
 
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
@@ -15,13 +18,68 @@ import org.neo4j.graphdb.RelationshipType;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
+/***
+ * Convenience utilities for dealing with Neo4j graphs.
+ * 
+ * <b>Note:</b> Clients are responsible for managing transactions around these methods.
+ */
 public class GraphUtil {
 
   /***
+   * Add a property value to a container.
+   * 
+   * Abstracts dealing with underlying value arrays for the client. The property may already have a
+   * value. <br />
+   * <b>Note:</b> duplicate values are ignored.
+   * 
    * @param container
+   *          The PropertyContainer in question
    * @param property
+   *          The name of the property
+   * @param value
+   *          The value to append
+   */
+  public static void addProperty(PropertyContainer container, String property, Object value) {
+    if (container.hasProperty(property)) {
+      // We might be creating or updating an array - read everything into a Set<>
+      Object origValue = container.getProperty(property);
+      Class<?> clazz = value.getClass();
+      Set<Object> valueSet = new LinkedHashSet<>();
+      if (origValue.getClass().isArray()) {
+        for (int i = 0; i < Array.getLength(origValue); i++) {
+          valueSet.add(Array.get(origValue, i));
+        }
+      } else {
+        valueSet.add(origValue);
+      }
+      valueSet.add(value);
+
+      // Now write the set back if necessary
+      if (valueSet.size() > 1) {
+        Object newArray = Array.newInstance(clazz, valueSet.size());
+        int i = 0;
+        for (Object obj : valueSet) {
+          Array.set(newArray, i++, clazz.cast(obj));
+        }
+        container.setProperty(property, newArray);
+      }
+    } else {
+      container.setProperty(property, value);
+    }
+  }
+
+  /***
+   * Get a single valued property in a type safe way.
+   * 
+   * @param container
+   *          The PropertyContainer in question
+   * @param property
+   *          The name of the property
    * @param type
-   * @return the single property value for node with the supplied type
+   *          The type of the property
+   * @return An optional property value
+   * @throws ClassCastException
+   *           if the property types don't match
    */
   static public <T> Optional<T> getProperty(PropertyContainer container, String property,
       Class<T> type) {
@@ -33,24 +91,35 @@ public class GraphUtil {
   }
 
   /***
+   * Get multi-valued properties.
+   * 
    * @param container
+   *          The PropertyContainer in question
    * @param property
+   *          The name of the property
    * @param type
-   * @return a list of properties for node with the supplied type
+   *          The type of the property
+   * @return An list of property values
+   * @throws ClassCastException
+   *           if the property types don't match
    */
   static public <T> List<T> getProperties(PropertyContainer container, String property,
       Class<T> type) {
     List<T> list = new ArrayList<>();
     if (container.hasProperty(property)) {
       if (container.getProperty(property).getClass().isArray()) {
-        for (Object o : (Object[]) container.getProperty(property)) {
+        Object value = container.getProperty(property);
+        List<Object> objects = new ArrayList<>();
+        for (int i = 0; i < Array.getLength(value); i++) {
+          objects.add(Array.get(value, i));
+        }
+        for (Object o : objects) {
           list.add(type.cast(o));
         }
       } else {
         list.add(type.cast(container.getProperty(property)));
       }
     }
-
     return list;
   }
 
