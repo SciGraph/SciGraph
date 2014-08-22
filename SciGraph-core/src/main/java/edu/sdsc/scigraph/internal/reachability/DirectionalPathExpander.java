@@ -28,7 +28,7 @@ class DirectionalPathExpander implements PathExpander<Void> {
 
   private final Direction direction;
 
-  DirectionalPathExpander (Direction direction) {
+  DirectionalPathExpander(Direction direction) {
     this.direction = direction;
   }
 

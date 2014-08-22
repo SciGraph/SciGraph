@@ -78,7 +78,7 @@ public class BatchGraph {
    *          The node's unique id
    * @return A new or existing node identified by id
    */
-  public long getOrCreateNode(String id) {
+  public long getNode(String id) {
     long nodeId = idMap.get(id);
     if (!inserter.nodeExists(nodeId)) {
       inserter.createNode(nodeId, Collections.<String, Object> emptyMap());
@@ -87,6 +87,12 @@ public class BatchGraph {
     return nodeId;
   }
 
+  /***
+   * @param from
+   * @param to
+   * @param type
+   * @return true if an undirected relationship with type exists between from and to
+   */
   public boolean hasRelationship(long from, long to, RelationshipType type) {
     for (BatchRelationship rel : inserter.getRelationships(from)) {
       if ((rel.getEndNode() == to) || (rel.getStartNode() == to)
@@ -97,6 +103,12 @@ public class BatchGraph {
     return false;
   }
 
+  /***
+   * @param from
+   * @param to
+   * @param type
+   * @return A new or existing relationship with type type between from and to
+   */
   public long createRelationship(long from, long to, RelationshipType type) {
     if (!relationshipMap.containsKey(from, to, type)) {
       long relationshipId = inserter.createRelationship(from, to, type, Collections.<String, Object> emptyMap());
@@ -105,6 +117,13 @@ public class BatchGraph {
     return relationshipMap.get(from, to, type);
   }
 
+  /***
+   * Create pairwise relationships between all nodes.
+   * 
+   * @param nodes
+   * @param type
+   * @return All of the created edges
+   */
   public Collection<Long> createRelationshipPairwise(Collection<Long> nodes, RelationshipType type) {
     Set<Long> relationships = new HashSet<>();
     for (Long start : nodes) {

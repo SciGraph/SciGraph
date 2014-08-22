@@ -46,7 +46,7 @@ public class BatchGraphTest {
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     graph = new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
         Collections.<String> emptySet());
-    foo = graph.getOrCreateNode("http://example.org/foo");
+    foo = graph.getNode("http://example.org/foo");
   }
 
   @After
@@ -129,8 +129,8 @@ public class BatchGraphTest {
 
   @Test
   public void testHasRelationship() {
-    long a = graph.getOrCreateNode("a");
-    long b = graph.getOrCreateNode("b");
+    long a = graph.getNode("a");
+    long b = graph.getNode("b");
     RelationshipType type = DynamicRelationshipType.withName("foo");
     graph.createRelationship(a, b, type);
     assertThat(graph.hasRelationship(a, b, type), is(true));
@@ -139,8 +139,8 @@ public class BatchGraphTest {
 
   @Test
   public void testRelationshipProperty() {
-    long a = graph.getOrCreateNode("a");
-    long b = graph.getOrCreateNode("b");
+    long a = graph.getNode("a");
+    long b = graph.getNode("b");
     RelationshipType type = DynamicRelationshipType.withName("foo");
     long foo = graph.createRelationship(a, b, type);
     graph.setRelationshipProperty(foo, "foo", "bar");
@@ -151,9 +151,9 @@ public class BatchGraphTest {
 
   @Test
   public void testCreateRelationshipPairwise() {
-    long a = graph.getOrCreateNode("a");
-    long b = graph.getOrCreateNode("b");
-    long c = graph.getOrCreateNode("c");
+    long a = graph.getNode("a");
+    long b = graph.getNode("b");
+    long c = graph.getNode("c");
     RelationshipType type = DynamicRelationshipType.withName("foo");
     graph.createRelationshipPairwise(newHashSet(a, b, c), type);
     getGraphDB();

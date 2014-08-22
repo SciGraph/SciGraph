@@ -129,7 +129,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   private long getOrCreateNode(URI uri) {
-    return graph.getOrCreateNode(uri.toString());
+    return graph.getNode(uri.toString());
   }
 
   @Override

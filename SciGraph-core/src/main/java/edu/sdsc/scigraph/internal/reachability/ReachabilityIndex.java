@@ -44,6 +44,10 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.primitives.Longs;
 
+/***
+ * 
+ *
+ */
 public class ReachabilityIndex {
 
   private static final Label REACHABILITY_METADATA = DynamicLabel.label("ReachabilityIndex");
