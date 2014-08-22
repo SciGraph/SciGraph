@@ -122,7 +122,6 @@ public class BatchOwlLoader {
         NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
         CommonProperties.CURIE, CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
-    private static final Set<String> RELATIONSHIP_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI);
     private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL,
         Concept.SYNONYM);
 

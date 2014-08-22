@@ -80,7 +80,6 @@ public class BatchGraph {
    * @return
    */
   public long getOrCreateNode(String uri) {
-    logger.fine("Creating " + uri);
     long nodeId = idMap.get(uri);
     if (!inserter.nodeExists(nodeId)) {
       inserter.createNode(nodeId, Collections.<String, Object> emptyMap());

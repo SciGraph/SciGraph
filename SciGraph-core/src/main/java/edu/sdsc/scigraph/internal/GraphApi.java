@@ -36,7 +36,6 @@ import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.kernel.Traversal;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Function;
@@ -62,7 +61,7 @@ public class GraphApi {
   }
 
   public boolean classIsInCategory(Node candidate, Node parent, RelationshipType... relationships) {
-    TraversalDescription description = Traversal.description().depthFirst()
+    TraversalDescription description = graph.getGraphDb().traversalDescription().depthFirst()
         .evaluator(new Evaluator() {
           @Override
           public Evaluation evaluate(Path path) {
@@ -97,7 +96,8 @@ public class GraphApi {
    */
   Collection<Node> getEntailment(Node parent, RelationshipType type, Direction direction) {
     Set<Node> entailment = new HashSet<>();
-    for (Path path : Traversal.description().depthFirst().relationships(type, direction)
+    for (Path path : graph.getGraphDb().traversalDescription().depthFirst()
+        .relationships(type, direction)
         .evaluator(Evaluators.fromDepth(1)).evaluator(Evaluators.all()).traverse(parent)) {
       entailment.add(path.endNode());
     }

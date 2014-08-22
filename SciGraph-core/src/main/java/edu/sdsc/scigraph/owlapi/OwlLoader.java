@@ -80,8 +80,7 @@ public class OwlLoader {
   void loadOntology() {
     Stopwatch timer = Stopwatch.createStarted();
     inTransaction.set(true);
-    Transaction tx = graph.getGraphDb().beginTx();
-    try {
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
       logger.info("Walking ontology structure...");
       walker.walkStructure(visitor);
       logger.info(format("Walking ontology structure took %d seconds",
@@ -96,7 +95,6 @@ public class OwlLoader {
       timer.reset();
       timer.start();
       logger.info("Committing changes...");
-      tx.finish();
       logger.info(format("Committing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
     }
     try (Transaction tx2 = graph.getGraphDb().beginTx()) {

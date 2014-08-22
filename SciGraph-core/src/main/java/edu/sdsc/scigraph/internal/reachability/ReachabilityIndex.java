@@ -37,8 +37,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.kernel.Traversal;
-import org.neo4j.kernel.Uniqueness;
+import org.neo4j.graphdb.traversal.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Predicate;
@@ -120,11 +119,11 @@ public class ReachabilityIndex {
 
     MemoryReachabilityIndex inMemoryIndex = new MemoryReachabilityIndex();
 
-    TraversalDescription incomingTraversal = Traversal.description().breadthFirst()
+    TraversalDescription incomingTraversal = graphDb.traversalDescription().breadthFirst()
         .uniqueness(Uniqueness.NODE_GLOBAL).expand(new DirectionalPathExpander(Direction.INCOMING))
         .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.INCOMING, nodePredicate));
 
-    TraversalDescription outgoingTraversal = Traversal.description().breadthFirst()
+    TraversalDescription outgoingTraversal = graphDb.traversalDescription().breadthFirst()
         .uniqueness(Uniqueness.NODE_GLOBAL).expand(new DirectionalPathExpander(Direction.OUTGOING))
         .evaluator(new ReachabilityEvaluator(inMemoryIndex, Direction.OUTGOING, nodePredicate));
 

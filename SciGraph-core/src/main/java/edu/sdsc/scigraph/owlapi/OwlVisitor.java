@@ -38,8 +38,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.kernel.Traversal;
-import org.neo4j.kernel.Uniqueness;
+import org.neo4j.graphdb.traversal.Uniqueness;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -476,7 +475,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   public void processCategories(Node root, RelationshipType type, String category) {
-    for (Path position : Traversal.description()
+    for (Path position : graph.getGraphDb().traversalDescription()
         .uniqueness(Uniqueness.NODE_GLOBAL)
         .depthFirst()
         .relationships(type, Direction.OUTGOING)

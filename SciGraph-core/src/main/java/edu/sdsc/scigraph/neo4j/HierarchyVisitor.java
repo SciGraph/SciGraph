@@ -36,8 +36,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.traversal.BranchState;
 import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.kernel.Traversal;
-import org.neo4j.kernel.Uniqueness;
+import org.neo4j.graphdb.traversal.Uniqueness;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
@@ -129,7 +128,7 @@ public class HierarchyVisitor {
   }
 
   void traverse(Node... roots) {
-    TraversalDescription description = Traversal.description()
+    TraversalDescription description = graph.getGraphDb().traversalDescription()
         .uniqueness(Uniqueness.RELATIONSHIP_PATH)
         .depthFirst()
         .expand(new PathExpander<Void>() {

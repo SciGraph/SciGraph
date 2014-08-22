@@ -78,12 +78,9 @@ public class Graph {
   private final ExecutionEngine engine;
   private final ReadableIndex<Node> nodeAutoIndex;
 
-  private final Class<?> nodeType;
-
   @Inject
   public Graph(GraphDatabaseService graphDb, Class<?> nodeType) {
     this.graphDb = graphDb;
-    this.nodeType = nodeType;
     this.engine = new ExecutionEngine(graphDb);
     if (!graphDb.index().getNodeAutoIndexer().isEnabled()) {
       setupAutoIndexing();
