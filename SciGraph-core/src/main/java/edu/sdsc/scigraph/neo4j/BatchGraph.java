@@ -3,7 +3,6 @@ package edu.sdsc.scigraph.neo4j;
 import static com.google.common.collect.Sets.newHashSet;
 
 import java.lang.reflect.Array;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -75,21 +74,17 @@ public class BatchGraph {
   }
 
   /***
-   * 
-   * @param uri
-   * @return
+   * @param id
+   *          The node's unique id
+   * @return A new or existing node identified by id
    */
-  public long getOrCreateNode(String uri) {
-    long nodeId = idMap.get(uri);
+  public long getOrCreateNode(String id) {
+    long nodeId = idMap.get(id);
     if (!inserter.nodeExists(nodeId)) {
       inserter.createNode(nodeId, Collections.<String, Object> emptyMap());
-      setNodeProperty(nodeId, uniqueProperty, uri);
+      setNodeProperty(nodeId, uniqueProperty, id);
     }
     return nodeId;
-  }
-
-  public long getOrCreateNode(URI uri) {
-    return getOrCreateNode(uri.toString());
   }
 
   public boolean hasRelationship(long from, long to, RelationshipType type) {
