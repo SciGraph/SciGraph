@@ -94,7 +94,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private OWLOntology parentOntology = null;
 
   @Inject
-  BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph, Map<String, String> curieMap,
+  public BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph, Map<String, String> curieMap,
       List<MappedProperty> mappedProperties) {
     super(walker);
     this.graph = graph;
