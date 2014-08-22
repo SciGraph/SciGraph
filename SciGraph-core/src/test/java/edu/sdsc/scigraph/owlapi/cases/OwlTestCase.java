@@ -30,6 +30,14 @@ import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
+/***
+ * An abstract test case for testing simple OWL axiom combinations.
+ * 
+ * <p>
+ * The OWL structure in question should be placed in src/test/resources/ontologies/cases/x.owl
+ * (where x matches the name of the test class). In addition to running the unit tests, GraphViz dot
+ * files will be produced for each OWL file in target/owl_cases.
+ */
 public abstract class OwlTestCase {
 
   Path path;
@@ -49,8 +57,8 @@ public abstract class OwlTestCase {
     path = Files.createTempDirectory("SciGraph-OwlTest");
 
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
-    BatchGraph batchGraph = new BatchGraph(inserter, "uri",
-        Collections.<String> emptySet(), Collections.<String> emptySet());
+    BatchGraph batchGraph = new BatchGraph(inserter, "uri", Collections.<String> emptySet(),
+        Collections.<String> emptySet());
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     String uri = Resources.getResource("ontologies/cases/" + getTestName() + ".owl").toURI()
         .toString();

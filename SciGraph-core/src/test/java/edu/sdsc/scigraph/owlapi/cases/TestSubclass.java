@@ -18,8 +18,10 @@ public class TestSubclass extends OwlTestCase {
     Node subclass = getNode("http://example.org/subclass");
     Node superclass = getNode("http://example.org/superclass");
     Relationship relationship = getOnlyElement(GraphUtil.getRelationships(subclass, superclass, OwlLabels.RDF_SUBCLASS_OF));
-    assertThat(relationship.getStartNode(), is(subclass));
-    assertThat(relationship.getEndNode(), is(superclass));
+    assertThat("subclassOf relationship should start with the subclass.",
+        relationship.getStartNode(), is(subclass));
+    assertThat("subclassOf relationship should end with the subclass.",
+        relationship.getEndNode(), is(superclass));
   }
 
 }
