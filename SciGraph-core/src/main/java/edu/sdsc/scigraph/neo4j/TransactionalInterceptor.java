@@ -43,12 +43,9 @@ public class TransactionalInterceptor implements MethodInterceptor {
     logger.fine("Intercepting transaction");
     Object result = null;
     if (inTransaction.compareAndSet(false, true)) {
-      Transaction tx = graphDb.beginTx();
-      try {
+      try (Transaction tx = graphDb.beginTx()) {
         result = invocation.proceed();
         tx.success();
-      } finally {
-        tx.finish();
       }
       inTransaction.set(false);
     } else {
