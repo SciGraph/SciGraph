@@ -20,13 +20,10 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.newHashSet;
 
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -391,32 +388,7 @@ public class Graph {
             .contains(((String) value).toLowerCase()))) {
       return;
     }
-    if (container.hasProperty(property)) {
-      // We might be creating or updating an array - read everything into a Set<>
-      Object origValue = container.getProperty(property);
-      Class<?> clazz = value.getClass();
-      Set<Object> valueSet = new LinkedHashSet<>();
-      if (origValue.getClass().isArray()) {
-        for (int i = 0; i < Array.getLength(origValue); i++) {
-          valueSet.add(Array.get(origValue, i));
-        }
-      } else {
-        valueSet.add(origValue);
-      }
-      valueSet.add(value);
-
-      // Now write the set back if necessary
-      if (valueSet.size() > 1) {
-        Object newArray = Array.newInstance(clazz, valueSet.size());
-        int i = 0;
-        for (Object obj : valueSet) {
-          Array.set(newArray, i++, clazz.cast(obj));
-        }
-        container.setProperty(property, newArray);
-      }
-    } else {
-      container.setProperty(property, value);
-    }
+    GraphUtil.addProperty(container, property, value);
     if (EXACT_PROPERTIES.contains(property)) {
       addProperty(container, property + LuceneUtils.EXACT_SUFFIX, value);
     }
@@ -429,11 +401,7 @@ public class Graph {
    * @return the single property value for node with the supplied type
    */
   public <T> Optional<T> getProperty(PropertyContainer container, String property, Class<T> type) {
-    Optional<T> value = Optional.<T> absent();
-    if (container.hasProperty(property)) {
-      value = Optional.<T> of(type.cast(container.getProperty(property)));
-    }
-    return value;
+    return GraphUtil.getProperty(container, property, type);
   }
 
   /***
@@ -443,18 +411,7 @@ public class Graph {
    * @return a list of properties for node with the supplied type
    */
   public <T> List<T> getProperties(PropertyContainer container, String property, Class<T> type) {
-    List<T> list = new ArrayList<>();
-    if (container.hasProperty(property)) {
-      if (container.getProperty(property).getClass().isArray()) {
-        for (Object o : (Object[]) container.getProperty(property)) {
-          list.add(type.cast(o));
-        }
-      } else {
-        list.add(type.cast(container.getProperty(property)));
-      }
-    }
-
-    return list;
+    return GraphUtil.getProperties(container, property, type);
   }
 
   public ResourceIterator<Map<String, Object>> runCypherQuery(String query) {

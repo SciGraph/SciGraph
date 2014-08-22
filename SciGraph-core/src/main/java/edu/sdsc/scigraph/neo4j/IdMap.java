@@ -4,6 +4,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.google.common.collect.ForwardingConcurrentMap;
 
 /***
@@ -13,6 +15,7 @@ import com.google.common.collect.ForwardingConcurrentMap;
  * TODO: This could be switched to MapDB if this structure needs to persist.
  *
  */
+@ThreadSafe
 public class IdMap extends ForwardingConcurrentMap<String, Long> {
 
   ConcurrentHashMap<String, Long> delegate = new ConcurrentHashMap<String, Long>(200_000);
