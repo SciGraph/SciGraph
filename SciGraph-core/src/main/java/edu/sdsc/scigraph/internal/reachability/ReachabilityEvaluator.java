@@ -28,14 +28,14 @@ import com.google.common.base.Predicate;
 
 class ReachabilityEvaluator implements Evaluator {
 
-  private final MemoryReachabilityIndex inMemoryIdx;
+  private final InMemoryReachabilityIndex inMemoryIndex;
   private final Direction direction;
   private final Predicate<Node> nodePredicate;
 
-  ReachabilityEvaluator(MemoryReachabilityIndex inMemoryIdx,
+  ReachabilityEvaluator(InMemoryReachabilityIndex inMemoryIdx,
       Direction direction,
       Predicate<Node> nodePredicate) {
-    this.inMemoryIdx = inMemoryIdx;
+    this.inMemoryIndex = inMemoryIdx;
     this.direction = direction;
     this.nodePredicate = nodePredicate;
   }
@@ -44,7 +44,7 @@ class ReachabilityEvaluator implements Evaluator {
   public Evaluation evaluate(Path path) {
     long currentId = path.endNode().getId();
     if (!nodePredicate.apply(path.endNode())) {
-      inMemoryIdx.get(currentId);
+      inMemoryIndex.get(currentId);
       return Evaluation.EXCLUDE_AND_PRUNE;
     }
 
@@ -52,7 +52,7 @@ class ReachabilityEvaluator implements Evaluator {
 
     if (0 == path.length()) {
       // first node in the traverse - add itself to the in-out list
-      InOutList listPair = inMemoryIdx.get(currentId);
+      InOutList listPair = inMemoryIndex.get(currentId);
       listPair.getInList().add(currentId);
       listPair.getOutList().add(currentId);
       return Evaluation.INCLUDE_AND_CONTINUE;
@@ -62,7 +62,7 @@ class ReachabilityEvaluator implements Evaluator {
       if (nodesAreConnectedInIndex(currentId, startId)) {
         return Evaluation.EXCLUDE_AND_PRUNE;
       } else {
-        InOutList listPair = inMemoryIdx.get(currentId);
+        InOutList listPair = inMemoryIndex.get(currentId);
         listPair.getOutList().add(startId);
         return Evaluation.INCLUDE_AND_CONTINUE;
       }
@@ -71,7 +71,7 @@ class ReachabilityEvaluator implements Evaluator {
       if ( nodesAreConnectedInIndex(startId,currentId)) { // cur is w
         return Evaluation.EXCLUDE_AND_PRUNE;
       } else {
-        InOutList listPair = inMemoryIdx.get(currentId);
+        InOutList listPair = inMemoryIndex.get(currentId);
         listPair.getInList().add(startId);
         return Evaluation.INCLUDE_AND_CONTINUE;
       }
@@ -79,8 +79,8 @@ class ReachabilityEvaluator implements Evaluator {
   }
 
   boolean nodesAreConnectedInIndex(long nodeIdOut, long nodeIdIn) {
-    Set<Long> outList = inMemoryIdx.get(nodeIdOut).getOutList();
-    Set<Long> inList = inMemoryIdx.get(nodeIdIn).getInList();
+    Set<Long> outList = inMemoryIndex.get(nodeIdOut).getOutList();
+    Set<Long> inList = inMemoryIndex.get(nodeIdIn).getInList();
     return !Collections.disjoint(outList, inList);
   }
 

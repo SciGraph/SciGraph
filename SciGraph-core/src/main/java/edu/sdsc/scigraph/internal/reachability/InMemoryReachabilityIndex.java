@@ -23,7 +23,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.google.common.collect.ForwardingMap;
 
 @ThreadSafe
-class MemoryReachabilityIndex extends ForwardingMap<Long, InOutList> {
+class InMemoryReachabilityIndex extends ForwardingMap<Long, InOutList> {
 
   ConcurrentSkipListMap<Long, InOutList> delegate = new ConcurrentSkipListMap<>();
 

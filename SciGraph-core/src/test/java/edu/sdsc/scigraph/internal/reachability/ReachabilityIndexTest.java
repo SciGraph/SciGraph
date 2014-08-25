@@ -18,7 +18,12 @@ package edu.sdsc.scigraph.internal.reachability;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -112,6 +117,53 @@ public class ReachabilityIndexTest {
     assertThat(index.canReach(a, f), is(false));
     assertThat(index.canReach(e, f), is(false));
     assertThat(index.canReach(a, e), is(false));
+  }
+
+  @Test
+  public void testNodePairNodeReachability() {
+    Set<Node> src = new HashSet<>();
+    src.add(a);
+    src.add(d);
+    Set<Node> dest = new HashSet<>();
+    dest.add(b);
+    dest.add(c);
+    Set<Pair<Node, Node>> r = new HashSet<>();
+    r.add(Pair.of(a, b));
+    r.add(Pair.of(a, c));
+    try {
+      Set<Pair<Node, Node>> result = index.getConnectedPairs(src, dest);
+      assertThat(result, is(r));
+    } catch (InterruptedException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void testForAllConnected1() {
+    Set<Node> dest = new HashSet<Node>();
+    dest.add(b);
+    dest.add(c);
+    try {
+      assertThat(index.allReachable(a, dest, false), is(true));
+      dest.add(d);
+      assertThat(index.allReachable(a, dest, false), is(false));
+    } catch (InterruptedException e) {
+      fail();
+    }
+  }
+
+  @Test
+  public void testForAllConnected2() {
+    Set<Node> src = new HashSet<>();
+    src.add(a);
+    src.add(c);
+    try {
+      assertThat(index.allReachable(src, c, false), is(true));
+      src.add(b);
+      assertThat(index.allReachable(src, c, false), is(false));
+    } catch (InterruptedException e) {
+      fail();
+    }
   }
 
 }
