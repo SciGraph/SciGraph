@@ -11,7 +11,7 @@ import org.neo4j.graphdb.Relationship;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.OwlLabels;
 
-public class TestSubclass extends OwlTestCase {
+public class TestSubClassOf extends OwlTestCase {
 
   @Test
   public void testSubclass() {
