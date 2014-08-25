@@ -1,0 +1,5 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestSubclass
+EquivalentClasses(:x :y :z)
+)

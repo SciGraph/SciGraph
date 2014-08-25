@@ -15,7 +15,7 @@ import org.neo4j.graphdb.RelationshipType;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.OwlLabels;
 
-public class TestSubClassOfExistential extends OwlTestCase {
+public class TestEquivalentToIntersectionOf extends OwlTestCase {
 
 	/**
 	 * 
@@ -26,16 +26,25 @@ public class TestSubClassOfExistential extends OwlTestCase {
 	 * 
 	 */
 	@Test
-	public void testSubclass() {
-		Node subclass = getNode("http://example.org/subclass");
-		Node superclass = getNode("http://example.org/superclass");
+	public void testEquivalentToIntersectionOf() {
+		Node definedClass = getNode("http://example.org/definedClass");
+		Node fillerClass = getNode("http://example.org/fillerClass");
 
 		RelationshipType p = DynamicRelationshipType.withName( "http://example.org/p" );
-		Relationship relationship = getOnlyElement(GraphUtil.getRelationships(subclass, superclass, p));
-		assertThat("subclassOf relationship should start with the subclass.",
-				relationship.getStartNode(), is(subclass));
-		assertThat("subclassOf relationship should end with the superclass.",
-				relationship.getEndNode(), is(superclass));
+		Relationship relationship = getOnlyElement(GraphUtil.getRelationships(definedClass, fillerClass, p));
+		
+		/*
+		 * Should translate
+		 * 
+		 * X = genus and R some Y
+		 * ==>
+		 * X = _
+		 * _ subClassOfgenus
+		 * _ R Y
+		 * 
+		 * 
+		 */
+		
 	}
 
 }

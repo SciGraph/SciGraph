@@ -1,0 +1,6 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestSubclass
+Declaration(ObjectProperty(:p))
+EquivalentClasses(:definedClass ObjectIntersectionOf( :genus ObjectSomeValuesFrom(:p :fillerClass)))
+)

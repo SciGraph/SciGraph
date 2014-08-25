@@ -24,9 +24,9 @@ public class TestObjectPropertyAssertion extends OwlTestCase {
 
 		RelationshipType p = DynamicRelationshipType.withName( "http://example.org/p" );
 		Relationship relationship = getOnlyElement(GraphUtil.getRelationships(i, j, p));
-		assertThat("subclassOf relationship should start with the subclass.",
+		assertThat("OPE edge should start with the subject.",
 				relationship.getStartNode(), is(i));
-		assertThat("subclassOf relationship should end with the subclass.",
+		assertThat("OPE edge should start with the target.",
 				relationship.getEndNode(), is(j));
 
 	}
