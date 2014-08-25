@@ -16,9 +16,9 @@
 package edu.sdsc.scigraph.internal.reachability;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -120,50 +120,26 @@ public class ReachabilityIndexTest {
   }
 
   @Test
-  public void testNodePairNodeReachability() {
-    Set<Node> src = new HashSet<>();
-    src.add(a);
-    src.add(d);
-    Set<Node> dest = new HashSet<>();
-    dest.add(b);
-    dest.add(c);
+  public void testGetConnectedPairs() {
+    Set<Node> src = newHashSet(a, d);
+    Set<Node> dest = newHashSet(b, c);
     Set<Pair<Node, Node>> r = new HashSet<>();
     r.add(Pair.of(a, b));
     r.add(Pair.of(a, c));
-    try {
-      Set<Pair<Node, Node>> result = index.getConnectedPairs(src, dest);
-      assertThat(result, is(r));
-    } catch (InterruptedException e) {
-      fail();
-    }
+    Set<Pair<Node, Node>> result = index.getConnectedPairs(src, dest);
+    assertThat(result, is(r));
   }
 
   @Test
-  public void testForAllConnected1() {
-    Set<Node> dest = new HashSet<Node>();
-    dest.add(b);
-    dest.add(c);
-    try {
-      assertThat(index.allReachable(a, dest, false), is(true));
-      dest.add(d);
-      assertThat(index.allReachable(a, dest, false), is(false));
-    } catch (InterruptedException e) {
-      fail();
-    }
-  }
-
-  @Test
-  public void testForAllConnected2() {
-    Set<Node> src = new HashSet<>();
-    src.add(a);
-    src.add(c);
-    try {
-      assertThat(index.allReachable(src, c, false), is(true));
-      src.add(b);
-      assertThat(index.allReachable(src, c, false), is(false));
-    } catch (InterruptedException e) {
-      fail();
-    }
+  public void testAllReachable() {
+    Set<Node> dest = newHashSet(b, c);
+    assertThat(index.allReachable(newHashSet(a), dest), is(true));
+    dest.add(d);
+    assertThat(index.allReachable(newHashSet(a), dest), is(false));
+    Set<Node> src = newHashSet(a, c);
+    assertThat(index.allReachable(src, newHashSet(c)), is(true));
+    src.add(b);
+    assertThat(index.allReachable(src, newHashSet(c)), is(false));
   }
 
 }

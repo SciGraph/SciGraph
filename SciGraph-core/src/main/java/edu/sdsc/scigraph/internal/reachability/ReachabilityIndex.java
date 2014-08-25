@@ -27,8 +27,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -47,6 +45,8 @@ import org.neo4j.tooling.GlobalGraphOperations;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.primitives.Longs;
+
+import edu.sdsc.scigraph.neo4j.DirectionalPathExpander;
 
 /***
  * A Neo4j implementation of the <a
@@ -67,8 +67,6 @@ public class ReachabilityIndex {
   private final Node metaDataNode;
 
   private int transactionBatchSize = 500000; // default transaction size.
-
-  private int parallelLevel = 8;
 
   /***
    * Manage a reachability index object on a graph
@@ -268,141 +266,47 @@ public class ReachabilityIndex {
     }
   }
 
-  public Set<Pair<Node, Node>> getConnectedPairs(Set<Node> sourceNodes, Set<Node> targetNodes)
-      throws InterruptedException {
-    return getConnectivityPairs(sourceNodes, targetNodes, false);
-  }
-
-  public Set<Pair<Node, Node>> getDisconnectedConnectPairs(Set<Node> sourceNodes,
-      Set<Node> targetNodes) throws InterruptedException {
-    return getConnectivityPairs(sourceNodes, targetNodes, true);
-  }
-
-  /*
-   * We assume that source and target sets has no intersections for now.
-   * 
-   * @param sourceNodes
-   * 
-   * @param targetNodes
-   * 
-   * @param negate
-   * 
-   * @return
-   */
-  private Set<Pair<Node, Node>> getConnectivityPairs(Set<Node> sourceNodes, Set<Node> targetNodes,
-      boolean negate) throws InterruptedException {
-    ExecutorService executor = Executors.newFixedThreadPool(parallelLevel);
-    Set<Pair<Node, Node>> r = new HashSet<>();
-
-    for (Node start : sourceNodes) {
-      for (Node end : targetNodes) {
-        Runnable worker = new ConnectivityTester(r, start, end, negate);
-        executor.execute(worker);
-      }
-    }
-
-    executor.shutdown();
-    executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.HOURS);
-
-    return r;
-  }
-
-  public boolean allReachable(Node sourceNode, Set<Node> targetNodes, boolean negate)
-      throws InterruptedException {
-
-    ExecutorService executor = Executors.newFixedThreadPool(parallelLevel);
-    ReachabilityTestContext context = new ReachabilityTestContext();
-
-    for (Node end : targetNodes) {
-      if (context.isAllSatisfied()) {
-        Runnable worker = new ForAllConnectivityTester(sourceNode, end, negate, context);
-        executor.execute(worker);
-      } else {
-        break;
-      }
-    }
-
-    executor.shutdown();
-    executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.HOURS);
-
-    return context.isAllSatisfied();
-  }
-
-  public boolean allReachable(Set<Node> sourceNodes, Node targetNode, boolean negate)
-      throws InterruptedException {
-
-    ExecutorService executor = Executors.newFixedThreadPool(parallelLevel);
-    ReachabilityTestContext context = new ReachabilityTestContext();
-
-    for (Node start : sourceNodes) {
-      if (context.isAllSatisfied()) {
-        Runnable worker = new ForAllConnectivityTester(start, targetNode, negate, context);
-        executor.execute(worker);
-      } else {
-        break;
-      }
-    }
-
-    executor.shutdown();
-    executor.awaitTermination(Integer.MAX_VALUE, TimeUnit.HOURS);
-
-    return context.isAllSatisfied();
-  }
-
-  class ForAllConnectivityTester implements Runnable {
-
-    private Node startNode;
-    private Node endNode;
-    private boolean negate;
-    ReachabilityTestContext context;
-
-    public ForAllConnectivityTester(Node startNode, Node endNode, boolean negate,
-        ReachabilityTestContext context) {
-      this.startNode = startNode;
-      this.endNode = endNode;
-      this.negate = negate;
-      this.context = context;
-    }
-
-    @Override
-    public void run() {
-      if (!context.isAllSatisfied())
-        return;
-      if (canReach(startNode, endNode) == negate) {
-        synchronized (context) {
-          if (context.isAllSatisfied())
-            context.setAllSatisfied(false);
-
+  Set<Pair<Node, Node>> evaluatePairs(Set<Node> sources, Set<Node> targets,
+      Predicate<Pair<Node, Node>> predicate) {
+    Set<Pair<Node, Node>> pairs = new HashSet<>();
+    for (Node source : sources) {
+      for (Node target : targets) {
+        Pair<Node, Node> pair = Pair.of(source, target);
+        if (predicate.apply(pair)) {
+          pairs.add(pair);
         }
       }
     }
-
+    return pairs;
   }
 
-  class ConnectivityTester implements Runnable {
+  public Set<Pair<Node, Node>> getConnectedPairs(Set<Node> sources, Set<Node> targets) {
+    return evaluatePairs(sources, targets, new Predicate<Pair<Node, Node>>() {
+      @Override
+      public boolean apply(Pair<Node, Node> pair) {
+        return canReach(pair.getLeft(), pair.getRight());
+      }
+    });
+  }
 
-    private Set<Pair<Node, Node>> resultSet;
-    private Node startNode;
-    private Node endNode;
-    private boolean negate;
+  public Set<Pair<Node, Node>> getDisconnectedPairs(Set<Node> sources, Set<Node> targets) {
+    return evaluatePairs(sources, targets, new Predicate<Pair<Node, Node>>() {
+      @Override
+      public boolean apply(Pair<Node, Node> pair) {
+        return !canReach(pair.getLeft(), pair.getRight());
+      }
+    });
+  }
 
-    public ConnectivityTester(Set<Pair<Node, Node>> resultSet, Node startNode, Node endNode,
-        boolean negate) {
-      this.resultSet = resultSet;
-      this.startNode = startNode;
-      this.endNode = endNode;
-      this.negate = negate;
-    }
-
-    @Override
-    public void run() {
-      if (canReach(startNode, endNode) != negate) {
-        synchronized (resultSet) {
-          resultSet.add(Pair.of(startNode, endNode));
+  public boolean allReachable(Set<Node> sources, Set<Node> targets) {
+    for (Node source : sources) {
+      for (Node target : targets) {
+        if (!canReach(source, target)) {
+          return false;
         }
       }
     }
-
+    return true;
   }
 
   static class InOutListTraverser extends Thread {

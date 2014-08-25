@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.internal.reachability;
+package edu.sdsc.scigraph.neo4j;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Path;
@@ -24,11 +24,11 @@ import org.neo4j.graphdb.traversal.BranchState;
 /***
  * A utility path expander to expand <i>any</i> relationship in a direction
  */
-class DirectionalPathExpander implements PathExpander<Void> {
+public class DirectionalPathExpander implements PathExpander<Void> {
 
   private final Direction direction;
 
-  DirectionalPathExpander(Direction direction) {
+  public DirectionalPathExpander(Direction direction) {
     this.direction = direction;
   }
 
