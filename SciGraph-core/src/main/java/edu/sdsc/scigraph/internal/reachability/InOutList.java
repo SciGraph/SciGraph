@@ -15,8 +15,9 @@
  */
 package edu.sdsc.scigraph.internal.reachability;
 
+import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -25,8 +26,8 @@ import com.google.common.base.Objects;
 @ThreadSafe
 class InOutList {
 
-  Set<Long> inList = new ConcurrentSkipListSet<>();
-  Set<Long> outList = new ConcurrentSkipListSet<>();
+  Set<Long> inList = Collections.newSetFromMap(new ConcurrentHashMap<Long, Boolean>());
+  Set<Long> outList = Collections.newSetFromMap(new ConcurrentHashMap<Long, Boolean>());
 
   Set<Long> getInList() {
     return inList;
