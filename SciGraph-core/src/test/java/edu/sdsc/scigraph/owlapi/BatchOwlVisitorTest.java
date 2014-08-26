@@ -323,7 +323,7 @@ public class BatchOwlVisitorTest {
     Node hasChild = getNode(ROOT + "/hasChild");
     Node happyPerson = getNode(ROOT + "/HappyPerson");
     assertThat(size(GraphUtil.getRelationships(svf, hasChild, EdgeType.PROPERTY)), is(equalTo(1)));
-    assertThat(size(GraphUtil.getRelationships(svf, happyPerson, EdgeType.CLASS)), is(equalTo(1)));
+    assertThat(size(GraphUtil.getRelationships(svf, happyPerson, EdgeType.FILLER)), is(equalTo(1)));
   }
 
   @Test
@@ -333,7 +333,7 @@ public class BatchOwlVisitorTest {
     Node hasChild = getNode(ROOT + "/hasChild");
     Node happyPerson = getNode(ROOT + "/HappyPerson");
     assertThat(size(GraphUtil.getRelationships(avf, hasChild, EdgeType.PROPERTY)), is(equalTo(1)));
-    assertThat(size(GraphUtil.getRelationships(avf, happyPerson, EdgeType.CLASS)), is(equalTo(1)));
+    assertThat(size(GraphUtil.getRelationships(avf, happyPerson, EdgeType.FILLER)), is(equalTo(1)));
   }
 
   /*

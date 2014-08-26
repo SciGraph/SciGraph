@@ -414,7 +414,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       long property = getOrCreateNode(getUri(desc.getProperty()));
       graph.createRelationship(restriction, property, EdgeType.PROPERTY);
       long cls = getOrCreateNode(getUri(desc.getFiller()));
-      graph.createRelationship(restriction, cls, EdgeType.CLASS);
+      graph.createRelationship(restriction, cls, EdgeType.FILLER);
     }
     return null;
   }
@@ -427,7 +427,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       long property = getOrCreateNode(getUri(desc.getProperty()));
       graph.createRelationship(restriction, property, EdgeType.PROPERTY);
       long cls = getOrCreateNode(getUri(desc.getFiller()));
-      graph.createRelationship(restriction, cls, EdgeType.CLASS);
+      graph.createRelationship(restriction, cls, EdgeType.FILLER);
     }
     return null;
   }

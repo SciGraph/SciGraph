@@ -43,7 +43,7 @@ public class OwlPostprocessor {
         Node subject = (Node) result.get("n");
         Node svf = (Node) result.get("svf");
         Node property = getFirst(svf.getRelationships(EdgeType.PROPERTY), null).getEndNode();
-        for (Relationship r : svf.getRelationships(EdgeType.CLASS)) {
+        for (Relationship r : svf.getRelationships(EdgeType.FILLER)) {
           Node object = r.getEndNode();
           String relationshipName = GraphUtil.getProperty(property, CommonProperties.FRAGMENT,
               String.class).get();
