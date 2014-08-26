@@ -1,9 +1,9 @@
 package edu.sdsc.scigraph.owlapi.cases;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -14,11 +14,7 @@ import edu.sdsc.scigraph.neo4j.OwlLabels;
 public class TestEquivalentClasses extends OwlTestCase {
 
   /**
-   * 
-   * See https://github.com/SciCrunch/SciGraph/wiki/MappingToOWL#subclassof-axioms
-   * 
-   * Reduction step should give us a simple edge {sub p super}
-   * 
+   * See https://github.com/SciCrunch/SciGraph/wiki/MappingToOWL#equivalence-axioms
    */
   @Test
   public void testEquivalentToIntersectionOf() {
@@ -26,21 +22,15 @@ public class TestEquivalentClasses extends OwlTestCase {
     Node y = getNode("http://example.org/y");
     Node z = getNode("http://example.org/z");
 
-    testEdge(x, y);
-    testEdge(y, x);
-    testEdge(x, z);
-    testEdge(z, x);
-    testEdge(y, z);
-    testEdge(z, y);
-  }
-
-  private void testEdge(Node x, Node y) {
-    Relationship relationship = getOnlyElement(GraphUtil.getRelationships(x, y,
-        OwlLabels.OWL_EQUIVALENT_CLASS));
     assertThat("equivalence is symmetric and holds between all members.",
-        relationship.getStartNode(), is(x));
+        GraphUtil.getRelationships(x, y, OwlLabels.OWL_EQUIVALENT_CLASS, false),
+        is(IsIterableWithSize.<Relationship> iterableWithSize(1)));
     assertThat("equivalence is symmetric and holds between all members.",
-        relationship.getEndNode(), is(y));
+        GraphUtil.getRelationships(x, z, OwlLabels.OWL_EQUIVALENT_CLASS, false),
+        is(IsIterableWithSize.<Relationship> iterableWithSize(1)));
+    assertThat("equivalence is symmetric and holds between all members.",
+        GraphUtil.getRelationships(y, z, OwlLabels.OWL_EQUIVALENT_CLASS, false),
+        is(IsIterableWithSize.<Relationship> iterableWithSize(1)));
   }
 
 }

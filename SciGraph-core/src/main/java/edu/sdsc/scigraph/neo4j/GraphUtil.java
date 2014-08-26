@@ -124,7 +124,7 @@ public class GraphUtil {
   }
 
   static public Iterable<Relationship> getRelationships(final Node a, final Node b,
-      RelationshipType type) {
+      RelationshipType type, final boolean directed) {
     checkNotNull(a);
     checkNotNull(b);
     checkNotNull(type);
@@ -132,9 +132,15 @@ public class GraphUtil {
     return filter(a.getRelationships(type), new Predicate<Relationship>() {
       @Override
       public boolean apply(Relationship relationship) {
-        return relationship.getEndNode().equals(b);
+        return directed ? relationship.getEndNode().equals(b)
+            || relationship.getStartNode().equals(b) : relationship.getEndNode().equals(b);
       }
     });
+  }
+
+  static public Iterable<Relationship> getRelationships(final Node a, final Node b,
+      RelationshipType type) {
+    return getRelationships(a, b, type, true);
   }
 
   static String getLastPathFragment(URI uri) {

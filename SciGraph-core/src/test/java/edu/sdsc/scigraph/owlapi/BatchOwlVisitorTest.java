@@ -59,7 +59,6 @@ import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
@@ -214,10 +213,8 @@ public class BatchOwlVisitorTest {
   public void testObjectPropertyAssertions() {
     Node susan = getNode(ROOT + "/Susan");
     Node meg = getNode(ROOT + "/Meg");
-    Relationship ancestor = getOnlyElement(GraphUtil.getRelationships(susan, meg,
+    getOnlyElement(GraphUtil.getRelationships(susan, meg,
         DynamicRelationshipType.withName("hasAncestor")));
-    assertThat(GraphUtil.getProperty(ancestor, EdgeProperties.TRANSITIVE, Boolean.class).get(),
-        is(true));
   }
 
   @Test

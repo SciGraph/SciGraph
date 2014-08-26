@@ -71,6 +71,9 @@ public class BatchOwlLoader {
   @Inject
   BatchOwlVisitor visitor;
 
+  @Inject
+  OwlPostprocessor postprocessor;
+
   BatchOwlLoader() {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
   }
@@ -84,7 +87,7 @@ public class BatchOwlLoader {
     timer.reset();
     timer.start();
     logger.info("Postprocessing...");
-    // visitor.postProcess();
+    postprocessor.processSomeValuesFrom();
     logger.info(format("Postprocessing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
 
     timer.reset();

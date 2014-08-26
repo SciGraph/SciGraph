@@ -1,14 +1,9 @@
 package edu.sdsc.scigraph.owlapi.cases;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
-
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-
-import edu.sdsc.scigraph.neo4j.GraphUtil;
 
 public class TestEquivalentToIntersectionOf extends OwlTestCase {
 
@@ -26,7 +21,8 @@ public class TestEquivalentToIntersectionOf extends OwlTestCase {
 		Node fillerClass = getNode("http://example.org/fillerClass");
 
 		RelationshipType p = DynamicRelationshipType.withName( "http://example.org/p" );
-		Relationship relationship = getOnlyElement(GraphUtil.getRelationships(definedClass, fillerClass, p));
+    // Relationship relationship = getOnlyElement(GraphUtil.getRelationships(definedClass,
+    // fillerClass, p));
 		
 		/*
 		 * Should translate

@@ -32,6 +32,7 @@ public class CommonProperties {
   public static final String PARENT_ONTOLOGY = "parentOntology";
   public static final String ONTOLOGY = "ontology";
   public static final String ONTOLOGY_VERSION = "ontologyVersion";
+  public static final String ASSERTED = "asserted";
 
   private long id;
   private String uri;

@@ -29,6 +29,7 @@ import com.google.common.io.Resources;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 
 /***
  * An abstract test case for testing simple OWL axiom combinations.
@@ -69,10 +70,13 @@ public abstract class OwlTestCase {
     BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph,
         new HashMap<String, String>(), new ArrayList<MappedProperty>());
     walker.walkStructure(visitor);
-
     batchGraph.shutdown();
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
+
+    OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb);
+    postprocessor.processSomeValuesFrom();
+
     graphDb.beginTx();
     drawGraph();
   }

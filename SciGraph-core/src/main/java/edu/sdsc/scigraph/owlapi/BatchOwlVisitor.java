@@ -164,6 +164,9 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLObjectProperty property) {
     long node = getOrCreateNode(property.getIRI().toURI());
     graph.setLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
+    graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
+    graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
+    graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
     return null;
   }
 
@@ -290,18 +293,11 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     URI property = getUri(axiom.getProperty());
     long object = getOrCreateNode(getUri(axiom.getObject()));
     RelationshipType type = DynamicRelationshipType.withName(property.toString());
-    if (null != property.getFragment()) {
-      type = DynamicRelationshipType.withName(property.getFragment());
+    if (null != GraphUtil.getFragment(property)) {
+      type = DynamicRelationshipType.withName(GraphUtil.getFragment(property));
     }
     long relationship = graph.createRelationship(subject, object, type);
     graph.setRelationshipProperty(relationship, CommonProperties.URI, property.toString());
-    graph.setRelationshipProperty(relationship, EdgeProperties.NEGATED, false);
-    graph.setRelationshipProperty(relationship, EdgeProperties.SYMMETRIC, !axiom.getProperty()
-        .isAsymmetric(ontology));
-    graph.setRelationshipProperty(relationship, EdgeProperties.REFLEXIVE, axiom.getProperty()
-        .isReflexive(ontology));
-    graph.setRelationshipProperty(relationship, EdgeProperties.TRANSITIVE, axiom.getProperty()
-        .isTransitive(ontology));
     return relationship;
   }
 
