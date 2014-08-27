@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.neo4j;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -29,8 +28,6 @@ import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4j;
 
 public class TransactionalInterceptor implements MethodInterceptor {
 
-  private static final Logger logger = Logger.getLogger(TransactionalInterceptor.class.getName());
-
   @Inject
   GraphDatabaseService graphDb;
 
@@ -40,18 +37,17 @@ public class TransactionalInterceptor implements MethodInterceptor {
 
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
-    logger.fine("Intercepting transaction");
-    Object result = null;
     if (inTransaction.compareAndSet(false, true)) {
+      Object result = null;
       try (Transaction tx = graphDb.beginTx()) {
         result = invocation.proceed();
         tx.success();
       }
       inTransaction.set(false);
+      return result;
     } else {
-      result = invocation.proceed();
+      return invocation.proceed();
     }
-    return result;
   }
 
 }
