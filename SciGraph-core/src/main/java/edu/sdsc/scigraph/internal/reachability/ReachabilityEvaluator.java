@@ -49,36 +49,34 @@ class ReachabilityEvaluator implements Evaluator {
     }
 
     long startId = path.startNode().getId(); // Vi
+    InOutList listPair = inMemoryIndex.get(currentId);
 
     if (0 == path.length()) {
       // first node in the traverse - add itself to the in-out list
-      InOutList listPair = inMemoryIndex.get(currentId);
       listPair.getInList().add(currentId);
       listPair.getOutList().add(currentId);
       return Evaluation.INCLUDE_AND_CONTINUE;
     }
     else if (direction == Direction.INCOMING ) {
       // doing reverse BFS
-      if (nodesAreConnectedInIndex(currentId, startId)) {
+      if (nodesAreConnected(currentId, startId)) {
         return Evaluation.EXCLUDE_AND_PRUNE;
       } else {
-        InOutList listPair = inMemoryIndex.get(currentId);
         listPair.getOutList().add(startId);
         return Evaluation.INCLUDE_AND_CONTINUE;
       }
     } else {
       //doing BFS
-      if ( nodesAreConnectedInIndex(startId,currentId)) { // cur is w
+      if (nodesAreConnected(startId, currentId)) { // cur is w
         return Evaluation.EXCLUDE_AND_PRUNE;
       } else {
-        InOutList listPair = inMemoryIndex.get(currentId);
         listPair.getInList().add(startId);
         return Evaluation.INCLUDE_AND_CONTINUE;
       }
     }
   }
 
-  boolean nodesAreConnectedInIndex(long nodeIdOut, long nodeIdIn) {
+  boolean nodesAreConnected(long nodeIdOut, long nodeIdIn) {
     Set<Long> outList = inMemoryIndex.get(nodeIdOut).getOutList();
     Set<Long> inList = inMemoryIndex.get(nodeIdIn).getInList();
     return !Collections.disjoint(outList, inList);

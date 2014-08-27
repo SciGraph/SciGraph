@@ -30,6 +30,8 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
@@ -74,6 +76,7 @@ public class ReachabilityIndex {
    * @param graphDb
    *          The graph on which to build the reachability index
    */
+  @Inject
   public ReachabilityIndex(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
     try (Transaction tx = graphDb.beginTx()) {
@@ -162,21 +165,25 @@ public class ReachabilityIndex {
     logger.info("Reachability index created.");
   }
 
+  Transaction batchTransactions(Transaction tx, int operationCount) {
+    if (operationCount % transactionBatchSize == 0) {
+      tx.success();
+      tx.finish();
+      return graphDb.beginTx();
+    } else {
+      return tx;
+    }
+  }
+
   void commitIndexToGraph(InMemoryReachabilityIndex inMemoryIndex) {
     Transaction tx = graphDb.beginTx();
 
     int operationCount = 0;
     for (Entry<Long, InOutList> e : inMemoryIndex.entrySet()) {
       Node node = graphDb.getNodeById(e.getKey());
-      operationCount++;
-      if (operationCount % transactionBatchSize == 0) {
-        logger.fine("commit transaction when populating in-out list.");
-        tx.success();
-        tx.finish();
-        tx = graphDb.beginTx();
-      }
       node.setProperty(IN_LIST_PROPERTY, Longs.toArray(e.getValue().getInList()));
       node.setProperty(OUT_LIST_PROPERTY, Longs.toArray(e.getValue().getOutList()));
+      tx = batchTransactions(tx, operationCount++);
     }
 
     metaDataNode.setProperty(INDEX_EXISTS_PROPERTY, true);
@@ -193,13 +200,7 @@ public class ReachabilityIndex {
       for (Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
         n.removeProperty(IN_LIST_PROPERTY);
         n.removeProperty(OUT_LIST_PROPERTY);
-        counter++;
-        if (counter % transactionBatchSize == 0) {
-          logger.fine("commit transaction when populating in-out list.");
-          tx.success();
-          tx.finish();
-          tx = graphDb.beginTx();
-        }
+        tx = batchTransactions(tx, counter++);
       }
 
       // reset the flag.
