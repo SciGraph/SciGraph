@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# This script can be run after mvn test to generate images of the graph translation
+# test cases. It requires graphviz.
+
 out=target/owl_cases/index.html
 
 function getOwlContent() {
@@ -14,7 +17,7 @@ function drawGraph() {
   echo "<img src='$1.png' />" >> $out
 }
 
-echo "<h1>OWL Graph Representations</h1>\n" > $out
+echo "<h1>OWL -> Neo4j Translations</h1>\n" > $out
 
 echo "<table border='1'>" >> $out
 for f in target/owl_cases/*.dot

@@ -51,8 +51,8 @@ import com.google.common.primitives.Longs;
 import edu.sdsc.scigraph.neo4j.DirectionalPathExpander;
 
 /***
- * A Neo4j implementation of the <a
- * href="www.vldb.org/pvldb/vol6/p1978-jin.pdf">"Simple, Fast, and Scalable Reachability Oracle"</a>
+ * A Neo4j implementation of the <a href="http://www.vldb.org/pvldb/vol6/p1978-jin.pdf">
+ * "Simple, Fast, and Scalable Reachability Oracle"</a>
  *
  */
 public class ReachabilityIndex {

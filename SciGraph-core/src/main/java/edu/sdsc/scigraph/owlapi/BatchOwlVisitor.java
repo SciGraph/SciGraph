@@ -34,11 +34,11 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
@@ -132,8 +132,11 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     return graph.getNode(uri.toString());
   }
 
+  /***
+   * Should this be OWLDeclarationAxiom
+   */
   @Override
-  public Void visit(OWLDeclarationAxiom desc) {
+  public Void visit(OWLClass desc) {
     URI uri = getUri(desc);
     long node = getOrCreateNode(uri);
     graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
@@ -206,6 +209,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLNamedIndividual individual) {
     long node = getOrCreateNode(getUri(individual));
     graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
+    graph.setNodeProperty(node, CommonProperties.FRAGMENT,
+        GraphUtil.getFragment(getUri(individual)));
     return null;
   }
 
@@ -270,7 +275,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.setNodeProperty(subject, NodeProperties.ANONYMOUS, true);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getUri(expression));
-      graph.createRelationship(subject, object, EdgeType.REL);
+      graph.createRelationship(subject, object, EdgeType.OPERAND);
     }
     return null;
   }
@@ -282,7 +287,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.setNodeProperty(subject, NodeProperties.ANONYMOUS, true);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getUri(expression));
-      graph.createRelationship(subject, object, EdgeType.REL);
+      graph.createRelationship(subject, object, EdgeType.OPERAND);
     }
     return null;
   }

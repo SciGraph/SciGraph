@@ -67,7 +67,7 @@ public class Graph {
       NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
       CommonProperties.CURIE, CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
       Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
-  private static final Set<String> RELATIONSHIP_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI);
+
   private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL,
       Concept.SYNONYM);
 
@@ -100,7 +100,6 @@ public class Graph {
       graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
       setupIndex(graphDb.index().getNodeAutoIndexer(), NODE_PROPERTIES_TO_INDEX);
       graphDb.index().forRelationships("relationship_auto_index", INDEX_CONFIG);
-      setupIndex(graphDb.index().getRelationshipAutoIndexer(), RELATIONSHIP_PROPERTIES_TO_INDEX);
       tx.success();
     }
   }

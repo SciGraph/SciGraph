@@ -95,13 +95,8 @@ public class BatchOwlLoader {
     logger.info("Committing changes...");
     logger.info(format("Committing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
 
-    /*
-     * try (Transaction tx2 = graph.getGraphDb().beginTx()) { int nodes =
-     * size(GlobalGraphOperations.at(graph.getGraphDb()).getAllNodes()); int edges =
-     * size(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationships());
-     * logger.info(format("...done. Graph contains %s nodes and %s edges.", nodes, edges));
-     * tx2.success(); } graph.shutdown();
-     */
+    postprocessor.processSomeValuesFrom();
+    // postprocessor.processCategories(categoryMap);
   }
 
   protected static Options getOptions() {

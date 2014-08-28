@@ -38,7 +38,7 @@ public class TestSubClassOfExistential extends OwlTestCase {
         GraphUtil.getProperty(relationship, CommonProperties.URI, String.class),
         is(equalTo(Optional.of("http://example.org/p"))));
     assertThat("relationship is asserted",
-        GraphUtil.getProperty(relationship, CommonProperties.ASSERTED, Boolean.class),
+        GraphUtil.getProperty(relationship, CommonProperties.CONVENIENCE, Boolean.class),
         is(equalTo(Optional.of(true))));
   }
 
