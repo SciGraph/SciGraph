@@ -1,6 +1,5 @@
 package edu.sdsc.scigraph.neo4j;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -31,14 +30,14 @@ public class GraphUtilTest {
   @Test
   public void testAddValue() {
     GraphUtil.addProperty(node, "p", 1);
-    assertThat((Integer) node.getProperty("p"), is(equalTo(1)));
+    assertThat((Integer) node.getProperty("p"), is(1));
   }
 
   @Test
   public void testAddMultipleValues() {
     GraphUtil.addProperty(node, "p", 1);
     GraphUtil.addProperty(node, "p", 2);
-    assertThat((int[]) node.getProperty("p"), is(equalTo(new int[] { 1, 2 })));
+    assertThat((int[]) node.getProperty("p"), is(new int[] { 1, 2 }));
   }
 
   @Test(expected = ClassCastException.class)
@@ -49,8 +48,8 @@ public class GraphUtilTest {
 
   @Test
   public void testGetProperty() {
-    assertThat(GraphUtil.getProperty(node, "foo", String.class), is(equalTo(Optional.of("bar"))));
-    assertThat(GraphUtil.getProperty(node, "fizz", Integer.class), is(equalTo(Optional.of(1))));
+    assertThat(GraphUtil.getProperty(node, "foo", String.class), is(Optional.of("bar")));
+    assertThat(GraphUtil.getProperty(node, "fizz", Integer.class), is(Optional.of(1)));
   }
 
   @Test

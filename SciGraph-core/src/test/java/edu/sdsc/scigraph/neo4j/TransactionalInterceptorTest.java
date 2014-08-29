@@ -45,9 +45,4 @@ public class TransactionalInterceptorTest {
     verify(tx, never()).success();
   }
 
-  @Test
-  public void testTransactionCounting() throws Throwable {
-
-  }
-
 }

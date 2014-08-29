@@ -17,7 +17,6 @@ package edu.sdsc.scigraph.vocabulary;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
@@ -109,7 +108,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetByUri() {
     Optional<Concept> concept = vocabulary.getConceptFromUri("http://example.org/#hippocampus");
-    assertThat(concept.get(), is(equalTo(hippocampus)));
+    assertThat(concept.get(), is(hippocampus));
   }
 
   @Test

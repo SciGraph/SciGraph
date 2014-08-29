@@ -135,7 +135,7 @@ public class GraphTest extends GraphTestBase {
   @Test
   public void testNoUriFragment() {
     Node node = graph.getOrCreateNode(BASE_URI + "Fragment");
-    assertThat((String)node.getProperty(CommonProperties.FRAGMENT), is(equalTo("Fragment")));
+    assertThat((String) node.getProperty(CommonProperties.FRAGMENT), is("Fragment"));
   }
 
   @Test(expected = IllegalStateException.class)

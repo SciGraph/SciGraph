@@ -122,7 +122,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node person = graph.getNode(ROOT + "/Person").get();
     assertThat(
         graph.getProperty(person, "http://www.w3.org/2000/01/rdf-schema#comment", String.class)
-            .get(), is(equalTo("Represents the set of all people.")));
+            .get(), is("Represents the set of all people."));
   }
 
   @Test
@@ -130,7 +130,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node person = graph.getNode(ROOT + "/Person").get();
     assertThat(graph
         .getProperty(person, "http://www.w3.org/2000/01/rdf-schema#label", String.class).get(),
-        is(equalTo("Person")));
+        is("Person"));
   }
 
   @Test
@@ -143,7 +143,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Relationship r = graph.getOrCreateRelationship(person, fazz,
         DynamicRelationshipType.withName("fizz"));
     assertThat(graph.getProperty(r, CommonProperties.TYPE, String.class).get(),
-        is(equalTo("OWLAnnotationAssertionAxiom")));
+        is("OWLAnnotationAssertionAxiom"));
   }
 
   @Test
@@ -177,13 +177,13 @@ public class OwlVisitorTest extends GraphTestBase {
   @Test
   public void testDataPropertyAssertions() {
     Node john = graph.getNode(ROOT + "/John").get();
-    assertThat((Integer) john.getProperty(ROOT + "/hasAge"), is(equalTo(51)));
+    assertThat((Integer) john.getProperty(ROOT + "/hasAge"), is(51));
   }
 
   @Test
   public void testMappedDataPropertyAssertion() {
     Node john = graph.getNode(ROOT + "/John").get();
-    assertThat((Integer) john.getProperty("isAged"), is(equalTo(51)));
+    assertThat((Integer) john.getProperty("isAged"), is(51));
   }
 
   @Test
@@ -271,8 +271,8 @@ public class OwlVisitorTest extends GraphTestBase {
     assertThat(graph.hasRelationship(chain, brother, EdgeType.REL), is(true));
     Relationship firstLink = graph.getOrCreateRelationship(chain, father, EdgeType.REL);
     Relationship secondLink = graph.getOrCreateRelationship(chain, brother, EdgeType.REL);
-    assertThat(graph.getProperty(firstLink, "order", Integer.class).get(), is(equalTo(0)));
-    assertThat(graph.getProperty(secondLink, "order", Integer.class).get(), is(equalTo(1)));
+    assertThat(graph.getProperty(firstLink, "order", Integer.class).get(), is(0));
+    assertThat(graph.getProperty(secondLink, "order", Integer.class).get(), is(1));
   }
 
   @Test
@@ -280,7 +280,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node restriction = graph.getNode("http://ontology.neuinfo.org/anon/-583677237").get();
     Node hasChild = graph.getNode(ROOT + "/hasChild").get();
     Node parent = graph.getNode(ROOT + "/Parent").get();
-    assertThat(graph.getProperty(restriction, "cardinality", Integer.class).get(), is(equalTo(2)));
+    assertThat(graph.getProperty(restriction, "cardinality", Integer.class).get(), is(2));
     assertThat(graph.hasRelationship(restriction, hasChild, EdgeType.PROPERTY), is(true));
     assertThat(graph.hasRelationship(restriction, parent, EdgeType.CLASS), is(true));
   }

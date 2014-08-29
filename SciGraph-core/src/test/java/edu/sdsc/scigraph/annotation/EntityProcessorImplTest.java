@@ -87,15 +87,15 @@ public class EntityProcessorImplTest {
     when(config.isLongestOnly()).thenReturn(true);
     List<EntityAnnotation> annotations = processor.getAnnotations("female in cerebellum of cells", config);
 
-    assertThat(getOnlyElement(annotations).getStart(), is(equalTo(10)));
-    assertThat(getOnlyElement(annotations).getEnd(), is(equalTo(20)));
+    assertThat(getOnlyElement(annotations).getStart(), is(10));
+    assertThat(getOnlyElement(annotations).getEnd(), is(20));
   }
 
   @Test
   public void testInsertAllSpans() throws Exception {
     String expected = "Sentence about <span class=\"mock\" data-entity=\"SMA,1,|muscular atrophy,1,\">Spinal muscular atrophy</span>"
         + " <span class=\"mock\" data-entity=\"SMA,1,\">(SMA).</span>";
-    assertThat(processor.insertSpans(expectedAnnotations, text, config), is(equalTo(expected)));
+    assertThat(processor.insertSpans(expectedAnnotations, text, config), is(expected));
   }
 
   @Test
@@ -103,7 +103,7 @@ public class EntityProcessorImplTest {
     when(config.isLongestOnly()).thenReturn(true);
     String expected = "Sentence about <span class=\"mock\" data-entity=\"SMA,1,\">Spinal muscular atrophy</span>"
         + " <span class=\"mock\" data-entity=\"SMA,1,\">(SMA).</span>";
-    assertThat(processor.insertSpans(expectedAnnotations, text, config), is(equalTo(expected)));
+    assertThat(processor.insertSpans(expectedAnnotations, text, config), is(expected));
   }
 
   @Test
@@ -166,7 +166,8 @@ public class EntityProcessorImplTest {
 
   @Test
   public void testGetBase() throws MalformedURLException {
-    assertThat(EntityProcessorImpl.getBase(new URL("http://example.org:9000/foo/bar.html")), is(equalTo("http://example.org:9000/foo/")));
+    assertThat(EntityProcessorImpl.getBase(new URL("http://example.org:9000/foo/bar.html")),
+        is("http://example.org:9000/foo/"));
   }
 
 }

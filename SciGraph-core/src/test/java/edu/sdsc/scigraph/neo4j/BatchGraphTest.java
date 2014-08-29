@@ -2,7 +2,6 @@ package edu.sdsc.scigraph.neo4j;
 
 import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -146,7 +145,7 @@ public class BatchGraphTest {
     graph.setRelationshipProperty(foo, "foo", "bar");
     getGraphDB();
     Relationship rel = graphDb.getRelationshipById(foo);
-    assertThat(GraphUtil.getProperty(rel, "foo", String.class).get(), is(equalTo("bar")));
+    assertThat(GraphUtil.getProperty(rel, "foo", String.class).get(), is("bar"));
   }
 
   @Test

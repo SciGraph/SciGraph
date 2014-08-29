@@ -16,7 +16,7 @@
 package edu.sdsc.scigraph.annotation;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
@@ -45,7 +45,7 @@ public class EntityAnnotationTest {
     List<EntityAnnotation> list = Lists.newArrayList(annot1, annot2, annot3, annot4, annot5);
     Collections.sort(list);
     List<EntityAnnotation> expected = newArrayList(annot5, annot2, annot1, annot3, annot4);
-    assertThat(list, equalTo(expected));
+    assertThat(list, is(expected));
   }
 
 }

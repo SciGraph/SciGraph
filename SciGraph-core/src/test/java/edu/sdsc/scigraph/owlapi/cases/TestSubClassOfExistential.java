@@ -1,7 +1,6 @@
 package edu.sdsc.scigraph.owlapi.cases;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -37,13 +36,13 @@ public class TestSubClassOfExistential extends OwlTestCase {
         relationship.getEndNode(), is(superclass));
     assertThat("relationship has the correct uri",
         GraphUtil.getProperty(relationship, CommonProperties.URI, String.class),
-        is(equalTo(Optional.of("http://example.org/p"))));
+        is(Optional.of("http://example.org/p")));
     assertThat("relationship is asserted",
         GraphUtil.getProperty(relationship, CommonProperties.CONVENIENCE, Boolean.class),
-        is(equalTo(Optional.of(true))));
+        is(Optional.of(true)));
     assertThat("owltype is added",
         GraphUtil.getProperty(relationship, CommonProperties.OWL_TYPE, String.class),
-        is(equalTo(Optional.of(OwlLabels.RDF_SUBCLASS_OF.name()))));
+        is(Optional.of(OwlLabels.RDF_SUBCLASS_OF.name())));
   }
 
 }

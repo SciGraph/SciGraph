@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.owlapi;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -52,24 +51,24 @@ public class OwlApiUtilsTest {
   @Test
   public void testGetNumericTypedLiterals() {
     OWLLiteral doub = factory.getOWLLiteral(3.14);
-    assertThat((Double)OwlApiUtils.getTypedLiteralValue(doub).get(), is(equalTo(3.14)));
+    assertThat((Double) OwlApiUtils.getTypedLiteralValue(doub).get(), is(3.14));
     OWLLiteral flt = factory.getOWLLiteral(3.14f);
-    assertThat((Float)OwlApiUtils.getTypedLiteralValue(flt).get(), is(equalTo(3.14f)));
+    assertThat((Float) OwlApiUtils.getTypedLiteralValue(flt).get(), is(3.14f));
     OWLLiteral i = factory.getOWLLiteral(3);
-    assertThat((Integer)OwlApiUtils.getTypedLiteralValue(i).get(), is(equalTo(3)));
+    assertThat((Integer) OwlApiUtils.getTypedLiteralValue(i).get(), is(3));
   }
 
   @Test
   public void testGetStringTypedLiterals() {
     OWLLiteral literal = factory.getOWLLiteral("hello", "en");
-    assertThat((String)OwlApiUtils.getTypedLiteralValue(literal).get(), is(equalTo("hello")));
+    assertThat((String) OwlApiUtils.getTypedLiteralValue(literal).get(), is("hello"));
   }
 
   @Test
   public void testLiteralLanguages() {
     OWLLiteral literalEnLang = factory.getOWLLiteral("hello", "en");
     OWLLiteral literalEsLang = factory.getOWLLiteral("hello", "es");
-    assertThat((String)OwlApiUtils.getTypedLiteralValue(literalEnLang).get(), is(equalTo("hello")));
+    assertThat((String) OwlApiUtils.getTypedLiteralValue(literalEnLang).get(), is("hello"));
     assertThat(OwlApiUtils.getTypedLiteralValue(literalEsLang).isPresent(), is(false));
   }
 
@@ -78,9 +77,10 @@ public class OwlApiUtilsTest {
     OWLClassExpression expression = mock(OWLClassExpression.class, Mockito.RETURNS_DEEP_STUBS);
     when(expression.isAnonymous()).thenReturn(false);
     when(expression.asOWLClass().getIRI().toURI()).thenReturn(new URI("http://example.org/Thing"));
-    assertThat(new URI("http://example.org/Thing"), is(equalTo(OwlApiUtils.getUri(expression))));
+    assertThat(new URI("http://example.org/Thing"), is(OwlApiUtils.getUri(expression)));
     when(expression.isAnonymous()).thenReturn(true);
-    assertThat(new URI("http://ontology.neuinfo.org/anon/" + expression.hashCode()), is(equalTo(OwlApiUtils.getUri(expression))));
+    assertThat(new URI("http://ontology.neuinfo.org/anon/" + expression.hashCode()),
+        is(OwlApiUtils.getUri(expression)));
   }
 
 }

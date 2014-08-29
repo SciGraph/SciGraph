@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.owlapi;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
@@ -66,7 +65,7 @@ public class Csv2OwlTest {
   @Test
   public void testSubclassCreation() throws Exception {
     for (OWLSubClassOfAxiom axiom: ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
-      assertThat(axiom.getSuperClass().asOWLClass(), is(equalTo(parent)));
+      assertThat(axiom.getSuperClass().asOWLClass(), is(parent));
     }
   }
 
@@ -74,7 +73,7 @@ public class Csv2OwlTest {
   public void veryLabelAssertion() throws Exception {
     OWLEntity entity = getOnlyElement(ontology.getEntitiesInSignature(IRI.create("http://example.org#1")));
     OWLAnnotation annotation = getOnlyElement(entity.getAnnotations(ontology, df.getRDFSLabel()));
-    assertThat((OWLLiteral)annotation.getValue(), is(equalTo(df.getOWLLiteral("term"))));
+    assertThat((OWLLiteral) annotation.getValue(), is(df.getOWLLiteral("term")));
   }
 
 }

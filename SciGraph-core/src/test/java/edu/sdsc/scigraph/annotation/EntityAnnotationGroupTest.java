@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.annotation;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
@@ -86,7 +85,7 @@ public class EntityAnnotationGroupTest {
     group.add(new EntityAnnotation(null, 0, 5));
     EntityAnnotationGroup group2 = new EntityAnnotationGroup();
     group2.add(new EntityAnnotation(null, 0, 5));
-    assertThat(group, is(equalTo(group2)));
+    assertThat(group, is(group2));
   }
 
   @Test
@@ -95,7 +94,7 @@ public class EntityAnnotationGroupTest {
     group.add(new EntityAnnotation(null, 0, 7));
     EntityAnnotationGroup group2 = new EntityAnnotationGroup();
     group2.add(new EntityAnnotation(null, 0, 5));
-    assertThat(group, is(not(equalTo(group2))));
+    assertThat(group, is(not(group2)));
   }
 
 }
