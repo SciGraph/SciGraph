@@ -1,0 +1,5 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestSubclass
+SubObjectPropertyOf(ObjectPropertyChain(:p1 :p2) :p3)
+)
