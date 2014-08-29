@@ -61,7 +61,6 @@ import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.neo4j.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class BatchOwlVisitorTest {
@@ -137,9 +136,10 @@ public class BatchOwlVisitorTest {
   public void testConcreteSubclass() {
     Node mother = getNode(ROOT + "/Mother");
     Node woman = getNode(ROOT + "/Woman");
-    assertThat(mother.hasRelationship(Direction.OUTGOING, OwlLabels.RDF_SUBCLASS_OF), is(true));
+    assertThat(mother.hasRelationship(Direction.OUTGOING, OwlRelationships.RDF_SUBCLASS_OF),
+        is(true));
     Relationship relationship = getOnlyElement(mother.getRelationships(Direction.OUTGOING,
-        OwlLabels.RDF_SUBCLASS_OF));
+        OwlRelationships.RDF_SUBCLASS_OF));
     assertThat(relationship.getEndNode(), is(woman));
   }
 
@@ -164,7 +164,7 @@ public class BatchOwlVisitorTest {
     Node person = getNode(ROOT + "/Person");
     Node fazz = getNode(ROOT + "/Fazz");
     Relationship assertion = getOnlyElement(GraphUtil.getRelationships(person, fazz,
-        OwlLabels.OWL_ANNOTATION));
+        OwlRelationships.OWL_ANNOTATION));
     assertThat(GraphUtil.getProperty(assertion, CommonProperties.URI, String.class).get(), is(ROOT
         + "/fizz"));
   }
@@ -174,14 +174,14 @@ public class BatchOwlVisitorTest {
     Node john = getNode(ROOT + "/John");
     Node father = getNode(ROOT + "/Father");
     assertThat(john.hasLabel(OwlLabels.OWL_NAMED_INDIVIDUAL), is(true));
-    assertThat(size(GraphUtil.getRelationships(john, father, OwlLabels.RDF_TYPE)), is(1));
+    assertThat(size(GraphUtil.getRelationships(john, father, OwlRelationships.RDF_TYPE)), is(1));
   }
 
   @Test
   public void testSameIndividual() {
     Node james = getNode(ROOT + "/James");
     Node jim = getNode(ROOT + "/Jim");
-    Relationship r = getOnlyElement(james.getRelationships(OwlLabels.OWL_SAME_AS));
+    Relationship r = getOnlyElement(james.getRelationships(OwlRelationships.OWL_SAME_AS));
     assertThat(r.getEndNode(), is(jim));
   }
 
@@ -189,7 +189,7 @@ public class BatchOwlVisitorTest {
   public void testDifferentIndividual() {
     Node john = getNode(ROOT + "/John");
     Node bill = getNode(ROOT + "/Bill");
-    Relationship r = getOnlyElement(john.getRelationships(OwlLabels.OWL_DIFFERENT_FROM));
+    Relationship r = getOnlyElement(john.getRelationships(OwlRelationships.OWL_DIFFERENT_FROM));
     assertThat(r.getStartNode(), is(bill));
   }
 
@@ -217,7 +217,8 @@ public class BatchOwlVisitorTest {
   public void testClassEquivalenceRelationships() {
     Node adult = getNode(ROOT + "/Adult");
     Node grownup = getNode(OTHER_ROOT + "/Grownup");
-    assertThat(size(GraphUtil.getRelationships(adult, grownup, OwlLabels.OWL_EQUIVALENT_CLASS)),
+    assertThat(
+        size(GraphUtil.getRelationships(adult, grownup, OwlRelationships.OWL_EQUIVALENT_CLASS)),
         is(1));
   }
 
@@ -225,7 +226,8 @@ public class BatchOwlVisitorTest {
   public void testDisjointClasses() {
     Node man = getNode(ROOT + "/Man");
     Node woman = getNode(ROOT + "/Woman");
-    assertThat(size(GraphUtil.getRelationships(man, woman, OwlLabels.OWL_DISJOINT_WITH)), is(1));
+    assertThat(size(GraphUtil.getRelationships(man, woman, OwlRelationships.OWL_DISJOINT_WITH)),
+        is(1));
   }
 
   @Test
@@ -233,7 +235,8 @@ public class BatchOwlVisitorTest {
     Node parent = getNode(ROOT + "/Parent");
     Node intersection = getNode("http://ontology.neuinfo.org/anon/412251922");
     assertThat(
-        size(GraphUtil.getRelationships(parent, intersection, OwlLabels.OWL_EQUIVALENT_CLASS)),
+size(GraphUtil.getRelationships(parent, intersection,
+        OwlRelationships.OWL_EQUIVALENT_CLASS)),
         is(1));
     assertThat(intersection.hasLabel(OwlLabels.OWL_UNION_OF), is(true));
     assertThat(intersection.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
@@ -248,7 +251,8 @@ public class BatchOwlVisitorTest {
     Node parent = getNode(ROOT + "/HappyPerson");
     Node intersection = getNode("http://ontology.neuinfo.org/anon/1064318321");
     assertThat(
-        size(GraphUtil.getRelationships(parent, intersection, OwlLabels.OWL_EQUIVALENT_CLASS)),
+size(GraphUtil.getRelationships(parent, intersection,
+        OwlRelationships.OWL_EQUIVALENT_CLASS)),
         is(equalTo(1)));
     assertThat(intersection.hasLabel(OwlLabels.OWL_INTERSECTION_OF), is(true));
     Node mother = getNode("http://ontology.neuinfo.org/anon/-1615296904");
@@ -279,7 +283,8 @@ public class BatchOwlVisitorTest {
     Node hasWife = getNode(ROOT + "/hasWife");
     Node hasSpouse = getNode(ROOT + "/hasSpouse");
     assertThat(
-        size(GraphUtil.getRelationships(hasWife, hasSpouse, OwlLabels.RDFS_SUB_PROPERTY_OF)), is(1));
+        size(GraphUtil.getRelationships(hasWife, hasSpouse, OwlRelationships.RDFS_SUB_PROPERTY_OF)),
+        is(1));
   }
 
   @Test
@@ -288,9 +293,9 @@ public class BatchOwlVisitorTest {
     Node father = getNode(ROOT + "/hasFather");
     Node brother = getNode(ROOT + "/hasBrother");
     Relationship firstLink = getOnlyElement(GraphUtil.getRelationships(chain, father,
-        OwlLabels.OWL_PROPERTY_CHAIN_AXIOM));
+        OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM));
     Relationship secondLink = getOnlyElement(GraphUtil.getRelationships(chain, brother,
-        OwlLabels.OWL_PROPERTY_CHAIN_AXIOM));
+        OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM));
     assertThat(GraphUtil.getProperty(firstLink, "order", Integer.class).get(), is(0));
     assertThat(GraphUtil.getProperty(secondLink, "order", Integer.class).get(), is(1));
   }

@@ -9,7 +9,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.neo4j.OwlLabels;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class TestEquivalentClasses extends OwlTestCase {
 
@@ -23,13 +23,13 @@ public class TestEquivalentClasses extends OwlTestCase {
     Node z = getNode("http://example.org/z");
 
     assertThat("equivalence is symmetric and holds between all members.",
-        GraphUtil.getRelationships(x, y, OwlLabels.OWL_EQUIVALENT_CLASS, false),
+        GraphUtil.getRelationships(x, y, OwlRelationships.OWL_EQUIVALENT_CLASS, false),
         is(IsIterableWithSize.<Relationship> iterableWithSize(1)));
     assertThat("equivalence is symmetric and holds between all members.",
-        GraphUtil.getRelationships(x, z, OwlLabels.OWL_EQUIVALENT_CLASS, false),
+        GraphUtil.getRelationships(x, z, OwlRelationships.OWL_EQUIVALENT_CLASS, false),
         is(IsIterableWithSize.<Relationship> iterableWithSize(1)));
     assertThat("equivalence is symmetric and holds between all members.",
-        GraphUtil.getRelationships(y, z, OwlLabels.OWL_EQUIVALENT_CLASS, false),
+        GraphUtil.getRelationships(y, z, OwlRelationships.OWL_EQUIVALENT_CLASS, false),
         is(IsIterableWithSize.<Relationship> iterableWithSize(1)));
   }
 

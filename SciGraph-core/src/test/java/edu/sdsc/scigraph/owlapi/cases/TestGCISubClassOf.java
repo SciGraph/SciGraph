@@ -15,7 +15,7 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.neo4j.OwlLabels;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 
 public class TestGCISubClassOf extends OwlTestCase {
 

@@ -9,7 +9,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.neo4j.OwlLabels;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 /***
  * See https://github.com/SciCrunch/SciGraph/wiki/MappingToOWL#subclassof-axioms
@@ -22,7 +22,7 @@ public class TestSubClassOf extends OwlTestCase {
     Node subclass = getNode("http://example.org/subclass");
     Node superclass = getNode("http://example.org/superclass");
     assertThat("subclass should be a directed relationship",
-        GraphUtil.getRelationships(subclass, superclass, OwlLabels.RDF_SUBCLASS_OF),
+        GraphUtil.getRelationships(subclass, superclass, OwlRelationships.RDF_SUBCLASS_OF),
         is(IsIterableWithSize.<Relationship> iterableWithSize(1)));
   }
 

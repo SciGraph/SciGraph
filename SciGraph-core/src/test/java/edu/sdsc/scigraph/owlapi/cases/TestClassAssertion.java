@@ -12,7 +12,8 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.neo4j.OwlLabels;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class TestClassAssertion extends OwlTestCase {
 
@@ -26,7 +27,8 @@ public class TestClassAssertion extends OwlTestCase {
         GraphUtil.getProperty(c, CommonProperties.FRAGMENT, String.class), is(Optional.of("c")));
     assertThat("fragment properties are set",
         GraphUtil.getProperty(i, CommonProperties.FRAGMENT, String.class), is(Optional.of("i")));
-    Relationship relationship = getOnlyElement(GraphUtil.getRelationships(i, c, OwlLabels.RDF_TYPE));
+    Relationship relationship = getOnlyElement(GraphUtil.getRelationships(i, c,
+        OwlRelationships.RDF_TYPE));
     assertThat("OPE edge should start with the subject.", relationship.getStartNode(), is(i));
     assertThat("OPE edge should start with the target.", relationship.getEndNode(), is(c));
   }
