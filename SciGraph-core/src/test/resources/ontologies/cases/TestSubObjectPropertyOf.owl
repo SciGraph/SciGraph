@@ -1,0 +1,5 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestSubclass
+SubObjectPropertyOf(:subproperty :superproperty)
+)
