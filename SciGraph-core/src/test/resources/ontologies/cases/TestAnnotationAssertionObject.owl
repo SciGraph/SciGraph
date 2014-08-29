@@ -1,0 +1,6 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestSubclass
+Declaration(AnnotationProperty(:p))
+AnnotationAssertion(:p :i :j)
+)
