@@ -35,3 +35,13 @@ do
   echo "</tr>" >> $out
 done
 echo "</table>" >> $out
+
+`cd target/owl_cases`
+`pandoc -f html -t markdown index.html > index.md`
+`git clone git@github.com:SciCrunch/SciGraph.wiki.git`
+`cd SciGraph.wiki`
+`cp ../index.md Neo4jMapping.md`
+`mkdir images`
+`cp ../*.png images`
+`git commit -a -m "Automated update of owl_cases"`
+`git push`

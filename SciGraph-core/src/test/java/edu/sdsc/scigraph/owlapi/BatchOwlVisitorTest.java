@@ -164,7 +164,7 @@ public class BatchOwlVisitorTest {
     Node person = getNode(ROOT + "/Person");
     Node fazz = getNode(ROOT + "/Fazz");
     Relationship assertion = getOnlyElement(GraphUtil.getRelationships(person, fazz,
-        OwlRelationships.OWL_ANNOTATION));
+        DynamicRelationshipType.withName("fizz")));
     assertThat(GraphUtil.getProperty(assertion, CommonProperties.URI, String.class).get(), is(ROOT
         + "/fizz"));
   }
