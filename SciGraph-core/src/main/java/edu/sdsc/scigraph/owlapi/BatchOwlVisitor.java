@@ -71,7 +71,6 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
@@ -129,7 +128,9 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   private long getOrCreateNode(URI uri) {
-    return graph.getNode(uri.toString());
+    long node = graph.getNode(uri.toString());
+    graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
+    return node;
   }
 
   /***
@@ -139,7 +140,6 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLClass desc) {
     URI uri = getUri(desc);
     long node = getOrCreateNode(uri);
-    graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
     graph.addLabel(node, OwlLabels.OWL_CLASS);
     /*
      * graph.setProperty(node, NodeProperties.ANONYMOUS, false);
@@ -209,8 +209,6 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLNamedIndividual individual) {
     long node = getOrCreateNode(getUri(individual));
     graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
-    graph.setNodeProperty(node, CommonProperties.FRAGMENT,
-        GraphUtil.getFragment(getUri(individual)));
     return null;
   }
 
@@ -272,7 +270,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLObjectIntersectionOf desc) {
     long subject = getOrCreateNode(getUri(desc));
     graph.setLabel(subject, OwlLabels.OWL_INTERSECTION_OF);
-    graph.setNodeProperty(subject, NodeProperties.ANONYMOUS, true);
+    graph.addLabel(subject, OwlLabels.OWL_ANONYMOUS);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getUri(expression));
       graph.createRelationship(subject, object, EdgeType.OPERAND);
@@ -284,7 +282,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLObjectUnionOf desc) {
     long subject = getOrCreateNode(getUri(desc));
     graph.setLabel(subject, OwlLabels.OWL_UNION_OF);
-    graph.setNodeProperty(subject, NodeProperties.ANONYMOUS, true);
+    graph.addLabel(subject, OwlLabels.OWL_ANONYMOUS);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getUri(expression));
       graph.createRelationship(subject, object, EdgeType.OPERAND);
@@ -347,9 +345,9 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLObjectComplementOf desc) {
     long subject = getOrCreateNode(getUri(desc));
     graph.setLabel(subject, OwlLabels.OWL_COMPLEMENT_OF);
-    graph.setNodeProperty(subject, NodeProperties.ANONYMOUS, true);
+    graph.addLabel(subject, OwlLabels.OWL_ANONYMOUS);
     long operand = getOrCreateNode(getUri(desc.getOperand()));
-    graph.createRelationship(subject, operand, EdgeType.REL);
+    graph.createRelationship(subject, operand, EdgeType.OPERAND);
     return null;
   }
 
@@ -415,6 +413,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLObjectSomeValuesFrom desc) {
     long restriction = getOrCreateNode(getUri(desc));
     graph.setLabel(restriction, OwlLabels.OWL_SOME_VALUES_FROM);
+    graph.addLabel(restriction, OwlLabels.OWL_ANONYMOUS);
     if (!desc.getProperty().isAnonymous()) {
       long property = getOrCreateNode(getUri(desc.getProperty()));
       graph.createRelationship(restriction, property, EdgeType.PROPERTY);
@@ -428,6 +427,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLObjectAllValuesFrom desc) {
     long restriction = getOrCreateNode(getUri(desc));
     graph.setLabel(restriction, OwlLabels.OWL_ALL_VALUES_FROM);
+    graph.addLabel(restriction, OwlLabels.OWL_ANONYMOUS);
     if (!desc.getProperty().isAnonymous()) {
       long property = getOrCreateNode(getUri(desc.getProperty()));
       graph.createRelationship(restriction, property, EdgeType.PROPERTY);
@@ -436,34 +436,5 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     }
     return null;
   }
-
-  /*
-   * public void processSomeValuesFrom() { logger.info("Processing someValuesFrom classes");
-   * ResourceIterator<Map<String, Object>> results = graph.runCypherQuery( "START svf = node(*) " +
-   * "MATCH n-[:SUBCLASS_OF]->svf " +
-   * "WHERE (has(svf.type) AND svf.type = 'OWLObjectSomeValuesFrom') " + "RETURN n, svf"); while
-   * (results.hasNext()) { Map<String, Object> result = results.next(); Node subject =
-   * (Node)result.get("n"); Node svf = (Node)result.get("svf"); Node property =
-   * getFirst(svf.getRelationships(EdgeType.PROPERTY), null).getEndNode(); // TODO: This could
-   * contain multiple nodes for (Relationship r : svf.getRelationships(EdgeType.CLASS)) { Node
-   * object = r.getEndNode(); String relationshipName = graph.getProperty(property,
-   * CommonProperties.FRAGMENT, String.class).get(); RelationshipType type =
-   * DynamicRelationshipType.withName(relationshipName); String propertyUri =
-   * graph.getProperty(property, CommonProperties.URI, String.class).get();
-   * graph.getOrCreateRelationship(subject, object, type, propertyUri); } } }
-   * 
-   * public void processCategories(Node root, RelationshipType type, String category) { for (Path
-   * position : Traversal.description() .uniqueness(Uniqueness.NODE_GLOBAL) .depthFirst()
-   * .relationships(type, Direction.OUTGOING) .traverse(root)) { Node end = position.endNode();
-   * graph.addProperty(end, Concept.CATEGORY, category); } }
-   * 
-   * public void postProcess() { processSomeValuesFrom();
-   * 
-   * logger.info("Processing categories"); for (Entry<String, String> category:
-   * categoryMap.entrySet()) { Node root = graph.getOrCreateNode(category.getKey());
-   * processCategories(root, EdgeType.SUPERCLASS_OF, category.getValue()); }
-   * 
-   * }
-   */
 
 }

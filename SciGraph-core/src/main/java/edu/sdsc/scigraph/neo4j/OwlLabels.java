@@ -11,7 +11,8 @@ public class OwlLabels {
   /***
    * Labels
    */
-
+  public static final Label OWL_ANONYMOUS = DynamicLabel.label("anonymous");
+  
   public static final Label OWL_CLASS = DynamicLabel.label(getFragment(OWLRDFVocabulary.OWL_CLASS));
 
   public static final Label OWL_INDIVIDUAL = DynamicLabel
@@ -90,6 +91,7 @@ public class OwlLabels {
   // DynamicRelationshipType.withName(getFragment(OWLRDFVocabulary.o))
 
   private static String getFragment(OWLRDFVocabulary vocab) {
+    // return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, vocab.getIRI().getFragment());
     return vocab.getIRI().getFragment();
   }
 

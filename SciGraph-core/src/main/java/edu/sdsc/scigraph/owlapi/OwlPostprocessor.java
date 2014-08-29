@@ -44,11 +44,13 @@ public class OwlPostprocessor {
     logger.info("Processing someValuesFrom classes");
     try (Transaction tx = graphDb.beginTx()) {
       ResourceIterator<Map<String, Object>> results = engine.execute(
-          "MATCH (n)-[:subClassOf]->(svf:someValuesFrom)-[:PROPERTY]->(p) RETURN n, svf, p")
+          "MATCH (n)-[relationship]->(svf:someValuesFrom)-[:PROPERTY]->(p) "
+              + "RETURN n, relationship, svf, p")
           .iterator();
       while (results.hasNext()) {
         Map<String, Object> result = results.next();
         Node subject = (Node) result.get("n");
+        Relationship relationship = (Relationship) result.get("relationship");
         Node svf = (Node) result.get("svf");
         Node property = (Node) result.get("p");
         for (Relationship r : svf.getRelationships(EdgeType.FILLER)) {
@@ -61,6 +63,7 @@ public class OwlPostprocessor {
           Relationship inferred = subject.createRelationshipTo(object, type);
           inferred.setProperty(CommonProperties.URI, propertyUri);
           inferred.setProperty(CommonProperties.CONVENIENCE, true);
+          inferred.setProperty(CommonProperties.OWL_TYPE, relationship.getType().name());
         }
       }
       tx.success();

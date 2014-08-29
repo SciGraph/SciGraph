@@ -15,6 +15,7 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.neo4j.OwlLabels;
 
 public class TestSubClassOfExistential extends OwlTestCase {
 
@@ -40,6 +41,9 @@ public class TestSubClassOfExistential extends OwlTestCase {
     assertThat("relationship is asserted",
         GraphUtil.getProperty(relationship, CommonProperties.CONVENIENCE, Boolean.class),
         is(equalTo(Optional.of(true))));
+    assertThat("owltype is added",
+        GraphUtil.getProperty(relationship, CommonProperties.OWL_TYPE, String.class),
+        is(equalTo(Optional.of(OwlLabels.RDF_SUBCLASS_OF.name()))));
   }
 
 }
