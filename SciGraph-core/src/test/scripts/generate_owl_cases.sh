@@ -14,7 +14,7 @@ function getOwlContent() {
 function drawGraph() {
   png="target/owl_cases/$1.png"
   `dot -Tpng $2 > $png`
-  echo "<img src='$1.png' />" >> $out
+  echo "<img src='images/$1.png' />" >> $out
 }
 
 echo "<h1>OWL -> Neo4j Translations</h1>\n" > $out
@@ -36,12 +36,15 @@ do
 done
 echo "</table>" >> $out
 
-`cd target/owl_cases`
+cd target/owl_cases
+
+`rm -fr SciGraph.wiki`
 `pandoc -f html -t markdown index.html > index.md`
 `git clone git@github.com:SciCrunch/SciGraph.wiki.git`
-`cd SciGraph.wiki`
+cd SciGraph.wiki
 `cp ../index.md Neo4jMapping.md`
-`mkdir images`
+`mkdir -p images`
 `cp ../*.png images`
-`git commit -a -m "Automated update of owl_cases"`
-`git push`
+git add *
+git commit -m "Automated update of owl_cases"
+git push
