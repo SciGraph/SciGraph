@@ -18,10 +18,6 @@ package edu.sdsc.scigraph.neo4j;
 import static java.lang.String.format;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Named;
@@ -29,6 +25,7 @@ import javax.inject.Singleton;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
@@ -47,24 +44,13 @@ public class Neo4jModule extends AbstractModule {
 
   private Optional<String> graphLocation = Optional.absent();
 
-  /***
-   * @deprecated Configuration should now be done with yaml files.
-   */
-  @Deprecated
-  public Neo4jModule() {}
-
   public Neo4jModule(OntologyConfiguration configuration) {
     this.graphLocation = Optional.of(configuration.getGraphLocation());
   }
 
   @Override
   protected void configure() {
-    if (!graphLocation.isPresent()) {
-      Properties properties = loadProperties(this, "neo4j.properties");
-      Names.bindProperties(binder(), properties);
-    } else {
-      bind(String.class).annotatedWith(Names.named("neo4j.location")).toInstance(graphLocation.get());
-    }
+    bind(String.class).annotatedWith(Names.named("neo4j.location")).toInstance(graphLocation.get());
     bind(new TypeLiteral<Class<?>>() {}).toInstance(Concept.class);
     TransactionalInterceptor interceptor = new TransactionalInterceptor();
     requestInjection(interceptor);
@@ -90,15 +76,13 @@ public class Neo4jModule extends AbstractModule {
   @Singleton
   GraphDatabaseService getGraphDatabaseService(@Named("neo4j.location") String neo4jLocation) throws IOException {
     try {
-      Map<String, String> config = new HashMap<>();
-      config.put("neostore.nodestore.db.mapped_memory", "500M");
-      config.put("neostore.relationshipstore.db.mapped_memory", "500M");
-      config.put("neostore.propertystore.db.mapped_memory", "500M");
-      config.put("neostore.propertystore.db.strings.mapped_memory", "500M");
-      config.put("neostore.propertystore.db.arrays.mapped_memory", "500M");
       final GraphDatabaseService graphDb = new GraphDatabaseFactory()
       .newEmbeddedDatabaseBuilder(neo4jLocation)
-      .setConfig(config)
+      .setConfig(GraphDatabaseSettings.nodestore_mapped_memory_size, "500M")
+      .setConfig(GraphDatabaseSettings.relationshipstore_mapped_memory_size, "500M")
+      .setConfig(GraphDatabaseSettings.nodestore_propertystore_mapped_memory_size, "500M")
+      .setConfig(GraphDatabaseSettings.strings_mapped_memory_size, "500M")
+      .setConfig(GraphDatabaseSettings.arrays_mapped_memory_size, "500M")
       .newGraphDatabase();
 
       Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -112,20 +96,6 @@ public class Neo4jModule extends AbstractModule {
       }
       throw e;
     }
-  }
-
-  @Deprecated
-  private static Properties loadProperties(Object object, String name) {
-    Properties properties = new Properties();
-    try (InputStream is = object.getClass().getResourceAsStream(name)) {
-      properties.load(is);
-    } catch (Exception e) {
-      try (InputStream is = object.getClass().getResourceAsStream("/" + name)) {
-        properties.load(is);
-      } catch (Exception ex) {
-      }
-    } 
-    return properties;
   }
 
 }
