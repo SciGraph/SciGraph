@@ -3,6 +3,8 @@ package edu.sdsc.scigraph.neo4j;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.collect.ForwardingConcurrentMap;
@@ -14,10 +16,21 @@ import com.google.common.collect.ForwardingConcurrentMap;
  * TODO: This could be switched to MapDB if this structure needs to persist.
  *
  */
+@ThreadSafe
 public class RelationshipMap extends ForwardingConcurrentMap<Edge, Long> {
 
-  ConcurrentHashMap<Edge, Long> delegate = new ConcurrentHashMap<Edge, Long>(200_000);
+  private static final int INITIAL_CAPACITY = 200_000;
+  
+  private final ConcurrentHashMap<Edge, Long> delegate;
 
+  public RelationshipMap() {
+    this(INITIAL_CAPACITY);
+  }
+
+  public RelationshipMap(int initialCapacity) {
+    delegate = new ConcurrentHashMap<Edge, Long>(initialCapacity);
+  }
+  
   @Override
   protected ConcurrentMap<Edge, Long> delegate() {
     return delegate();
