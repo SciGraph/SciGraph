@@ -17,8 +17,10 @@ package edu.sdsc.scigraph.owlapi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.base.Objects;
 
@@ -31,6 +33,8 @@ public class OwlLoadConfiguration {
   private Map<String, String> curies = new HashMap<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
+  private Set<String> indexedNodeProperties = new HashSet<>();
+  private Set<String> exactNodeProperties = new HashSet<>();
 
   public OntologyConfiguration getOntologyConfiguration() {
     return ontologyConfiguration;
@@ -54,6 +58,14 @@ public class OwlLoadConfiguration {
 
   public List<MappedProperty> getMappedProperties() {
     return mappedProperties;
+  }
+
+  public Set<String> getIndexedNodeProperties() {
+    return indexedNodeProperties;
+  }
+
+  public Set<String> getExactNodeProperties() {
+    return exactNodeProperties;
   }
 
   public static class MappedProperty {
