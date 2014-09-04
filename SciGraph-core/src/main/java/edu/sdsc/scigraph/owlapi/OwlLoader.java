@@ -136,13 +136,11 @@ public class OwlLoader {
 
     @Provides
     @Singleton
-    OWLOntologyWalker getOntologyWalker(FileCachingIRIMapper mapper)
+    OWLOntologyWalker getOntologyWalker()
         throws OWLOntologyCreationException {
       logger.info("Loading ontologies with owlapi...");
       Stopwatch timer = Stopwatch.createStarted();
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-      // TODO: Removes IRI mapper for now
-      // manager.addIRIMapper(mapper);
       for (String url: config.getOntologyUrls()) {
         if (url.startsWith("http://") || url.startsWith("https://")) {
           manager.loadOntology(IRI.create(url));
