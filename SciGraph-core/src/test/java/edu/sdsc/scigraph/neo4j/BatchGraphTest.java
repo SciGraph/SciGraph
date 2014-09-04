@@ -10,7 +10,6 @@ import static org.hamcrest.Matchers.contains;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -30,6 +29,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.lucene.LuceneUtils;
 
 public class BatchGraphTest {
 
@@ -43,8 +43,7 @@ public class BatchGraphTest {
   public void setup() throws IOException {
     path = Files.createTempDirectory("SciGraph-BatchTest");
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
-    graph = new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
-        Collections.<String> emptySet());
+    graph = new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"), newHashSet("prop1"));
     foo = graph.getNode("http://example.org/foo");
   }
 
@@ -66,7 +65,7 @@ public class BatchGraphTest {
     GraphDatabaseService graphDb = getGraphDB();
     assertThat(size(GlobalGraphOperations.at(graphDb).getAllNodes()), is(1));
     IndexHits<Node> hits = nodeIndex.query(CommonProperties.URI + ":http\\://example.org/foo");
-    assertThat(hits.size(), is(1));
+    assertThat(hits.getSingle().getId(), is(foo));
   }
 
   @Test
@@ -74,7 +73,15 @@ public class BatchGraphTest {
     graph.addProperty(foo, "prop1", "foo");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1:foo");
-    assertThat(hits.size(), is(1));
+    assertThat(hits.getSingle().getId(), is(foo));
+  }
+  
+  @Test
+  public void testExactPropertyIndex() {
+    graph.addProperty(foo, "prop1", "foo");
+    getGraphDB();
+    IndexHits<Node> hits = nodeIndex.query("prop1" + LuceneUtils.EXACT_SUFFIX + ":foo");
+    assertThat(hits.getSingle().getId(), is(foo));
   }
 
   @Test
