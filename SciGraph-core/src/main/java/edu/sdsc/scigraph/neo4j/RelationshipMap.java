@@ -14,25 +14,25 @@ import com.google.common.collect.ForwardingConcurrentMap;
  * TODO: This could be switched to MapDB if this structure needs to persist.
  *
  */
-public class RelationshipMap extends ForwardingConcurrentMap<Composite, Long> {
+public class RelationshipMap extends ForwardingConcurrentMap<Edge, Long> {
 
-  ConcurrentHashMap<Composite, Long> delegate = new ConcurrentHashMap<Composite, Long>(200_000);
+  ConcurrentHashMap<Edge, Long> delegate = new ConcurrentHashMap<Edge, Long>(200_000);
 
   @Override
-  protected ConcurrentMap<Composite, Long> delegate() {
+  protected ConcurrentMap<Edge, Long> delegate() {
     return delegate();
   }
   
   public Long get(long start, long end, RelationshipType type) {
-    return delegate.get(new Composite(start, end, type.toString()));
+    return delegate.get(new Edge(start, end, type.toString()));
   }
 
   public boolean containsKey(long start, long end, RelationshipType type) {
-    return delegate.containsKey(new Composite(start, end, type.toString()));
+    return delegate.containsKey(new Edge(start, end, type.toString()));
   };
   
   public Long put(long start, long end, RelationshipType type, Long value) {
-    return delegate.put(new Composite(start, end, type.toString()), value);
+    return delegate.put(new Edge(start, end, type.toString()), value);
   };
 
 }
