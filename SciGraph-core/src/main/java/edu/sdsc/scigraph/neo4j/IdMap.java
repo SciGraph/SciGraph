@@ -18,8 +18,18 @@ import com.google.common.collect.ForwardingConcurrentMap;
 @ThreadSafe
 public class IdMap extends ForwardingConcurrentMap<String, Long> {
 
-  ConcurrentHashMap<String, Long> delegate = new ConcurrentHashMap<String, Long>(200_000);
-  AtomicLong idCounter = new AtomicLong();
+  private static final int INITIAL_CAPACITY = 200_000;
+  
+  private final ConcurrentHashMap<String, Long> delegate;
+  private final AtomicLong idCounter = new AtomicLong();
+
+  public IdMap() {
+    this(INITIAL_CAPACITY);
+  }
+
+  public IdMap(int initialCapacity) {
+    delegate = new ConcurrentHashMap<String, Long>(initialCapacity);
+  }
 
   @Override
   protected ConcurrentMap<String, Long> delegate() {

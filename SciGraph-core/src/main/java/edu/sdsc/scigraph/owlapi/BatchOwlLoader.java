@@ -127,14 +127,14 @@ public class BatchOwlLoader {
     protected void configure() {
       bindConstant().annotatedWith(Names.named("uniqueProperty")).to(CommonProperties.URI);
       bind(new TypeLiteral<Set<String>>() {
-      }).annotatedWith(Names.named("indexedProperties")).toInstance(NODE_PROPERTIES_TO_INDEX);
+      }).annotatedWith(Names.named("indexedProperties")).toInstance(config.getIndexedNodeProperties());
       bind(new TypeLiteral<Set<String>>() {
-      }).annotatedWith(Names.named("exactProperties")).toInstance(EXACT_PROPERTIES);
+      }).annotatedWith(Names.named("exactProperties")).toInstance(config.getExactNodeProperties());
     }
 
     @Provides
     BatchInserter getInserter() {
-      return BatchInserters.inserter("/temp/batchGraph");
+      return BatchInserters.inserter(config.getOntologyConfiguration().getGraphLocation());
     }
 
     @Provides
@@ -145,13 +145,11 @@ public class BatchOwlLoader {
 
     @Provides
     @Singleton
-    OWLOntologyWalker getOntologyWalker(FileCachingIRIMapper mapper)
+    OWLOntologyWalker getOntologyWalker()
         throws OWLOntologyCreationException {
       logger.info("Loading ontologies with owlapi...");
       Stopwatch timer = Stopwatch.createStarted();
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-      // TODO: Removes IRI mapper for now
-      // manager.addIRIMapper(mapper);
       for (String url : config.getOntologyUrls()) {
         if (url.startsWith("http://") || url.startsWith("https://")) {
           manager.loadOntology(IRI.create(url));

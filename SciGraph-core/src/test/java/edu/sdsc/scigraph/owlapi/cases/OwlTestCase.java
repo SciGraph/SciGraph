@@ -74,7 +74,7 @@ public abstract class OwlTestCase {
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
 
-    OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb);
+    OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
     postprocessor.processSomeValuesFrom();
 
     graphDb.beginTx();

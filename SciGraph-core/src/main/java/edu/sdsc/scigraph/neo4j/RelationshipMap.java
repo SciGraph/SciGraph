@@ -3,6 +3,8 @@ package edu.sdsc.scigraph.neo4j;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.collect.ForwardingConcurrentMap;
@@ -14,25 +16,36 @@ import com.google.common.collect.ForwardingConcurrentMap;
  * TODO: This could be switched to MapDB if this structure needs to persist.
  *
  */
-public class RelationshipMap extends ForwardingConcurrentMap<Composite, Long> {
+@ThreadSafe
+public class RelationshipMap extends ForwardingConcurrentMap<Edge, Long> {
 
-  ConcurrentHashMap<Composite, Long> delegate = new ConcurrentHashMap<Composite, Long>(200_000);
+  private static final int INITIAL_CAPACITY = 200_000;
+  
+  private final ConcurrentHashMap<Edge, Long> delegate;
 
+  public RelationshipMap() {
+    this(INITIAL_CAPACITY);
+  }
+
+  public RelationshipMap(int initialCapacity) {
+    delegate = new ConcurrentHashMap<Edge, Long>(initialCapacity);
+  }
+  
   @Override
-  protected ConcurrentMap<Composite, Long> delegate() {
+  protected ConcurrentMap<Edge, Long> delegate() {
     return delegate();
   }
   
   public Long get(long start, long end, RelationshipType type) {
-    return delegate.get(new Composite(start, end, type.toString()));
+    return delegate.get(new Edge(start, end, type.toString()));
   }
 
   public boolean containsKey(long start, long end, RelationshipType type) {
-    return delegate.containsKey(new Composite(start, end, type.toString()));
+    return delegate.containsKey(new Edge(start, end, type.toString()));
   };
   
   public Long put(long start, long end, RelationshipType type, Long value) {
-    return delegate.put(new Composite(start, end, type.toString()), value);
+    return delegate.put(new Edge(start, end, type.toString()), value);
   };
 
 }

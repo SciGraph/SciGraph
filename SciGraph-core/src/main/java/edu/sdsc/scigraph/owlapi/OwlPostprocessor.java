@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.Direction;
@@ -31,15 +32,23 @@ public class OwlPostprocessor {
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;
   private final ReadableIndex<Node> nodeIndex;
+  
+  private final Map<String, String> categoryMap;
 
   @Inject
-  public OwlPostprocessor(GraphDatabaseService graphDb) {
+  public OwlPostprocessor(GraphDatabaseService graphDb, @Named("owl.categories") Map<String, String> categoryMap) {
     this.graphDb = graphDb;
+    this.categoryMap = categoryMap;
     this.nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     engine = new ExecutionEngine(graphDb);
     
   }
 
+  public void postprocess() {
+    processSomeValuesFrom();
+    processCategories(categoryMap);
+  }
+  
   public void processSomeValuesFrom() {
     logger.info("Processing someValuesFrom classes");
     try (Transaction tx = graphDb.beginTx()) {
@@ -70,19 +79,22 @@ public class OwlPostprocessor {
     }
   }
 
-  void processCategory(Node root, RelationshipType type, String category) {
+  void processCategory(Node root, RelationshipType type, Direction direction, String category) {
     for (Path position : graphDb.traversalDescription()
-        .uniqueness(Uniqueness.NODE_GLOBAL).depthFirst().relationships(type, Direction.OUTGOING)
+        .uniqueness(Uniqueness.NODE_GLOBAL).depthFirst().relationships(type, direction)
         .traverse(root)) {
       Node end = position.endNode();
       GraphUtil.addProperty(end, Concept.CATEGORY, category);
     }
   }
 
-  public void processCategories(Map<String, String> categoryMap) {
-    for (Entry<String, String> category : categoryMap.entrySet()) {
+  public void processCategories(Map<String, String> categories) {
+    for (Entry<String, String> category : categories.entrySet()) {
       Node root = nodeIndex.get(CommonProperties.URI, category.getKey()).getSingle();
-      processCategory(root, EdgeType.SUPERCLASS_OF, category.getValue());
+      if (null == root) {
+        throw new IllegalStateException("Failed to locate " + category.getKey() + " while processing categories");
+      }
+      processCategory(root, OwlRelationships.RDF_SUBCLASS_OF, Direction.INCOMING, category.getValue());
     }
   }
 
