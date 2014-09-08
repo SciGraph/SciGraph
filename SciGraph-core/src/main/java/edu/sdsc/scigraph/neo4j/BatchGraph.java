@@ -224,7 +224,6 @@ public class BatchGraph {
     } catch (Exception e) {
       logger.log(Level.WARNING, "Failed to set " + property + " to " + value + " on " + batchId, e);
     }
-
   }
 
   public void setRelationshipProperty(long batchId, String property, Object value) {

@@ -16,13 +16,11 @@ package edu.sdsc.scigraph.owlapi;
 import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getTypedLiteralValue;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getUri;
-import static java.lang.String.format;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +28,7 @@ import javax.inject.Inject;
 
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -85,18 +84,15 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private OWLOntology ontology;
 
-  private Map<String, String> curieMap;
-
   private Map<String, String> mappedProperties;
 
   private OWLOntology parentOntology = null;
 
   @Inject
-  public BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph, Map<String, String> curieMap,
+  public BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph,
       List<MappedProperty> mappedProperties) {
     super(walker);
     this.graph = graph;
-    this.curieMap = curieMap;
     this.mappedProperties = new HashMap<>();
     for (MappedProperty mappedProperty : mappedProperties) {
       for (String property : mappedProperty.getProperties()) {
@@ -119,17 +115,6 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     return null;
   }
 
-  Optional<String> getCurie(String iri) {
-    for (Entry<String, String> prefix : curieMap.entrySet()) {
-      String key = prefix.getKey();
-      if (iri.startsWith(key)) {
-        String currie = format("%s:%s", prefix.getValue(), iri.substring(key.length()));
-        return Optional.of(currie);
-      }
-    }
-    return Optional.absent();
-  }
-
   private long getOrCreateNode(URI uri) {
     long node = graph.getNode(uri.toString());
     graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
@@ -140,46 +125,20 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLDeclarationAxiom axiom) {
     URI uri = getUri(axiom);
     long node = getOrCreateNode(uri);
-    graph.addLabel(node, OwlLabels.OWL_CLASS);
-    return null;
-  }
-
-  @Override
-  public Void visit(OWLClass desc) {
-    URI uri = getUri(desc);
-    long node = getOrCreateNode(uri);
-    graph.addLabel(node, OwlLabels.OWL_CLASS);
-    /*
-     * graph.setProperty(node, NodeProperties.ANONYMOUS, false);
-     * 
-     * if (null != ontology.getOntologyID().getOntologyIRI()) { graph.setProperty(node,
-     * NodeProperties.ONTOLOGY, ontology.getOntologyID().getOntologyIRI() .toString()); } if (null
-     * != parentOntology.getOntologyID().getOntologyIRI()) { graph.setProperty(node,
-     * NodeProperties.PARENT_ONTOLOGY, parentOntology.getOntologyID() .getOntologyIRI().toString());
-     * } if (null != ontology.getOntologyID().getVersionIRI()) { graph.setProperty(node,
-     * NodeProperties.ONTOLOGY_VERSION, ontology.getOntologyID() .getVersionIRI()); }
-     * Optional<String> curie = getCurie(getUri(desc).toString()); if (curie.isPresent()) {
-     * graph.setProperty(node, CommonProperties.CURIE, curie.get()); }
-     */
-    return null;
-  }
-
-  @Override
-  public Void visit(OWLDataProperty property) {
-    long node = getOrCreateNode(property.getIRI().toURI());
-    graph.setLabel(node, OwlLabels.OWL_DATA_PROPERTY);
-    return null;
-  }
-
-  @Override
-  public Void visit(OWLObjectProperty property) {
-    long node = getOrCreateNode(property.getIRI().toURI());
-    // TODO: Why is this necessary? Neo4j BatchInserter throws exceptions when this is called too many times.
-    if (!graph.hasLabel(node, OwlLabels.OWL_OBJECT_PROPERTY)) {
+    if (axiom.getEntity() instanceof OWLClass) {
+      graph.addLabel(node, OwlLabels.OWL_CLASS);
+    } else if (axiom.getEntity() instanceof OWLNamedIndividual) {
+      graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
+    } else if (axiom.getEntity() instanceof OWLObjectProperty) {
+      OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
       graph.setLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
       graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
       graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
       graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+    } else if (axiom.getEntity() instanceof OWLDataProperty) {
+      graph.setLabel(node, OwlLabels.OWL_DATA_PROPERTY);
+    } else {
+      logger.warning("Unhandled declaration type " + axiom.getEntity().getClass().getName());
     }
     return null;
   }
@@ -227,13 +186,6 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long superProperty = getOrCreateNode(getUri(axiom.getSuperProperty()));
     graph.addLabel(superProperty, OwlLabels.OWL_ANNOTATION_PROPERTY);
     graph.createRelationship(subProperty, superProperty, OwlRelationships.RDFS_SUB_PROPERTY_OF);
-    return null;
-  }
-
-  @Override
-  public Void visit(OWLNamedIndividual individual) {
-    long node = getOrCreateNode(getUri(individual));
-    graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
     return null;
   }
 

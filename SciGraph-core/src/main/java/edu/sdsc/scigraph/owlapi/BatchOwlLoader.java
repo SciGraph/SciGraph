@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 
 import java.io.File;
@@ -59,9 +58,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
 
 public class BatchOwlLoader {
@@ -132,13 +128,6 @@ public class BatchOwlLoader {
       this.config = config;
     }
 
-    private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
-        NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
-        CommonProperties.CURIE, CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
-        Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
-    private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL,
-        Concept.SYNONYM);
-
     @Override
     protected void configure() {
       bind(OwlLoadConfiguration.class).toInstance(config);
@@ -161,7 +150,7 @@ public class BatchOwlLoader {
     @Provides
     @Singleton
     BatchOwlVisitor getBatchVisitor(OWLOntologyWalker walker, BatchGraph graph) {
-      return new BatchOwlVisitor(walker, graph, config.getCuries(), config.getMappedProperties());
+      return new BatchOwlVisitor(walker, graph, config.getMappedProperties());
     }
 
     @Provides

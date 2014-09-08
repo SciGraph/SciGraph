@@ -71,8 +71,6 @@ public class OwlVisitorTest extends GraphTestBase {
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
-    Map<String, String> curieMap = new HashMap<>();
-    curieMap.put("http://example.org/otherOntologies/families/", "otherOnt");
     Map<String, String> categoryMap = new HashMap<>();
     try (Transaction tx = graphDb.beginTx()) {
       List<MappedProperty> propertyMap = new ArrayList<>();
@@ -81,7 +79,7 @@ public class OwlVisitorTest extends GraphTestBase {
       when(age.getProperties()).thenReturn(newArrayList(ROOT + "/hasAge"));
       propertyMap.add(age);
 
-      OwlVisitor visitor = new OwlVisitor(walker, graph, curieMap, categoryMap, propertyMap);
+      OwlVisitor visitor = new OwlVisitor(walker, graph, categoryMap, propertyMap);
       walker.walkStructure(visitor);
       visitor.postProcess();
       tx.success();
@@ -323,13 +321,6 @@ public class OwlVisitorTest extends GraphTestBase {
     assertThat(graph.hasRelationship(nonchild, adult, EdgeType.EQUIVALENT_TO), is(true));
     assertThat(graph.hasRelationship(nonchild, grownUp, EdgeType.EQUIVALENT_TO), is(true));
     assertThat(graph.hasRelationship(grownUp, nonchild, EdgeType.EQUIVALENT_TO), is(true));
-  }
-
-  @Test
-  public void testCuries() {
-    Node grownup = graph.getOrCreateNode(OTHER_ROOT + "/Grownup");
-    String curie = graph.getProperty(grownup, CommonProperties.CURIE, String.class).get();
-    assertThat(curie, is(equalTo("otherOnt:Grownup")));
   }
 
   /*** http://www.w3.org/TR/owl2-new-features/#F12:_Punning */

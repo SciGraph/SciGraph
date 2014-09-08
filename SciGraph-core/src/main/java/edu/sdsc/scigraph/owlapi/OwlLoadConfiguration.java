@@ -30,7 +30,6 @@ public class OwlLoadConfiguration {
 
   private OntologyConfiguration ontologyConfiguration;
   private List<String> ontologyUrls = new ArrayList<>();
-  private Map<String, String> curies = new HashMap<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
   private Set<String> indexedNodeProperties = new HashSet<>();
@@ -46,10 +45,6 @@ public class OwlLoadConfiguration {
 
   public List<String> getOntologyUrls() {
     return ontologyUrls;
-  }
-
-  public Map<String, String> getCuries() {
-    return curies;
   }
 
   public Map<String, String> getCategories() {

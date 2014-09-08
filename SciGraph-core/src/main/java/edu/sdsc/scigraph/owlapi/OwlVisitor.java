@@ -19,7 +19,6 @@ import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getTypedLiteralValue;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getUri;
-import static java.lang.String.format;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -98,8 +97,6 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private OWLOntology ontology;
 
-  private Map<String, String> curieMap;
-
   private Map<String, String> categoryMap;
 
   private Map<String, String> mappedProperties;
@@ -108,12 +105,10 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   @Inject
   OwlVisitor(OWLOntologyWalker walker, Graph graph,
-      Map<String, String> curieMap,
       Map<String, String> categoryMap,
       List<MappedProperty> mappedProperties) {
     super(walker);
     this.graph = graph;
-    this.curieMap = curieMap;
     this.categoryMap = categoryMap;
     this.mappedProperties = new HashMap<>();
     for (MappedProperty mappedProperty: mappedProperties) {
@@ -133,17 +128,6 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     return null;
   }
 
-  Optional<String> getCurie(String iri) {
-    for (Entry<String, String> prefix: curieMap.entrySet()) {
-      String key = prefix.getKey();
-      if (iri.startsWith(key)) {
-        String currie = format("%s:%s", prefix.getValue(), iri.substring(key.length()));
-        return Optional.of(currie);
-      }
-    }
-    return Optional.absent();
-  }
-
   @Override
   public Void visit(OWLClass desc) {
     logger.fine(desc.toString());
@@ -159,10 +143,6 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     }
     if (null != ontology.getOntologyID().getVersionIRI()) {
       graph.setProperty(node, NodeProperties.ONTOLOGY_VERSION, ontology.getOntologyID().getVersionIRI().toString());
-    }
-    Optional<String> curie = getCurie(getUri(desc).toString());
-    if (curie.isPresent()) {
-      graph.setProperty(node, CommonProperties.CURIE, curie.get());
     }
     return null;
   }
@@ -217,10 +197,6 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLNamedIndividual individual) {
     Node node = graph.getOrCreateNode(getUri(individual));
     graph.addProperty(node, CommonProperties.TYPE, OWLIndividual.class.getSimpleName());
-    Optional<String> curie = getCurie(getUri(individual).toString());
-    if (curie.isPresent()) {
-      graph.setProperty(node, CommonProperties.CURIE, curie.get());
-    }
     return null;
   }
 

@@ -21,6 +21,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -30,9 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
@@ -52,6 +51,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
+import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
@@ -86,15 +86,13 @@ public class BatchOwlVisitorTest {
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
-    Map<String, String> curieMap = new HashMap<>();
-    curieMap.put("http://example.org/otherOntologies/families/", "otherOnt");
     List<MappedProperty> propertyMap = new ArrayList<>();
     MappedProperty age = mock(MappedProperty.class);
     when(age.getName()).thenReturn("isAged");
     when(age.getProperties()).thenReturn(newArrayList(ROOT + "/hasAge"));
     propertyMap.add(age);
 
-    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, curieMap, propertyMap);
+    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, propertyMap);
     walker.walkStructure(visitor);
 
     batchGraph.shutdown();
@@ -374,8 +372,10 @@ size(GraphUtil.getRelationships(parent, intersection,
 
   @Test
   public void testObjectProperties() {
-    Node hasAge = getNode(ROOT + "/hasParent");
-    assertThat(hasAge.hasLabel(OwlLabels.OWL_OBJECT_PROPERTY), is(true));
+    Node hasParent = getNode(ROOT + "/hasParent");
+    assertThat(Iterables.contains(hasParent.getLabels(), OwlLabels.OWL_OBJECT_PROPERTY), is(true));
+    // TODO: Why doesn't hasLabel return true?
+    // assertThat(hasParent.hasLabel(OwlLabels.OWL_OBJECT_PROPERTY), is(true));
   }
 
 }

@@ -10,6 +10,8 @@ import static org.hamcrest.Matchers.contains;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -172,13 +174,11 @@ public class BatchGraphTest {
   }
 
   @Test
-  public void testRepeatedPropertySetting() {
-    for (int i = 0; i < 10_100_000; i++) {
-      long a = graph.getNode("a");
-      graph.setNodeProperty(a, EdgeProperties.REFLEXIVE, false);
-      graph.setNodeProperty(a, EdgeProperties.TRANSITIVE, true);
-      graph.setNodeProperty(a, EdgeProperties.SYMMETRIC, false);
-    }
+  public void testCollectIndexProperties() {
+    System.out.println(graph.collectIndexProperties("prop1", "foo"));
+    Map<String, Object> map = new HashMap<>();
+    map.put("prop1", "foo");
+    map.put("prop2", "bar");
+    System.out.println(graph.collectIndexProperties(map));
   }
-
 }

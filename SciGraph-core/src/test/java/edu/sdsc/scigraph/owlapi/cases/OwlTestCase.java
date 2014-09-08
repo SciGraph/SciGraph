@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -67,8 +66,7 @@ public abstract class OwlTestCase {
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
-    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph,
-        new HashMap<String, String>(), new ArrayList<MappedProperty>());
+    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
     walker.walkStructure(visitor);
     batchGraph.shutdown();
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
