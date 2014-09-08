@@ -22,13 +22,15 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
+import com.google.common.io.Resources;
+
+@Ignore
 public class LoggingOWLVisitorTest {
 
   @Test
   public void testLogging() throws Exception {
-    //String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
+    String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-    String uri = "http://purl.obolibrary.org/obo/upheno/imports/fbbt_import.owl";
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
