@@ -19,36 +19,20 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.io.Resources;
-
-@Ignore
 public class LoggingOWLVisitorTest {
 
   @Test
   public void testLogging() throws Exception {
-    String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
+    //String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    String uri = "http://purl.obolibrary.org/obo/upheno/imports/fbbt_import.owl";
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
     LoggingOWLVisitor visitor = new LoggingOWLVisitor(walker);
-    
-    for (OWLOntology ontology: manager.getOntologies()) {
-      OWLOntologyFormat format = manager.getOntologyFormat(ontology);
-      System.out.println(format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap());
-      ListMultimap<String, String> prefixMap = 
-          Multimaps.invertFrom(Multimaps.forMap(format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap()), ArrayListMultimap.<String, String>create());
-      System.out.println(prefixMap);
-    }
-    
     walker.walkStructure(visitor);
   }
 

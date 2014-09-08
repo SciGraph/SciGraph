@@ -29,6 +29,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 
 public class BatchGraphTest {
@@ -43,7 +44,9 @@ public class BatchGraphTest {
   public void setup() throws IOException {
     path = Files.createTempDirectory("SciGraph-BatchTest");
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
-    graph = new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"), newHashSet("prop1"));
+    graph =
+        new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
+            newHashSet("prop1"));
     foo = graph.getNode("http://example.org/foo");
   }
 
@@ -75,7 +78,7 @@ public class BatchGraphTest {
     IndexHits<Node> hits = nodeIndex.query("prop1:foo");
     assertThat(hits.getSingle().getId(), is(foo));
   }
-  
+
   @Test
   public void testExactPropertyIndex() {
     graph.addProperty(foo, "prop1", "foo");
@@ -166,6 +169,16 @@ public class BatchGraphTest {
     assertThat(size(graphDb.getNodeById(a).getRelationships(type)), is(2));
     assertThat(size(graphDb.getNodeById(b).getRelationships(type)), is(2));
     assertThat(size(graphDb.getNodeById(c).getRelationships(type)), is(2));
+  }
+
+  @Test
+  public void testRepeatedPropertySetting() {
+    for (int i = 0; i < 10_100_000; i++) {
+      long a = graph.getNode("a");
+      graph.setNodeProperty(a, EdgeProperties.REFLEXIVE, false);
+      graph.setNodeProperty(a, EdgeProperties.TRANSITIVE, true);
+      graph.setNodeProperty(a, EdgeProperties.SYMMETRIC, false);
+    }
   }
 
 }

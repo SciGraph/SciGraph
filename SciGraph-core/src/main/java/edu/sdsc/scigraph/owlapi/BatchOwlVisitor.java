@@ -1,17 +1,15 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.sdsc.scigraph.owlapi;
 
@@ -107,6 +105,10 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     }
   }
 
+  public void shutdown() {
+    graph.shutdown();
+  }
+
   @Override
   public Void visit(OWLOntology ontology) {
     logger.info("Walking ontology: " + ontology.getOntologyID());
@@ -172,10 +174,13 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectProperty property) {
     long node = getOrCreateNode(property.getIRI().toURI());
-    graph.setLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
-    graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
-    graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
-    graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+    // TODO: Why is this necessary? Neo4j BatchInserter throws exceptions when this is called too many times.
+    if (!graph.hasLabel(node, OwlLabels.OWL_OBJECT_PROPERTY)) {
+      graph.setLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
+      graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
+      graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
+      graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+    }
     return null;
   }
 
@@ -203,8 +208,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         long object = getOrCreateNode(((IRI) axiom.getValue()).toURI());
         URI uri = Graph.getURI(property);
         String fragment = GraphUtil.getFragment(uri);
-        long assertion = graph.createRelationship(subject, object,
-            DynamicRelationshipType.withName(fragment));
+        long assertion =
+            graph.createRelationship(subject, object, DynamicRelationshipType.withName(fragment));
         graph.setRelationshipProperty(assertion, CommonProperties.URI, uri.toString());
         graph.setRelationshipProperty(assertion, CommonProperties.OWL_TYPE,
             OwlRelationships.OWL_ANNOTATION.name());
@@ -333,8 +338,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLEquivalentClassesAxiom axiom) {
     logger.fine(axiom.toString());
-    List<Long> nodes = transform(axiom.getClassExpressionsAsList(),
-        new Function<OWLClassExpression, Long>() {
+    List<Long> nodes =
+        transform(axiom.getClassExpressionsAsList(), new Function<OWLClassExpression, Long>() {
 
           @Override
           public Long apply(OWLClassExpression expr) {
@@ -348,8 +353,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   @Override
   public Void visit(OWLDisjointClassesAxiom axiom) {
-    List<Long> nodes = transform(axiom.getClassExpressionsAsList(),
-        new Function<OWLClassExpression, Long>() {
+    List<Long> nodes =
+        transform(axiom.getClassExpressionsAsList(), new Function<OWLClassExpression, Long>() {
 
           @Override
           public Long apply(OWLClassExpression individual) {
@@ -385,8 +390,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     int i = 0;
     for (OWLObjectPropertyExpression property : axiom.getPropertyChain()) {
       long link = getOrCreateNode(getUri(property));
-      long relationship = graph.createRelationship(chain, link,
-          OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM);
+      long relationship =
+          graph.createRelationship(chain, link, OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM);
       graph.setRelationshipProperty(relationship, "order", i++);
     }
     return null;

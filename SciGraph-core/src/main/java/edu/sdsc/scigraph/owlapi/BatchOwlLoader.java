@@ -20,11 +20,13 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.commons.cli.CommandLine;
@@ -34,6 +36,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -50,6 +54,7 @@ import com.google.common.base.Stopwatch;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
@@ -59,7 +64,6 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
-import edu.sdsc.scigraph.neo4j.Neo4jModule;
 
 public class BatchOwlLoader {
 
@@ -70,9 +74,9 @@ public class BatchOwlLoader {
 
   @Inject
   BatchOwlVisitor visitor;
-
+  
   @Inject
-  OwlPostprocessor postprocessor;
+  PostpostprocessorProvider postprocessorProvider;
 
   BatchOwlLoader() {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
@@ -82,21 +86,15 @@ public class BatchOwlLoader {
     Stopwatch timer = Stopwatch.createStarted();
     logger.info("Walking ontology structure...");
     walker.walkStructure(visitor);
+    visitor.shutdown();
     logger.info(format("Walking ontology structure took %d seconds",
         timer.elapsed(TimeUnit.SECONDS)));
     timer.reset();
     timer.start();
     logger.info("Postprocessing...");
-    postprocessor.processSomeValuesFrom();
+    postprocessorProvider.get().postprocess();
     logger.info(format("Postprocessing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
-
-    timer.reset();
-    timer.start();
-    logger.info("Committing changes...");
-    logger.info(format("Committing took %d seconds", timer.elapsed(TimeUnit.SECONDS)));
-
-    postprocessor.processSomeValuesFrom();
-    // postprocessor.processCategories(categoryMap);
+    postprocessorProvider.shutdown();
   }
 
   protected static Options getOptions() {
@@ -108,6 +106,25 @@ public class BatchOwlLoader {
     return options;
   }
 
+  static class PostpostprocessorProvider implements Provider<OwlPostprocessor> {
+
+    @Inject
+    OwlLoadConfiguration config;
+    
+    GraphDatabaseService graphDb;
+    
+    @Override
+    public OwlPostprocessor get() {
+      graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(config.getOntologyConfiguration().getGraphLocation());
+      return new OwlPostprocessor(graphDb, config.getCategories());
+    }
+    
+    public void shutdown() {
+      graphDb.shutdown();
+    }
+    
+  }
+  
   static class OwlLoaderModule extends AbstractModule {
 
     OwlLoadConfiguration config;
@@ -125,15 +142,20 @@ public class BatchOwlLoader {
 
     @Override
     protected void configure() {
+      bind(OwlLoadConfiguration.class).toInstance(config);
       bindConstant().annotatedWith(Names.named("uniqueProperty")).to(CommonProperties.URI);
       bind(new TypeLiteral<Set<String>>() {
       }).annotatedWith(Names.named("indexedProperties")).toInstance(config.getIndexedNodeProperties());
       bind(new TypeLiteral<Set<String>>() {
       }).annotatedWith(Names.named("exactProperties")).toInstance(config.getExactNodeProperties());
+      bind(new TypeLiteral<Map<String, String>>() {
+      }).annotatedWith(Names.named("owl.categories")).toInstance(config.getCategories());
     }
 
     @Provides
+    @Singleton
     BatchInserter getInserter() {
+      logger.info("Getting BatchInserter");
       return BatchInserters.inserter(config.getOntologyConfiguration().getGraphLocation());
     }
 
@@ -165,8 +187,7 @@ public class BatchOwlLoader {
   }
 
   public static void load(OwlLoadConfiguration config) {
-    Injector i = Guice.createInjector(new Neo4jModule(config.getOntologyConfiguration()),
-        new OwlLoaderModule(config));
+    Injector i = Guice.createInjector(new OwlLoaderModule(config));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
     logger.info("Starting to load ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
