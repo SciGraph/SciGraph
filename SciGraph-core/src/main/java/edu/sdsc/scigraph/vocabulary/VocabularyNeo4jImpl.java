@@ -74,7 +74,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   private static final Logger logger = Logger.getLogger(VocabularyNeo4jImpl.class.getName());
 
   private final Graph graph;
-  private SpellChecker spellChecker;
+  private final SpellChecker spellChecker;
   private final QueryParser parser;
 
   @Inject
@@ -92,7 +92,10 @@ public class VocabularyNeo4jImpl implements Vocabulary {
         spellChecker.indexDictionary(new LuceneDictionary(reader, NodeProperties.LABEL
             + LuceneUtils.EXACT_SUFFIX), config, true);
       }
+    } else {
+      spellChecker = null;
     }
+      
     parser = new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
         new VocabularyQueryAnalyzer());
   }
