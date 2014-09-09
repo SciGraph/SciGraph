@@ -52,7 +52,6 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.traversal.BranchState;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.helpers.collection.Iterables;
-import org.neo4j.kernel.Traversal;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -247,7 +246,7 @@ public class GraphService extends BaseResource {
     RelationshipType type = DynamicRelationshipType.withName(relationship);
 
     //TODO: include equivalences
-    for (org.neo4j.graphdb.Path path: Traversal.description()
+    for (org.neo4j.graphdb.Path path: graph.getGraphDb().traversalDescription()
         .depthFirst()
         .relationships(type, Direction.OUTGOING)
         .evaluator(Evaluators.toDepth(depth))
@@ -290,7 +289,7 @@ public class GraphService extends BaseResource {
     Node node = graph.getOrCreateNode(concept.getUri());
     List<GraphPath> graphPaths = new ArrayList<>();
 
-    for (org.neo4j.graphdb.Path path: Traversal.description()
+    for (org.neo4j.graphdb.Path path: graph.getGraphDb().traversalDescription()
         .depthFirst()
         .evaluator(Evaluators.toDepth(depth))
         .traverse(node)) {
