@@ -78,7 +78,7 @@ public class BatchOwlVisitorTest {
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     batchGraph = new BatchGraph(inserter, CommonProperties.URI, newHashSet(CommonProperties.URI,
         NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
-        CommonProperties.CURIE, CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
+        CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX),
         newHashSet(""));
     String uri = Resources.getResource("ontologies/family.owl").toURI().toString();

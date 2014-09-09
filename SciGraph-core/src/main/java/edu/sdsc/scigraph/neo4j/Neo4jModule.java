@@ -18,6 +18,8 @@ package edu.sdsc.scigraph.neo4j;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Named;
@@ -43,14 +45,18 @@ import edu.sdsc.scigraph.vocabulary.VocabularyNeo4jImpl;
 public class Neo4jModule extends AbstractModule {
 
   private Optional<String> graphLocation = Optional.absent();
+  
+  private Map<String, String> curieMap = new HashMap<>();
 
   public Neo4jModule(OntologyConfiguration configuration) {
     this.graphLocation = Optional.of(configuration.getGraphLocation());
+    this.curieMap = configuration.getCuries();
   }
 
   @Override
   protected void configure() {
     bind(String.class).annotatedWith(Names.named("neo4j.location")).toInstance(graphLocation.get());
+    bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(Names.named("neo4j.curieMap")).toInstance(curieMap);
     bind(new TypeLiteral<Class<?>>() {}).toInstance(Concept.class);
     TransactionalInterceptor interceptor = new TransactionalInterceptor();
     requestInjection(interceptor);
@@ -62,7 +68,7 @@ public class Neo4jModule extends AbstractModule {
   @Singleton
   Vocabulary getVocabulary(Graph graph, @Named("neo4j.location") String graphLocation)
       throws IOException {
-    return new VocabularyNeo4jImpl(graph, graphLocation);
+    return new VocabularyNeo4jImpl(graph, graphLocation, null);
   }
 
   @Provides

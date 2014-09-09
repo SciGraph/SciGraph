@@ -22,6 +22,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Set;
@@ -38,6 +41,7 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.owlapi.*;
 import edu.sdsc.scigraph.util.GraphTestBase;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
@@ -58,10 +62,9 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   Concept parkinsons;
   Concept als;
 
-  Concept buildConcept(String uri, String label, String curie, String... categories) {
+  Concept buildConcept(String uri, String label, String... categories) {
     Node concept = graph.getOrCreateNode(uri);
     graph.addProperty(concept, Concept.LABEL, label);
-    graph.setProperty(concept, Concept.CURIE, curie);
     graph.setProperty(concept, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
     for (String category : categories) {
       graph.addProperty(concept, Concept.CATEGORY, category);
@@ -73,16 +76,14 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void setupGraph() throws IOException {
     graph = new Graph(graphDb, Concept.class);
     try (Transaction tx = graphDb.beginTx()) {
-      hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation",
-          "BL:5");
-      hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "HP:0008",
-          "foo", "fizz");
+      hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation");
+      hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "foo", "fizz");
       graph.setProperty(graph.getNode(hippocampus), Concept.ONTOLOGY, "http://foo.org");
       graph.addProperty(graph.getNode(hippocampus), Concept.SYNONYM, "cornu ammonis");
       graph.addProperty(graph.getNode(hippocampus), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "cornu ammonis");
       hippocampusStructure = buildConcept("http://example.org/#hippocampusStructure",
-          "Hippocampus structure", "HP", "baz");
+          "Hippocampus structure", "baz");
       graph.setProperty(graph.getNode(hippocampusStructure), Concept.ONTOLOGY, "http://baz.org");
       structureOfHippocampus = buildConcept("http://example.org/#structureOfHippocampus",
           "Structure of hippocampus", "baz");
@@ -92,7 +93,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
           "foo bar");
       parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
       graph.addProperty(graph.getNode(parkinsons), Concept.SYNONYM, "the");
-      als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis", "", "");
+      als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis");
       graph.addProperty(graph.getNode(als), Concept.SYNONYM, "Lou Gehrig's");
       graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "Lou Gehrig's");
@@ -102,7 +103,10 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
       tx.success();
     }
 
-    vocabulary = new VocabularyNeo4jImpl(graph, null);
+    CurieUtil curieUtil = mock(CurieUtil.class);
+    when(curieUtil.getFullUri(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getFullUri("HP:0008")).thenReturn(Optional.of("http://example.org/#hippocampus"));
+    vocabulary = new VocabularyNeo4jImpl(graph, null, curieUtil);
   }
 
   @Test
@@ -144,7 +148,6 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testSearchConcepts() {
     Query query = new Vocabulary.Query.Builder("hippocampus").build();
-    System.out.println(vocabulary.searchConcepts(query));
     assertThat(vocabulary.searchConcepts(query),
         contains(hippocampus, structureOfHippocampus, hippocampusStructure, hippocampalFormation));
   }
@@ -217,7 +220,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetConceptFromCurriePrefix() {
     Query query = new Vocabulary.Query.Builder("HP:0008").build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus));
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
   }
 
   @Test
@@ -242,7 +245,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testGetConceptsFromPrefixWithMultipleCategories() {
     Query query = new Vocabulary.Query.Builder("hip").categories(newArrayList("baz", "foo"))
         .build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampusStructure, hippocampus));
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
   }
 
   @Test

@@ -63,7 +63,6 @@ public class HierarchyVisitorTest extends GraphTestBase {
 
   Node createNode(String id) {
     Node node = graph.getOrCreateNode("http://example.org/" + id);
-    node.setProperty(CommonProperties.CURIE, id);
     return node;
   }
 

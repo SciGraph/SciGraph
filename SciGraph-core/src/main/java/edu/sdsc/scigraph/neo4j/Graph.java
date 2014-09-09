@@ -65,7 +65,7 @@ public class Graph {
 
   private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
       NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
-      CommonProperties.CURIE, CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
+      CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
       Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
 
   private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL,
@@ -191,7 +191,6 @@ public class Graph {
       concept.setAnonymous((boolean) n.getProperty(Concept.ANONYMOUS, false));
       concept.setInferred((boolean) n.getProperty(Concept.INFERRED, false));
       concept.setNegated((boolean) n.getProperty(Concept.NEGATED, false));
-      concept.setCurie((String) n.getProperty(Concept.CURIE, null));
 
       concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
       concept.setId(id);

@@ -61,3 +61,36 @@ applicationContextPath: scigraph
 
 graphConfiguration:
   graphLocation: /temp/monarchGraph
+  curies:
+    http://purl.obolibrary.org/obo/DOID_ : DOID
+    http://purl.obolibrary.org/obo/ORPHANET_ : ORPHANET
+    http://purl.obolibrary.org/obo/OMIM_ : OMIM
+    http://www.ncbi.nlm.nih.gov/pubmed/ : PMID
+    http://purl.obolibrary.org/obo/HP_ : HP
+    http://purl.obolibrary.org/obo/MP_ : MP
+    http://purl.obolibrary.org/obo/ZP_ : ZP
+    http://purl.obolibrary.org/obo/GENO_ : GENO
+    http://purl.obolibrary.org/obo/ECO_ : ECO
+    http://purl.obolibrary.org/obo/RO_ : RO
+    http://purl.obolibrary.org/obo/BFO_ : BFO
+    http://monarch-initiative.org/data/MGI_ : MGI
+    http://semanticscience.org/resource/SIO_ : SIO
+    http://purl.obolibrary.org/obo/Ensembl_ : ENSEMBL
+    http://purl.obolibrary.org/obo/ENSEMBL_ : ENSEMBL
+    http://purl.obolibrary.org/obo/MGI_ : MGI
+    http://purl.obolibrary.org/obo/ZFIN_ : ZFIN
+    http://purl.obolibrary.org/obo/UniProtKB_ : UNIPROT
+    http://purl.obolibrary.org/obo/MESH_ : MESH
+    http://purl.obolibrary.org/obo/MeSH_ : MESH
+    http://purl.obolibrary.org/obo/UMLS_ : UMLS
+    http://purl.obolibrary.org/obo/UMLS_CUI : UMLS
+    http://purl.obolibrary.org/obo/WB_ : WB
+    http://purl.obolibrary.org/obo/WormBase_ : WB
+    http://purl.obolibrary.org/obo/FB_ : FB
+    http://purl.obolibrary.org/obo/FlyBase_ : FB
+    http://purl.obolibrary.org/obo/RGD_ : RGD
+    http://purl.obolibrary.org/obo/MONARCH_ : MONARCH
+    http://omia.angis.org.au/OMIA : OMIA
+    http://purl.obolibrary.org/obo/OMIABreed_ : OMIABreed
+    http://purl.obolibrary.org/obo/OMIAPub_ : OMIAPub
+

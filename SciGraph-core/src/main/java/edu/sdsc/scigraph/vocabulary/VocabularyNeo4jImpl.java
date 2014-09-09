@@ -1,17 +1,15 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.sdsc.scigraph.vocabulary;
 
@@ -68,6 +66,7 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyQueryAnalyzer;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 
 public class VocabularyNeo4jImpl implements Vocabulary {
 
@@ -76,16 +75,18 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   private final Graph graph;
   private final SpellChecker spellChecker;
   private final QueryParser parser;
+  private final CurieUtil curieUtil;
 
   @Inject
-  public VocabularyNeo4jImpl(Graph graph, @Nullable @Named("neo4j.location") String neo4jLocation)
-      throws IOException {
+  public VocabularyNeo4jImpl(Graph graph, @Nullable @Named("neo4j.location") String neo4jLocation,
+      CurieUtil curieUtil) throws IOException {
     this.graph = graph;
+    this.curieUtil = curieUtil;
     if (null != neo4jLocation) {
-      Directory indexDirectory = FSDirectory.open(new File(new File(neo4jLocation),
-          "index/lucene/node/node_auto_index"));
-      Directory spellDirectory = FSDirectory.open(new File(new File(neo4jLocation),
-          "index/lucene/spellchecker"));
+      Directory indexDirectory =
+          FSDirectory.open(new File(new File(neo4jLocation), "index/lucene/node/node_auto_index"));
+      Directory spellDirectory =
+          FSDirectory.open(new File(new File(neo4jLocation), "index/lucene/spellchecker"));
       spellChecker = new SpellChecker(spellDirectory);
       try (IndexReader reader = IndexReader.open(indexDirectory)) {
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new KeywordAnalyzer());
@@ -95,9 +96,10 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     } else {
       spellChecker = null;
     }
-      
-    parser = new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
-        new VocabularyQueryAnalyzer());
+
+    parser =
+        new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
+            new VocabularyQueryAnalyzer());
   }
 
   static String formatQuery(String format, Object... args) {
@@ -137,7 +139,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       tx.success();
       return ret;
     }
-
   }
 
   @Override
@@ -148,9 +149,14 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public Collection<Concept> getConceptFromId(Query query) {
     String idQuery = StringUtils.strip(query.getInput(), "\"");
+    Optional<String> fullUri = curieUtil.getFullUri(idQuery);
     idQuery = QueryParser.escape(idQuery);
-    String queryString = format("%s:%s %s:%s", CommonProperties.FRAGMENT, idQuery,
-        CommonProperties.CURIE, idQuery);
+
+    String queryString = format("%s:%s", CommonProperties.FRAGMENT, idQuery);
+    if (fullUri.isPresent()) {
+      queryString +=
+          String.format(" %s:%s", CommonProperties.URI, QueryParser.escape(fullUri.get()));
+    }
     IndexHits<Node> hits;
     try (Transaction tx = graph.getGraphDb().beginTx()) {
       hits = graph.getNodeAutoIndex().query(parser.parse(queryString));
@@ -170,8 +176,11 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       BooleanQuery subQuery = new BooleanQuery();
       subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL,
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
-      subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.CURIE, query.getInput())),
-          Occur.SHOULD);
+      Optional<String> fullUri = curieUtil.getFullUri(query.getInput());
+      if (fullUri.isPresent()) {
+          subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri.get()))),
+              Occur.SHOULD);
+      }
       subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
           Occur.SHOULD);
 
@@ -248,8 +257,9 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     return Suppliers.memoize(new Supplier<Set<String>>() {
       @Override
       public Set<String> get() {
-        ExecutionResult result = graph.getExecutionEngine().execute(
-            "START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
+        ExecutionResult result =
+            graph.getExecutionEngine().execute(
+                "START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
         Set<String> categories = new HashSet<>();
         while (result.iterator().hasNext()) {
           Map<String, Object> col = result.iterator().next();
@@ -272,8 +282,9 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     return Suppliers.memoize(new Supplier<Set<String>>() {
       @Override
       public Set<String> get() {
-        ExecutionResult result = graph.getExecutionEngine().execute(
-            "START n = node(*) WHERE has(n.ontology) RETURN distinct(n.ontology)");
+        ExecutionResult result =
+            graph.getExecutionEngine().execute(
+                "START n = node(*) WHERE has(n.ontology) RETURN distinct(n.ontology)");
         Set<String> ontologies = new HashSet<>();
         while (result.iterator().hasNext()) {
           Map<String, Object> col = result.iterator().next();
