@@ -31,8 +31,8 @@ public class CurieUtilTest {
   }
 
   @Test
-  public void testGetCurrie() {
-    assertThat(util.getCurrie("http://example.org/a_foo"), is(Optional.of("A:foo")));
+  public void testGetCurie() {
+    assertThat(util.getCurie("http://example.org/a_foo"), is(Optional.of("A:foo")));
   }
 
   @Test

@@ -23,7 +23,7 @@ public class CurieUtil {
     this.curieMap = ImmutableBiMap.copyOf(curieMap);
   }
 
-  public Optional<String> getCurrie(final String uri) {
+  public Optional<String> getCurie(final String uri) {
     Preconditions.checkNotNull(uri);
     for (Entry<String, String> entry: curieMap.entrySet()) {
       if (uri.startsWith(entry.getKey())) {
@@ -33,12 +33,12 @@ public class CurieUtil {
     return Optional.absent();
   }
 
-  public Optional<String> getFullUri(String currie) {
-    Preconditions.checkNotNull(currie);
-    String prefix = getFirst(Splitter.on(':').split(currie), null);
+  public Optional<String> getFullUri(String curie) {
+    Preconditions.checkNotNull(curie);
+    String prefix = getFirst(Splitter.on(':').split(curie), null);
     if (null != prefix && curieMap.inverse().containsKey(prefix)) {
       String uriPrefix = curieMap.inverse().get(prefix);
-      return Optional.of(String.format("%s%s", uriPrefix, currie.substring(currie.indexOf(':') + 1)));
+      return Optional.of(String.format("%s%s", uriPrefix, curie.substring(curie.indexOf(':') + 1)));
     }
     return Optional.absent();
   }
