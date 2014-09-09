@@ -31,7 +31,6 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 
 public class BatchGraphTest {
