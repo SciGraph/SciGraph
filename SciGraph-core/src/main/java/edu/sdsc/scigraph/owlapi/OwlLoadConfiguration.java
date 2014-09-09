@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
 
@@ -77,7 +77,7 @@ public class OwlLoadConfiguration {
 
     @Override
     public String toString() {
-      return Objects.toStringHelper(this.getClass())
+      return MoreObjects.toStringHelper(this.getClass())
           .add("name", name)
           .add("properties", properties)
           .toString();
