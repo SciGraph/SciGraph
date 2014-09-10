@@ -141,7 +141,7 @@ public class OwlVisitorTest extends GraphTestBase {
     assertThat(graph.nodeExists(ROOT + "/Bill"), is(true));
     Node john = graph.getNode(ROOT + "/John").get();
     Node father = graph.getNode(ROOT + "/Father").get();
-    assertThat(graph.hasRelationship(john, father, EdgeType.IS_A), is(true));
+    assertThat(graph.hasRelationship(john, father, OwlRelationships.RDF_TYPE), is(true));
     assertThat(graph.getProperties(john, CommonProperties.TYPE, String.class),
         contains("OWLIndividual"));
   }
@@ -239,9 +239,7 @@ public class OwlVisitorTest extends GraphTestBase {
   public void testSubPropeties() {
     Node hasWife = graph.getNode(ROOT + "/hasWife").get();
     Node hasSpouse = graph.getNode(ROOT + "/hasSpouse").get();
-    assertThat(graph.hasRelationship(hasWife, hasSpouse, EdgeType.SUB_OBJECT_PROPETY_OF), is(true));
-    assertThat(graph.hasRelationship(hasSpouse, hasWife, EdgeType.SUPER_OBJECT_PROPETY_OF),
-        is(true));
+    assertThat(graph.hasRelationship(hasWife, hasSpouse, OwlRelationships.RDFS_SUB_PROPERTY_OF), is(true));
   }
 
   @Test

@@ -129,7 +129,7 @@ public class GraphTest extends GraphTestBase {
     assertEquals(rel, r.getProperty(CommonProperties.URI));
     assertEquals("relationship", r.getProperty(CommonProperties.FRAGMENT));
     assertTrue(graph.hasRelationship(a, b, EdgeType.REL, rel));
-    assertFalse(graph.hasRelationship(a, b, EdgeType.IS_A, rel));
+    assertFalse(graph.hasRelationship(a, b, OwlRelationships.RDF_TYPE, rel));
   }
 
   @Test

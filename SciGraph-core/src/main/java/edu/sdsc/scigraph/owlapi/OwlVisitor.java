@@ -225,7 +225,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLClassAssertionAxiom axiom) {
     Node individual = graph.getOrCreateNode(getUri(axiom.getIndividual()));
     Node type = graph.getOrCreateNode(getUri(axiom.getClassExpression()));
-    graph.getOrCreateRelationship(individual, type, EdgeType.IS_A);
+    graph.getOrCreateRelationship(individual, type, OwlRelationships.RDF_TYPE);
     return null;
   }
 
