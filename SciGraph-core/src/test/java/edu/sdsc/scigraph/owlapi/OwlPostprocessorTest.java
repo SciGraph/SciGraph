@@ -42,13 +42,6 @@ public class OwlPostprocessorTest {
     postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void testUnknownUri() {
-    Map<String, String> categoryMap = new HashMap<>();
-    categoryMap.put("http://example.org/unknown", "foo");
-    postprocessor.processCategories(categoryMap);
-  }
-
   @Test
   public void testCategories() {
     Map<String, String> categoryMap = new HashMap<>();

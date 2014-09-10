@@ -12,10 +12,10 @@ public class OwlRelationships {
 
   public static final RelationshipType RDF_SUBCLASS_OF = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.RDFS_SUBCLASS_OF));
-  
+
   public static final RelationshipType RDF_TYPE = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.RDF_TYPE));
-  
+
   public static final RelationshipType OWL_SAME_AS = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.OWL_SAME_AS));
 
@@ -36,6 +36,14 @@ public class OwlRelationships {
 
   public static final RelationshipType OWL_PROPERTY_CHAIN_AXIOM = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.OWL_PROPERTY_CHAIN_AXIOM));
+
+  public static final RelationshipType FILLER = DynamicRelationshipType.withName("filler");
+
+  public static final RelationshipType OPERAND = DynamicRelationshipType.withName("operand");
+
+  public static final RelationshipType PROPERTY = DynamicRelationshipType.withName("property");
+  
+  public static final RelationshipType CLASS = DynamicRelationshipType.withName("class");
 
   /*
    * public static final RelationshipType OWL_OBJECT_PROPERTY = DynamicRelationshipType

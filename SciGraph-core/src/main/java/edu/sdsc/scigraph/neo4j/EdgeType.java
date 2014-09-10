@@ -18,6 +18,5 @@ package edu.sdsc.scigraph.neo4j;
 import org.neo4j.graphdb.RelationshipType;
 
 public enum EdgeType implements RelationshipType {
-   REL,
-   CLASS, PROPERTY, OWLObjectPropertyAssertionAxiom, FILLER, OPERAND
+   REL, OWLObjectPropertyAssertionAxiom
 }

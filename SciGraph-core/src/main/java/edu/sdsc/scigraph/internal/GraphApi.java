@@ -44,7 +44,6 @@ import com.google.common.base.Optional;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
@@ -138,12 +137,12 @@ public class GraphApi {
           String.class);
       if (endType.isPresent() && "OWLObjectSomeValuesFrom".equals(endType.get())) {
         Relationship property = getOnlyElement(
-            r.getEndNode().getRelationships(Direction.OUTGOING, EdgeType.PROPERTY), null);
+            r.getEndNode().getRelationships(Direction.OUTGOING, OwlRelationships.PROPERTY), null);
         if (null != property
             && "http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17"
                 .equals(property.getEndNode().getProperty("uri"))) {
           for (Relationship bearerOf : r.getEndNode().getRelationships(Direction.OUTGOING,
-              EdgeType.CLASS)) {
+              OwlRelationships.CLASS)) {
             Node role = bearerOf.getEndNode();
             inferredClasses.addAll(getEntailment(role,
                 DynamicRelationshipType.withName("birnlex_17"), Direction.INCOMING));

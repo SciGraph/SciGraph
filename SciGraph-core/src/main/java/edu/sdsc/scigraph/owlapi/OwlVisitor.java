@@ -357,9 +357,9 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   Node addQuantifiedRestriction(OWLQuantifiedObjectRestriction desc) {
     Node restriction = graph.getOrCreateNode(getUri(desc));
     Node property = graph.getOrCreateNode(getUri(desc.getProperty()));
-    graph.getOrCreateRelationship(restriction, property, EdgeType.PROPERTY);
+    graph.getOrCreateRelationship(restriction, property, OwlRelationships.PROPERTY);
     Node cls = graph.getOrCreateNode(getUri(desc.getFiller()));
-    graph.getOrCreateRelationship(restriction, cls, EdgeType.CLASS);
+    graph.getOrCreateRelationship(restriction, cls, OwlRelationships.CLASS);
     return restriction;
   }
 
@@ -367,9 +367,9 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     Node restriction = graph.getOrCreateNode(getUri(desc));
     graph.setProperty(restriction, "cardinality", desc.getCardinality());
     Node property = graph.getOrCreateNode(getUri(desc.getProperty()));
-    graph.getOrCreateRelationship(restriction, property, EdgeType.PROPERTY);
+    graph.getOrCreateRelationship(restriction, property, OwlRelationships.PROPERTY);
     Node cls = graph.getOrCreateNode(getUri(desc.getFiller()));
-    graph.getOrCreateRelationship(restriction, cls, EdgeType.CLASS);
+    graph.getOrCreateRelationship(restriction, cls, OwlRelationships.CLASS);
     return restriction;
   }
 
@@ -400,9 +400,9 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.setProperty(restriction, CommonProperties.TYPE, OWLObjectSomeValuesFrom.class.getSimpleName());
     if (!desc.getProperty().isAnonymous()) {
       Node property = graph.getOrCreateNode(getUri(desc.getProperty()));
-      graph.getOrCreateRelationship(restriction, property, EdgeType.PROPERTY);
+      graph.getOrCreateRelationship(restriction, property, OwlRelationships.PROPERTY);
       Node cls = graph.getOrCreateNode(getUri(desc.getFiller()));
-      graph.getOrCreateRelationship(restriction, cls, EdgeType.CLASS);
+      graph.getOrCreateRelationship(restriction, cls, OwlRelationships.CLASS);
     }
     return null;
   }
@@ -413,9 +413,9 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.setProperty(restriction, CommonProperties.TYPE, OWLObjectAllValuesFrom.class.getSimpleName());
     if (!desc.getProperty().isAnonymous()) {
       Node property = graph.getOrCreateNode(getUri(desc.getProperty()));
-      graph.getOrCreateRelationship(restriction, property, EdgeType.PROPERTY);
+      graph.getOrCreateRelationship(restriction, property, OwlRelationships.PROPERTY);
       Node cls = graph.getOrCreateNode(getUri(desc.getFiller()));
-      graph.getOrCreateRelationship(restriction, cls, EdgeType.CLASS);
+      graph.getOrCreateRelationship(restriction, cls, OwlRelationships.CLASS);
     }
     return null;
   }
@@ -431,9 +431,9 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       Map<String, Object> result = results.next();
       Node subject = (Node)result.get("n");
       Node svf = (Node)result.get("svf");
-      Node property = getFirst(svf.getRelationships(EdgeType.PROPERTY), null).getEndNode();
+      Node property = getFirst(svf.getRelationships(OwlRelationships.PROPERTY), null).getEndNode();
       // TODO: This could contain multiple nodes
-      for (Relationship r : svf.getRelationships(EdgeType.CLASS)) {
+      for (Relationship r : svf.getRelationships(OwlRelationships.CLASS)) {
         Node object = r.getEndNode();
         String relationshipName = graph.getProperty(property, CommonProperties.FRAGMENT,
             String.class).get();

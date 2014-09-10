@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class TestEquivalentToIntersectionOf extends OwlTestCase {
 
@@ -28,7 +29,7 @@ public class TestEquivalentToIntersectionOf extends OwlTestCase {
     assertThat(GraphUtil.getProperty(r, CommonProperties.CONVENIENCE, Boolean.class),
         is(Optional.of(true)));
     assertThat(GraphUtil.getProperty(r, CommonProperties.OWL_TYPE, String.class),
-        is(Optional.of("OPERAND")));
+        is(Optional.of(OwlRelationships.OPERAND.name())));
   }
 
 }

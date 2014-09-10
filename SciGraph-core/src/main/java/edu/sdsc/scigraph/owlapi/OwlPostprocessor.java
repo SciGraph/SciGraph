@@ -21,7 +21,6 @@ import org.neo4j.graphdb.traversal.Uniqueness;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 
 public class OwlPostprocessor {
@@ -53,7 +52,7 @@ public class OwlPostprocessor {
     try (Transaction tx = graphDb.beginTx()) {
       ResourceIterator<Map<String, Object>> results =
           engine.execute(
-              "MATCH (n)-[relationship]->(svf:someValuesFrom)-[:PROPERTY]->(p) "
+              "MATCH (n)-[relationship]->(svf:someValuesFrom)-[:property]->(p) "
                   + "RETURN n, relationship, svf, p").iterator();
       while (results.hasNext()) {
         Map<String, Object> result = results.next();
@@ -61,7 +60,7 @@ public class OwlPostprocessor {
         Relationship relationship = (Relationship) result.get("relationship");
         Node svf = (Node) result.get("svf");
         Node property = (Node) result.get("p");
-        for (Relationship r : svf.getRelationships(EdgeType.FILLER)) {
+        for (Relationship r : svf.getRelationships(OwlRelationships.FILLER)) {
           Node object = r.getEndNode();
           String relationshipName =
               GraphUtil.getProperty(property, CommonProperties.FRAGMENT, String.class).get();
