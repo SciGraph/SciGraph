@@ -68,7 +68,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
@@ -129,15 +128,17 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     } else if (axiom.getEntity() instanceof OWLNamedIndividual) {
       graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
     } else if (axiom.getEntity() instanceof OWLObjectProperty) {
-      OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
+      /***
+       * TODO: Removing object property processing for now...
+       * OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
       graph.setLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
       graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
       graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
-      graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+      graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));*/
     } else if (axiom.getEntity() instanceof OWLDataProperty) {
       graph.setLabel(node, OwlLabels.OWL_DATA_PROPERTY);
     } else {
-      logger.warning("Unhandled declaration type " + axiom.getEntity().getClass().getName());
+      //logger.warning("Unhandled declaration type " + axiom.getEntity().getClass().getName());
     }
     return null;
   }

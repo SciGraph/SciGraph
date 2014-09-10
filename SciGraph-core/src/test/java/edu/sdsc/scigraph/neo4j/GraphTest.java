@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -47,6 +46,7 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class GraphTest extends GraphTestBase {
@@ -119,7 +119,7 @@ public class GraphTest extends GraphTestBase {
     assertThat("There should be one relationship", newArrayList(GlobalGraphOperations.at(graphDb)
         .getAllRelationships()), hasSize(1));
     assertThat("The graph should have r", GlobalGraphOperations.at(graphDb).getAllRelationships(), contains(r));
-    graph.getOrCreateRelationship(a, b, EdgeType.SUBCLASS_OF);
+    graph.getOrCreateRelationship(a, b, OwlRelationships.RDF_SUBCLASS_OF);
     assertThat("There should be two relationships", newArrayList(GlobalGraphOperations.at(graphDb).getAllRelationships()), hasSize(2));
   }
 
@@ -237,26 +237,6 @@ public class GraphTest extends GraphTestBase {
   }
 
   @Test
-  @Ignore
-  public void testGetFramedRelationship() {
-    graph.getOrCreateRelationship(a, b, EdgeType.SUPERCLASS_OF);
-    Concept aFrame = graph.getOrCreateFramedNode(a);
-    Concept bFrame = graph.getOrCreateFramedNode(b);
-    // assertThat(aFrame.getSubclasses(), contains(bFrame));
-  }
-
-  @Test
-  @Ignore
-  public void testGetFramedEquivalence() {
-    graph.getOrCreateRelationship(a, b, EdgeType.EQUIVALENT_TO);
-    graph.getOrCreateRelationship(b, a, EdgeType.EQUIVALENT_TO);
-    Concept aFrame = graph.getOrCreateFramedNode(a);
-    Concept bFrame = graph.getOrCreateFramedNode(b);
-    // assertThat(aFrame.getEquivalentClasses(), contains(bFrame));
-    // assertThat(bFrame.getEquivalentClasses(), contains(aFrame));
-  }
-
-  @Test
   public void testUpdateFramedNode() {
     String uri = BASE_URI + "#foo";
     //assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"), hasItems(a, b, c));
@@ -277,10 +257,10 @@ public class GraphTest extends GraphTestBase {
   @Test
   public void testCreateRelationshipsPairwise() {
     List<Node> nodes = newArrayList(a, b, c);
-    graph.getOrCreateRelationshipPairwise(nodes, EdgeType.EQUIVALENT_TO, Optional.<URI>absent());
-    assertThat(graph.hasRelationship(a, b, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(a, c, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(b, c, EdgeType.EQUIVALENT_TO), is(true));
+    graph.getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_EQUIVALENT_CLASS, Optional.<URI>absent());
+    assertThat(graph.hasRelationship(a, b, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
+    assertThat(graph.hasRelationship(a, c, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
+    assertThat(graph.hasRelationship(b, c, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
   }
 
   @Test

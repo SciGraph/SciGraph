@@ -16,8 +16,10 @@
 package edu.sdsc.scigraph.neo4j;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.addAll;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.addAll;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +45,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 
 import edu.sdsc.scigraph.frames.NodeProperties;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 /***
  * Used for building the Solr synonym files to support object property entailment.
@@ -110,10 +113,8 @@ public class HierarchyVisitor {
       })));
     } else {
       ResourceIterator<Map<String,Object>> result = graph.runCypherQuery(
-          String.format("START n = node(*) " + 
-              "MATCH (n)-[:%1$s]->(s) " +
- "WHERE not(()-[:%1$s]->n) AND (not(has(n.anonymous)) OR n.anonymous = false) "
-              +
+          String.format("MATCH (n)<-[:%1$s]-(s) " +
+              "WHERE not(()<-[:%1$s]-n) AND not(n:anonymous) " +
               "RETURN DISTINCT n", edgeType.toString()));
       while (result.hasNext()) {
         Map<String, Object> map = result.next();
@@ -135,14 +136,13 @@ public class HierarchyVisitor {
 
           @Override
           public Iterable<Relationship> expand(Path path, BranchState<Void> state) {
-            Set<RelationshipType> types = new HashSet<>();
-            types.add(EdgeType.SUPERCLASS_OF);
+            Set<Relationship> relationships = new HashSet<>();
+            addAll(relationships, path.endNode().getRelationships(Direction.INCOMING, OwlRelationships.RDF_SUBCLASS_OF));
             if (includeEquivalentClasses && null != path.lastRelationship()
-                && !path.lastRelationship().isType(EdgeType.EQUIVALENT_TO)) {
-              types.add(EdgeType.EQUIVALENT_TO);
+                && !path.lastRelationship().isType(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
+              addAll(relationships, path.endNode().getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS));
             }
-            return path.endNode().getRelationships(Direction.OUTGOING, 
-                   types.toArray(new RelationshipType[0]));
+            return relationships;
           }
 
           @Override
@@ -161,7 +161,7 @@ public class HierarchyVisitor {
             // Ignore paths with anonymous nodes
           }
           else if (iter.hasNext() &&
-              ((Relationship)iter.peek()).isType(EdgeType.EQUIVALENT_TO)) {
+              ((Relationship)iter.peek()).isType(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
             // Ignore the path hop representing the equivalence
           } else {
             path.add((Node)container);

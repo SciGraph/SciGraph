@@ -87,10 +87,6 @@ import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
-  static final String RDFS_PREFIX = "http://www.w3.org/2000/01/rdf-schema#";
-  static final String OWL_PREFIX = "http://www.w3.org/2002/07/owl#";
-  static final String RDF_PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-
   private static final Logger logger = Logger.getLogger(OwlVisitor.class.getName());
 
   private final Graph graph;
@@ -133,7 +129,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     logger.fine(desc.toString());
     Node node = graph.getOrCreateNode(getUri(desc));
     //TODO: Move this to the object creation:
-    graph.addProperty(node, CommonProperties.TYPE, OWLClass.class.getSimpleName());
+    node.addLabel(OwlLabels.OWL_CLASS);
     graph.setProperty(node, NodeProperties.ANONYMOUS, false);
     if (null != ontology.getOntologyID().getOntologyIRI()) {
       graph.setProperty(node, NodeProperties.ONTOLOGY, ontology.getOntologyID().getOntologyIRI().toString());
@@ -150,14 +146,14 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLDataProperty property) {
     Node node = graph.getOrCreateNode(property.getIRI().toURI());
-    graph.addProperty(node, CommonProperties.TYPE, OWLDataProperty.class.getSimpleName());
+    node.addLabel(OwlLabels.OWL_DATA_PROPERTY);
     return null;
   }
 
   @Override
   public Void visit(OWLObjectProperty property) {
     Node node = graph.getOrCreateNode(property.getIRI().toURI());
-    graph.addProperty(node, CommonProperties.TYPE, OWLObjectProperty.class.getSimpleName());
+    node.addLabel(OwlLabels.OWL_OBJECT_PROPERTY);
     return null;
   }
 
@@ -196,7 +192,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLNamedIndividual individual) {
     Node node = graph.getOrCreateNode(getUri(individual));
-    graph.addProperty(node, CommonProperties.TYPE, OWLIndividual.class.getSimpleName());
+    node.addLabel(OwlLabels.OWL_NAMED_INDIVIDUAL);
     return null;
   }
 
@@ -208,7 +204,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         return graph.getOrCreateNode(getUri(individual));
       }
     });
-    graph.getOrCreateRelationshipPairwise(nodes, EdgeType.SAME_AS, Optional.of(Graph.getURI(OWL_PREFIX + "sameAs")));
+    graph.getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_SAME_AS, Optional.<URI>absent());
     return null;
   }
 
@@ -221,7 +217,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       }
     });
 
-    graph.getOrCreateRelationshipPairwise(nodes, EdgeType.DIFFERENT_FROM, Optional.of(Graph.getURI(OWL_PREFIX + "differentFrom")));
+    graph.getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_DIFFERENT_FROM, Optional.<URI>absent());
     return null;
   }
 
@@ -251,8 +247,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLSubClassOfAxiom axiom) {
     Node subjectNode = graph.getOrCreateNode(getUri(axiom.getSubClass()));
     Node objectNode = graph.getOrCreateNode(getUri(axiom.getSuperClass()));
-    graph.getOrCreateRelationship(subjectNode, objectNode, EdgeType.SUBCLASS_OF, RDFS_PREFIX + "subClassOf");
-    graph.getOrCreateRelationship(objectNode, subjectNode, EdgeType.SUPERCLASS_OF);
+    graph.getOrCreateRelationship(subjectNode, objectNode, OwlRelationships.RDF_SUBCLASS_OF);
     return null;
   }
 
@@ -312,7 +307,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       }
     });
 
-    graph.getOrCreateRelationshipPairwise(nodes, EdgeType.EQUIVALENT_TO, Optional.of(Graph.getURI(OWL_PREFIX + "equivalentClass")));
+    graph.getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_EQUIVALENT_CLASS, Optional.<URI>absent());
     return null;
   }
 
@@ -325,7 +320,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       }
     });
 
-    graph.getOrCreateRelationshipPairwise(nodes, EdgeType.DISJOINT_WITH, Optional.of(Graph.getURI(OWL_PREFIX + "disjointWith")));
+    graph.getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_DISJOINT_WITH, Optional.<URI>absent());
     return null;
   }
 
@@ -343,8 +338,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLSubObjectPropertyOfAxiom axiom) {
     Node subProperty = graph.getOrCreateNode(getUri(axiom.getSubProperty()));
     Node superProperty = graph.getOrCreateNode(getUri(axiom.getSuperProperty()));
-    graph.getOrCreateRelationship(subProperty, superProperty, EdgeType.SUB_OBJECT_PROPETY_OF, Optional.of(Graph.getURI(RDFS_PREFIX + "subPropertyOf")));
-    graph.getOrCreateRelationship(superProperty, subProperty, EdgeType.SUPER_OBJECT_PROPETY_OF);
+    graph.getOrCreateRelationship(subProperty, superProperty, OwlRelationships.RDFS_SUB_PROPERTY_OF, Optional.<URI>absent());
     return null;
   }
 
@@ -467,7 +461,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     logger.info("Processing categories");
     for (Entry<String, String> category: categoryMap.entrySet()) {
       Node root = graph.getOrCreateNode(category.getKey());
-      processCategories(root, EdgeType.SUPERCLASS_OF, category.getValue());
+      processCategories(root, OwlRelationships.RDF_SUBCLASS_OF, category.getValue());
     }
 
   }

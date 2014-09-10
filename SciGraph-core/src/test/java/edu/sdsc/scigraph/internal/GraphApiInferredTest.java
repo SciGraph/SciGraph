@@ -27,6 +27,7 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class GraphApiInferredTest extends GraphTestBase {
@@ -55,7 +56,7 @@ public class GraphApiInferredTest extends GraphTestBase {
     fizzConcept = graph.getOrCreateFramedNode(fizz);
     Node anon = graph.getOrCreateNode(BASE_URI + "#anon");
     graph.setProperty(anon, CommonProperties.TYPE, "OWLObjectSomeValuesFrom");
-    graph.getOrCreateRelationship(fizz, anon, EdgeType.EQUIVALENT_TO);
+    graph.getOrCreateRelationship(fizz, anon, OwlRelationships.OWL_EQUIVALENT_CLASS);
     Node birnlex17 = graph.getOrCreateNode("http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17");
     graph.getOrCreateRelationship(anon, birnlex17, EdgeType.PROPERTY);
     Node fizzRole = graph.getOrCreateNode(BASE_URI + "#fizzRole");

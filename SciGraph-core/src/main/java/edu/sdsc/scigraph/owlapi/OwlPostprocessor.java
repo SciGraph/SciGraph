@@ -91,11 +91,11 @@ public class OwlPostprocessor {
       for (Entry<String, String> category : categories.entrySet()) {
         Node root = nodeIndex.get(CommonProperties.URI, category.getKey()).getSingle();
         if (null == root) {
-          throw new IllegalStateException("Failed to locate " + category.getKey()
-              + " while processing categories");
+          logger.warning("Failed to locate " + category.getKey() + " while processing categories");
+        } else {
+          processCategory(root, OwlRelationships.RDF_SUBCLASS_OF, Direction.INCOMING,
+              category.getValue());
         }
-        processCategory(root, OwlRelationships.RDF_SUBCLASS_OF, Direction.INCOMING,
-            category.getValue());
       }
       tx.success();
     }
