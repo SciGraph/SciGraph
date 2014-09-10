@@ -2,13 +2,13 @@ package edu.sdsc.scigraph.neo4j;
 
 import java.util.Objects;
 
-class Edge {
+class BatchEdge {
 
   private final Long start;
   private final Long end;
   private final String type;
 
-  public Edge(long start, long end, String type) {
+  public BatchEdge(long start, long end, String type) {
     super();
     this.start = start;
     this.end = end;
@@ -34,8 +34,8 @@ class Edge {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Edge) {
-      Edge c = (Edge) obj;
+    if (obj instanceof BatchEdge) {
+      BatchEdge c = (BatchEdge) obj;
       return Objects.equals(start, c.getStart()) && Objects.equals(end, c.getEnd())
           && Objects.equals(type, c.getType());
     } else {

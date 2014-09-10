@@ -17,35 +17,35 @@ import com.google.common.collect.ForwardingConcurrentMap;
  *
  */
 @ThreadSafe
-public class RelationshipMap extends ForwardingConcurrentMap<Edge, Long> {
+public class RelationshipMap extends ForwardingConcurrentMap<BatchEdge, Long> {
 
   private static final int INITIAL_CAPACITY = 200_000;
   
-  private final ConcurrentHashMap<Edge, Long> delegate;
+  private final ConcurrentHashMap<BatchEdge, Long> delegate;
 
   public RelationshipMap() {
     this(INITIAL_CAPACITY);
   }
 
   public RelationshipMap(int initialCapacity) {
-    delegate = new ConcurrentHashMap<Edge, Long>(initialCapacity);
+    delegate = new ConcurrentHashMap<BatchEdge, Long>(initialCapacity);
   }
   
   @Override
-  protected ConcurrentMap<Edge, Long> delegate() {
+  protected ConcurrentMap<BatchEdge, Long> delegate() {
     return delegate();
   }
   
   public Long get(long start, long end, RelationshipType type) {
-    return delegate.get(new Edge(start, end, type.toString()));
+    return delegate.get(new BatchEdge(start, end, type.toString()));
   }
 
   public boolean containsKey(long start, long end, RelationshipType type) {
-    return delegate.containsKey(new Edge(start, end, type.toString()));
+    return delegate.containsKey(new BatchEdge(start, end, type.toString()));
   };
   
   public Long put(long start, long end, RelationshipType type, Long value) {
-    return delegate.put(new Edge(start, end, type.toString()), value);
+    return delegate.put(new BatchEdge(start, end, type.toString()), value);
   };
 
 }
