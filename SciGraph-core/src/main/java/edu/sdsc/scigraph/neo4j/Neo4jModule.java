@@ -37,8 +37,8 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4j;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 import edu.sdsc.scigraph.vocabulary.VocabularyNeo4jImpl;
 
@@ -57,7 +57,7 @@ public class Neo4jModule extends AbstractModule {
   protected void configure() {
     bind(String.class).annotatedWith(Names.named("neo4j.location")).toInstance(graphLocation.get());
     bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(Names.named("neo4j.curieMap")).toInstance(curieMap);
-    bind(new TypeLiteral<Class<?>>() {}).toInstance(Concept.class);
+    bind(CurieUtil.class);
     TransactionalInterceptor interceptor = new TransactionalInterceptor();
     requestInjection(interceptor);
     bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transactional.class), 
@@ -66,9 +66,9 @@ public class Neo4jModule extends AbstractModule {
 
   @Provides
   @Singleton
-  Vocabulary getVocabulary(Graph graph, @Named("neo4j.location") String graphLocation)
+  Vocabulary getVocabulary(Graph graph, @Named("neo4j.location") String graphLocation, CurieUtil util)
       throws IOException {
-    return new VocabularyNeo4jImpl(graph, graphLocation, null);
+    return new VocabularyNeo4jImpl(graph, graphLocation, util);
   }
 
   @Provides

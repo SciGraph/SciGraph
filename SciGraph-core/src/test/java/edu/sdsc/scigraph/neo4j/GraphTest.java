@@ -69,7 +69,7 @@ public class GraphTest extends GraphTestBase {
 
   @Before
   public void addNodes() throws Exception {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     a = graph.getOrCreateNode(uri);
     b = graph.getOrCreateNode(uri2);
     c = graph.getOrCreateNode(uri3);

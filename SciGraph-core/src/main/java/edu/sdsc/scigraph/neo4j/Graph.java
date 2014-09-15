@@ -79,7 +79,7 @@ public class Graph {
   private final ReadableIndex<Node> nodeAutoIndex;
 
   @Inject
-  public Graph(GraphDatabaseService graphDb, Class<?> nodeType) {
+  public Graph(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
     this.engine = new ExecutionEngine(graphDb);
     if (!graphDb.index().getNodeAutoIndexer().isEnabled()) {

@@ -57,7 +57,7 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
 
   @Before
   public void setupGraph() throws IOException {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     cell = buildConcept("http://example.org/#birnlex5", "Cell", "BL:5");
     onCell = buildConcept("http://example.org/#birnlex6", "Something on cell", "HP:0008");
     onCell.addSynonym("on cell");

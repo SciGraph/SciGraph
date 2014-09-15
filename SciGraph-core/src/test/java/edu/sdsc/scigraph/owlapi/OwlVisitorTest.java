@@ -43,7 +43,6 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.EdgeType;
@@ -62,7 +61,7 @@ public class OwlVisitorTest extends GraphTestBase {
   public static void loadOwl() throws Exception {
     cleanup = false;
     // graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     IRI iri = IRI.create(uri);

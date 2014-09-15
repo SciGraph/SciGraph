@@ -50,7 +50,7 @@ public class GraphApiInferredTest extends GraphTestBase {
    */
   @Before
   public void addNodes() throws Exception {
-    Graph graph = new Graph(graphDb, Concept.class);
+    Graph graph = new Graph(graphDb);
     fizz = graph.getOrCreateNode(fizzUri);
     fizzConcept = graph.getOrCreateFramedNode(fizz);
     Node anon = graph.getOrCreateNode(BASE_URI + "#anon");

@@ -31,7 +31,6 @@ import org.neo4j.graphdb.Node;
 import com.google.common.base.Function;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.HierarchyVisitor.Callback;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -76,7 +75,7 @@ public class HierarchyVisitorTest extends GraphTestBase {
    **********/
   @Before
   public void createNodes() {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     a = createNode("a");
     b = createNode("b");
     c = createNode("c");

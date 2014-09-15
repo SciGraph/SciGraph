@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
@@ -47,7 +46,7 @@ public class GraphApiCategoryTest extends GraphTestBase {
 
   @Before
   public void addNodes() throws Exception {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     a = graph.getOrCreateNode(uri);
     graph.setProperty(a, NodeProperties.TYPE, "OWLClass");
     b = graph.getOrCreateNode(uri2);

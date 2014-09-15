@@ -74,7 +74,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   @Before
   public void setupGraph() throws IOException {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     try (Transaction tx = graphDb.beginTx()) {
       hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation");
       hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "foo", "fizz");
