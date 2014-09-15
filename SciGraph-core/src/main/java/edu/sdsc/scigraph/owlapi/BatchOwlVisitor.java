@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -68,6 +67,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
@@ -82,8 +82,6 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private OWLOntology ontology;
 
   private Map<String, String> mappedProperties;
-
-  private OWLOntology parentOntology = null;
 
   @Inject
   public BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph,
@@ -106,9 +104,6 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLOntology ontology) {
     logger.info("Walking ontology: " + ontology.getOntologyID());
     this.ontology = ontology;
-    if (null == parentOntology) {
-      parentOntology = ontology;
-    }
     return null;
   }
 
@@ -127,13 +122,13 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     } else if (axiom.getEntity() instanceof OWLNamedIndividual) {
       graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
     } else if (axiom.getEntity() instanceof OWLObjectProperty) {
-      /***
-       * TODO: Removing object property processing for now...
-       * OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
-      graph.setLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
-      graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
-      graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
-      graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));*/
+      if (!graph.hasLabel(node, OwlLabels.OWL_OBJECT_PROPERTY)) {
+        graph.addLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
+        OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
+        graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
+        graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
+        graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+      }
     } else if (axiom.getEntity() instanceof OWLDataProperty) {
       graph.setLabel(node, OwlLabels.OWL_DATA_PROPERTY);
     } else {

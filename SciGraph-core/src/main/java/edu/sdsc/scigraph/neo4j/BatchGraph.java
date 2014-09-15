@@ -95,6 +95,7 @@ public class BatchGraph {
    * @return true if an undirected relationship with type exists between from and to
    */
   public boolean hasRelationship(long from, long to, RelationshipType type) {
+    //return relationshipMap.containsKey(from, to, type);
     for (BatchRelationship rel : inserter.getRelationships(from)) {
       if ((rel.getEndNode() == to) || (rel.getStartNode() == to)
           && rel.getType().name().equals(type.name())) {
