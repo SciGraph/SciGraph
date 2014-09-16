@@ -16,13 +16,17 @@
 package edu.sdsc.scigraph.owlapi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableBiMap;
 
 public class CurieUtilTest {
 
@@ -30,19 +34,20 @@ public class CurieUtilTest {
 
   @Before
   public void setup() {
-    util =
-        new CurieUtil(ImmutableBiMap.<String, String>builder().put("http://example.org/a_", "A")
-            .build());
+    Map<String, String> map = new HashMap<>();
+    map.put("http://example.org/a_", "A");
+    map.put("http://example.org/A_", "A");
+    util = new CurieUtil(map);
   }
 
   @Test
   public void testGetFullUri() {
-    assertThat(util.getFullUri("A:foo"), is(Optional.of("http://example.org/a_foo")));
+    assertThat(util.getFullUri("A:foo"), containsInAnyOrder("http://example.org/a_foo", "http://example.org/A_foo"));
   }
 
   @Test
   public void testUnknownCurie() {
-    assertThat(util.getFullUri("NONE:foo"), is(Optional.<String>absent()));
+    assertThat(util.getFullUri("NONE:foo"), is(empty()));
   }
 
   @Test
@@ -52,7 +57,7 @@ public class CurieUtilTest {
 
   @Test
   public void testUnknownUri() {
-    assertThat(util.getFullUri("http://example.org/none_foo"), is(Optional.<String>absent()));
+    assertThat(util.getFullUri("http://example.org/none_foo"), is(empty()));
   }
 
 }

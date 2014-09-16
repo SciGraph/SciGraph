@@ -151,13 +151,13 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public Collection<Concept> getConceptFromId(Query query) {
     String idQuery = StringUtils.strip(query.getInput(), "\"");
-    Optional<String> fullUri = curieUtil.getFullUri(idQuery);
+    Collection<String> fullUris = curieUtil.getFullUri(idQuery);
     idQuery = QueryParser.escape(idQuery);
 
     String queryString = format("%s:%s", CommonProperties.FRAGMENT, idQuery);
-    if (fullUri.isPresent()) {
+    for (String fullUri: fullUris) {
       queryString +=
-          String.format(" %s:%s", CommonProperties.URI, QueryParser.escape(fullUri.get()));
+          String.format(" %s:%s", CommonProperties.URI, QueryParser.escape(fullUri));
     }
     IndexHits<Node> hits;
     try (Transaction tx = graph.getGraphDb().beginTx()) {
@@ -178,9 +178,9 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       BooleanQuery subQuery = new BooleanQuery();
       subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL,
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
-      Optional<String> fullUri = curieUtil.getFullUri(query.getInput());
-      if (fullUri.isPresent()) {
-          subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri.get()))),
+      Collection<String> fullUris = curieUtil.getFullUri(query.getInput());
+      for (String fullUri: fullUris) {
+          subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri))),
               Occur.SHOULD);
       }
       subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),

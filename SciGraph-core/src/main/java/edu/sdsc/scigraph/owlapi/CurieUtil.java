@@ -15,27 +15,37 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.getFirst;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 
 public class CurieUtil {
 
-  private final BiMap<String, String> curieMap;
+  private final Map<String, String> curieMap;
+  private final Multimap<String, String> uriMap;
 
   @Inject
   CurieUtil(@Named("neo4j.curieMap") Map<String, String> curieMap) {
-    this.curieMap = ImmutableBiMap.copyOf(curieMap);
+    this.curieMap = ImmutableMap.copyOf(curieMap);
+    uriMap = HashMultimap.create();
+    for (Entry<String, String> curie: curieMap.entrySet()) {
+      uriMap.put(curie.getValue(), curie.getKey());
+    }
   }
 
   public Optional<String> getCurie(final String uri) {
@@ -48,14 +58,19 @@ public class CurieUtil {
     return Optional.absent();
   }
 
-  public Optional<String> getFullUri(String curie) {
+  public Collection<String> getFullUri(final String curie) {
     Preconditions.checkNotNull(curie);
     String prefix = getFirst(Splitter.on(':').split(curie), null);
-    if (null != prefix && curieMap.inverse().containsKey(prefix)) {
-      String uriPrefix = curieMap.inverse().get(prefix);
-      return Optional.of(String.format("%s%s", uriPrefix, curie.substring(curie.indexOf(':') + 1)));
+    if (null != prefix && uriMap.containsKey(prefix)) {
+      return transform(uriMap.get(prefix), new Function<String, String>() {
+        @Override
+        public String apply(String uriPrefix) {
+          return String.format("%s%s", uriPrefix, curie.substring(curie.indexOf(':') + 1));
+        }
+        
+      });
     }
-    return Optional.absent();
+    return Collections.emptySet();
   }
 
 }
