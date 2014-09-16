@@ -24,6 +24,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
 import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 /***
@@ -36,6 +37,7 @@ public class TestSubClassOf extends OwlTestCase {
   public void testSubclass() {
     Node subclass = getNode("http://example.org/subclass");
     Node superclass = getNode("http://example.org/superclass");
+    assertThat("classes should be labeled as such", subclass.hasLabel(OwlLabels.OWL_CLASS) && superclass.hasLabel(OwlLabels.OWL_CLASS));
     assertThat("subclass should be a directed relationship",
         GraphUtil.getRelationships(subclass, superclass, OwlRelationships.RDF_SUBCLASS_OF),
         is(IsIterableWithSize.<Relationship> iterableWithSize(1)));

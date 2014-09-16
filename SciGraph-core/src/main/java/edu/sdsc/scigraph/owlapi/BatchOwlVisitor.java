@@ -116,6 +116,30 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   @Override
+  public Void visit(OWLClass desc) {
+    URI uri = getUri(desc);
+    long node = getOrCreateNode(uri);
+    graph.addLabel(node, OwlLabels.OWL_CLASS);
+    return null;
+  }
+
+  @Override
+  public Void visit(OWLObjectProperty property) {
+    URI uri = getUri(property);
+    long node = getOrCreateNode(uri);
+    graph.addLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
+    return null;
+  }
+
+  @Override
+  public Void visit(OWLNamedIndividual individual) {
+    URI uri = getUri(individual);
+    long node = getOrCreateNode(uri);
+    graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
+    return null;
+  }
+
+  @Override
   public Void visit(OWLDeclarationAxiom axiom) {
     URI uri = getUri(axiom);
     long node = getOrCreateNode(uri);
