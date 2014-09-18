@@ -54,6 +54,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.BranchState;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.helpers.collection.Iterables;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -296,6 +297,27 @@ public class GraphService extends BaseResource {
       tx.success();
     }
     return JaxRsUtil.wrapJsonp(request, response, callback);
+  }
+  
+  @GET
+  @Path("/relationship_types")
+  @ApiOperation(value = "Get all relationship types", response = String.class)
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  public Object getRelationships(
+      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+    List<String> relationships = new ArrayList<>();
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      relationships = newArrayList(transform(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationshipTypes(),
+          new Function<RelationshipType, String>() {
+        @Override
+        public String apply(RelationshipType relationshipType) {
+          return relationshipType.name();
+        }
+        
+      }));
+    }
+    return JaxRsUtil.wrapJsonp(request, new GenericEntity<List<String>>(relationships) {}, callback);
   }
   
   @GET
