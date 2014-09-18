@@ -45,6 +45,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 import org.neo4j.unsafe.batchinsert.BatchRelationship;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.lucene.LuceneUtils;
@@ -213,8 +214,9 @@ public class BatchGraph {
           for (Object obj : valueSet) {
             Array.set(newArray, i++, clazz.cast(obj));
           }
-          //inserter.getNodeProperties(node).put(property, newArray);
-          inserter.setNodeProperty(node, property, newArray);
+          Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(node));
+          properties.put(property, newArray);
+          inserter.setNodeProperties(node, properties);
         }
         Map<String, Object> indexProperties = collectIndexProperties(property, value);
         if (!indexProperties.isEmpty()) {
@@ -230,9 +232,11 @@ public class BatchGraph {
   public void setNodeProperty(long batchId, String property, Object value) {
     try {
       if (!ignoreProperty(value)) {
-        inserter.setNodeProperty(batchId, property, value);
+        Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(batchId));
+        properties.put(property, value);
+        inserter.setNodeProperties(batchId, properties);
         Map<String, Object> indexProperties =
-            collectIndexProperties(inserter.getNodeProperties(batchId));
+            collectIndexProperties(properties);
         if (!indexProperties.isEmpty()) {
           logger.fine("Indexing " + indexProperties);
           nodeIndex.updateOrAdd(batchId, indexProperties);
