@@ -20,6 +20,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
 
 import java.io.IOException;
@@ -85,6 +86,23 @@ public class BatchGraphTest {
     assertThat(size(GlobalGraphOperations.at(graphDb).getAllNodes()), is(1));
     IndexHits<Node> hits = nodeIndex.query(CommonProperties.URI + ":http\\://example.org/foo");
     assertThat(hits.getSingle().getId(), is(foo));
+  }
+
+  @Test
+  public void testPropertySetting() {
+    graph.addProperty(foo, "prop1", "foo");
+    getGraphDB();
+    IndexHits<Node> hits = nodeIndex.query("prop1:foo");
+    assertThat((String)hits.getSingle().getProperty("prop1"), is("foo"));
+  }
+
+  @Test
+  public void testMultiplePropertySetting() {
+    graph.addProperty(foo, "prop1", "bar");
+    graph.addProperty(foo, "prop1", "baz");
+    getGraphDB();
+    IndexHits<Node> hits = nodeIndex.query("prop1:bar");
+    assertThat((String[])hits.getSingle().getProperty("prop1"), is(arrayContaining("bar", "baz")));
   }
 
   @Test

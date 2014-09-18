@@ -213,7 +213,8 @@ public class BatchGraph {
           for (Object obj : valueSet) {
             Array.set(newArray, i++, clazz.cast(obj));
           }
-          inserter.getNodeProperties(node).put(property, newArray);
+          //inserter.getNodeProperties(node).put(property, newArray);
+          inserter.setNodeProperty(node, property, newArray);
         }
         Map<String, Object> indexProperties = collectIndexProperties(property, value);
         if (!indexProperties.isEmpty()) {
