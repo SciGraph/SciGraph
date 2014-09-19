@@ -35,6 +35,7 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.BranchState;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
@@ -150,25 +151,26 @@ public class HierarchyVisitor {
           }
         });
 
-    for (Path position: description.traverse(roots)) {
-      List<Node> path = new ArrayList<>();
-      PeekingIterator<PropertyContainer> iter = Iterators.peekingIterator(position.iterator());
-      while (iter.hasNext()) {
-        PropertyContainer container = iter.next();
-        if (container instanceof Node) {
-          if (graph.getProperty(container, NodeProperties.ANONYMOUS, Boolean.class).or(false)) {
-            // Ignore paths with anonymous nodes
-          }
-          else if (iter.hasNext() &&
-              ((Relationship)iter.peek()).isType(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
-            // Ignore the path hop representing the equivalence
-          } else {
-            path.add((Node)container);
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      for (Path position: description.traverse(roots)) {
+        List<Node> path = new ArrayList<>();
+        PeekingIterator<PropertyContainer> iter = Iterators.peekingIterator(position.iterator());
+        while (iter.hasNext()) {
+          PropertyContainer container = iter.next();
+          if (container instanceof Node) {
+            if (graph.getProperty(container, NodeProperties.ANONYMOUS, Boolean.class).or(false)) {
+              // Ignore paths with anonymous nodes
+            }
+            else if (iter.hasNext() &&
+                ((Relationship)iter.peek()).isType(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
+              // Ignore the path hop representing the equivalence
+            } else {
+              path.add((Node)container);
+            }
           }
         }
+        callback.processPath(path);
       }
-      
-      callback.processPath(path);
     }
   }
 
