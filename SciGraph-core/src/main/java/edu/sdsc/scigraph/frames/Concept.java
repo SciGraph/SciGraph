@@ -36,6 +36,8 @@ public class Concept extends NodeProperties {
   private Set<String> acronyms = new HashSet<>();
   private Set<String> abbreviations = new HashSet<>();
 
+  private Set<String> equivalentClasses = new HashSet<>();
+
   public void setPreferredLabel(String preferredLabel) {
     this.preferredLabel = preferredLabel;
   }
@@ -82,6 +84,10 @@ public class Concept extends NodeProperties {
 
   public Iterable<String> getCategories() {
     return categories;
+  }
+
+  public Set<String> getEquivalentClasses() {
+    return equivalentClasses;
   }
 
   @Override

@@ -56,6 +56,7 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class Graph {
 
@@ -221,7 +222,15 @@ public class Graph {
       for (String type : getProperties(n, Concept.TYPE, String.class)) {
         concept.addType(type);
       }
+
+      for (Relationship r: n.getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
+        Node equivalence = r.getStartNode().equals(n) ? r.getEndNode() : r.getStartNode();
+        concept.getEquivalentClasses().add((String)equivalence.getProperty(CommonProperties.URI));
+      }
+
       tx.success();
+
+
     }
 
     return concept;
