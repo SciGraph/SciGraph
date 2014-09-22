@@ -100,6 +100,7 @@ public class BatchOwlVisitorTest {
 
   @AfterClass
   public static void teardown() throws IOException {
+    graphDb.shutdown();
     FileUtils.deleteDirectory(path.toFile());
   }
 

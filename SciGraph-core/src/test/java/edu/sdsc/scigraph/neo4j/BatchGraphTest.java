@@ -69,6 +69,7 @@ public class BatchGraphTest {
 
   @After
   public void teardown() throws IOException {
+    graphDb.shutdown();
     FileUtils.deleteDirectory(path.toFile());
   }
 
