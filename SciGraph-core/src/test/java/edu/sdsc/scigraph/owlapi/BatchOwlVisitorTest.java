@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -100,8 +99,8 @@ public class BatchOwlVisitorTest {
 
   @AfterClass
   public static void teardown() throws IOException {
-    graphDb.shutdown();
-    FileUtils.deleteDirectory(path.toFile());
+    //TODO: Why does this fail on Windows? 
+    // FileUtils.deleteDirectory(path.toFile());
   }
 
   Node getNode(String uri) {

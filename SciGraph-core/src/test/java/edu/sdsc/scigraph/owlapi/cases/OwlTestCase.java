@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -103,8 +102,8 @@ public abstract class OwlTestCase {
 
   @After
   public void tearDownAfterClass() throws Exception {
-    graphDb.shutdown();
-    FileUtils.deleteDirectory(path.toFile());
+    // TODO: Why does this fail on Windows
+    //FileUtils.deleteDirectory(path.toFile());
   }
 
 }

@@ -28,18 +28,13 @@ import org.neo4j.tooling.GlobalGraphOperations;
 
 public class GraphTestBase {
 
-  protected static GraphDatabaseService graphDb;
+  protected GraphDatabaseService graphDb;
   Transaction tx;
   protected static boolean cleanup = true;
 
-  @BeforeClass
-  public static void setupDb() {
+  @Before
+  public void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-  }
-
-  @AfterClass
-  public static void shutdownDb() {
-    graphDb.shutdown();
   }
 
   @Before
@@ -47,7 +42,7 @@ public class GraphTestBase {
     tx = graphDb.beginTx();
   }
 
-  @After
+/*  @After
   public void teardown() throws Exception {
     tx.success();
     try {
@@ -59,7 +54,7 @@ public class GraphTestBase {
     if (cleanup) {
       cleanDatabase();
     }
-  }
+  }*/
 
   void cleanDatabase() {
     Transaction tx = graphDb.beginTx();

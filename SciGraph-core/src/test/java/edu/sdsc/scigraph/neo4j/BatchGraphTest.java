@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,8 +68,8 @@ public class BatchGraphTest {
 
   @After
   public void teardown() throws IOException {
-    graphDb.shutdown();
-    FileUtils.deleteDirectory(path.toFile());
+    // TODO: Why does this fail on Windows?
+    // FileUtils.deleteDirectory(path.toFile());
   }
 
   GraphDatabaseService getGraphDB() {

@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -57,8 +57,8 @@ public class OwlVisitorTest extends GraphTestBase {
   static final String ROOT = "http://example.com/owl/families";
   static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
 
-  @BeforeClass
-  public static void loadOwl() throws Exception {
+  @Before
+  public void loadOwl() throws Exception {
     cleanup = false;
     // graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
     graph = new Graph(graphDb);
