@@ -103,6 +103,7 @@ public abstract class OwlTestCase {
 
   @After
   public void tearDownAfterClass() throws Exception {
+    graphDb.shutdown();
     FileUtils.deleteDirectory(path.toFile());
   }
 
