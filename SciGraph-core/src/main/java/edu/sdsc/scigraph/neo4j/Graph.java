@@ -41,11 +41,8 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.index.AutoIndexer;
-import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.index.UniqueFactory;
-import org.neo4j.helpers.collection.MapUtil;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
@@ -55,7 +52,6 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
-import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class Graph {
@@ -64,16 +60,8 @@ public class Graph {
 
   public static final String UNIQUE_PROPERTY = CommonProperties.URI;
 
-  private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
-      NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
-      CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
-      Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
-
   private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL,
       Concept.SYNONYM);
-
-  private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
-      "lucene", "analyzer", VocabularyIndexAnalyzer.class.getName());
 
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;
@@ -83,26 +71,7 @@ public class Graph {
   public Graph(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
     this.engine = new ExecutionEngine(graphDb);
-    if (!graphDb.index().getNodeAutoIndexer().isEnabled()) {
-      setupAutoIndexing();
-    }
     this.nodeAutoIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-  }
-
-  private void setupIndex(AutoIndexer<?> index, Set<String> properties) {
-    for (String property : properties) {
-      index.startAutoIndexingProperty(property);
-    }
-    index.setEnabled(true);
-  }
-
-  private void setupAutoIndexing() {
-    try (Transaction tx = graphDb.beginTx()) {
-      graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
-      setupIndex(graphDb.index().getNodeAutoIndexer(), NODE_PROPERTIES_TO_INDEX);
-      graphDb.index().forRelationships("relationship_auto_index", INDEX_CONFIG);
-      tx.success();
-    }
   }
 
   public void shutdown() {

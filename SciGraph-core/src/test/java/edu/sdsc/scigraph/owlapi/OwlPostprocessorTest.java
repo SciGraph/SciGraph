@@ -39,7 +39,7 @@ import edu.sdsc.scigraph.neo4j.GraphUtil;
 public class OwlPostprocessorTest {
 
   GraphDatabaseService graphDb;
-  Node parent, child;
+  Node parent, child, grandChild;
   OwlPostprocessor postprocessor;
 
   @Before
@@ -53,6 +53,8 @@ public class OwlPostprocessorTest {
     parent.setProperty(CommonProperties.URI, "http://example.org/a");
     child = graphDb.createNode();
     child.createRelationshipTo(parent, OwlRelationships.RDF_SUBCLASS_OF);
+    grandChild = graphDb.createNode();
+    grandChild.createRelationshipTo(child, OwlRelationships.RDF_SUBCLASS_OF);
     tx.success();
     postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
   }
@@ -66,6 +68,8 @@ public class OwlPostprocessorTest {
         GraphUtil.getProperty(parent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
     assertThat("child category should be set",
         GraphUtil.getProperty(child, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat("grandchild category should be set",
+        GraphUtil.getProperty(grandChild, Concept.CATEGORY, String.class), is(Optional.of("foo")));
   }
 
 }

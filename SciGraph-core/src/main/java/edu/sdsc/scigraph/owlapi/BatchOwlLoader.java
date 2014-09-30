@@ -35,7 +35,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -59,6 +58,7 @@ import com.google.inject.name.Names;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
+import edu.sdsc.scigraph.neo4j.Neo4jModule;
 
 public class BatchOwlLoader {
 
@@ -69,7 +69,7 @@ public class BatchOwlLoader {
 
   @Inject
   BatchOwlVisitor visitor;
-  
+
   @Inject
   PostpostprocessorProvider postprocessorProvider;
 
@@ -105,21 +105,24 @@ public class BatchOwlLoader {
 
     @Inject
     OwlLoadConfiguration config;
+
+    @Inject
+    Provider<GraphDatabaseService> graphDbProvider;
     
     GraphDatabaseService graphDb;
-    
+
     @Override
     public OwlPostprocessor get() {
-      graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(config.getOntologyConfiguration().getGraphLocation());
+      graphDb = graphDbProvider.get();
       return new OwlPostprocessor(graphDb, config.getCategories());
     }
-    
+
     public void shutdown() {
       graphDb.shutdown();
     }
-    
+
   }
-  
+
   static class OwlLoaderModule extends AbstractModule {
 
     OwlLoadConfiguration config;
@@ -155,12 +158,14 @@ public class BatchOwlLoader {
 
     @Provides
     @Singleton
-    OWLOntologyWalker getOntologyWalker()
+    OWLOntologyWalker getOntologyWalker(FileCachingIRIMapper mapper)
         throws OWLOntologyCreationException {
       logger.info("Loading ontologies with owlapi...");
       Stopwatch timer = Stopwatch.createStarted();
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+      //manager.addIRIMapper(mapper);
       for (String url : config.getOntologyUrls()) {
+        logger.info("Loading " + url);
         if (url.startsWith("http://") || url.startsWith("https://")) {
           manager.loadOntology(IRI.create(url));
         } else {
@@ -175,7 +180,7 @@ public class BatchOwlLoader {
   }
 
   public static void load(OwlLoadConfiguration config) {
-    Injector i = Guice.createInjector(new OwlLoaderModule(config));
+    Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getOntologyConfiguration()));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
     logger.info("Starting to load ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
@@ -184,7 +189,7 @@ public class BatchOwlLoader {
   }
 
   public static void main(String[] args) throws OWLOntologyCreationException, JsonParseException,
-      JsonMappingException, IOException {
+  JsonMappingException, IOException {
     CommandLineParser parser = new PosixParser();
     CommandLine cmd = null;
     try {

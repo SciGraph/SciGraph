@@ -1,5 +1,4 @@
 ontologyConfiguration:
-
     # The location of the graph.
     # If this location does not exist it will be created.
     # Loading will append content to existing graphs.
@@ -22,3 +21,12 @@ mappedProperties:
   - name: aged # The name of the new property
     properties: # The list of properties mapped to the new property
     - http://example.com/owl/families/hasAge
+
+indexedNodeProperties:
+  - label
+  - synonym
+  - fragment
+
+exactNodeProperties:
+  - label
+  - synonym
