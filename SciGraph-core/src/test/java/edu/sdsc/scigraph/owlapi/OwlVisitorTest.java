@@ -15,11 +15,9 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -30,8 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -46,7 +43,6 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.EdgeType;
@@ -61,18 +57,16 @@ public class OwlVisitorTest extends GraphTestBase {
   static final String ROOT = "http://example.com/owl/families";
   static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
 
-  @BeforeClass
-  public static void loadOwl() throws Exception {
+  @Before
+  public void loadOwl() throws Exception {
     cleanup = false;
     // graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
-    Map<String, String> curieMap = new HashMap<>();
-    curieMap.put("http://example.org/otherOntologies/families/", "otherOnt");
     Map<String, String> categoryMap = new HashMap<>();
     try (Transaction tx = graphDb.beginTx()) {
       List<MappedProperty> propertyMap = new ArrayList<>();
@@ -81,7 +75,7 @@ public class OwlVisitorTest extends GraphTestBase {
       when(age.getProperties()).thenReturn(newArrayList(ROOT + "/hasAge"));
       propertyMap.add(age);
 
-      OwlVisitor visitor = new OwlVisitor(walker, graph, curieMap, categoryMap, propertyMap);
+      OwlVisitor visitor = new OwlVisitor(walker, graph, categoryMap, propertyMap);
       walker.walkStructure(visitor);
       visitor.postProcess();
       tx.success();
@@ -91,8 +85,8 @@ public class OwlVisitorTest extends GraphTestBase {
   @Test
   public void testConcreteClassCreation() {
     assertThat(graph.nodeExists(ROOT + "/Mother"), is(true));
-    assertThat(getOnlyElement(graph.getFramedNode(ROOT + "/Mother").get().getTypes()),
-        is(equalTo("OWLClass")));
+    Node mother = graph.getNode(ROOT + "/Mother").get();
+    assertThat(mother.hasLabel(OwlLabels.OWL_CLASS), is(true));
   }
 
   @Test
@@ -106,15 +100,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node mother = graph.getNode(ROOT + "/Mother").get();
     Node woman = graph.getNode(ROOT + "/Woman").get();
     assertThat(
-        graph.hasRelationship(mother, woman, EdgeType.SUBCLASS_OF, OwlVisitor.RDFS_PREFIX
-            + "subClassOf"), is(true));
-  }
-
-  @Test
-  public void testGeneratedInverseRelationship() {
-    Node mother = graph.getNode(ROOT + "/Mother").get();
-    Node woman = graph.getNode(ROOT + "/Woman").get();
-    assertThat(graph.hasRelationship(woman, mother, EdgeType.SUPERCLASS_OF), is(true));
+        graph.hasRelationship(mother, woman, OwlRelationships.RDF_SUBCLASS_OF), is(true));
   }
 
   @Test
@@ -151,27 +137,22 @@ public class OwlVisitorTest extends GraphTestBase {
     assertThat(graph.nodeExists(ROOT + "/Bill"), is(true));
     Node john = graph.getNode(ROOT + "/John").get();
     Node father = graph.getNode(ROOT + "/Father").get();
-    assertThat(graph.hasRelationship(john, father, EdgeType.IS_A), is(true));
-    assertThat(graph.getProperties(john, CommonProperties.TYPE, String.class),
-        contains("OWLIndividual"));
+    assertThat(graph.hasRelationship(john, father, OwlRelationships.RDF_TYPE), is(true));
+    john.hasLabel(OwlLabels.OWL_NAMED_INDIVIDUAL);
   }
 
   @Test
   public void testSameIndividual() {
     Node james = graph.getNode(ROOT + "/James").get();
     Node jim = graph.getNode(ROOT + "/Jim").get();
-    assertThat(
-        graph.hasRelationship(james, jim, EdgeType.SAME_AS, OwlVisitor.OWL_PREFIX + "sameAs"),
-        is(true));
+    assertThat(graph.hasRelationship(james, jim, OwlRelationships.OWL_SAME_AS), is(true));
   }
 
   @Test
   public void testDifferentIndividual() {
     Node john = graph.getNode(ROOT + "/John").get();
     Node bill = graph.getNode(ROOT + "/Bill").get();
-    assertThat(
-        graph.hasRelationship(john, bill, EdgeType.DIFFERENT_FROM, OwlVisitor.OWL_PREFIX
-            + "differentFrom"), is(true));
+    assertThat(graph.hasRelationship(john, bill, OwlRelationships.OWL_DIFFERENT_FROM), is(true));
   }
 
   @Test
@@ -201,11 +182,9 @@ public class OwlVisitorTest extends GraphTestBase {
     Node adult = graph.getNode(ROOT + "/Adult").get();
     Node grownup = graph.getNode(OTHER_ROOT + "/Grownup").get();
     assertThat(
-        graph.hasRelationship(adult, grownup, EdgeType.EQUIVALENT_TO, OwlVisitor.OWL_PREFIX
-            + "equivalentClass"), is(true));
+        graph.hasRelationship(adult, grownup, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
     assertThat(
-        graph.hasRelationship(grownup, adult, EdgeType.EQUIVALENT_TO, OwlVisitor.OWL_PREFIX
-            + "equivalentClass"), is(true));
+        graph.hasRelationship(grownup, adult, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
   }
 
   @Test
@@ -213,8 +192,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node man = graph.getNode(ROOT + "/Man").get();
     Node woman = graph.getNode(ROOT + "/Woman").get();
     assertThat(
-        graph.hasRelationship(man, woman, EdgeType.DISJOINT_WITH, OwlVisitor.OWL_PREFIX
-            + "disjointWith"), is(true));
+        graph.hasRelationship(man, woman, OwlRelationships.OWL_DISJOINT_WITH), is(true));
   }
 
   @Test
@@ -222,8 +200,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node parent = graph.getNode(ROOT + "/Parent").get();
     Node intersection = graph.getOrCreateNode("http://ontology.neuinfo.org/anon/412251922");
     assertThat(
-        graph.hasRelationship(parent, intersection, EdgeType.EQUIVALENT_TO, OwlVisitor.OWL_PREFIX
-            + "equivalentClass"), is(true));
+        graph.hasRelationship(parent, intersection, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
     Node mother = graph.getNode(ROOT + "/Mother").get();
     Node father = graph.getNode(ROOT + "/Father").get();
     assertThat(graph.hasRelationship(intersection, mother, EdgeType.REL), is(true));
@@ -257,9 +234,7 @@ public class OwlVisitorTest extends GraphTestBase {
   public void testSubPropeties() {
     Node hasWife = graph.getNode(ROOT + "/hasWife").get();
     Node hasSpouse = graph.getNode(ROOT + "/hasSpouse").get();
-    assertThat(graph.hasRelationship(hasWife, hasSpouse, EdgeType.SUB_OBJECT_PROPETY_OF), is(true));
-    assertThat(graph.hasRelationship(hasSpouse, hasWife, EdgeType.SUPER_OBJECT_PROPETY_OF),
-        is(true));
+    assertThat(graph.hasRelationship(hasWife, hasSpouse, OwlRelationships.RDFS_SUB_PROPERTY_OF), is(true));
   }
 
   @Test
@@ -281,8 +256,8 @@ public class OwlVisitorTest extends GraphTestBase {
     Node hasChild = graph.getNode(ROOT + "/hasChild").get();
     Node parent = graph.getNode(ROOT + "/Parent").get();
     assertThat(graph.getProperty(restriction, "cardinality", Integer.class).get(), is(2));
-    assertThat(graph.hasRelationship(restriction, hasChild, EdgeType.PROPERTY), is(true));
-    assertThat(graph.hasRelationship(restriction, parent, EdgeType.CLASS), is(true));
+    assertThat(graph.hasRelationship(restriction, hasChild, OwlRelationships.PROPERTY), is(true));
+    assertThat(graph.hasRelationship(restriction, parent, OwlRelationships.CLASS), is(true));
   }
 
   @Test
@@ -290,8 +265,8 @@ public class OwlVisitorTest extends GraphTestBase {
     Node svf = graph.getNode("http://ontology.neuinfo.org/anon/-1615296904").get();
     Node hasChild = graph.getNode(ROOT + "/hasChild").get();
     Node happyPerson = graph.getOrCreateNode(ROOT + "/HappyPerson");
-    assertThat(graph.hasRelationship(svf, hasChild, EdgeType.PROPERTY), is(true));
-    assertThat(graph.hasRelationship(svf, happyPerson, EdgeType.CLASS), is(true));
+    assertThat(graph.hasRelationship(svf, hasChild, OwlRelationships.PROPERTY), is(true));
+    assertThat(graph.hasRelationship(svf, happyPerson, OwlRelationships.CLASS), is(true));
   }
 
   @Test
@@ -299,58 +274,25 @@ public class OwlVisitorTest extends GraphTestBase {
     Node avf = graph.getNode("http://ontology.neuinfo.org/anon/-1615359878").get();
     Node hasChild = graph.getNode(ROOT + "/hasChild").get();
     Node happyPerson = graph.getNode(ROOT + "/HappyPerson").get();
-    assertThat(graph.hasRelationship(avf, hasChild, EdgeType.PROPERTY), is(true));
-    assertThat(graph.hasRelationship(avf, happyPerson, EdgeType.CLASS), is(true));
-  }
-
-  @Test
-  public void testSomeValuesFromPostProcess() {
-    Node woman = graph.getNode(ROOT + "/Woman").get();
-    Node happyPerson = graph.getNode(ROOT + "/HappyPerson").get();
-    assertThat(graph.hasRelationship(woman, happyPerson,
-        DynamicRelationshipType.withName("hasChild"), ROOT + "/hasChild"), is(true));
-  }
-
-  @Test
-  @Ignore
-  public void testEquivalencePostProcess() {
-    Node adult = graph.getNode(ROOT + "/Adult").get();
-    Node grownUp = graph.getNode(OTHER_ROOT + "/Grownup").get();
-    Node nonchild = graph.getNode(OTHER_ROOT + "/Nonchild").get();
-    assertThat(graph.hasRelationship(adult, grownUp, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(grownUp, adult, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(adult, nonchild, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(nonchild, adult, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(nonchild, grownUp, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(grownUp, nonchild, EdgeType.EQUIVALENT_TO), is(true));
-  }
-
-  @Test
-  public void testCuries() {
-    Node grownup = graph.getOrCreateNode(OTHER_ROOT + "/Grownup");
-    String curie = graph.getProperty(grownup, CommonProperties.CURIE, String.class).get();
-    assertThat(curie, is(equalTo("otherOnt:Grownup")));
+    assertThat(graph.hasRelationship(avf, hasChild, OwlRelationships.PROPERTY), is(true));
+    assertThat(graph.hasRelationship(avf, happyPerson, OwlRelationships.CLASS), is(true));
   }
 
   /*** http://www.w3.org/TR/owl2-new-features/#F12:_Punning */
   @Test
   public void testPunning() {
     Node eagle = graph.getOrCreateNode(ROOT + "/Eagle");
-    assertThat(graph.getProperties(eagle, NodeProperties.TYPE, String.class),
-        containsInAnyOrder("OWLClass", "OWLIndividual"));
+    assertThat(eagle.getLabels(), containsInAnyOrder(OwlLabels.OWL_CLASS, OwlLabels.OWL_NAMED_INDIVIDUAL));
   }
 
   @Test
   public void testDataProperties() {
     assertThat(graph.nodeExists(ROOT + "/hasAge"), is(true));
-    assertThat(graph.getFramedNode(ROOT + "/hasAge").get().getTypes(), contains("OWLDataProperty"));
   }
 
   @Test
   public void testObjectProperties() {
     assertThat(graph.nodeExists(ROOT + "/hasParent"), is(true));
-    assertThat(graph.getFramedNode(ROOT + "/hasParent").get().getTypes(),
-        contains("OWLObjectProperty"));
   }
 
 }

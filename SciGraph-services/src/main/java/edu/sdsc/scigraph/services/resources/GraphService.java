@@ -45,14 +45,16 @@ import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PathExpander;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.BranchState;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.helpers.collection.Iterables;
-import org.neo4j.kernel.Traversal;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -69,15 +71,16 @@ import edu.sdsc.scigraph.representations.monarch.GraphPath;
 import edu.sdsc.scigraph.representations.monarch.GraphPath.Edge;
 import edu.sdsc.scigraph.representations.monarch.GraphPath.Vertex;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTO;
+import edu.sdsc.scigraph.services.api.graph.NodeDTO;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
-@Path("/graph") 
+@Path("/graph")
 @Api(value = "/graph", description = "Graph services")
-@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML })
+@Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
+    MediaType.APPLICATION_XML})
 public class GraphService extends BaseResource {
 
   private final Vocabulary vocabulary;
@@ -105,19 +108,21 @@ public class GraphService extends BaseResource {
       }
     }));
 
-    graphPath.edges = newArrayList(transform(path.relationships(), new Function<Relationship, Edge>() {
-      @Override
-      public Edge apply(Relationship input) {
-        Edge e = new Edge((String)input.getStartNode().getProperty(CommonProperties.FRAGMENT),
-            (String)input.getEndNode().getProperty(CommonProperties.FRAGMENT),
-            input.getType().name());
-        Optional<String> type = graph.getProperty(input, CommonProperties.TYPE, String.class);
-        if (type.isPresent()) {
-          e.meta.put("type", type.get());
-        }
-        return e;
-      }
-    }));
+    graphPath.edges =
+        newArrayList(transform(path.relationships(), new Function<Relationship, Edge>() {
+          @Override
+          public Edge apply(Relationship input) {
+            Edge e =
+                new Edge((String) input.getStartNode().getProperty(CommonProperties.FRAGMENT),
+                    (String) input.getEndNode().getProperty(CommonProperties.FRAGMENT), input
+                        .getType().name());
+            Optional<String> type = graph.getProperty(input, CommonProperties.TYPE, String.class);
+            if (type.isPresent()) {
+              e.meta.put("type", type.get());
+            }
+            return e;
+          }
+        }));
     return graphPath;
   }
 
@@ -127,44 +132,44 @@ public class GraphService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getShortestPath(
-      @ApiParam( value = "Start node ID", required = true )
-      @PathParam("startId") String startId,
-      @ApiParam( value = "End node ID", required = true )
-      @PathParam("endId") String endId,
-      @ApiParam( value = "Maximum path length", required = false )
-      @QueryParam("length") @DefaultValue("1") int length,
-      @ApiParam( value = "JSONP callback", required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = "Start node ID", required = true) @PathParam("startId") String startId,
+      @ApiParam(value = "End node ID", required = true) @PathParam("endId") String endId,
+      @ApiParam(value = "Maximum path length", required = false) @QueryParam("length") @DefaultValue("1") int length,
+      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(startId).build();
     Concept startConcept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node startNode = graph.getNode(startConcept.getUri()).get();
+    Node startNode = graph.getGraphDb().getNodeById(startConcept.getId());
 
     query = new Vocabulary.Query.Builder(endId).build();
     Concept endConcept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node endNode = graph.getNode(endConcept.getUri()).get();
+    Node endNode = graph.getGraphDb().getNodeById(endConcept.getId());
 
-    PathExpander<Void> expander = new PathExpander<Void>() {
+    GraphPath graphPath = null;
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      PathExpander<Void> expander = new PathExpander<Void>() {
 
-      @Override
-      public Iterable<Relationship> expand(org.neo4j.graphdb.Path path, BranchState<Void> state) {
-        return path.endNode().getRelationships();
+        @Override
+        public Iterable<Relationship> expand(org.neo4j.graphdb.Path path, BranchState<Void> state) {
+          return path.endNode().getRelationships();
+        }
+
+        @Override
+        public PathExpander<Void> reverse() {
+          return this;
+        }
+      };
+
+      PathFinder<org.neo4j.graphdb.Path> finder = GraphAlgoFactory.shortestPath(expander, length);
+      org.neo4j.graphdb.Path path = finder.findSinglePath(startNode, endNode);
+      if (null == path) {
+        throw new WebApplicationException(404);
       }
 
-      @Override
-      public PathExpander<Void> reverse() {
-        return this;
-      }
-    };
-
-    PathFinder<org.neo4j.graphdb.Path> finder = GraphAlgoFactory.shortestPath(expander, length);
-    org.neo4j.graphdb.Path path = finder.findSinglePath(startNode, endNode);
-    if (null == path) {
-      throw new WebApplicationException(404);
+      graphPath = getGraphPathFromPath(path);
+      tx.success();
     }
 
-    GraphPath graphPath = getGraphPathFromPath(path);
-
-    GenericEntity<GraphPath> response = new GenericEntity<GraphPath>(graphPath){};
+    GenericEntity<GraphPath> response = new GenericEntity<GraphPath>(graphPath) {};
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }
 
@@ -174,132 +179,173 @@ public class GraphService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getPath(
-      @ApiParam( value = "Start node ID", required = true )
-      @PathParam("startId") String startId,
-      @ApiParam( value = "End node ID", required = true )
-      @PathParam("endId") String endId,
-      @ApiParam( value = "Maximum path length", required = false )
-      @QueryParam("length") @DefaultValue("1") int length,
-      @ApiParam( value = "JSONP callback", required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = "Start node ID", required = true) @PathParam("startId") String startId,
+      @ApiParam(value = "End node ID", required = true) @PathParam("endId") String endId,
+      @ApiParam(value = "Maximum path length", required = false) @QueryParam("length") @DefaultValue("1") int length,
+      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(startId).build();
     Concept startConcept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node startNode = graph.getOrCreateNode(startConcept.getUri());
+    Node startNode = graph.getGraphDb().getNodeById(startConcept.getId());
 
     query = new Vocabulary.Query.Builder(endId).build();
     Concept endConcept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node endNode = graph.getOrCreateNode(endConcept.getUri());
+    Node endNode = graph.getGraphDb().getNodeById(endConcept.getId());
 
-    PathExpander<Void> expander = new PathExpander<Void>() {
-
-      @Override
-      public Iterable<Relationship> expand(org.neo4j.graphdb.Path path, BranchState<Void> state) {
-        Set<Node> seenNodes = new HashSet<>();
-        for (Node node: path.nodes()) {
-          if (seenNodes.contains(node)) {
-            return Iterables.empty();
-          } else {
-            seenNodes.add(node);
-          }
-        }
-        return path.endNode().getRelationships();
-      }
-
-      @Override
-      public PathExpander<Void> reverse() {
-        return this;
-      }
-    };
-
-    PathFinder<org.neo4j.graphdb.Path> finder = GraphAlgoFactory.allSimplePaths(expander, length);
-    Iterable<org.neo4j.graphdb.Path> paths = finder.findAllPaths(startNode, endNode);
-    if ((null == paths) || (0 == Iterables.count(paths))) {
-      throw new WebApplicationException(404);
-    }
     List<GraphPath> returnedPaths = new ArrayList<>();
-    for (org.neo4j.graphdb.Path path: paths) {
-      returnedPaths.add(getGraphPathFromPath(path));
-    }
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      PathExpander<Void> expander = new PathExpander<Void>() {
 
-    GenericEntity<List<GraphPath>> response = new GenericEntity<List<GraphPath>>(returnedPaths){};
+        @Override
+        public Iterable<Relationship> expand(org.neo4j.graphdb.Path path, BranchState<Void> state) {
+          Set<Node> seenNodes = new HashSet<>();
+          for (Node node : path.nodes()) {
+            if (seenNodes.contains(node)) {
+              return Iterables.empty();
+            } else {
+              seenNodes.add(node);
+            }
+          }
+          return path.endNode().getRelationships();
+        }
+
+        @Override
+        public PathExpander<Void> reverse() {
+          return this;
+        }
+      };
+
+      PathFinder<org.neo4j.graphdb.Path> finder = GraphAlgoFactory.allSimplePaths(expander, length);
+      Iterable<org.neo4j.graphdb.Path> paths = finder.findAllPaths(startNode, endNode);
+      if ((null == paths) || (0 == Iterables.count(paths))) {
+        throw new WebApplicationException(404);
+      }
+      for (org.neo4j.graphdb.Path path : paths) {
+        returnedPaths.add(getGraphPathFromPath(path));
+      }
+    }
+    GenericEntity<List<GraphPath>> response = new GenericEntity<List<GraphPath>>(returnedPaths) {};
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }
 
   @GET
   @Path("/descendants/{relationship}/{id}")
-  @ApiOperation(value = "Get descendants", response = ConceptDTO .class)
+  @ApiOperation(value = "Get descendants", response = ConceptDTO.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getSubclasses(
-      @ApiParam( value = "Type of relationship to use (try SUPERCLASS_OF or has_proper_part)", required = true )
-      @PathParam("relationship") String relationship,
-      @ApiParam( value = "ID to find", required = true )
-      @PathParam("id") String id,
-      @ApiParam( value = "How deep to traverse descendants", required = false )
-      @QueryParam("depth") @DefaultValue("1") int depth,
-      @ApiParam( value = "JSONP callback", required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = "Type of relationship to use", required = true) @PathParam("relationship") String relationship,
+      @ApiParam(value = "ID to find", required = true) @PathParam("id") String id,
+      @ApiParam(value = "How deep to traverse descendants", required = false) @QueryParam("depth") @DefaultValue("1") int depth,
+      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node node = graph.getOrCreateNode(concept.getUri());
+    Node node = graph.getGraphDb().getNodeById(concept.getId());
     LinkedList<ConceptDTO> dtos = new LinkedList<>();
 
     RelationshipType type = DynamicRelationshipType.withName(relationship);
 
-    //TODO: include equivalences
-    for (org.neo4j.graphdb.Path path: Traversal.description()
-        .depthFirst()
-        .relationships(type, Direction.OUTGOING)
-        .evaluator(Evaluators.toDepth(depth))
-        .traverse(node)) {
-      ConceptDTO dto = new ConceptDTO();
-      dto.setUri((String)path.endNode().getProperty("uri"));
-      int numPathNodes = path.length() + 1;
-      if (numPathNodes > dtos.size()) {
-        if (!dtos.isEmpty()) {
-          dtos.peek().getDescendants().add(dto);
-        }
-        dtos.push(dto);
-      } else {
-        while (dtos.size() > numPathNodes) {
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      // TODO: include equivalences
+      for (org.neo4j.graphdb.Path path : graph.getGraphDb().traversalDescription().depthFirst()
+          .relationships(type, Direction.OUTGOING).evaluator(Evaluators.toDepth(depth))
+          .traverse(node)) {
+        ConceptDTO dto = new ConceptDTO();
+        dto.setUri((String) path.endNode().getProperty("uri"));
+        int numPathNodes = path.length() + 1;
+        if (numPathNodes > dtos.size()) {
+          if (!dtos.isEmpty()) {
+            dtos.peek().getDescendants().add(dto);
+          }
+          dtos.push(dto);
+        } else {
+          while (dtos.size() > numPathNodes) {
+            dtos.pop();
+          }
           dtos.pop();
+          dtos.peek().getDescendants().add(dto);
+          dtos.push(dto);
         }
-        dtos.pop();
-        dtos.peek().getDescendants().add(dto);
-        dtos.push(dto);
       }
+      tx.success();
     }
-    GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(dtos.getLast()){};
+    GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(dtos.getLast()) {};
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }
 
   @GET
   @Path("/neighbors/{id}")
-  @ApiOperation(value = "Get neighbors", response = ConceptDTO .class)
+  @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getNeighbors(
-      @ApiParam( value = "Starting ID", required = true )
-      @PathParam("id") String id,
-      @ApiParam( value = "How far to traverse neighbors", required = false )
-      @QueryParam("depth") @DefaultValue("1") int depth,
-      @ApiParam( value = "JSONP callback", required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = "Starting ID", required = true) @PathParam("id") String id,
+      @ApiParam(value = "How far to traverse neighbors", required = false) @QueryParam("depth") @DefaultValue("1") int depth,
+      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
-    Node node = graph.getOrCreateNode(concept.getUri());
-    List<GraphPath> graphPaths = new ArrayList<>();
+    GenericEntity<GraphPathWrapper> response = null;
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      Node node = graph.getGraphDb().getNodeById(concept.getId());
+      List<GraphPath> graphPaths = new ArrayList<>();
 
-    for (org.neo4j.graphdb.Path path: Traversal.description()
-        .depthFirst()
-        .evaluator(Evaluators.toDepth(depth))
-        .traverse(node)) {
-      graphPaths.add(getGraphPathFromPath(path));
+      for (org.neo4j.graphdb.Path path : graph.getGraphDb().traversalDescription().depthFirst()
+          .evaluator(Evaluators.toDepth(depth)).traverse(node)) {
+        graphPaths.add(getGraphPathFromPath(path));
+      }
+
+      response = new GenericEntity<GraphPathWrapper>(new GraphPathWrapper(graphPaths)) {};
+      tx.success();
     }
-    GenericEntity<GraphPathWrapper> response = new GenericEntity<GraphPathWrapper>(
-        new GraphPathWrapper(graphPaths)) {
-    };
     return JaxRsUtil.wrapJsonp(request, response, callback);
+  }
+  
+  @GET
+  @Path("/relationship_types")
+  @ApiOperation(value = "Get all relationship types", response = String.class)
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  public Object getRelationships(
+      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+    List<String> relationships = new ArrayList<>();
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      relationships = newArrayList(transform(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationshipTypes(),
+          new Function<RelationshipType, String>() {
+        @Override
+        public String apply(RelationshipType relationshipType) {
+          return relationshipType.name();
+        }
+        
+      }));
+    }
+    return JaxRsUtil.wrapJsonp(request, new GenericEntity<List<String>>(relationships) {}, callback);
+  }
+  
+  @GET
+  @Path("/{id}")
+  @ApiOperation(value = "Get information about a node", response = ConceptDTO.class)
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  public Object getNode(
+      @ApiParam(value = "Node ID", required = true) @PathParam("id") String id,
+      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+    Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
+    Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
+    NodeDTO dto = new NodeDTO();
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      dto.setUri(concept.getUri());
+      Node node = graph.getGraphDb().getNodeById(concept.getId());
+      for (String key: node.getPropertyKeys()) {
+        if (CommonProperties.URI.equals(key)) {
+          continue;
+        }
+        dto.getProperties().put(key, node.getProperty(key));
+      }
+      for (Label label: node.getLabels()) {
+        dto.getTypes().add(label.name());
+      }
+      tx.success();
+    }
+    return JaxRsUtil.wrapJsonp(request, new GenericEntity<NodeDTO>(dto) {}, callback);
   }
 
   @XmlRootElement
@@ -309,8 +355,7 @@ public class GraphService extends BaseResource {
     @JsonProperty
     List<GraphPath> paths;
 
-    public GraphPathWrapper() {
-    }
+    public GraphPathWrapper() {}
 
     public GraphPathWrapper(List<GraphPath> paths) {
       this.paths = paths;

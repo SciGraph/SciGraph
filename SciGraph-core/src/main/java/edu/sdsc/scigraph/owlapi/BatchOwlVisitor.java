@@ -18,14 +18,11 @@ package edu.sdsc.scigraph.owlapi;
 import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getTypedLiteralValue;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getUri;
-import static java.lang.String.format;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -74,7 +71,6 @@ import com.google.common.base.Optional;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
-import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
@@ -87,18 +83,13 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private OWLOntology ontology;
 
-  private Map<String, String> curieMap;
-
   private Map<String, String> mappedProperties;
 
-  private OWLOntology parentOntology = null;
-
   @Inject
-  public BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph, Map<String, String> curieMap,
+  public BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph,
       List<MappedProperty> mappedProperties) {
     super(walker);
     this.graph = graph;
-    this.curieMap = curieMap;
     this.mappedProperties = new HashMap<>();
     for (MappedProperty mappedProperty : mappedProperties) {
       for (String property : mappedProperty.getProperties()) {
@@ -107,25 +98,15 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     }
   }
 
+  public void shutdown() {
+    graph.shutdown();
+  }
+
   @Override
   public Void visit(OWLOntology ontology) {
     logger.info("Walking ontology: " + ontology.getOntologyID());
     this.ontology = ontology;
-    if (null == parentOntology) {
-      parentOntology = ontology;
-    }
     return null;
-  }
-
-  Optional<String> getCurie(String iri) {
-    for (Entry<String, String> prefix : curieMap.entrySet()) {
-      String key = prefix.getKey();
-      if (iri.startsWith(key)) {
-        String currie = format("%s:%s", prefix.getValue(), iri.substring(key.length()));
-        return Optional.of(currie);
-      }
-    }
-    return Optional.absent();
   }
 
   private long getOrCreateNode(URI uri) {
@@ -135,47 +116,50 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   @Override
-  public Void visit(OWLDeclarationAxiom axiom) {
-    URI uri = getUri(axiom);
-    long node = getOrCreateNode(uri);
-    graph.addLabel(node, OwlLabels.OWL_CLASS);
-    return null;
-  }
-
-  @Override
   public Void visit(OWLClass desc) {
     URI uri = getUri(desc);
     long node = getOrCreateNode(uri);
     graph.addLabel(node, OwlLabels.OWL_CLASS);
-    /*
-     * graph.setProperty(node, NodeProperties.ANONYMOUS, false);
-     * 
-     * if (null != ontology.getOntologyID().getOntologyIRI()) { graph.setProperty(node,
-     * NodeProperties.ONTOLOGY, ontology.getOntologyID().getOntologyIRI() .toString()); } if (null
-     * != parentOntology.getOntologyID().getOntologyIRI()) { graph.setProperty(node,
-     * NodeProperties.PARENT_ONTOLOGY, parentOntology.getOntologyID() .getOntologyIRI().toString());
-     * } if (null != ontology.getOntologyID().getVersionIRI()) { graph.setProperty(node,
-     * NodeProperties.ONTOLOGY_VERSION, ontology.getOntologyID() .getVersionIRI()); }
-     * Optional<String> curie = getCurie(getUri(desc).toString()); if (curie.isPresent()) {
-     * graph.setProperty(node, CommonProperties.CURIE, curie.get()); }
-     */
-    return null;
-  }
-
-  @Override
-  public Void visit(OWLDataProperty property) {
-    long node = getOrCreateNode(property.getIRI().toURI());
-    graph.setLabel(node, OwlLabels.OWL_DATA_PROPERTY);
     return null;
   }
 
   @Override
   public Void visit(OWLObjectProperty property) {
-    long node = getOrCreateNode(property.getIRI().toURI());
-    graph.setLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
-    graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
-    graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
-    graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+    URI uri = getUri(property);
+    long node = getOrCreateNode(uri);
+    graph.addLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
+    return null;
+  }
+
+  @Override
+  public Void visit(OWLNamedIndividual individual) {
+    URI uri = getUri(individual);
+    long node = getOrCreateNode(uri);
+    graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
+    return null;
+  }
+
+  @Override
+  public Void visit(OWLDeclarationAxiom axiom) {
+    URI uri = getUri(axiom);
+    long node = getOrCreateNode(uri);
+    if (axiom.getEntity() instanceof OWLClass) {
+      graph.addLabel(node, OwlLabels.OWL_CLASS);
+    } else if (axiom.getEntity() instanceof OWLNamedIndividual) {
+      graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
+    } else if (axiom.getEntity() instanceof OWLObjectProperty) {
+      if (!graph.hasLabel(node, OwlLabels.OWL_OBJECT_PROPERTY)) {
+        graph.addLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
+        OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
+        graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
+        graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
+        graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+      }
+    } else if (axiom.getEntity() instanceof OWLDataProperty) {
+      graph.setLabel(node, OwlLabels.OWL_DATA_PROPERTY);
+    } else {
+      //logger.warning("Unhandled declaration type " + axiom.getEntity().getClass().getName());
+    }
     return null;
   }
 
@@ -194,17 +178,17 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
             if (mappedProperties.containsKey(property)) {
               graph.addProperty(subject, mappedProperties.get(property), literal.get());
             }
-          } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to add property: " + property + " with value "
-                + literal.get().toString(), e);
+          } catch (ClassCastException e) {
+            logger.warning("Can't store property arrays with mixed types. Ignoring " + property + " with value "
+                + literal.get().toString() + " on " + ((IRI) axiom.getSubject()).toURI().toString());
           }
         }
       } else if (axiom.getValue() instanceof IRI) {
         long object = getOrCreateNode(((IRI) axiom.getValue()).toURI());
         URI uri = Graph.getURI(property);
         String fragment = GraphUtil.getFragment(uri);
-        long assertion = graph.createRelationship(subject, object,
-            DynamicRelationshipType.withName(fragment));
+        long assertion =
+            graph.createRelationship(subject, object, DynamicRelationshipType.withName(fragment));
         graph.setRelationshipProperty(assertion, CommonProperties.URI, uri.toString());
         graph.setRelationshipProperty(assertion, CommonProperties.OWL_TYPE,
             OwlRelationships.OWL_ANNOTATION.name());
@@ -222,13 +206,6 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long superProperty = getOrCreateNode(getUri(axiom.getSuperProperty()));
     graph.addLabel(superProperty, OwlLabels.OWL_ANNOTATION_PROPERTY);
     graph.createRelationship(subProperty, superProperty, OwlRelationships.RDFS_SUB_PROPERTY_OF);
-    return null;
-  }
-
-  @Override
-  public Void visit(OWLNamedIndividual individual) {
-    long node = getOrCreateNode(getUri(individual));
-    graph.addLabel(node, OwlLabels.OWL_NAMED_INDIVIDUAL);
     return null;
   }
 
@@ -293,7 +270,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.addLabel(subject, OwlLabels.OWL_ANONYMOUS);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getUri(expression));
-      graph.createRelationship(subject, object, EdgeType.OPERAND);
+      graph.createRelationship(subject, object, OwlRelationships.OPERAND);
     }
     return null;
   }
@@ -305,7 +282,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.addLabel(subject, OwlLabels.OWL_ANONYMOUS);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getUri(expression));
-      graph.createRelationship(subject, object, EdgeType.OPERAND);
+      graph.createRelationship(subject, object, OwlRelationships.OPERAND);
     }
     return null;
   }
@@ -333,8 +310,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLEquivalentClassesAxiom axiom) {
     logger.fine(axiom.toString());
-    List<Long> nodes = transform(axiom.getClassExpressionsAsList(),
-        new Function<OWLClassExpression, Long>() {
+    List<Long> nodes =
+        transform(axiom.getClassExpressionsAsList(), new Function<OWLClassExpression, Long>() {
 
           @Override
           public Long apply(OWLClassExpression expr) {
@@ -348,8 +325,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   @Override
   public Void visit(OWLDisjointClassesAxiom axiom) {
-    List<Long> nodes = transform(axiom.getClassExpressionsAsList(),
-        new Function<OWLClassExpression, Long>() {
+    List<Long> nodes =
+        transform(axiom.getClassExpressionsAsList(), new Function<OWLClassExpression, Long>() {
 
           @Override
           public Long apply(OWLClassExpression individual) {
@@ -367,7 +344,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.setLabel(subject, OwlLabels.OWL_COMPLEMENT_OF);
     graph.addLabel(subject, OwlLabels.OWL_ANONYMOUS);
     long operand = getOrCreateNode(getUri(desc.getOperand()));
-    graph.createRelationship(subject, operand, EdgeType.OPERAND);
+    graph.createRelationship(subject, operand, OwlRelationships.OPERAND);
     return null;
   }
 
@@ -385,8 +362,8 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     int i = 0;
     for (OWLObjectPropertyExpression property : axiom.getPropertyChain()) {
       long link = getOrCreateNode(getUri(property));
-      long relationship = graph.createRelationship(chain, link,
-          OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM);
+      long relationship =
+          graph.createRelationship(chain, link, OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM);
       graph.setRelationshipProperty(relationship, "order", i++);
     }
     return null;
@@ -403,9 +380,9 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long restriction = getOrCreateNode(getUri(desc));
     graph.setNodeProperty(restriction, "cardinality", desc.getCardinality());
     long property = getOrCreateNode(getUri(desc.getProperty()));
-    graph.createRelationship(restriction, property, EdgeType.PROPERTY);
+    graph.createRelationship(restriction, property, OwlRelationships.PROPERTY);
     long cls = getOrCreateNode(getUri(desc.getFiller()));
-    graph.createRelationship(restriction, cls, EdgeType.CLASS);
+    graph.createRelationship(restriction, cls, OwlRelationships.CLASS);
     return restriction;
   }
 
@@ -437,9 +414,9 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.addLabel(restriction, OwlLabels.OWL_ANONYMOUS);
     if (!desc.getProperty().isAnonymous()) {
       long property = getOrCreateNode(getUri(desc.getProperty()));
-      graph.createRelationship(restriction, property, EdgeType.PROPERTY);
+      graph.createRelationship(restriction, property, OwlRelationships.PROPERTY);
       long cls = getOrCreateNode(getUri(desc.getFiller()));
-      graph.createRelationship(restriction, cls, EdgeType.FILLER);
+      graph.createRelationship(restriction, cls, OwlRelationships.FILLER);
     }
     return null;
   }
@@ -451,9 +428,9 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.addLabel(restriction, OwlLabels.OWL_ANONYMOUS);
     if (!desc.getProperty().isAnonymous()) {
       long property = getOrCreateNode(getUri(desc.getProperty()));
-      graph.createRelationship(restriction, property, EdgeType.PROPERTY);
+      graph.createRelationship(restriction, property, OwlRelationships.PROPERTY);
       long cls = getOrCreateNode(getUri(desc.getFiller()));
-      graph.createRelationship(restriction, cls, EdgeType.FILLER);
+      graph.createRelationship(restriction, cls, OwlRelationships.FILLER);
     }
     return null;
   }

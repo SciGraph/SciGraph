@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2014 The SciGraph authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package edu.sdsc.scigraph.neo4j;
 
 import static com.google.common.collect.Iterables.size;
@@ -5,13 +20,15 @@ import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,13 +60,16 @@ public class BatchGraphTest {
   public void setup() throws IOException {
     path = Files.createTempDirectory("SciGraph-BatchTest");
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
-    graph = new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"), newHashSet("prop1"));
+    graph =
+        new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
+            newHashSet("prop1"));
     foo = graph.getNode("http://example.org/foo");
   }
 
   @After
   public void teardown() throws IOException {
-    FileUtils.deleteDirectory(path.toFile());
+    // TODO: Why does this fail on Windows?
+    // FileUtils.deleteDirectory(path.toFile());
   }
 
   GraphDatabaseService getGraphDB() {
@@ -69,13 +89,30 @@ public class BatchGraphTest {
   }
 
   @Test
+  public void testPropertySetting() {
+    graph.addProperty(foo, "prop1", "foo");
+    getGraphDB();
+    IndexHits<Node> hits = nodeIndex.query("prop1:foo");
+    assertThat((String)hits.getSingle().getProperty("prop1"), is("foo"));
+  }
+
+  @Test
+  public void testMultiplePropertySetting() {
+    graph.addProperty(foo, "prop1", "bar");
+    graph.addProperty(foo, "prop1", "baz");
+    getGraphDB();
+    IndexHits<Node> hits = nodeIndex.query("prop1:bar");
+    assertThat((String[])hits.getSingle().getProperty("prop1"), is(arrayContaining("bar", "baz")));
+  }
+
+  @Test
   public void testPropertyIndex() {
     graph.addProperty(foo, "prop1", "foo");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1:foo");
     assertThat(hits.getSingle().getId(), is(foo));
   }
-  
+
   @Test
   public void testExactPropertyIndex() {
     graph.addProperty(foo, "prop1", "foo");
@@ -168,4 +205,12 @@ public class BatchGraphTest {
     assertThat(size(graphDb.getNodeById(c).getRelationships(type)), is(2));
   }
 
+  @Test
+  public void testCollectIndexProperties() {
+    System.out.println(graph.collectIndexProperties("prop1", "foo"));
+    Map<String, Object> map = new HashMap<>();
+    map.put("prop1", "foo");
+    map.put("prop2", "bar");
+    System.out.println(graph.collectIndexProperties(map));
+  }
 }

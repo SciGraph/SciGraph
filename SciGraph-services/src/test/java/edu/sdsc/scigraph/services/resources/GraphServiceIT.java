@@ -31,9 +31,7 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 public class GraphServiceIT {
 
-  @SuppressWarnings("unchecked")
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
-  @SuppressWarnings("unchecked")
   private static final Graph graph = mock(Graph.class);
 
   private final Concept foo = mock(Concept.class);

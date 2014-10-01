@@ -31,8 +31,8 @@ import org.neo4j.graphdb.Node;
 import com.google.common.base.Function;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.HierarchyVisitor.Callback;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class HierarchyVisitorTest extends GraphTestBase {
@@ -63,7 +63,6 @@ public class HierarchyVisitorTest extends GraphTestBase {
 
   Node createNode(String id) {
     Node node = graph.getOrCreateNode("http://example.org/" + id);
-    node.setProperty(CommonProperties.CURIE, id);
     return node;
   }
 
@@ -76,7 +75,7 @@ public class HierarchyVisitorTest extends GraphTestBase {
    **********/
   @Before
   public void createNodes() {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     a = createNode("a");
     b = createNode("b");
     c = createNode("c");
@@ -87,35 +86,34 @@ public class HierarchyVisitorTest extends GraphTestBase {
     h = createNode("h");
     i = createNode("i");
     j = createNode("j");
-    graph.getOrCreateRelationship(a, b, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(a, c, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(d, e, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(e, f, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(c, e, EdgeType.EQUIVALENT_TO);
-    graph.getOrCreateRelationship(e, c, EdgeType.EQUIVALENT_TO);
+    graph.getOrCreateRelationship(b, a, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(c, a, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(e, d, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(f, e, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(e, c, OwlRelationships.OWL_EQUIVALENT_CLASS);
 
-    graph.getOrCreateRelationship(g, h, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(g, i, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(h, j, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(i, j, EdgeType.SUPERCLASS_OF);
+    graph.getOrCreateRelationship(h, g, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(i, g, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(j, h, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(j, i, OwlRelationships.RDF_SUBCLASS_OF);
   }
 
   @Test
   public void testGetRootNodesWithProvidedRoot() {
-    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, EdgeType.SUPERCLASS_OF, emptyCallback).rootUris("http://example.org/a").build();
+    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, OwlRelationships.RDF_SUBCLASS_OF, emptyCallback).rootUris("http://example.org/a").build();
     assertThat(visitor.getRootNodes(), hasItems(a));
   }
 
   @Test
   public void testGetRootNodesWithProvidedRoots() {
-    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, EdgeType.SUPERCLASS_OF, emptyCallback).
+    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, OwlRelationships.RDF_SUBCLASS_OF, emptyCallback).
         rootUris("http://example.org/a", "http://example.org/d").build();
     assertThat(visitor.getRootNodes(), hasItems(a, d));
   }
 
   @Test
   public void testGetRootNodesWithoutProvidedRoots() {
-    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, EdgeType.SUPERCLASS_OF, emptyCallback).build();
+    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, OwlRelationships.RDF_SUBCLASS_OF, emptyCallback).build();
     assertThat(visitor.getRootNodes(), hasItems(a, d));
   }
 
@@ -138,7 +136,7 @@ public class HierarchyVisitorTest extends GraphTestBase {
   @Test
   public void testNonEquivalentTraverse() {
     CollectingCallback callback = new CollectingCallback();
-    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, EdgeType.SUPERCLASS_OF, callback).includeEquivalentClasses(false).build();
+    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, OwlRelationships.RDF_SUBCLASS_OF, callback).includeEquivalentClasses(false).build();
     visitor.traverse();
     assertThat(callback.fragments, containsInAnyOrder(getExpectedNonEquivalentFragments().toArray()));
   }
@@ -146,7 +144,7 @@ public class HierarchyVisitorTest extends GraphTestBase {
   @Test
   public void testEquivalentTraverse() {
     CollectingCallback callback = new CollectingCallback();
-    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, EdgeType.SUPERCLASS_OF, callback).includeEquivalentClasses(true).build();
+    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, OwlRelationships.RDF_SUBCLASS_OF, callback).includeEquivalentClasses(true).build();
     visitor.traverse();
     List<List<String>> expected = getExpectedNonEquivalentFragments();
     expected.add(newArrayList("a", "e"));
@@ -159,13 +157,11 @@ public class HierarchyVisitorTest extends GraphTestBase {
   public void testMultipleEquivalences() {
     Node l = createNode("http://example.org/l");
     Node k = createNode("http://example.org/k");
-    graph.getOrCreateRelationship(l, k, EdgeType.SUPERCLASS_OF);
-    graph.getOrCreateRelationship(k, e, EdgeType.EQUIVALENT_TO);
-    graph.getOrCreateRelationship(e, k, EdgeType.EQUIVALENT_TO);
-    graph.getOrCreateRelationship(k, c, EdgeType.EQUIVALENT_TO);
-    graph.getOrCreateRelationship(c, k, EdgeType.EQUIVALENT_TO);
+    graph.getOrCreateRelationship(k, l, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(e, k, OwlRelationships.OWL_EQUIVALENT_CLASS);
+    graph.getOrCreateRelationship(c, k, OwlRelationships.OWL_EQUIVALENT_CLASS);
     CollectingCallback callback = new CollectingCallback();
-    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, EdgeType.SUPERCLASS_OF, callback).includeEquivalentClasses(true).build();
+    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graph, OwlRelationships.RDF_SUBCLASS_OF, callback).includeEquivalentClasses(true).build();
     visitor.traverse();
     List<List<String>> expected = getExpectedNonEquivalentFragments();
     expected.add(newArrayList("a", "e"));

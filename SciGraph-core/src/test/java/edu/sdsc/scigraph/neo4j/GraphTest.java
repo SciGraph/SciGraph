@@ -35,10 +35,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
@@ -47,9 +48,12 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class GraphTest extends GraphTestBase {
+
+  RelationshipType relationship = DynamicRelationshipType.withName("relationship");
 
   static String BASE_URI = "http://example.org/";
 
@@ -65,7 +69,7 @@ public class GraphTest extends GraphTestBase {
 
   @Before
   public void addNodes() throws Exception {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     a = graph.getOrCreateNode(uri);
     b = graph.getOrCreateNode(uri2);
     c = graph.getOrCreateNode(uri3);
@@ -90,46 +94,51 @@ public class GraphTest extends GraphTestBase {
     assertThat(node, is(not(nullValue())));
     Node node2 = graph.getOrCreateNode(uri);
     assertThat("The same node should be retrieved", node2, is(equalTo(node)));
-    assertThat("There should be four nodes total", newArrayList(GlobalGraphOperations.at(graphDb).getAllNodes()), hasSize(4));
-    assertThat("The graph should have the created node", GlobalGraphOperations.at(graphDb).getAllNodes(), hasItems(node));
+    assertThat("There should be four nodes total", newArrayList(GlobalGraphOperations.at(graphDb)
+        .getAllNodes()), hasSize(4));
+    assertThat("The graph should have the created node", GlobalGraphOperations.at(graphDb)
+        .getAllNodes(), hasItems(node));
   }
 
   @Test
   public void testFragment() {
-    assertThat((String)a.getProperty(CommonProperties.FRAGMENT), is(equalTo("fizz")));
+    assertThat((String) a.getProperty(CommonProperties.FRAGMENT), is(equalTo("fizz")));
   }
 
   @Test
   public void testHasRelationship() {
-    assertFalse("No relationship should exist", graph.hasRelationship(a, b, EdgeType.REL));
-    Relationship r = graph.getOrCreateRelationship(a, b, EdgeType.REL);
+    assertFalse("No relationship should exist", graph.hasRelationship(a, b, relationship));
+    Relationship r = graph.getOrCreateRelationship(a, b, relationship);
     assertEquals(a, r.getStartNode());
     assertEquals(b, r.getEndNode());
-    assertTrue(graph.hasRelationship(a, b, EdgeType.REL));
-    assertThat("There should be one relationship", newArrayList(GlobalGraphOperations.at(graphDb).getAllRelationships()), hasSize(1));
+    assertTrue(graph.hasRelationship(a, b, relationship));
+    assertThat("There should be one relationship", newArrayList(GlobalGraphOperations.at(graphDb)
+        .getAllRelationships()), hasSize(1));
     assertThat("One relationship should exist", GlobalGraphOperations.at(graphDb)
         .getAllRelationships(), hasItems(r));
   }
 
   @Test
   public void testUniqueRelationship() {
-    Relationship r = graph.getOrCreateRelationship(a, b, EdgeType.REL);
-    Relationship r1 = graph.getOrCreateRelationship(a, b, EdgeType.REL);
+    Relationship r = graph.getOrCreateRelationship(a, b, relationship);
+    Relationship r1 = graph.getOrCreateRelationship(a, b, relationship);
     assertEquals(r, r1);
     assertThat("There should be one relationship", newArrayList(GlobalGraphOperations.at(graphDb)
         .getAllRelationships()), hasSize(1));
-    assertThat("The graph should have r", GlobalGraphOperations.at(graphDb).getAllRelationships(), contains(r));
-    graph.getOrCreateRelationship(a, b, EdgeType.SUBCLASS_OF);
-    assertThat("There should be two relationships", newArrayList(GlobalGraphOperations.at(graphDb).getAllRelationships()), hasSize(2));
+    assertThat("The graph should have r", GlobalGraphOperations.at(graphDb).getAllRelationships(),
+        contains(r));
+    graph.getOrCreateRelationship(a, b, OwlRelationships.RDF_SUBCLASS_OF);
+    assertThat("There should be two relationships", newArrayList(GlobalGraphOperations.at(graphDb)
+        .getAllRelationships()), hasSize(2));
   }
 
   @Test
   public void testHasRelationshipWithUri() {
-    Relationship r = graph.getOrCreateRelationship(a, b, EdgeType.REL, rel);
+    Relationship r = graph.getOrCreateRelationship(a, b, relationship, rel);
     assertEquals(rel, r.getProperty(CommonProperties.URI));
     assertEquals("relationship", r.getProperty(CommonProperties.FRAGMENT));
-    assertTrue(graph.hasRelationship(a, b, EdgeType.REL, rel));
-    assertFalse(graph.hasRelationship(a, b, EdgeType.IS_A, rel));
+    assertTrue(graph.hasRelationship(a, b, relationship, rel));
+    assertFalse(graph.hasRelationship(a, b, OwlRelationships.RDF_TYPE, rel));
   }
 
   @Test
@@ -152,9 +161,9 @@ public class GraphTest extends GraphTestBase {
 
   @Test
   public void testRelationshipProperty() {
-    Relationship r = graph.getOrCreateRelationship(a, b, EdgeType.REL, rel);
+    Relationship r = graph.getOrCreateRelationship(a, b, relationship, rel);
     graph.setProperty(r, "foo", false);
-    assertThat((Boolean)r.getProperty("foo"), is(false));
+    assertThat((Boolean) r.getProperty("foo"), is(false));
   }
 
   @Test
@@ -162,9 +171,9 @@ public class GraphTest extends GraphTestBase {
     Node node = graph.getOrCreateNode(BASE_URI);
     graph.addProperty(node, "foo", "bar");
     graph.addProperty(node, "foo", "baz");
-    assertThat(newArrayList((String[])node.getProperty("foo")), contains("bar", "baz"));
+    assertThat(newArrayList((String[]) node.getProperty("foo")), contains("bar", "baz"));
     graph.addProperty(node, "foo", "bat");
-    assertThat(newArrayList((String[])node.getProperty("foo")), contains("bar", "baz", "bat"));
+    assertThat(newArrayList((String[]) node.getProperty("foo")), contains("bar", "baz", "bat"));
   }
 
   @Test
@@ -172,7 +181,7 @@ public class GraphTest extends GraphTestBase {
     Node node = graph.getOrCreateNode(BASE_URI);
     graph.addProperty(node, "foo", "bar");
     graph.addProperty(node, "foo", "bar");
-    assertThat(newArrayList((String)node.getProperty("foo")), contains("bar"));
+    assertThat(newArrayList((String) node.getProperty("foo")), contains("bar"));
   }
 
   @Test
@@ -190,18 +199,20 @@ public class GraphTest extends GraphTestBase {
     graph.addProperty(node, "foo", 1);
     graph.addProperty(node, "foo", 2);
     int[] expected = {1, 2};
-    assertTrue(Arrays.equals((int[])node.getProperty("foo"), expected));
+    assertTrue(Arrays.equals((int[]) node.getProperty("foo"), expected));
     graph.addProperty(node, "foo", 3);
     int[] expected2 = {1, 2, 3};
-    assertTrue(Arrays.equals((int[])node.getProperty("foo"), expected2));
+    assertTrue(Arrays.equals((int[]) node.getProperty("foo"), expected2));
   }
 
   @Test
   public void testGetSingleProperty() {
     Node node = graph.getOrCreateNode(BASE_URI);
-    assertFalse("Missing values should be absent", graph.getProperty(node, "foo", String.class).isPresent());
+    assertFalse("Missing values should be absent", graph.getProperty(node, "foo", String.class)
+        .isPresent());
     graph.addProperty(node, "foo", "bar");
-    assertEquals("Single values should match", Optional.of("bar"), graph.getProperty(node, "foo", String.class));
+    assertEquals("Single values should match", Optional.of("bar"),
+        graph.getProperty(node, "foo", String.class));
   }
 
   @Test(expected = ClassCastException.class)
@@ -221,11 +232,14 @@ public class GraphTest extends GraphTestBase {
   @Test
   public void testGetMultipleProperties() {
     Node node = graph.getOrCreateNode(BASE_URI);
-    assertTrue("Missing properties return empty collections", graph.getProperties(node, "foo", String.class).isEmpty());
+    assertTrue("Missing properties return empty collections",
+        graph.getProperties(node, "foo", String.class).isEmpty());
     graph.addProperty(node, "foo", "bar");
-    assertThat("Single properties return", graph.getProperties(node, "foo", String.class), contains("bar"));
+    assertThat("Single properties return", graph.getProperties(node, "foo", String.class),
+        contains("bar"));
     graph.addProperty(node, "foo", "baz");
-    assertThat("Multiple properties return", graph.getProperties(node, "foo", String.class), contains("bar", "baz"));
+    assertThat("Multiple properties return", graph.getProperties(node, "foo", String.class),
+        contains("bar", "baz"));
   }
 
   @Test
@@ -237,56 +251,46 @@ public class GraphTest extends GraphTestBase {
   }
 
   @Test
-  @Ignore
-  public void testGetFramedRelationship() {
-    graph.getOrCreateRelationship(a, b, EdgeType.SUPERCLASS_OF);
-    Concept aFrame = graph.getOrCreateFramedNode(a);
-    Concept bFrame = graph.getOrCreateFramedNode(b);
-    // assertThat(aFrame.getSubclasses(), contains(bFrame));
-  }
-
-  @Test
-  @Ignore
-  public void testGetFramedEquivalence() {
-    graph.getOrCreateRelationship(a, b, EdgeType.EQUIVALENT_TO);
-    graph.getOrCreateRelationship(b, a, EdgeType.EQUIVALENT_TO);
-    Concept aFrame = graph.getOrCreateFramedNode(a);
-    Concept bFrame = graph.getOrCreateFramedNode(b);
-    // assertThat(aFrame.getEquivalentClasses(), contains(bFrame));
-    // assertThat(bFrame.getEquivalentClasses(), contains(aFrame));
-  }
-
-  @Test
   public void testUpdateFramedNode() {
     String uri = BASE_URI + "#foo";
-    //assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"), hasItems(a, b, c));
-    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*").iterator()));
+    // assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"),
+    // hasItems(a, b, c));
+    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex()
+        .query("fragment:f*").iterator()));
     Concept concept = graph.getOrCreateFramedNode(uri);
-    //Node node = graph.getOrCreateNode(uri);
+    // Node node = graph.getOrCreateNode(uri);
     concept.setFragment("foo");
-    //assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"), hasItems(a, b, c, node));
-    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*").iterator()));
+    // assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"),
+    // hasItems(a, b, c, node));
+    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex()
+        .query("fragment:f*").iterator()));
     concept.setFragment("foo2");
-    //assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"), hasItems(a, b, c, node));
-    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*").iterator()));
+    // assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"),
+    // hasItems(a, b, c, node));
+    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex()
+        .query("fragment:f*").iterator()));
     concept.setFragment("baz");
-    //assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"), hasItems(a, b, c));
-    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*").iterator()));
+    // assertThat(graphDb.index().getNodeAutoIndexer().getAutoIndex().query("fragment:f*"),
+    // hasItems(a, b, c));
+    System.out.println(newArrayList(graphDb.index().getNodeAutoIndexer().getAutoIndex()
+        .query("fragment:f*").iterator()));
   }
 
   @Test
   public void testCreateRelationshipsPairwise() {
     List<Node> nodes = newArrayList(a, b, c);
-    graph.getOrCreateRelationshipPairwise(nodes, EdgeType.EQUIVALENT_TO, Optional.<URI>absent());
-    assertThat(graph.hasRelationship(a, b, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(a, c, EdgeType.EQUIVALENT_TO), is(true));
-    assertThat(graph.hasRelationship(b, c, EdgeType.EQUIVALENT_TO), is(true));
+    graph.getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_EQUIVALENT_CLASS,
+        Optional.<URI>absent());
+    assertThat(graph.hasRelationship(a, b, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
+    assertThat(graph.hasRelationship(a, c, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
+    assertThat(graph.hasRelationship(b, c, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
   }
 
   @Test
   public void testPropertyCopy() {
     graph.setProperty(a, NodeProperties.LABEL, "test");
-    assertThat(graph.getProperty(a, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, String.class).get(), is(equalTo("test")));
+    assertThat(graph.getProperty(a, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, String.class)
+        .get(), is(equalTo("test")));
   }
 
   @Test

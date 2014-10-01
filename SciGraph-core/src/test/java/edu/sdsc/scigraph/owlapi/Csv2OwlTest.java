@@ -17,7 +17,7 @@ package edu.sdsc.scigraph.owlapi;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -59,7 +59,7 @@ public class Csv2OwlTest {
 
   @Test
   public void verifyClassCreation() throws Exception {
-    assertThat(ontology.getClassesInSignature(), contains(parent, term2, term));
+    assertThat(ontology.getClassesInSignature(), containsInAnyOrder(parent, term2, term));
   }
 
   @Test

@@ -1,5 +1,21 @@
+/**
+ * Copyright (C) 2014 The SciGraph authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package edu.sdsc.scigraph.neo4j;
 
+import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Sets.newHashSet;
 
 import java.lang.reflect.Array;
@@ -11,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -28,6 +45,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 import org.neo4j.unsafe.batchinsert.BatchRelationship;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.lucene.LuceneUtils;
@@ -74,14 +92,13 @@ public class BatchGraph {
   }
 
   /***
-   * @param id
-   *          The node's unique id
+   * @param id The node's unique id
    * @return A new or existing node identified by id
    */
   public long getNode(String id) {
     long nodeId = idMap.get(id);
     if (!inserter.nodeExists(nodeId)) {
-      inserter.createNode(nodeId, Collections.<String, Object> emptyMap());
+      inserter.createNode(nodeId, Collections.<String, Object>emptyMap());
       setNodeProperty(nodeId, uniqueProperty, id);
     }
     return nodeId;
@@ -94,6 +111,7 @@ public class BatchGraph {
    * @return true if an undirected relationship with type exists between from and to
    */
   public boolean hasRelationship(long from, long to, RelationshipType type) {
+    //return relationshipMap.containsKey(from, to, type);
     for (BatchRelationship rel : inserter.getRelationships(from)) {
       if ((rel.getEndNode() == to) || (rel.getStartNode() == to)
           && rel.getType().name().equals(type.name())) {
@@ -111,7 +129,8 @@ public class BatchGraph {
    */
   public long createRelationship(long from, long to, RelationshipType type) {
     if (!relationshipMap.containsKey(from, to, type)) {
-      long relationshipId = inserter.createRelationship(from, to, type, Collections.<String, Object> emptyMap());
+      long relationshipId =
+          inserter.createRelationship(from, to, type, Collections.<String, Object>emptyMap());
       relationshipMap.put(from, to, type, relationshipId);
     }
     return relationshipMap.get(from, to, type);
@@ -195,7 +214,9 @@ public class BatchGraph {
           for (Object obj : valueSet) {
             Array.set(newArray, i++, clazz.cast(obj));
           }
-          inserter.getNodeProperties(node).put(property, newArray);
+          Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(node));
+          properties.put(property, newArray);
+          inserter.setNodeProperties(node, properties);
         }
         Map<String, Object> indexProperties = collectIndexProperties(property, value);
         if (!indexProperties.isEmpty()) {
@@ -209,14 +230,20 @@ public class BatchGraph {
   }
 
   public void setNodeProperty(long batchId, String property, Object value) {
-    if (!ignoreProperty(value)) {
-      inserter.setNodeProperty(batchId, property, value);
-      Map<String, Object> indexProperties = collectIndexProperties(inserter
-          .getNodeProperties(batchId));
-      if (!indexProperties.isEmpty()) {
-        logger.fine("Indexing " + indexProperties);
-        nodeIndex.updateOrAdd(batchId, indexProperties);
+    try {
+      if (!ignoreProperty(value)) {
+        Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(batchId));
+        properties.put(property, value);
+        inserter.setNodeProperties(batchId, properties);
+        Map<String, Object> indexProperties =
+            collectIndexProperties(properties);
+        if (!indexProperties.isEmpty()) {
+          logger.fine("Indexing " + indexProperties);
+          nodeIndex.updateOrAdd(batchId, indexProperties);
+        }
       }
+    } catch (Exception e) {
+      logger.log(Level.WARNING, "Failed to set " + property + " to " + value + " on " + batchId, e);
     }
   }
 
@@ -234,6 +261,10 @@ public class BatchGraph {
     Set<Label> labels = newHashSet(inserter.getNodeLabels(node));
     labels.add(label);
     inserter.setNodeLabels(node, labels.toArray(new Label[labels.size()]));
+  }
+
+  public boolean hasLabel(long node, Label label) {
+    return contains(inserter.getNodeLabels(node), label);
   }
 
 }

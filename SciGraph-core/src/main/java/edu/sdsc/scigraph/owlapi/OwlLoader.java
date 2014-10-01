@@ -130,7 +130,7 @@ public class OwlLoader {
     @Provides
     @Singleton
     OwlVisitor getVisitor(OWLOntologyWalker walker, Graph graph) {
-      return new OwlVisitor(walker, graph, config.getCuries(), config.getCategories(),
+      return new OwlVisitor(walker, graph, config.getCategories(),
           config.getMappedProperties());
     }
 

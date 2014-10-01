@@ -41,7 +41,6 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 public class VocabularyServiceTest {
 
-  @SuppressWarnings("unchecked")
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
 
   private final Concept hippocampus = mock(Concept.class);

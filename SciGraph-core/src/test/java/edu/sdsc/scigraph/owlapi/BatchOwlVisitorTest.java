@@ -30,11 +30,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -59,7 +56,6 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
-import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
@@ -78,7 +74,7 @@ public class BatchOwlVisitorTest {
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     batchGraph = new BatchGraph(inserter, CommonProperties.URI, newHashSet(CommonProperties.URI,
         NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
-        CommonProperties.CURIE, CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
+        CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX),
         newHashSet(""));
     String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
@@ -86,15 +82,13 @@ public class BatchOwlVisitorTest {
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
-    Map<String, String> curieMap = new HashMap<>();
-    curieMap.put("http://example.org/otherOntologies/families/", "otherOnt");
     List<MappedProperty> propertyMap = new ArrayList<>();
     MappedProperty age = mock(MappedProperty.class);
     when(age.getName()).thenReturn("isAged");
     when(age.getProperties()).thenReturn(newArrayList(ROOT + "/hasAge"));
     propertyMap.add(age);
 
-    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, curieMap, propertyMap);
+    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, propertyMap);
     walker.walkStructure(visitor);
 
     batchGraph.shutdown();
@@ -105,7 +99,8 @@ public class BatchOwlVisitorTest {
 
   @AfterClass
   public static void teardown() throws IOException {
-    FileUtils.deleteDirectory(path.toFile());
+    //TODO: Why does this fail on Windows? 
+    // FileUtils.deleteDirectory(path.toFile());
   }
 
   Node getNode(String uri) {
@@ -242,8 +237,8 @@ size(GraphUtil.getRelationships(parent, intersection,
     assertThat(intersection.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
     Node mother = getNode(ROOT + "/Mother");
     Node father = getNode(ROOT + "/Father");
-    assertThat(size(GraphUtil.getRelationships(intersection, mother, EdgeType.OPERAND)), is(1));
-    assertThat(size(GraphUtil.getRelationships(intersection, father, EdgeType.OPERAND)), is(1));
+    assertThat(size(GraphUtil.getRelationships(intersection, mother, OwlRelationships.OPERAND)), is(1));
+    assertThat(size(GraphUtil.getRelationships(intersection, father, OwlRelationships.OPERAND)), is(1));
   }
 
   @Test
@@ -257,8 +252,8 @@ size(GraphUtil.getRelationships(parent, intersection,
     assertThat(intersection.hasLabel(OwlLabels.OWL_INTERSECTION_OF), is(true));
     Node mother = getNode("http://ontology.neuinfo.org/anon/-1615296904");
     Node father = getNode("http://ontology.neuinfo.org/anon/-1615359878");
-    assertThat(size(GraphUtil.getRelationships(intersection, mother, EdgeType.OPERAND)), is(1));
-    assertThat(size(GraphUtil.getRelationships(intersection, father, EdgeType.OPERAND)), is(1));
+    assertThat(size(GraphUtil.getRelationships(intersection, mother, OwlRelationships.OPERAND)), is(1));
+    assertThat(size(GraphUtil.getRelationships(intersection, father, OwlRelationships.OPERAND)), is(1));
   }
 
   @Test
@@ -266,7 +261,7 @@ size(GraphUtil.getRelationships(parent, intersection,
     Node parent = getNode(ROOT + "/Parent");
     Node complement = getNode("http://ontology.neuinfo.org/anon/-1761792206");
     assertThat(complement.hasLabel(OwlLabels.OWL_COMPLEMENT_OF), is(true));
-    assertThat(size(GraphUtil.getRelationships(complement, parent, EdgeType.OPERAND)), is(1));
+    assertThat(size(GraphUtil.getRelationships(complement, parent, OwlRelationships.OPERAND)), is(1));
   }
 
   /*
@@ -307,8 +302,8 @@ size(GraphUtil.getRelationships(parent, intersection,
     Node parent = getNode(ROOT + "/Parent");
     assertThat(restriction.hasLabel(OwlLabels.OWL_MIN_CARDINALITY), is(true));
     assertThat(GraphUtil.getProperty(restriction, "cardinality", Integer.class).get(), is(2));
-    assertThat(size(GraphUtil.getRelationships(restriction, hasChild, EdgeType.PROPERTY)), is(1));
-    assertThat(size(GraphUtil.getRelationships(restriction, parent, EdgeType.CLASS)), is(1));
+    assertThat(size(GraphUtil.getRelationships(restriction, hasChild, OwlRelationships.PROPERTY)), is(1));
+    assertThat(size(GraphUtil.getRelationships(restriction, parent, OwlRelationships.CLASS)), is(1));
   }
 
   @Test
@@ -317,8 +312,8 @@ size(GraphUtil.getRelationships(parent, intersection,
     assertThat(svf.hasLabel(OwlLabels.OWL_SOME_VALUES_FROM), is(true));
     Node hasChild = getNode(ROOT + "/hasChild");
     Node happyPerson = getNode(ROOT + "/HappyPerson");
-    assertThat(size(GraphUtil.getRelationships(svf, hasChild, EdgeType.PROPERTY)), is(1));
-    assertThat(size(GraphUtil.getRelationships(svf, happyPerson, EdgeType.FILLER)), is(1));
+    assertThat(size(GraphUtil.getRelationships(svf, hasChild, OwlRelationships.PROPERTY)), is(1));
+    assertThat(size(GraphUtil.getRelationships(svf, happyPerson, OwlRelationships.FILLER)), is(1));
   }
 
   @Test
@@ -327,8 +322,8 @@ size(GraphUtil.getRelationships(parent, intersection,
     assertThat(avf.hasLabel(OwlLabels.OWL_ALL_VALUES_FROM), is(true));
     Node hasChild = getNode(ROOT + "/hasChild");
     Node happyPerson = getNode(ROOT + "/HappyPerson");
-    assertThat(size(GraphUtil.getRelationships(avf, hasChild, EdgeType.PROPERTY)), is(1));
-    assertThat(size(GraphUtil.getRelationships(avf, happyPerson, EdgeType.FILLER)), is(1));
+    assertThat(size(GraphUtil.getRelationships(avf, hasChild, OwlRelationships.PROPERTY)), is(1));
+    assertThat(size(GraphUtil.getRelationships(avf, happyPerson, OwlRelationships.FILLER)), is(1));
   }
 
   /*
@@ -374,8 +369,10 @@ size(GraphUtil.getRelationships(parent, intersection,
 
   @Test
   public void testObjectProperties() {
-    Node hasAge = getNode(ROOT + "/hasParent");
-    assertThat(hasAge.hasLabel(OwlLabels.OWL_OBJECT_PROPERTY), is(true));
+    Node hasParent = getNode(ROOT + "/hasParent");
+    assertThat(hasParent.hasLabel(OwlLabels.OWL_OBJECT_PROPERTY), is(true));
+    // TODO: Why doesn't hasLabel return true?
+    // assertThat(hasParent.hasLabel(OwlLabels.OWL_OBJECT_PROPERTY), is(true));
   }
 
 }

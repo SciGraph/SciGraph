@@ -26,7 +26,6 @@ public class CommonProperties {
 
   public static final String URI = "uri";
   public static final String FRAGMENT = "fragment";
-  public static final String CURIE = "curie";
   public static final String TYPE = "type"; // TODO: Could be replaced by neo4j 2.0 labels
   public static final String NEGATED = "negated";
   public static final String PARENT_ONTOLOGY = "parentOntology";
@@ -38,7 +37,6 @@ public class CommonProperties {
   private long id;
   private String uri;
   private String fragment;
-  private String curie;
   private boolean negated;
   private String parentOntology;
   private String ontology;
@@ -67,14 +65,6 @@ public class CommonProperties {
 
   public String getFragment() {
     return fragment;
-  }
-
-  public void setCurie(String curie) {
-    this.curie = curie;
-  }
-
-  public String getCurie() {
-    return curie;
   }
 
   public void setNegated(boolean negated) {

@@ -17,6 +17,7 @@ package edu.sdsc.scigraph.vocabulary;
 
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 
@@ -28,6 +29,7 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.util.GraphTestBase;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
@@ -45,7 +47,6 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
   Concept buildConcept(String uri, String label, String curie, String ... categories) {
     Concept concept = graph.getOrCreateFramedNode(uri);
     concept.addLabel(label);
-    concept.setCurie(curie);
     graph.getGraphDb().getNodeById(concept.getId())
         .setProperty(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
     for (String category: categories) {
@@ -56,11 +57,11 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
 
   @Before
   public void setupGraph() throws IOException {
-    graph = new Graph(graphDb, Concept.class);
+    graph = new Graph(graphDb);
     cell = buildConcept("http://example.org/#birnlex5", "Cell", "BL:5");
     onCell = buildConcept("http://example.org/#birnlex6", "Something on cell", "HP:0008");
     onCell.addSynonym("on cell");
-    vocabulary = new VocabularyNeo4jImpl(graph, null);
+    vocabulary = new VocabularyNeo4jImpl(graph, null, mock(CurieUtil.class));
   }
 
   // TODO: fix this

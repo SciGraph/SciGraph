@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2014 The SciGraph authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package edu.sdsc.scigraph.owlapi.cases;
 
 import java.io.File;
@@ -6,9 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -67,8 +80,7 @@ public abstract class OwlTestCase {
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
-    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph,
-        new HashMap<String, String>(), new ArrayList<MappedProperty>());
+    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
     walker.walkStructure(visitor);
     batchGraph.shutdown();
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
@@ -90,7 +102,8 @@ public abstract class OwlTestCase {
 
   @After
   public void tearDownAfterClass() throws Exception {
-    FileUtils.deleteDirectory(path.toFile());
+    // TODO: Why does this fail on Windows
+    //FileUtils.deleteDirectory(path.toFile());
   }
 
 }

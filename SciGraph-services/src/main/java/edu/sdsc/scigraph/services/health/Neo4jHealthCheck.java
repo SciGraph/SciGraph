@@ -35,9 +35,11 @@ public class Neo4jHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
-    Transaction tx = graph.getGraphDb().beginTx();
-    Node node = graph.getGraphDb().getNodeById(1);
-    tx.success();
+    Node node = null;
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      node = graph.getGraphDb().getNodeById(1);
+      tx.success();
+    }
 
     if (null != node) {
       return Result.healthy();

@@ -15,8 +15,17 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
-import org.neo4j.graphdb.RelationshipType;
+import com.google.inject.AbstractModule;
+import com.google.inject.matcher.Matchers;
 
-public enum EdgeType implements RelationshipType {
-   REL, OWLObjectPropertyAssertionAxiom
+public class TransactionalModule extends AbstractModule {
+  
+  @Override
+  protected void configure() {
+    TransactionalInterceptor interceptor = new TransactionalInterceptor();
+    requestInjection(interceptor);
+    bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transactional.class), 
+        interceptor);
+  }
+
 }

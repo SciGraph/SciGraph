@@ -15,6 +15,9 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,12 +28,18 @@ public class OntologyConfiguration {
   @JsonProperty
   private String graphLocation;
 
+  private Map<String, String> curies = new HashMap<>();
+
   public String getGraphLocation() {
     return graphLocation;
   }
 
   public void setGraphLocation(String graphLocation) {
     this.graphLocation = graphLocation;
+  }
+
+  public Map<String, String> getCuries() {
+    return curies;
   }
 
 }
