@@ -33,7 +33,7 @@ import com.google.common.collect.ForwardingConcurrentMap;
 @ThreadSafe
 public class IdMap extends ForwardingConcurrentMap<String, Long> {
 
-  private static final int INITIAL_CAPACITY = 200_000;
+  private static final int INITIAL_CAPACITY = 500_000;
   
   private final ConcurrentHashMap<String, Long> delegate;
   private final AtomicLong idCounter = new AtomicLong();
