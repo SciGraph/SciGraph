@@ -106,6 +106,9 @@
           <excludes>
             <exclude>**/LICENSE</exclude>
             <exclude>**/README.md</exclude>
+            <exclude>**/*.properties</exclude>
+            <exclude>**/*.txt</exclude>
+            <exclude>**/*.yml</exclude>
             <exclude>src/test/resources/**</exclude>
             <exclude>src/main/resources/**</exclude>
           </excludes>
