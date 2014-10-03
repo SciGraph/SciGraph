@@ -16,7 +16,12 @@
 package edu.sdsc.scigraph.owlapi;
 
 import java.net.URI;
+import java.util.List;
 
+import org.coode.owlapi.oboformat.OBOFormatParserFactory;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLParserFactory;
+import org.semanticweb.owlapi.io.OWLParserFactoryRegistry;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
@@ -88,4 +93,15 @@ public class OwlApiUtils {
     return property.asOWLAnnotationProperty().getIRI().toURI();
   }
 
+  public static void removeOboParser() {
+    OWLManager.createOWLOntologyManager();
+    OWLParserFactoryRegistry registry = OWLParserFactoryRegistry.getInstance();
+    List<OWLParserFactory> factories = registry.getParserFactories();
+    for (OWLParserFactory factory : factories) {
+      if (factory instanceof OBOFormatParserFactory) {
+        registry.unregisterParserFactory(factory); 
+        break;
+      }
+    }
+  }
 }
