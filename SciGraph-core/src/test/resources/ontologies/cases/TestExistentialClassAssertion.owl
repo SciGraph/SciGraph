@@ -1,6 +1,6 @@
 Prefix(:=<http://example.org/>)
 
-Ontology(:TestClassAssertion
+Ontology(:TestExistentialClassAssertion
 Declaration(ObjectProperty(:p))
 ClassAssertion( ObjectSomeValuesFrom(:p :c) :i)
 )

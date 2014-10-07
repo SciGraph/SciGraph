@@ -1,6 +1,6 @@
 Prefix(:=<http://example.org/>)
 
-Ontology(:TestSubclass
+Ontology(:TestObjectPropertyAssertion
 Declaration(ObjectProperty(:p))
 ObjectPropertyAssertion(:p :i :j)
 )

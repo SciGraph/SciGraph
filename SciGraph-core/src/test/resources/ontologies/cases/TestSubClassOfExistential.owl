@@ -1,6 +1,6 @@
 Prefix(:=<http://example.org/>)
 
-Ontology(:TestSubclass
+Ontology(:TestSubclassOfExistential
 Declaration(ObjectProperty(:p))
 SubClassOf(:subclass ObjectSomeValuesFrom(:p :superclass))
 )
