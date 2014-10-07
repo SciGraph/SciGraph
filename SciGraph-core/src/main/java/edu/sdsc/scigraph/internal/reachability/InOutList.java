@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 @ThreadSafe
 class InOutList {
@@ -39,7 +39,7 @@ class InOutList {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this)
+    return MoreObjects.toStringHelper(this)
     .add("inList", inList)
     .add("outList", outList)
     .toString();
