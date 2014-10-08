@@ -52,6 +52,8 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.BranchState;
+import org.neo4j.graphdb.traversal.Evaluation;
+import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -66,7 +68,9 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.representations.monarch.GraphPath;
 import edu.sdsc.scigraph.representations.monarch.GraphPath.Edge;
 import edu.sdsc.scigraph.representations.monarch.GraphPath.Vertex;
@@ -276,10 +280,11 @@ public class GraphService extends BaseResource {
   @Path("/neighbors/{id}")
   @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
   @Timed
-  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  //@CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getNeighbors(
       @ApiParam(value = "Starting ID", required = true) @PathParam("id") String id,
-      @ApiParam(value = "How far to traverse neighbors", required = false) @QueryParam("depth") @DefaultValue("1") int depth,
+      @ApiParam(value = "How far to traverse neighbors", required = false) @QueryParam("depth") @DefaultValue("1") final int depth,
+      @ApiParam(value = "Traverse blank nodes", required = false) @QueryParam("blankNodes") @DefaultValue("false") final boolean traverseBlankNodes,
       @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
@@ -289,7 +294,21 @@ public class GraphService extends BaseResource {
       List<GraphPath> graphPaths = new ArrayList<>();
 
       for (org.neo4j.graphdb.Path path : graph.getGraphDb().traversalDescription().depthFirst()
-          .evaluator(Evaluators.toDepth(depth)).traverse(node)) {
+          .evaluator(new Evaluator() {
+            
+            @Override
+            public Evaluation evaluate(org.neo4j.graphdb.Path path) {
+              Optional<String> uri = GraphUtil.getProperty(path.endNode(), NodeProperties.URI, String.class);
+              // TODO: This should work with the anonymous property - but some blank nodes seem to not be getting it set
+              if (!traverseBlankNodes && uri.or("").startsWith("http://ontology.neuinfo.org/anon/")) {
+                return Evaluation.EXCLUDE_AND_PRUNE;
+              }
+              if (path.length() > depth) {
+                return Evaluation.EXCLUDE_AND_PRUNE;
+              }
+              return Evaluation.INCLUDE_AND_CONTINUE;
+            }
+          }).traverse(node)) {
         graphPaths.add(getGraphPathFromPath(path));
       }
 
