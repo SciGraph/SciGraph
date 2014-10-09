@@ -46,7 +46,12 @@ public class CurieUtilTest {
   public void testGetCuriePrefixes() {
     assertThat(util.getPrefixes(), hasItems("A", "B"));
   }
-  
+
+  @Test
+  public void testGetAllExpansions() {
+    assertThat(util.getAllExpansions("A"), hasItems("http://example.org/a_", "http://example.org/A_"));
+  }
+
   @Test
   public void testGetFullUri() {
     assertThat(util.getFullUri("A:foo"), containsInAnyOrder("http://example.org/a_foo", "http://example.org/A_foo"));

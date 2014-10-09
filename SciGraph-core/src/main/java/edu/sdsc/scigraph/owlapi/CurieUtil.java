@@ -56,6 +56,10 @@ public class CurieUtil {
     return prefixes;
   }
 
+  public Collection<String> getAllExpansions(final String curie) {
+    return uriMap.get(curie);
+  }
+
   public Optional<String> getCurie(final String uri) {
     Preconditions.checkNotNull(uri);
     for (Entry<String, String> entry: curieMap.entrySet()) {
