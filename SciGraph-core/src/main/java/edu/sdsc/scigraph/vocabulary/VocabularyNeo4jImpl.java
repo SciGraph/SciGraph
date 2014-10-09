@@ -47,6 +47,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spell.LuceneDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
@@ -114,7 +115,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }).toArray());
   }
 
-  static void addCommonConstraints(BooleanQuery indexQuery, Query query) {
+  void addCommonConstraints(BooleanQuery indexQuery, Query query) {
     BooleanQuery categoryQueries = new BooleanQuery();
     for (String category : query.getCategories()) {
       categoryQueries.add(new TermQuery(new Term(Concept.CATEGORY, category)), Occur.SHOULD);
@@ -123,13 +124,15 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       indexQuery.add(new BooleanClause(categoryQueries, Occur.MUST));
     }
 
-    BooleanQuery ontoloogyQueries = new BooleanQuery();
-    for (String ontology : query.getOntologies()) {
-      ontoloogyQueries.add(new TermQuery(new Term(CommonProperties.ONTOLOGY, ontology)),
-          Occur.SHOULD);
+    BooleanQuery curieQueries = new BooleanQuery();
+    for (String curie : query.getCuries()) {
+      for (String prefix : curieUtil.getAllExpansions(curie)) {
+        curieQueries.add(new WildcardQuery(new Term(CommonProperties.URI, prefix + "*")),
+            Occur.SHOULD);
+      }
     }
-    if (!query.getOntologies().isEmpty()) {
-      indexQuery.add(new BooleanClause(ontoloogyQueries, Occur.MUST));
+    if (!query.getCuries().isEmpty()) {
+      indexQuery.add(new BooleanClause(curieQueries, Occur.MUST));
     }
   }
 

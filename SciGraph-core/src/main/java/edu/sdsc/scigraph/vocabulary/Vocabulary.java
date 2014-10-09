@@ -119,7 +119,7 @@ public interface Vocabulary {
     private final boolean includeSynonyms;
     private final boolean includeAcronyms;
     private final boolean includeAbbreviations;
-    private final Collection<String> ontologies;
+    private final Collection<String> curies;
     private final Collection<String> categories;
 
     public static class Builder {
@@ -128,7 +128,7 @@ public interface Vocabulary {
       private boolean includeSynonyms = true;
       private boolean includeAcronyms = false;
       private boolean includeAbbreviations = false;
-      private Collection<String> ontologies = new HashSet<>();
+      private Collection<String> curies = new HashSet<>();
       private Collection<String> categories = new HashSet<>();
 
       /***
@@ -161,11 +161,11 @@ public interface Vocabulary {
       }
 
       /***
-       * @param ontologies  a set of required ontologies
+       * @param ontologies a set of required CURIE prefixes
        * @return the builder
        */
-      public Builder ontologies(Collection<String> ontologies) {
-        this.ontologies = newHashSet(ontologies); return this;
+      public Builder curies(Collection<String> curies) {
+        this.curies = newHashSet(curies); return this;
       }
 
       /***
@@ -191,7 +191,7 @@ public interface Vocabulary {
       this.includeSynonyms = builder.includeSynonyms;
       this.includeAcronyms = builder.includeAcronyms;
       this.includeAbbreviations = builder.includeAbbreviations;
-      this.ontologies = builder.ontologies;
+      this.curies = builder.curies;
       this.categories = builder.categories;
     }
 
@@ -215,8 +215,8 @@ public interface Vocabulary {
       return includeAbbreviations;
     }
 
-    public Collection<String> getOntologies() {
-      return ontologies;
+    public Collection<String> getCuries() {
+      return curies;
     }
 
     public Collection<String> getCategories() {

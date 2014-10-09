@@ -105,6 +105,9 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     }
 
     CurieUtil curieUtil = mock(CurieUtil.class);
+    when(curieUtil.getPrefixes()).thenReturn(newHashSet("H", "S"));
+    when(curieUtil.getAllExpansions("H")).thenReturn(newHashSet("http://example.org/#h"));
+    when(curieUtil.getAllExpansions("S")).thenReturn(newHashSet("http://example.org/#s"));
     when(curieUtil.getFullUri(anyString())).thenReturn(Collections.<String>emptySet());
     when(curieUtil.getFullUri("HP:0008")).thenReturn(newHashSet("http://example.org/#hippocampus"));
     vocabulary = new VocabularyNeo4jImpl(graph, null, curieUtil);
@@ -250,16 +253,14 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
-  public void testGetConceptsFromPrefixWithOntology() {
-    Query query = new Vocabulary.Query.Builder("hip").ontologies(newHashSet("http://foo.org"))
-        .build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus));
+  public void testGetConceptsFromPrefixWithCurie() {
+    Query query = new Vocabulary.Query.Builder("hip").curies(newHashSet("H")).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
   }
 
   @Test
-  public void testGetConceptsFromPrefixWithMultipleOntologies() {
-    Query query = new Vocabulary.Query.Builder("hip").ontologies(
-        newHashSet("http://foo.org", "http://baz.org")).build();
+  public void testGetConceptsFromPrefixWithMultipleCuries() {
+    Query query = new Vocabulary.Query.Builder("hip").curies(newHashSet("H", "S")).build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
   }
 

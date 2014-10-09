@@ -214,13 +214,13 @@ public class VocabularyService extends BaseResource {
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
-      @ApiParam( value = "Ontologies to search (defaults to all)", required = false )
-      @QueryParam("ontology") List<String> ontologies,
+      @ApiParam( value = "CURIE prefiex to search (defaults to all)", required = false )
+      @QueryParam("curie") List<String> curies,
       @ApiParam( value = "JSONP callback", required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(prefix).
         categories(categories).
-        ontologies(ontologies).
+        curies(curies).
         includeSynonyms(searchSynonyms).
         limit(limit.get());
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
@@ -250,13 +250,13 @@ public class VocabularyService extends BaseResource {
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
-      @ApiParam( value = "Ontologies to search (defaults to all)", required = false )
-      @QueryParam("ontology") List<String> ontologies,
+      @ApiParam( value = "CURIE prefiex to search (defaults to all)", required = false )
+      @QueryParam("curie") List<String> curies,
       @ApiParam( value = "JSONP callback", required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
-        ontologies(ontologies).
+        curies(curies).
         includeSynonyms(searchSynonyms).
         limit(limit);
     List<Concept> concepts = vocabulary.getConceptsFromTerm(builder.build());
@@ -289,13 +289,13 @@ public class VocabularyService extends BaseResource {
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
-      @ApiParam( value = "Ontologies to search (defaults to all)", required = false )
-      @QueryParam("ontology") List<String> ontologies,
+      @ApiParam( value = "CURIE prefiex to search (defaults to all)", required = false )
+      @QueryParam("curie") List<String> curies,
       @ApiParam( value = "JSONP callback", required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
-        ontologies(ontologies).
+        curies(curies).
         includeSynonyms(searchSynonyms).
         limit(limit);
     List<Concept> concepts = vocabulary.searchConcepts(builder.build());
