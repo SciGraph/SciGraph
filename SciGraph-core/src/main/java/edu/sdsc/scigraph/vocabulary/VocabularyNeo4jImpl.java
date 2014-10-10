@@ -124,15 +124,15 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       indexQuery.add(new BooleanClause(categoryQueries, Occur.MUST));
     }
 
-    BooleanQuery curieQueries = new BooleanQuery();
-    for (String curie : query.getCuries()) {
+    BooleanQuery prefixQueries = new BooleanQuery();
+    for (String curie : query.getPrefixes()) {
       for (String prefix : curieUtil.getAllExpansions(curie)) {
-        curieQueries.add(new WildcardQuery(new Term(CommonProperties.URI, prefix + "*")),
+        prefixQueries.add(new WildcardQuery(new Term(CommonProperties.URI, prefix + "*")),
             Occur.SHOULD);
       }
     }
-    if (!query.getCuries().isEmpty()) {
-      indexQuery.add(new BooleanClause(curieQueries, Occur.MUST));
+    if (!query.getPrefixes().isEmpty()) {
+      indexQuery.add(new BooleanClause(prefixQueries, Occur.MUST));
     }
   }
 
@@ -283,21 +283,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   @Override
-  public Set<String> getAllOntologies() {
-    return Suppliers.memoize(new Supplier<Set<String>>() {
-      @Override
-      public Set<String> get() {
-        ExecutionResult result =
-            graph.getExecutionEngine().execute(
-                "START n = node(*) WHERE has(n.ontology) RETURN distinct(n.ontology)");
-        Set<String> ontologies = new HashSet<>();
-        while (result.iterator().hasNext()) {
-          Map<String, Object> col = result.iterator().next();
-          ontologies.add((String) col.get("(n.ontology)"));
-        }
-        return ontologies;
-      }
-    }).get();
+  public Collection<String> getAllCuriePrefixes() {
+    return curieUtil.getPrefixes();
   }
 
   @Override

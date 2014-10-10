@@ -99,9 +99,9 @@ public interface Vocabulary {
   Set<String> getAllCategories();
 
   /*** 
-   * @return a set of ontologies in the vocabulary
+   * @return a collection of all known CURIE prefixes
    */
-  Set<String> getAllOntologies();
+  Collection<String> getAllCuriePrefixes();
 
   /***
    * Provides "did you mean" functionality based on the labels of concepts in the vocabulary.
@@ -119,7 +119,7 @@ public interface Vocabulary {
     private final boolean includeSynonyms;
     private final boolean includeAcronyms;
     private final boolean includeAbbreviations;
-    private final Collection<String> curies;
+    private final Collection<String> prefixes;
     private final Collection<String> categories;
 
     public static class Builder {
@@ -128,7 +128,7 @@ public interface Vocabulary {
       private boolean includeSynonyms = true;
       private boolean includeAcronyms = false;
       private boolean includeAbbreviations = false;
-      private Collection<String> curies = new HashSet<>();
+      private Collection<String> prefixes = new HashSet<>();
       private Collection<String> categories = new HashSet<>();
 
       /***
@@ -161,11 +161,11 @@ public interface Vocabulary {
       }
 
       /***
-       * @param ontologies a set of required CURIE prefixes
+       * @param prefixes a set of required CURIE prefixes
        * @return the builder
        */
-      public Builder curies(Collection<String> curies) {
-        this.curies = newHashSet(curies); return this;
+      public Builder prefixes(Collection<String> prefixes) {
+        this.prefixes = newHashSet(prefixes); return this;
       }
 
       /***
@@ -191,7 +191,7 @@ public interface Vocabulary {
       this.includeSynonyms = builder.includeSynonyms;
       this.includeAcronyms = builder.includeAcronyms;
       this.includeAbbreviations = builder.includeAbbreviations;
-      this.curies = builder.curies;
+      this.prefixes = builder.prefixes;
       this.categories = builder.categories;
     }
 
@@ -215,8 +215,8 @@ public interface Vocabulary {
       return includeAbbreviations;
     }
 
-    public Collection<String> getCuries() {
-      return curies;
+    public Collection<String> getPrefixes() {
+      return prefixes;
     }
 
     public Collection<String> getCategories() {

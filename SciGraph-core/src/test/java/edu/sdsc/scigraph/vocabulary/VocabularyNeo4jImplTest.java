@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -253,14 +254,14 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
-  public void testGetConceptsFromPrefixWithCurie() {
-    Query query = new Vocabulary.Query.Builder("hip").curies(newHashSet("H")).build();
+  public void testGetConceptsFromPrefixWithCuriePrefix() {
+    Query query = new Vocabulary.Query.Builder("hip").prefixes(newHashSet("H")).build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
   }
 
   @Test
-  public void testGetConceptsFromPrefixWithMultipleCuries() {
-    Query query = new Vocabulary.Query.Builder("hip").curies(newHashSet("H", "S")).build();
+  public void testGetConceptsFromPrefixWithMultipleCuriePrefixes() {
+    Query query = new Vocabulary.Query.Builder("hip").prefixes(newHashSet("H", "S")).build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
   }
 
@@ -295,9 +296,9 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
-  public void testGetAllOntologies() {
-    Set<String> ontologies = vocabulary.getAllOntologies();
-    assertThat(ontologies, hasItems("http://foo.org", "http://baz.org"));
+  public void testGetAllPrefixes() {
+    Collection<String> prefixes = vocabulary.getAllCuriePrefixes();
+    assertThat(prefixes, hasItems("H", "S"));
   }
 
   @Test
