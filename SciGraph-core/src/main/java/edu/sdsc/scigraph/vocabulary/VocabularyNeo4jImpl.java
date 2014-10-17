@@ -77,7 +77,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   private final Graph graph;
   private final SpellChecker spellChecker;
-  private final QueryParser parser;
   private final CurieUtil curieUtil;
 
   @Inject
@@ -99,10 +98,11 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     } else {
       spellChecker = null;
     }
+  }
 
-    parser =
-        new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
-            new VocabularyQueryAnalyzer());
+  static QueryParser getQueryParser() {
+    return new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
+        new VocabularyQueryAnalyzer());
   }
 
   static String formatQuery(String format, Object... args) {
@@ -153,6 +153,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public Collection<Concept> getConceptFromId(Query query) {
+    QueryParser parser = getQueryParser();
     String idQuery = StringUtils.strip(query.getInput(), "\"");
     Collection<String> fullUris = curieUtil.getFullUri(idQuery);
     idQuery = QueryParser.escape(idQuery);
@@ -164,6 +165,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }
     IndexHits<Node> hits;
     try (Transaction tx = graph.getGraphDb().beginTx()) {
+      logger.info("Index query string: " + queryString);
       hits = graph.getNodeAutoIndex().query(parser.parse(queryString));
       tx.success();
       return limitHits(hits, query);
@@ -176,6 +178,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public List<Concept> getConceptsFromPrefix(Query query) {
+    QueryParser parser = getQueryParser();
     BooleanQuery finalQuery = new BooleanQuery();
     try {
       BooleanQuery subQuery = new BooleanQuery();
@@ -183,8 +186,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
       Collection<String> fullUris = curieUtil.getFullUri(query.getInput());
       for (String fullUri: fullUris) {
-          subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri))),
-              Occur.SHOULD);
+        subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri))),
+            Occur.SHOULD);
       }
       subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
           Occur.SHOULD);
@@ -210,6 +213,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public List<Concept> searchConcepts(Query query) {
+    QueryParser parser = getQueryParser();
     BooleanQuery finalQuery = new BooleanQuery();
     try {
       if (query.isIncludeSynonyms()) {
@@ -234,6 +238,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public List<Concept> getConceptsFromTerm(Query query) {
+    QueryParser parser = getQueryParser();
     String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
     BooleanQuery finalQuery = new BooleanQuery();
     try {
