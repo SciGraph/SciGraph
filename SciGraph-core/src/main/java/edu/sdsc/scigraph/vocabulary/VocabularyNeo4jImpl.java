@@ -165,7 +165,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }
     IndexHits<Node> hits;
     try (Transaction tx = graph.getGraphDb().beginTx()) {
-      logger.info("Index query string: " + queryString);
       hits = graph.getNodeAutoIndex().query(parser.parse(queryString));
       tx.success();
       return limitHits(hits, query);
