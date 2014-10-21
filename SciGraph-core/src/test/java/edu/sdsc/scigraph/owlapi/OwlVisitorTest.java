@@ -42,7 +42,6 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
 
-import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.EdgeType;
@@ -126,10 +125,6 @@ public class OwlVisitorTest extends GraphTestBase {
     assertThat(
         graph.hasRelationship(person, fazz, DynamicRelationshipType.withName("fizz"), ROOT
             + "/fizz"), is(true));
-    Relationship r = graph.getOrCreateRelationship(person, fazz,
-        DynamicRelationshipType.withName("fizz"));
-    assertThat(graph.getProperty(r, CommonProperties.TYPE, String.class).get(),
-        is("OWLAnnotationAssertionAxiom"));
   }
 
   @Test
