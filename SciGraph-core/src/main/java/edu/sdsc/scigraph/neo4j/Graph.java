@@ -35,6 +35,7 @@ import org.apache.lucene.analysis.StopAnalyzer;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
@@ -188,8 +189,8 @@ public class Graph {
       for (String synonym : getProperties(n, Concept.SYNONYM, String.class)) {
         concept.addSynonym(synonym);
       }
-      for (String type : getProperties(n, Concept.TYPE, String.class)) {
-        concept.addType(type);
+      for (Label type : n.getLabels()) {
+        concept.addType(type.name());
       }
 
       for (Relationship r: n.getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS)) {

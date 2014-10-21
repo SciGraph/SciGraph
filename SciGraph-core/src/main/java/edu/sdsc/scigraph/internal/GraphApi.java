@@ -39,12 +39,10 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 
-import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class GraphApi {
@@ -65,9 +63,7 @@ public class GraphApi {
         .evaluator(new Evaluator() {
           @Override
           public Evaluation evaluate(Path path) {
-            Optional<String> type = graph.getProperty(path.endNode(), NodeProperties.TYPE,
-                String.class);
-            if (type.isPresent() && "OWLClass".equals(type.get())) {
+            if (path.endNode().hasLabel(OwlLabels.OWL_CLASS)) {
               return Evaluation.INCLUDE_AND_CONTINUE;
             } else {
               return Evaluation.EXCLUDE_AND_PRUNE;
@@ -133,9 +129,7 @@ public class GraphApi {
     Node parent = graph.getOrCreateNode(c.getUri());
     Collection<Node> inferredClasses = new ArrayList<>();
     for (Relationship r : parent.getRelationships(Direction.OUTGOING, OwlRelationships.OWL_EQUIVALENT_CLASS)) {
-      Optional<String> endType = graph.getProperty(r.getEndNode(), CommonProperties.TYPE,
-          String.class);
-      if (endType.isPresent() && "OWLObjectSomeValuesFrom".equals(endType.get())) {
+      if (r.getEndNode().hasLabel(OwlLabels.OWL_SOME_VALUES_FROM)) {
         Relationship property = getOnlyElement(
             r.getEndNode().getRelationships(Direction.OUTGOING, OwlRelationships.PROPERTY), null);
         if (null != property
