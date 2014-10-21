@@ -17,13 +17,10 @@ package edu.sdsc.scigraph.owlapi;
 
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
+import org.semanticweb.owlapi.io.XMLUtils;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 public class OwlRelationships {
-
-  /***
-   * Relationships
-   */
 
   public static final RelationshipType RDF_SUBCLASS_OF = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.RDFS_SUBCLASS_OF));
@@ -60,17 +57,8 @@ public class OwlRelationships {
   
   public static final RelationshipType CLASS = DynamicRelationshipType.withName("class");
 
-  /*
-   * public static final RelationshipType OWL_OBJECT_PROPERTY = DynamicRelationshipType
-   * .withName(getFragment(OWLRDFVocabulary.OWL_OBJECT_PROPERTY));
-   */
-
-  // public static final RelationshipsType ANNOTATION_ASSERTION =
-  // DynamicRelationshipType.withName(getFragment(OWLRDFVocabulary.o))
-
   private static String getFragment(OWLRDFVocabulary vocab) {
-    // return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, vocab.getIRI().getFragment());
-    return vocab.getIRI().getFragment();
+    return XMLUtils.getNCNameSuffix(vocab.getIRI());
   }
 
 }

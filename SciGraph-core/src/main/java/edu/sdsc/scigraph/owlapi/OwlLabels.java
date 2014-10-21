@@ -17,15 +17,13 @@ package edu.sdsc.scigraph.owlapi;
 
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
+import org.semanticweb.owlapi.io.XMLUtils;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 public class OwlLabels {
 
-  /***
-   * Labels
-   */
   public static final Label OWL_ANONYMOUS = DynamicLabel.label("anonymous");
-  
+
   public static final Label OWL_CLASS = DynamicLabel.label(getFragment(OWLRDFVocabulary.OWL_CLASS));
 
   public static final Label OWL_INDIVIDUAL = DynamicLabel
@@ -68,8 +66,7 @@ public class OwlLabels {
       .label(getFragment(OWLRDFVocabulary.OWL_QUALIFIED_CARDINALITY));
 
   private static String getFragment(OWLRDFVocabulary vocab) {
-    // return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, vocab.getIRI().getFragment());
-    return vocab.getIRI().getFragment();
+    return XMLUtils.getNCNameSuffix(vocab.getIRI());
   }
 
 }
