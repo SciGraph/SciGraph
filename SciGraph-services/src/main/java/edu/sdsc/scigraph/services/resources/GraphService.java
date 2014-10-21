@@ -84,7 +84,7 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")
 @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML})
+  MediaType.APPLICATION_XML})
 public class GraphService extends BaseResource {
 
   private final Vocabulary vocabulary;
@@ -119,7 +119,7 @@ public class GraphService extends BaseResource {
             Edge e =
                 new Edge((String) input.getStartNode().getProperty(CommonProperties.FRAGMENT),
                     (String) input.getEndNode().getProperty(CommonProperties.FRAGMENT), input
-                        .getType().name());
+                    .getType().name());
             Optional<String> type = graph.getProperty(input, CommonProperties.TYPE, String.class);
             if (type.isPresent()) {
               e.meta.put("type", type.get());
@@ -280,7 +280,7 @@ public class GraphService extends BaseResource {
   @Path("/neighbors/{id}")
   @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
   @Timed
-  //@CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getNeighbors(
       @ApiParam(value = "Starting ID", required = true) @PathParam("id") String id,
       @ApiParam(value = "How far to traverse neighbors", required = false) @QueryParam("depth") @DefaultValue("1") final int depth,
@@ -295,7 +295,7 @@ public class GraphService extends BaseResource {
 
       for (org.neo4j.graphdb.Path path : graph.getGraphDb().traversalDescription().depthFirst()
           .evaluator(new Evaluator() {
-            
+
             @Override
             public Evaluation evaluate(org.neo4j.graphdb.Path path) {
               Optional<String> uri = GraphUtil.getProperty(path.endNode(), NodeProperties.URI, String.class);
@@ -317,7 +317,7 @@ public class GraphService extends BaseResource {
     }
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }
-  
+
   @GET
   @Path("/relationship_types")
   @ApiOperation(value = "Get all relationship types", response = String.class)
@@ -333,12 +333,12 @@ public class GraphService extends BaseResource {
         public String apply(RelationshipType relationshipType) {
           return relationshipType.name();
         }
-        
+
       }));
     }
     return JaxRsUtil.wrapJsonp(request, new GenericEntity<List<String>>(relationships) {}, callback);
   }
-  
+
   @GET
   @Path("/{id}")
   @ApiOperation(value = "Get information about a node", response = ConceptDTO.class)
