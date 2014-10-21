@@ -26,10 +26,6 @@
   <artifactId>scigraph-services</artifactId>
   <name>SciGraph - services</name>
 
-  <properties>
-    <dropwizard.version>0.7.1</dropwizard.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>io.dropwizard</groupId>
