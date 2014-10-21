@@ -120,10 +120,10 @@ public class GraphService extends BaseResource {
                 new Edge((String) input.getStartNode().getProperty(CommonProperties.FRAGMENT),
                     (String) input.getEndNode().getProperty(CommonProperties.FRAGMENT), input
                     .getType().name());
-            Optional<String> type = graph.getProperty(input, CommonProperties.TYPE, String.class);
+            /*Optional<String> type = graph.getProperty(input, CommonProperties.TYPE, String.class);
             if (type.isPresent()) {
               e.meta.put("type", type.get());
-            }
+            }*/
             return e;
           }
         }));
