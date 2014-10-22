@@ -36,7 +36,6 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
@@ -206,8 +205,7 @@ public class OwlVisitorTest extends GraphTestBase {
   public void testObjectComplementOf() {
     Node parent = graph.getNode(ROOT + "/Parent").get();
     Node complement = graph.getNode("http://ontology.neuinfo.org/anon/-1761792206").get();
-    assertThat(graph.getProperty(complement, "type", String.class).get(),
-        is(equalTo(OWLObjectComplementOf.class.getSimpleName())));
+    assertThat(complement.hasLabel(OwlLabels.OWL_COMPLEMENT_OF), is(true));
     assertThat(graph.hasRelationship(complement, parent, EdgeType.REL), is(true));
   }
 
