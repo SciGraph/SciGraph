@@ -22,6 +22,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import io.dropwizard.jersey.caching.CacheControl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,6 +80,7 @@ import edu.sdsc.scigraph.services.api.graph.NodeDTO;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
+import edu.sdsc.scigraph.services.jersey.UnknownClassException;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 @Path("/graph")
@@ -287,7 +289,11 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "Traverse blank nodes", required = false) @QueryParam("blankNodes") @DefaultValue("false") final boolean traverseBlankNodes,
       @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-    Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
+    Collection<Concept> concepts = vocabulary.getConceptFromId(query);
+    if (concepts.isEmpty()) {
+      throw new UnknownClassException(id);
+    }
+    Concept concept = getFirst(vocabulary.getConceptFromId(query), null);
     GenericEntity<GraphPathWrapper> response = null;
     try (Transaction tx = graph.getGraphDb().beginTx()) {
       Node node = graph.getGraphDb().getNodeById(concept.getId());
