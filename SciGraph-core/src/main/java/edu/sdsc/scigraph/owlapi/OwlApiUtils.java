@@ -92,6 +92,11 @@ public class OwlApiUtils {
     return property.asOWLAnnotationProperty().getIRI().toURI();
   }
 
+  @Deprecated
+  public static void removeOboParser() {
+    silenceOboParser();
+  }
+  
   public static void silenceOboParser() {
     OWLManager.createOWLOntologyManager();
     Logger logger = Logger.getLogger("org.obolibrary");
