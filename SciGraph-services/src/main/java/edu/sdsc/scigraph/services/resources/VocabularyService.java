@@ -155,7 +155,7 @@ public class VocabularyService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object findById(
-      @ApiParam( value = "ID to find", required = true, defaultValue = "DOID:4")
+      @ApiParam( value = "ID to find", required = true)
       @PathParam("id") String id,
       @ApiParam( value = "JSONP callback", required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) throws Exception {
