@@ -128,7 +128,7 @@ public class VocabularyService extends BaseResource {
   public Object findByUri(
       @ApiParam( value = "URI to find", required = true )
       @PathParam("uri") String uri,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) throws Exception {
     Optional<Concept> concept = vocabulary.getConceptFromUri(uri);
     if (concept.isPresent()) {
@@ -157,7 +157,7 @@ public class VocabularyService extends BaseResource {
   public Object findById(
       @ApiParam( value = "ID to find", required = true)
       @PathParam("id") String id,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) throws Exception {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     List<Concept> concepts = newArrayList(vocabulary.getConceptFromId(query));
@@ -221,7 +221,7 @@ public class VocabularyService extends BaseResource {
   public Object findByPrefix(
       @ApiParam( value = "Term prefix to find", required = true )
       @PathParam("term") String termPrefix,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") IntParam limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
@@ -229,7 +229,7 @@ public class VocabularyService extends BaseResource {
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
       @QueryParam("prefix") List<String> prefixes,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(termPrefix).
         categories(categories).
@@ -257,7 +257,7 @@ public class VocabularyService extends BaseResource {
   public Object findByTerm(
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") int limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
@@ -265,7 +265,7 @@ public class VocabularyService extends BaseResource {
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
       @QueryParam("prefix") List<String> prefixes,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
@@ -296,7 +296,7 @@ public class VocabularyService extends BaseResource {
   public Object searchByTerm(
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") int limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
@@ -304,7 +304,7 @@ public class VocabularyService extends BaseResource {
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
       @QueryParam("prefix") List<String> prefixes,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
@@ -331,9 +331,9 @@ public class VocabularyService extends BaseResource {
   public Object suggestFromTerm(
       @ApiParam( value = "Mispelled term", required = true )
       @PathParam("term") String term,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("1") int limit,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit));
     SuggestionWrapper wrapper = new SuggestionWrapper(suggestions);
@@ -349,7 +349,7 @@ public class VocabularyService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getCategories(
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     CategoryWrapper categories = new CategoryWrapper(vocabulary.getAllCategories());
     GenericEntity<CategoryWrapper> response = new GenericEntity<CategoryWrapper>(categories){};
@@ -364,7 +364,7 @@ public class VocabularyService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getCuriePrefixes(
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     OntologyWrapper ontologies = new OntologyWrapper(vocabulary.getAllCuriePrefixes());
     GenericEntity<OntologyWrapper> response = new GenericEntity<OntologyWrapper>(ontologies){};

@@ -58,6 +58,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 import edu.sdsc.scigraph.annotation.EntityAnnotation;
 import edu.sdsc.scigraph.annotation.EntityFormatConfiguration;
@@ -69,7 +70,7 @@ import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 @Path("/annotations")
 @Api(value = "/annotations", description = "Annotation services")
 @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML })
+  MediaType.APPLICATION_XML })
 public class AnnotateService extends BaseResource {
 
   private static final Logger logger = Logger.getLogger(AnnotateService.class.getName());
@@ -77,37 +78,28 @@ public class AnnotateService extends BaseResource {
   @Inject
   private EntityProcessor processor;
 
-  /***
-   * This service is designed to annotate shorter fragments of text and for use from 
-   * a browser. It does not have the same options for handling markup that
-   * {@link #annotateUrl(String, Set, Set, int, boolean, boolean, boolean, boolean, Set, List, List, Set, Set)}
-   * and
-   * {@link #annotatePost(String, Set, Set, int, boolean, boolean, boolean, boolean, Set, List, List, Set, Set)
-   * have.
-   * 
-   * @param content The content to annotate
-   * @param includeCategories A set of categories to include
-   * @param excludeCategories A set of categories to exclude
-   * @param minLength The minimum length of annotated entities
-   * @param longestOnly Should only the longest entity be returned for an overlapping group
-   * @param includeAbbrev Should abbreviations be included
-   * @param includeAcronym Should acronyms be included
-   * @param includeNumbers Should numbers be included
-   * @return The annotated text
-   */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Annotate text", response = String.class)
+  @ApiOperation(value = "Annotate text", response = String.class,
+  notes="This service is designed to annotate shorter fragments of text. Use the POST version if your content is too long.")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Response annotate(
+      @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
       final @QueryParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("includeCat") Set<String> includeCategories,
+      @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
+      @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
       final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
       final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
       final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers) {
     StreamingOutput stream = new StreamingOutput() {
       @Override
@@ -136,44 +128,39 @@ public class AnnotateService extends BaseResource {
     return Response.ok(stream).build();
   }
 
-  /***
-   * <p>Annotate the content of a URL (presumably a piece of HTML)</p>
-   * <p><b>NOTE:</b> this method will add a &lt;base&gt; element to the head
-   * 
-   * @param url The URL to annotate
-   * @param includeCategories A set of categories to include
-   * @param excludeCategories A set of categories to exclude
-   * @param minLength The minimum length of annotated entities
-   * @param longestOnly Should only the longest entity be returned for an overlapping group
-   * @param includeAbbrev Should abbreviations be included
-   * @param includeAcronym Should acronyms be included
-   * @param includeNumbers Should numbers be included
-   * @param ignoreTags HTML tags that should be ignored
-   * @param stylesheets CSS stylesheets to add to the &lt;head&gt;
-   * @param scripts Javascripts to add to the &lt;head&gt;
-   * @param targetIds A set of element IDs to annotate
-   * @param targetClasses A set of CSS class names to annotate
-   * @return The annotated HTML
-   */
   @GET
   @Path("/url")
   @Produces(MediaType.TEXT_HTML)
-  @ApiOperation(value = "Annotate a URL", response = String.class)
+  @ApiOperation(value = "Annotate a URL", response = String.class, 
+  notes="Annotate the content of a URL (presumably an HTML page). <em>NOTE:</em> this method will add a &lt;base&gt; element to the head.")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Response annotateUrl(
+      @ApiParam( value = "", required = true)
       final @QueryParam("url") @DefaultValue("") String url,
+      @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("includeCat") Set<String> includeCategories,
+      @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
+      @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
       final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
       final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
       final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      @ApiParam( value = DocumentationStrings.IGNORE_TAGS_DOC, required = false)
       final @QueryParam("ignoreTag") Set<String> ignoreTags,
-      final @QueryParam("stylesheet") List<String> stylesheets, 
+      @ApiParam( value = DocumentationStrings.STYLESHEETS_DOC, required = false)
+      final @QueryParam("stylesheet") List<String> stylesheets,
+      @ApiParam( value = DocumentationStrings.SCRIPTS_DOC, required = false)
       final @QueryParam("scripts") List<String> scripts,
+      @ApiParam( value = DocumentationStrings.TARGET_IDS_DOC, required = false)
       final @QueryParam("targetId") Set<String> targetIds,
+      @ApiParam( value = DocumentationStrings.CSS_CLASS_DOCS, required = false)
       final @QueryParam("targetClass") Set<String> targetClasses) {
     StreamingOutput stream = new StreamingOutput() {
       @Override
@@ -214,44 +201,41 @@ public class AnnotateService extends BaseResource {
     return Response.ok(stream).build();
   }
 
-  /***
-   * A POST method for API clients wishing to annotate longer blocks of content. This is most likely the method
-   * of choice for most clients.
-   * 
-   * @param content The content to annotate
-   * @param includeCategories A set of categories to include
-   * @param excludeCategories A set of categories to exclude
-   * @param minLength The minimum length of annotated entities
-   * @param longestOnly Should only the longest entity be returned for an overlapping group
-   * @param includeAbbrev Should abbreviations be included
-   * @param includeAcronym Should acronyms be included
-   * @param includeNumbers Should numbers be included
-   * @param ignoreTags HTML tags that should be ignored
-   * @param stylesheets CSS stylesheets to add to the &lt;head&gt;
-   * @param scripts Javascripts to add to the &lt;head&gt;
-   * @param targetIds A set of element IDs to annotate
-   * @param targetClasses A set of CSS class names to annotate
-   * @return The annotated HTML
-   */
   @POST
   @Produces(MediaType.TEXT_XML)
   @Consumes("application/x-www-form-urlencoded")
-  @ApiOperation(value = "Annotate text", response = String.class)
+  @ApiOperation(value = "Annotate text", response = String.class, 
+  notes = "A POST resource for API clients wishing to annotate longer content. This is most likely the method of choice for most clients. "
+      + DocumentationStrings.REST_ABUSE_DOC
+      )
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Response annotatePost(
+      @ApiParam(value = DocumentationStrings.CONTENT_DOC, required = true)
       final @FormParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("includeCat") Set<String> includeCategories,
+      @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("excludeCat") Set<String> excludeCategories,
+      @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
       final @FormParam("minLength") @DefaultValue("4") int minLength,
+      @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
       final @FormParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
       final @FormParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @FormParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      @ApiParam( value = DocumentationStrings.IGNORE_TAGS_DOC, required = false)
       final @FormParam("ignoreTag") Set<String> ignoreTags,
-      final @FormParam("stylesheet") List<String> stylesheets, 
+      @ApiParam( value = DocumentationStrings.STYLESHEETS_DOC, required = false)
+      final @FormParam("stylesheet") List<String> stylesheets,
+      @ApiParam( value = DocumentationStrings.SCRIPTS_DOC, required = false)
       final @FormParam("scripts") List<String> scripts,
+      @ApiParam( value = DocumentationStrings.TARGET_IDS_DOC, required = false)
       final @FormParam("targetId") Set<String> targetIds,
+      @ApiParam( value = DocumentationStrings.CSS_CLASS_DOCS, required = false)
       final @FormParam("targetClass") Set<String> targetClasses) {
     StreamingOutput stream = new StreamingOutput() {
       @Override
@@ -287,35 +271,30 @@ public class AnnotateService extends BaseResource {
     return Response.ok(stream).build();
   }
 
-  /***
-   * Get the entities from content without embedding them
-   * in the source.
-   * 
-   * @param content The content to annotate
-   * @param includeCategories A set of categories to include
-   * @param excludeCategories A set of categories to exclude
-   * @param minLength The minimum length of annotated entities
-   * @param longestOnly Should only the longest entity be returned for an overlapping group
-   * @param includeAbbrev Should abbreviations be included
-   * @param includeAcronym Should acronyms be included
-   * @param includeNumbers Should numbers be included
-   * @return A list of entities.
-   */
   @GET
   @Path("/entities")
   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
-  @ApiOperation(value = "Annotate text", response = String.class)
+  @ApiOperation(value = "Get entities from text", response = EntityAnnotation.class, notes="Get entities from content without embedding them in the source.")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getEntities(
-      @QueryParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
+      final @QueryParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("includeCat") Set<String> includeCategories,
+      @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
+      @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
       final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
       final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
       final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     List<EntityAnnotation> entities = newArrayList();
     try {
@@ -336,71 +315,65 @@ public class AnnotateService extends BaseResource {
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }
 
-  /***
-   * Get the entities from content without embedding them
-   * in the source - only the entities are returned.
-   * 
-   * @param content The content to annotate
-   * @param includeCategories A set of categories to include
-   * @param excludeCategories A set of categories to exclude
-   * @param minLength The minimum length of annotated entities
-   * @param longestOnly Should only the longest entity be returned for an overlapping group
-   * @param includeAbbrev Should abbreviations be included
-   * @param includeAcronym Should acronyms be included
-   * @param includeNumbers Should numbers be included
-   * @return A list of entities.
-   */
   @POST
   @Path("/entities")
   @Consumes("application/x-www-form-urlencoded")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
-  @ApiOperation(value = "Annotate text", response = String.class)
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Get entities from text", response = EntityAnnotation.class, 
+  notes = "Get the entities from content without embedding them in the source - only the entities are returned. " +
+    DocumentationStrings.REST_ABUSE_DOC)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object postEntities(
-      @FormParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
+      final @FormParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("includeCat") Set<String> includeCategories,
+      @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("excludeCat") Set<String> excludeCategories,
+      @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
       final @FormParam("minLength") @DefaultValue("4") int minLength,
+      @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
       final @FormParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
       final @FormParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @FormParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
-      final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
-      @FormParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
+      final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers) {
     return getEntities(content, includeCategories, excludeCategories, minLength, 
-        longestOnly, includeAbbrev, includeAcronym, includeNumbers, callback);
+        longestOnly, includeAbbrev, includeAcronym, includeNumbers, "fn");
   }
 
-  /***
-   * A convenience call for retrieving both a list of entities and annotated content
-   * 
-   * @param content The content to annotate
-   * @param includeCategories A set of categories to include
-   * @param excludeCategories A set of categories to exclude
-   * @param minLength The minimum length of annotated entities
-   * @param longestOnly Should only the longest entity be returned for an overlapping group
-   * @param includeAbbrev Should abbreviations be included
-   * @param includeAcronym Should acronyms be included
-   * @param includeNumbers Should numbers be included
+  /*** 
    * @return A list of entities and the annotated content
-   * @throws IOException 
    */
   @GET
   @Path("/complete")
   @Consumes("application/x-www-form-urlencoded")
   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
-  @ApiOperation(value = "Annotate text", response = Annotations.class)
+  @ApiOperation(value = "Get embedded annotations as well as a separate list", response = Annotations.class, 
+    notes="A convenience resource for retrieving both a list of entities and annotated content")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getEntitiesAndContent(
-      @QueryParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
+      final @QueryParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("includeCat") Set<String> includeCategories,
+      @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
+      @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
       final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
       final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
       final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") @DefaultValue("fn") String callback) throws IOException {
     Annotations annotation = new Annotations();
     StringWriter writer = new StringWriter();
@@ -438,20 +411,28 @@ public class AnnotateService extends BaseResource {
   @POST
   @Path("/complete")
   @Consumes("application/x-www-form-urlencoded")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
-  @ApiOperation(value = "Annotate text", response = Annotations.class)
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Get embedded annotations as well as a separate list", response = Annotations.class, 
+  notes="A convenience resource for retrieving both a list of entities and annotated content. " + DocumentationStrings.REST_ABUSE_DOC)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object postEntitiesAndContent(
-      @FormParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
+      final @FormParam("content") @DefaultValue("") String content,
+      @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("includeCat") Set<String> includeCategories,
+      @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("excludeCat") Set<String> excludeCategories,
+      @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
       final @FormParam("minLength") @DefaultValue("4") int minLength,
+      @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
       final @FormParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
       final @FormParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @FormParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
-      final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
-      @FormParam("callback") @DefaultValue("fn") String callback) throws IOException {
+      @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
+      final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers) throws IOException {
     Annotations annotation = new Annotations();
     StringWriter writer = new StringWriter();
     EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
@@ -467,7 +448,7 @@ public class AnnotateService extends BaseResource {
     annotation.content = writer.toString();
 
     GenericEntity<Annotations> response = new GenericEntity<Annotations>(annotation){};
-    return JaxRsUtil.wrapJsonp(request, response, callback); 
+    return JaxRsUtil.wrapJsonp(request, response, "fn"); 
   }
 
   /***
@@ -492,7 +473,7 @@ public class AnnotateService extends BaseResource {
     protected List<EntityAnnotation> delegate() {
       return delegate;
     }*/
-    
+
     @JsonProperty
     String getContent() {
       return content;

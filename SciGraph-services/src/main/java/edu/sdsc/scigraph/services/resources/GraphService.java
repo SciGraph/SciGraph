@@ -138,10 +138,14 @@ public class GraphService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getShortestPath(
-      @ApiParam(value = "Start node ID", required = true) @PathParam("startId") String startId,
-      @ApiParam(value = "End node ID", required = true) @PathParam("endId") String endId,
-      @ApiParam(value = "Maximum path length", required = false) @QueryParam("length") @DefaultValue("1") int length,
-      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = "Start node ID. " + DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("startId") String startId,
+      @ApiParam(value = "End node ID. " + DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("endId") String endId,
+      @ApiParam(value = "Maximum path length", required = false)
+      @QueryParam("length") @DefaultValue("1") int length,
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
+      @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(startId).build();
     Concept startConcept = getOnlyElement(vocabulary.getConceptFromId(query));
     Node startNode = graph.getGraphDb().getNodeById(startConcept.getId());
@@ -185,10 +189,14 @@ public class GraphService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getPath(
-      @ApiParam(value = "Start node ID", required = true) @PathParam("startId") String startId,
-      @ApiParam(value = "End node ID", required = true) @PathParam("endId") String endId,
-      @ApiParam(value = "Maximum path length", required = false) @QueryParam("length") @DefaultValue("1") int length,
-      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = "Start node ID. " + DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("startId") String startId,
+      @ApiParam(value = "End node ID. " + DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("endId") String endId,
+      @ApiParam(value = "Maximum path length", required = false)
+      @QueryParam("length") @DefaultValue("1") int length,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false) 
+      @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(startId).build();
     Concept startConcept = getOnlyElement(vocabulary.getConceptFromId(query));
     Node startNode = graph.getGraphDb().getNodeById(startConcept.getId());
@@ -240,9 +248,10 @@ public class GraphService extends BaseResource {
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getSubclasses(
       @ApiParam(value = "Type of relationship to use", required = true) @PathParam("relationship") String relationship,
-      @ApiParam(value = "ID to find", required = true) @PathParam("id") String id,
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true) @PathParam("id") String id,
       @ApiParam(value = "How deep to traverse descendants", required = false) @QueryParam("depth") @DefaultValue("1") int depth,
-      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
+      @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
     Node node = graph.getGraphDb().getNodeById(concept.getId());
@@ -284,10 +293,14 @@ public class GraphService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getNeighbors(
-      @ApiParam(value = "Starting ID", required = true) @PathParam("id") String id,
-      @ApiParam(value = "How far to traverse neighbors", required = false) @QueryParam("depth") @DefaultValue("1") final int depth,
-      @ApiParam(value = "Traverse blank nodes", required = false) @QueryParam("blankNodes") @DefaultValue("false") final boolean traverseBlankNodes,
-      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("id") String id,
+      @ApiParam(value = "How far to traverse neighbors", required = false)
+      @QueryParam("depth") @DefaultValue("1") final int depth,
+      @ApiParam(value = "Traverse blank nodes", required = false)
+      @QueryParam("blankNodes") @DefaultValue("false") final boolean traverseBlankNodes,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
+      @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Collection<Concept> concepts = vocabulary.getConceptFromId(query);
     if (concepts.isEmpty()) {
@@ -330,7 +343,8 @@ public class GraphService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getRelationships(
-      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
+      @QueryParam("callback") @DefaultValue("fn") String callback) {
     List<String> relationships = new ArrayList<>();
     try (Transaction tx = graph.getGraphDb().beginTx()) {
       relationships = newArrayList(transform(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationshipTypes(),
@@ -347,12 +361,14 @@ public class GraphService extends BaseResource {
 
   @GET
   @Path("/{id}")
-  @ApiOperation(value = "Get information about a node", response = ConceptDTO.class)
+  @ApiOperation(value = "Get all properties of a node", response = ConceptDTO.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getNode(
-      @ApiParam(value = "Node ID", required = true) @PathParam("id") String id,
-      @ApiParam(value = "JSONP callback", required = false) @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("id") String id,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
+      @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
     NodeDTO dto = new NodeDTO();
