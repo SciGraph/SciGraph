@@ -48,10 +48,12 @@ import edu.sdsc.scigraph.owlapi.OwlRelationships;
 public class GraphApi {
 
   private final Graph graph;
+  private final GraphDatabaseService graphDb;
 
   @Inject
-  GraphApi(Graph graph) {
+  GraphApi(Graph graph, GraphDatabaseService graphDb) {
     this.graph = graph;
+    this.graphDb = graphDb;
   }
 
   public boolean classIsInCategory(Node candidate, Node parentConcept) {
@@ -59,7 +61,7 @@ public class GraphApi {
   }
 
   public boolean classIsInCategory(Node candidate, Node parent, RelationshipType... relationships) {
-    TraversalDescription description = graph.getGraphDb().traversalDescription().depthFirst()
+    TraversalDescription description = graphDb.traversalDescription().depthFirst()
         .evaluator(new Evaluator() {
           @Override
           public Evaluation evaluate(Path path) {
@@ -92,7 +94,7 @@ public class GraphApi {
    */
   Collection<Node> getEntailment(Node parent, RelationshipType type, Direction direction) {
     Set<Node> entailment = new HashSet<>();
-    for (Path path : graph.getGraphDb().traversalDescription().depthFirst()
+    for (Path path : graphDb.traversalDescription().depthFirst()
         .relationships(type, direction)
         .evaluator(Evaluators.fromDepth(1)).evaluator(Evaluators.all()).traverse(parent)) {
       entailment.add(path.endNode());
@@ -154,8 +156,6 @@ public class GraphApi {
    *         in the graph.
    */
   public Set<Relationship> getSelfLoops() {
-    GraphDatabaseService graphDb = graph.getGraphDb();
-
     Set<Relationship> result = new HashSet<Relationship>();
 
     for (Relationship n : GlobalGraphOperations.at(graphDb).getAllRelationships()) {
@@ -165,5 +165,7 @@ public class GraphApi {
     }
     return result;
   }
+  
+  
 
 }

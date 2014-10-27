@@ -63,7 +63,7 @@ public class GraphApiInferredTest extends GraphTestBase {
     fuzzRole = graph.getOrCreateNode(fuzzRoleUri);
     inferredConcept = graph.getOrCreateFramedNode(fuzzRole);
     graph.getOrCreateRelationship(fuzzRole, fizzRole, DynamicRelationshipType.withName("birnlex_17"));
-    this.graphApi = new GraphApi(graph);
+    this.graphApi = new GraphApi(graph, graphDb);
   }
 
   @Test

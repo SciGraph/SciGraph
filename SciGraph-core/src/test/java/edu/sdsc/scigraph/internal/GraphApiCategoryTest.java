@@ -54,7 +54,7 @@ public class GraphApiCategoryTest extends GraphTestBase {
     c = graph.getOrCreateNode(uri3);
     c.addLabel(OwlLabels.OWL_CLASS);
     graph.getOrCreateRelationship(a, b, OwlRelationships.RDF_SUBCLASS_OF);
-    this.graphApi = new GraphApi(graph);
+    this.graphApi = new GraphApi(graph, graphDb);
   }
 
   @Test
