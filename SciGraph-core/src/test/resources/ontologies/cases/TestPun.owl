@@ -1,0 +1,7 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestPun
+Declaration(ObjectProperty(:p))
+ObjectPropertyAssertion(:p :i :j)
+SubClassOf(:i :k)
+)
