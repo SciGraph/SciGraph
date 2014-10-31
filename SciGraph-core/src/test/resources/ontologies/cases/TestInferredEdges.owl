@@ -1,0 +1,27 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestInferredEdges
+
+# primitive hierarchy
+SubClassOf(:a :root)
+SubClassOf(:b :a)
+SubClassOf(:c :b)
+SubClassOf(:d :c)
+SubClassOf(:e :d)
+
+# equivalence axioms sufficient to build complete hierarchy
+EquivalentClasses(:ax ObjectSomeValuesFrom(:p :a))
+EquivalentClasses(:bx ObjectSomeValuesFrom(:p :b))
+EquivalentClasses(:cx ObjectSomeValuesFrom(:p :c))
+EquivalentClasses(:dx ObjectSomeValuesFrom(:p :d))
+EquivalentClasses(:ex ObjectSomeValuesFrom(:p :e))
+
+# derived partially asserted hierarchy
+
+SubClassOf(:ax :root)
+SubClassOf(:bx :ax)
+SubClassOf(:cx :bx)
+SubClassOf(:dx :root)   ## link to be repaired
+SubClassOf(:ex :dx)
+
+)
