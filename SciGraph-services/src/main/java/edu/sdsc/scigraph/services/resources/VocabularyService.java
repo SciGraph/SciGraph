@@ -59,6 +59,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.lucene.ExactAnalyzer;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTO;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTOLite;
 import edu.sdsc.scigraph.services.api.vocabulary.Completion;
@@ -76,6 +77,7 @@ public class VocabularyService extends BaseResource {
 
   private final Vocabulary vocabulary;
   private final DozerBeanMapper mapper;
+  private final CurieUtil curieUtil;
 
   private static final Analyzer analyzer = new ExactAnalyzer();
 
@@ -83,7 +85,12 @@ public class VocabularyService extends BaseResource {
 
     @Override
     public ConceptDTO apply(Concept input) {
-      return mapper.map(input, ConceptDTO.class);
+      ConceptDTO dto =  mapper.map(input, ConceptDTO.class);
+      Optional<String> curie = curieUtil.getCurie(dto.getUri());
+      if (curie.isPresent()) {
+        dto.setCurie(curie.get());
+      }
+      return dto;
     }
 
   };
@@ -92,15 +99,21 @@ public class VocabularyService extends BaseResource {
 
     @Override
     public ConceptDTOLite apply(Concept input) {
-      return mapper.map(input, ConceptDTOLite.class);
+      ConceptDTOLite dto =  mapper.map(input, ConceptDTOLite.class);
+      Optional<String> curie = curieUtil.getCurie(dto.getUri());
+      if (curie.isPresent()) {
+        dto.setCurie(curie.get());
+      }
+      return dto;
     }
 
   };
 
   @Inject
-  VocabularyService(Vocabulary vocabulary, DozerBeanMapper mapper) {
+  VocabularyService(Vocabulary vocabulary, DozerBeanMapper mapper, CurieUtil curieUtil) {
     this.vocabulary = vocabulary;
     this.mapper = mapper;
+    this.curieUtil = curieUtil;
   }
 
   @GET
@@ -115,7 +128,7 @@ public class VocabularyService extends BaseResource {
   public Object findByUri(
       @ApiParam( value = "URI to find", required = true )
       @PathParam("uri") String uri,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) throws Exception {
     Optional<Concept> concept = vocabulary.getConceptFromUri(uri);
     if (concept.isPresent()) {
@@ -142,9 +155,9 @@ public class VocabularyService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object findById(
-      @ApiParam( value = "ID to find", required = true, defaultValue = "DOID:4")
+      @ApiParam( value = "ID to find", required = true)
       @PathParam("id") String id,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) throws Exception {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     List<Concept> concepts = newArrayList(vocabulary.getConceptFromId(query));
@@ -199,28 +212,28 @@ public class VocabularyService extends BaseResource {
   }
 
   @GET
-  @Path("/prefix/{prefix}")
+  @Path("/autocomplete/{term}")
   @ApiOperation(value = "Find a concept by its prefix",
   notes = "This resource is designed for autocomplete services.",
   response = Concept.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object findByPrefix(
-      @ApiParam( value = "Prefix to find", required = true )
-      @PathParam("prefix") String prefix,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = "Term prefix to find", required = true )
+      @PathParam("term") String termPrefix,
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") IntParam limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
-      @ApiParam( value = "Ontologies to search (defaults to all)", required = false )
-      @QueryParam("ontology") List<String> ontologies,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
+      @QueryParam("prefix") List<String> prefixes,
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
-    Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(prefix).
+    Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(termPrefix).
         categories(categories).
-        ontologies(ontologies).
+        prefixes(prefixes).
         includeSynonyms(searchSynonyms).
         limit(limit.get());
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
@@ -244,19 +257,19 @@ public class VocabularyService extends BaseResource {
   public Object findByTerm(
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") int limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
-      @ApiParam( value = "Ontologies to search (defaults to all)", required = false )
-      @QueryParam("ontology") List<String> ontologies,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
+      @QueryParam("prefix") List<String> prefixes,
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
-        ontologies(ontologies).
+        prefixes(prefixes).
         includeSynonyms(searchSynonyms).
         limit(limit);
     List<Concept> concepts = vocabulary.getConceptsFromTerm(builder.build());
@@ -283,19 +296,19 @@ public class VocabularyService extends BaseResource {
   public Object searchByTerm(
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") int limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
-      @ApiParam( value = "Ontologies to search (defaults to all)", required = false )
-      @QueryParam("ontology") List<String> ontologies,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
+      @QueryParam("prefix") List<String> prefixes,
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
-        ontologies(ontologies).
+        prefixes(prefixes).
         includeSynonyms(searchSynonyms).
         limit(limit);
     List<Concept> concepts = vocabulary.searchConcepts(builder.build());
@@ -318,9 +331,9 @@ public class VocabularyService extends BaseResource {
   public Object suggestFromTerm(
       @ApiParam( value = "Mispelled term", required = true )
       @PathParam("term") String term,
-      @ApiParam( value = "Result count limit", required = false )
+      @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("1") int limit,
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit));
     SuggestionWrapper wrapper = new SuggestionWrapper(suggestions);
@@ -336,7 +349,7 @@ public class VocabularyService extends BaseResource {
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getCategories(
-      @ApiParam( value = "JSONP callback", required = false )
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     CategoryWrapper categories = new CategoryWrapper(vocabulary.getAllCategories());
     GenericEntity<CategoryWrapper> response = new GenericEntity<CategoryWrapper>(categories){};
@@ -344,16 +357,16 @@ public class VocabularyService extends BaseResource {
   }
 
   @GET
-  @Path("/ontologies")
-  @ApiOperation(value = "Get all ontologies",
-  notes = "Ontologies can be used to limit results",
+  @Path("/prefixes")
+  @ApiOperation(value = "Get all CURIE prefixes",
+  notes = "CURIE prefixes can be used to limit results",
   response = String.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getOntologies(
-      @ApiParam( value = "JSONP callback", required = false )
+  public Object getCuriePrefixes(
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") @DefaultValue("fn") String callback) {
-    OntologyWrapper ontologies = new OntologyWrapper(vocabulary.getAllOntologies());
+    OntologyWrapper ontologies = new OntologyWrapper(vocabulary.getAllCuriePrefixes());
     GenericEntity<OntologyWrapper> response = new GenericEntity<OntologyWrapper>(ontologies){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }

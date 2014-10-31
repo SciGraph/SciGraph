@@ -26,10 +26,6 @@
   <artifactId>scigraph-services</artifactId>
   <name>SciGraph - services</name>
 
-  <properties>
-    <dropwizard.version>0.7.1</dropwizard.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>io.dropwizard</groupId>
@@ -67,6 +63,17 @@
     <dependency>
       <groupId>edu.sdsc</groupId>
       <artifactId>scigraph-core</artifactId>
+      <version>1.1-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>slf4j-log4j12</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>edu.sdsc</groupId>
+      <artifactId>scigraph-entity</artifactId>
       <version>1.1-SNAPSHOT</version>
       <exclusions>
         <exclusion>

@@ -117,9 +117,8 @@ public class ReachabilityIndex {
 
     long startTime = System.currentTimeMillis();
     Set<Entry<Long, Integer>> hopCoverages = getHopCoverages(nodePredicate);
-    long endTime = System.currentTimeMillis();
-    logger.info(format("Takes %d second(s) to calculate HopCoverage",
-        TimeUnit.MILLISECONDS.toSeconds(endTime - startTime)));
+    logger.info(format("Calculated hop coverage in %d second(s)",
+        TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)));
 
     InMemoryReachabilityIndex inMemoryIndex = new InMemoryReachabilityIndex();
 
@@ -157,9 +156,7 @@ public class ReachabilityIndex {
       tx.success();
     }
 
-    endTime = System.currentTimeMillis();
-
-    logger.info("InMemoryReachability index building time: " + ((endTime - startTime) / 1000)
+    logger.info("Built an InMemoryReachability index in " + ((System.currentTimeMillis() - startTime) / 1000)
         + " sec(s).");
     commitIndexToGraph(inMemoryIndex);
     logger.info("Reachability index created.");

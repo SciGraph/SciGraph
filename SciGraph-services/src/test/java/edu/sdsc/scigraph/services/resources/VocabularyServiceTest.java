@@ -37,6 +37,7 @@ import com.google.common.base.Optional;
 import com.sun.jersey.api.client.UniformInterfaceException;
 
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 public class VocabularyServiceTest {
@@ -44,10 +45,12 @@ public class VocabularyServiceTest {
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
 
   private final Concept hippocampus = mock(Concept.class);
+  
+  private static final CurieUtil curieUtil = mock(CurieUtil.class);
 
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
-  .addResource(new VocabularyService(vocabulary, new DozerBeanMapper()))
+  .addResource(new VocabularyService(vocabulary, new DozerBeanMapper(), curieUtil))
   .build();
 
   @Before

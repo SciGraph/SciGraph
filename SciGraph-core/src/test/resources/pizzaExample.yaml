@@ -1,0 +1,25 @@
+ontologyConfiguration:
+    graphLocation: target/pizzaGraph
+
+ontologyUrls:
+  - src/test/resources/ontologies/pizza.owl
+
+categories:
+    http://www.co-ode.org/ontologies/pizza/pizza.owl#NamedPizza : pizza
+    http://www.co-ode.org/ontologies/pizza/pizza.owl#PizzaTopping : topping
+
+mappedProperties:
+  - name: label
+    properties:
+    - http://www.w3.org/2000/01/rdf-schema#label
+  - name: comment
+    properties:
+    - http://www.w3.org/2000/01/rdf-schema#comment
+
+indexedNodeProperties:
+  - label
+  - fragment
+
+exactNodeProperties:
+  - label
+  - synonym

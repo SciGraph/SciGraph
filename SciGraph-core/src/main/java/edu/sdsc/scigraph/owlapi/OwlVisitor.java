@@ -180,8 +180,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         URI uri = Graph.getURI(property);
 
         RelationshipType type = DynamicRelationshipType.withName(GraphUtil.getFragment(uri));
-        Relationship r = graph.getOrCreateRelationship(subject, object, type, property);
-        r.setProperty(CommonProperties.TYPE, OWLAnnotationAssertionAxiom.class.getSimpleName());
+        graph.getOrCreateRelationship(subject, object, type, property);
       }
     } else {
       logger.fine("Ignoring non IRI assertion axiom: " + axiom.toString());
@@ -254,7 +253,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectIntersectionOf desc) {
     Node subjectNode = graph.getOrCreateNode(getUri(desc));
-    graph.setProperty(subjectNode, CommonProperties.TYPE, OWLObjectIntersectionOf.class.getSimpleName());
+    subjectNode.addLabel(OwlLabels.OWL_INTERSECTION_OF);
     graph.setProperty(subjectNode, NodeProperties.ANONYMOUS, true);
     for (OWLClassExpression expression: desc.getOperands()) {
       Node object = graph.getOrCreateNode(getUri(expression));
@@ -266,7 +265,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectUnionOf desc) {
     Node subjectNode = graph.getOrCreateNode(getUri(desc));
-    graph.setProperty(subjectNode, CommonProperties.TYPE, OWLObjectUnionOf.class.getSimpleName());
+    subjectNode.addLabel(OwlLabels.OWL_UNION_OF);
     graph.setProperty(subjectNode, NodeProperties.ANONYMOUS, true);
     for (OWLClassExpression expression: desc.getOperands()) {
       Node object = graph.getOrCreateNode(getUri(expression));
@@ -327,7 +326,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectComplementOf desc) {
     Node subject = graph.getOrCreateNode(getUri(desc));
-    graph.setProperty(subject, CommonProperties.TYPE, OWLObjectComplementOf.class.getSimpleName());
+    subject.addLabel(OwlLabels.OWL_COMPLEMENT_OF);
     graph.setProperty(subject, NodeProperties.ANONYMOUS, true);
     Node operand = graph.getOrCreateNode(getUri(desc.getOperand()));
     graph.getOrCreateRelationship(subject, operand, EdgeType.REL);
@@ -376,28 +375,28 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectMaxCardinality desc) {
     Node restriction = addCardinalityRestriction(desc);
-    graph.setProperty(restriction, CommonProperties.TYPE, OWLObjectMaxCardinality.class.getSimpleName());
+    restriction.addLabel(OwlLabels.OWL_MAX_CARDINALITY); 
     return null;
   }
 
   @Override
   public Void visit(OWLObjectMinCardinality desc) {
     Node restriction = addCardinalityRestriction(desc);
-    graph.setProperty(restriction, CommonProperties.TYPE, OWLObjectMinCardinality.class.getSimpleName());
+    restriction.addLabel(OwlLabels.OWL_MIN_CARDINALITY);
     return null;
   }
 
   @Override
   public Void visit(OWLObjectExactCardinality desc) {
     Node restriction = addCardinalityRestriction(desc);
-    graph.setProperty(restriction, CommonProperties.TYPE, OWLObjectExactCardinality.class.getSimpleName());
+    restriction.addLabel(OwlLabels.OWL_QUALIFIED_CARDINALITY);
     return null;
   }
 
   @Override
   public Void visit(OWLObjectSomeValuesFrom desc) {
     Node restriction = graph.getOrCreateNode(getUri(desc));
-    graph.setProperty(restriction, CommonProperties.TYPE, OWLObjectSomeValuesFrom.class.getSimpleName());
+    restriction.addLabel(OwlLabels.OWL_SOME_VALUES_FROM);
     if (!desc.getProperty().isAnonymous()) {
       Node property = graph.getOrCreateNode(getUri(desc.getProperty()));
       graph.getOrCreateRelationship(restriction, property, OwlRelationships.PROPERTY);
@@ -410,7 +409,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectAllValuesFrom desc) {
     Node restriction = graph.getOrCreateNode(getUri(desc));
-    graph.setProperty(restriction, CommonProperties.TYPE, OWLObjectAllValuesFrom.class.getSimpleName());
+    restriction.addLabel(OwlLabels.OWL_ALL_VALUES_FROM);
     if (!desc.getProperty().isAnonymous()) {
       Node property = graph.getOrCreateNode(getUri(desc.getProperty()));
       graph.getOrCreateRelationship(restriction, property, OwlRelationships.PROPERTY);

@@ -20,6 +20,7 @@ import static com.google.common.collect.Iterables.getFirst;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -38,14 +39,25 @@ public class CurieUtil {
 
   private final Map<String, String> curieMap;
   private final Multimap<String, String> uriMap;
+  private final Collection<String> prefixes;
 
   @Inject
   CurieUtil(@Named("neo4j.curieMap") Map<String, String> curieMap) {
     this.curieMap = ImmutableMap.copyOf(curieMap);
     uriMap = HashMultimap.create();
+    prefixes = new HashSet<>();
     for (Entry<String, String> curie: curieMap.entrySet()) {
       uriMap.put(curie.getValue(), curie.getKey());
+      prefixes.add(curie.getValue());
     }
+  }
+
+  public Collection<String> getPrefixes() {
+    return prefixes;
+  }
+
+  public Collection<String> getAllExpansions(final String curie) {
+    return uriMap.get(curie);
   }
 
   public Optional<String> getCurie(final String uri) {

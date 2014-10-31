@@ -27,6 +27,7 @@
   <modules>
     <module>SciGraph-core</module>
     <module>SciGraph-services</module>
+    <module>scigraph-entity</module>
   </modules>
 
   <prerequisites>
@@ -46,8 +47,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+    <dropwizard.version>0.7.1</dropwizard.version>
     <guice.version>3.0</guice.version>
+    <blueprints.version>2.6.0</blueprints.version>
   </properties>
 
   <build>
@@ -106,6 +108,9 @@
           <excludes>
             <exclude>**/LICENSE</exclude>
             <exclude>**/README.md</exclude>
+            <exclude>**/*.properties</exclude>
+            <exclude>**/*.txt</exclude>
+            <exclude>**/*.yml</exclude>
             <exclude>src/test/resources/**</exclude>
             <exclude>src/main/resources/**</exclude>
           </excludes>

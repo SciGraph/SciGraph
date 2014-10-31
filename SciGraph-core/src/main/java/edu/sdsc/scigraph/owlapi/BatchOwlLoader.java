@@ -73,8 +73,9 @@ public class BatchOwlLoader {
   @Inject
   PostpostprocessorProvider postprocessorProvider;
 
-  BatchOwlLoader() {
+  static {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
+    OwlApiUtils.removeOboParser();
   }
 
   void loadOntology() {

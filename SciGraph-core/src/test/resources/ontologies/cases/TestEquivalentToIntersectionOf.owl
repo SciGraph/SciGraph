@@ -1,6 +1,6 @@
 Prefix(:=<http://example.org/>)
 
-Ontology(:TestSubclass
+Ontology(:TestEquivalentToIntersectionOf
 Declaration(ObjectProperty(:p))
 EquivalentClasses(:definedClass ObjectIntersectionOf( :genus ObjectSomeValuesFrom(:p :fillerClass)))
 )

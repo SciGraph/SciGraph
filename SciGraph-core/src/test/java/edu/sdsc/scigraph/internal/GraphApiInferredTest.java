@@ -23,9 +23,9 @@ import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 
-import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
@@ -54,7 +54,7 @@ public class GraphApiInferredTest extends GraphTestBase {
     fizz = graph.getOrCreateNode(fizzUri);
     fizzConcept = graph.getOrCreateFramedNode(fizz);
     Node anon = graph.getOrCreateNode(BASE_URI + "#anon");
-    graph.setProperty(anon, CommonProperties.TYPE, "OWLObjectSomeValuesFrom");
+    anon.addLabel(OwlLabels.OWL_SOME_VALUES_FROM);
     graph.getOrCreateRelationship(fizz, anon, OwlRelationships.OWL_EQUIVALENT_CLASS);
     Node birnlex17 = graph.getOrCreateNode("http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17");
     graph.getOrCreateRelationship(anon, birnlex17, OwlRelationships.PROPERTY);
@@ -63,7 +63,7 @@ public class GraphApiInferredTest extends GraphTestBase {
     fuzzRole = graph.getOrCreateNode(fuzzRoleUri);
     inferredConcept = graph.getOrCreateFramedNode(fuzzRole);
     graph.getOrCreateRelationship(fuzzRole, fizzRole, DynamicRelationshipType.withName("birnlex_17"));
-    this.graphApi = new GraphApi(graph);
+    this.graphApi = new GraphApi(graph, graphDb);
   }
 
   @Test

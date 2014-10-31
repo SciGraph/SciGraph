@@ -46,7 +46,7 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
  * Cache remote IRIs as a local file.
  */
 @Singleton
-class FileCachingIRIMapper implements OWLOntologyIRIMapper {
+public class FileCachingIRIMapper implements OWLOntologyIRIMapper {
 
   private static final Logger logger = Logger.getLogger(FileCachingIRIMapper.class.getName());
 

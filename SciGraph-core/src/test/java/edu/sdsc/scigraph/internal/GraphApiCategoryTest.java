@@ -25,8 +25,8 @@ import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
@@ -48,13 +48,13 @@ public class GraphApiCategoryTest extends GraphTestBase {
   public void addNodes() throws Exception {
     graph = new Graph(graphDb);
     a = graph.getOrCreateNode(uri);
-    graph.setProperty(a, NodeProperties.TYPE, "OWLClass");
+    a.addLabel(OwlLabels.OWL_CLASS);
     b = graph.getOrCreateNode(uri2);
-    graph.setProperty(b, NodeProperties.TYPE, "OWLClass");
+    b.addLabel(OwlLabels.OWL_CLASS);
     c = graph.getOrCreateNode(uri3);
-    graph.setProperty(c, NodeProperties.TYPE, "OWLClass");
+    c.addLabel(OwlLabels.OWL_CLASS);
     graph.getOrCreateRelationship(a, b, OwlRelationships.RDF_SUBCLASS_OF);
-    this.graphApi = new GraphApi(graph);
+    this.graphApi = new GraphApi(graph, graphDb);
   }
 
   @Test

@@ -26,7 +26,6 @@ public class CommonProperties {
 
   public static final String URI = "uri";
   public static final String FRAGMENT = "fragment";
-  public static final String TYPE = "type"; // TODO: Could be replaced by neo4j 2.0 labels
   public static final String NEGATED = "negated";
   public static final String PARENT_ONTOLOGY = "parentOntology";
   public static final String ONTOLOGY = "ontology";

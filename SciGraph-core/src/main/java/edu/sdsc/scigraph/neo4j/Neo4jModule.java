@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -47,7 +46,6 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
-import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4j;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 import edu.sdsc.scigraph.vocabulary.VocabularyNeo4jImpl;
@@ -68,20 +66,7 @@ public class Neo4jModule extends AbstractModule {
     bind(String.class).annotatedWith(Names.named("neo4j.location")).toInstance(graphLocation.get());
     bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(Names.named("neo4j.curieMap")).toInstance(curieMap);
     bind(CurieUtil.class);
-  }
-
-  @Provides
-  @Singleton
-  Vocabulary getVocabulary(Graph graph, @Named("neo4j.location") String graphLocation, CurieUtil util)
-      throws IOException {
-    return new VocabularyNeo4jImpl(graph, graphLocation, util);
-  }
-
-  @Provides
-  @Singleton
-  @IndicatesNeo4j
-  AtomicBoolean getInTransaction() {
-    return new AtomicBoolean();
+    bind(Vocabulary.class).to(VocabularyNeo4jImpl.class).in(Singleton.class);
   }
 
   private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
@@ -92,8 +77,6 @@ public class Neo4jModule extends AbstractModule {
   private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
       "lucene", "analyzer", VocabularyIndexAnalyzer.class.getName());
 
-  
-  
   private static void setupIndex(AutoIndexer<?> index, Set<String> properties) {
     for (String property : properties) {
       index.startAutoIndexingProperty(property);

@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.owlapi;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
@@ -37,7 +38,18 @@ public class CurieUtilTest {
     Map<String, String> map = new HashMap<>();
     map.put("http://example.org/a_", "A");
     map.put("http://example.org/A_", "A");
+    map.put("http://example.org/B_", "B");
     util = new CurieUtil(map);
+  }
+
+  @Test
+  public void testGetCuriePrefixes() {
+    assertThat(util.getPrefixes(), hasItems("A", "B"));
+  }
+
+  @Test
+  public void testGetAllExpansions() {
+    assertThat(util.getAllExpansions("A"), hasItems("http://example.org/a_", "http://example.org/A_"));
   }
 
   @Test

@@ -47,6 +47,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spell.LuceneDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
@@ -76,7 +77,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   private final Graph graph;
   private final SpellChecker spellChecker;
-  private final QueryParser parser;
   private final CurieUtil curieUtil;
 
   @Inject
@@ -98,10 +98,11 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     } else {
       spellChecker = null;
     }
+  }
 
-    parser =
-        new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
-            new VocabularyQueryAnalyzer());
+  static QueryParser getQueryParser() {
+    return new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
+        new VocabularyQueryAnalyzer());
   }
 
   static String formatQuery(String format, Object... args) {
@@ -114,7 +115,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }).toArray());
   }
 
-  static void addCommonConstraints(BooleanQuery indexQuery, Query query) {
+  void addCommonConstraints(BooleanQuery indexQuery, Query query) {
     BooleanQuery categoryQueries = new BooleanQuery();
     for (String category : query.getCategories()) {
       categoryQueries.add(new TermQuery(new Term(Concept.CATEGORY, category)), Occur.SHOULD);
@@ -123,13 +124,15 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       indexQuery.add(new BooleanClause(categoryQueries, Occur.MUST));
     }
 
-    BooleanQuery ontoloogyQueries = new BooleanQuery();
-    for (String ontology : query.getOntologies()) {
-      ontoloogyQueries.add(new TermQuery(new Term(CommonProperties.ONTOLOGY, ontology)),
-          Occur.SHOULD);
+    BooleanQuery prefixQueries = new BooleanQuery();
+    for (String curie : query.getPrefixes()) {
+      for (String prefix : curieUtil.getAllExpansions(curie)) {
+        prefixQueries.add(new WildcardQuery(new Term(CommonProperties.URI, prefix + "*")),
+            Occur.SHOULD);
+      }
     }
-    if (!query.getOntologies().isEmpty()) {
-      indexQuery.add(new BooleanClause(ontoloogyQueries, Occur.MUST));
+    if (!query.getPrefixes().isEmpty()) {
+      indexQuery.add(new BooleanClause(prefixQueries, Occur.MUST));
     }
   }
 
@@ -150,6 +153,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public Collection<Concept> getConceptFromId(Query query) {
+    QueryParser parser = getQueryParser();
     String idQuery = StringUtils.strip(query.getInput(), "\"");
     Collection<String> fullUris = curieUtil.getFullUri(idQuery);
     idQuery = QueryParser.escape(idQuery);
@@ -173,6 +177,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public List<Concept> getConceptsFromPrefix(Query query) {
+    QueryParser parser = getQueryParser();
     BooleanQuery finalQuery = new BooleanQuery();
     try {
       BooleanQuery subQuery = new BooleanQuery();
@@ -180,8 +185,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
       Collection<String> fullUris = curieUtil.getFullUri(query.getInput());
       for (String fullUri: fullUris) {
-          subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri))),
-              Occur.SHOULD);
+        subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri))),
+            Occur.SHOULD);
       }
       subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
           Occur.SHOULD);
@@ -207,6 +212,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public List<Concept> searchConcepts(Query query) {
+    QueryParser parser = getQueryParser();
     BooleanQuery finalQuery = new BooleanQuery();
     try {
       if (query.isIncludeSynonyms()) {
@@ -231,6 +237,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public List<Concept> getConceptsFromTerm(Query query) {
+    QueryParser parser = getQueryParser();
     String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
     BooleanQuery finalQuery = new BooleanQuery();
     try {
@@ -280,21 +287,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   @Override
-  public Set<String> getAllOntologies() {
-    return Suppliers.memoize(new Supplier<Set<String>>() {
-      @Override
-      public Set<String> get() {
-        ExecutionResult result =
-            graph.getExecutionEngine().execute(
-                "START n = node(*) WHERE has(n.ontology) RETURN distinct(n.ontology)");
-        Set<String> ontologies = new HashSet<>();
-        while (result.iterator().hasNext()) {
-          Map<String, Object> col = result.iterator().next();
-          ontologies.add((String) col.get("(n.ontology)"));
-        }
-        return ontologies;
-      }
-    }).get();
+  public Collection<String> getAllCuriePrefixes() {
+    return curieUtil.getPrefixes();
   }
 
   @Override

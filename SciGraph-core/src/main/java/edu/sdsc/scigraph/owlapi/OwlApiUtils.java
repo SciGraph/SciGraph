@@ -16,7 +16,11 @@
 package edu.sdsc.scigraph.owlapi;
 
 import java.net.URI;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
@@ -88,4 +92,17 @@ public class OwlApiUtils {
     return property.asOWLAnnotationProperty().getIRI().toURI();
   }
 
+  @Deprecated
+  public static void removeOboParser() {
+    silenceOboParser();
+  }
+  
+  public static void silenceOboParser() {
+    OWLManager.createOWLOntologyManager();
+    Logger logger = Logger.getLogger("org.obolibrary");
+    logger.setLevel(Level.SEVERE);
+    for(Handler handler : logger.getHandlers()) {
+      handler.setLevel(Level.SEVERE);
+    }
+  }
 }
