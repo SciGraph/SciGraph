@@ -19,6 +19,7 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -57,8 +58,8 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class BatchOwlLoader {
 
@@ -75,7 +76,7 @@ public class BatchOwlLoader {
 
   static {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
-    OwlApiUtils.removeOboParser();
+    OwlApiUtils.silenceOboParser();
   }
 
   void loadOntology() {
@@ -142,6 +143,8 @@ public class BatchOwlLoader {
       }).annotatedWith(Names.named("exactProperties")).toInstance(config.getExactNodeProperties());
       bind(new TypeLiteral<Map<String, String>>() {
       }).annotatedWith(Names.named("owl.categories")).toInstance(config.getCategories());
+      bind(new TypeLiteral<List<MappedProperty>>() {
+      }).annotatedWith(Names.named("owl.mappedProperties")).toInstance(config.getMappedProperties());
     }
 
     @Provides
@@ -153,18 +156,11 @@ public class BatchOwlLoader {
 
     @Provides
     @Singleton
-    BatchOwlVisitor getBatchVisitor(OWLOntologyWalker walker, BatchGraph graph) {
-      return new BatchOwlVisitor(walker, graph, config.getMappedProperties());
-    }
-
-    @Provides
-    @Singleton
-    OWLOntologyWalker getOntologyWalker(FileCachingIRIMapper mapper)
+    OWLOntologyWalker getOntologyWalker()
         throws OWLOntologyCreationException {
       logger.info("Loading ontologies with owlapi...");
       Stopwatch timer = Stopwatch.createStarted();
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-      //manager.addIRIMapper(mapper);
       for (String url : config.getOntologyUrls()) {
         logger.info("Loading " + url);
         if (url.startsWith("http://") || url.startsWith("https://")) {
@@ -172,6 +168,7 @@ public class BatchOwlLoader {
         } else {
           manager.loadOntologyFromOntologyDocument(new File(url));
         }
+        logger.info("Finished loading " + url);
       }
       logger.info(format("loaded ontologies with owlapi in %d seconds",
           timer.elapsed(TimeUnit.SECONDS)));
@@ -183,7 +180,7 @@ public class BatchOwlLoader {
   public static void load(OwlLoadConfiguration config) {
     Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getOntologyConfiguration()));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
-    logger.info("Starting to load ontologies...");
+    logger.info("Starting to process ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
     loader.loadOntology();
     logger.info(format("Processing took %d minutes", timer.elapsed(TimeUnit.MINUTES)));

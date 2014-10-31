@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
@@ -87,7 +88,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   @Inject
   public BatchOwlVisitor(OWLOntologyWalker walker, BatchGraph graph,
-      List<MappedProperty> mappedProperties) {
+      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
     super(walker);
     this.graph = graph;
     this.mappedProperties = new HashMap<>();
