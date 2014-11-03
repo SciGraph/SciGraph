@@ -15,11 +15,15 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getFragment;
+
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
-import org.semanticweb.owlapi.io.XMLUtils;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
+/***
+ * Neo4j labels for OWL / RDF axioms
+ */
 public class OwlLabels {
 
   public static final Label OWL_ANONYMOUS = DynamicLabel.label("anonymous");
@@ -64,9 +68,5 @@ public class OwlLabels {
 
   public static final Label OWL_QUALIFIED_CARDINALITY = DynamicLabel
       .label(getFragment(OWLRDFVocabulary.OWL_QUALIFIED_CARDINALITY));
-
-  private static String getFragment(OWLRDFVocabulary vocab) {
-    return XMLUtils.getNCNameSuffix(vocab.getIRI());
-  }
 
 }

@@ -15,11 +15,15 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getFragment;
+
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
-import org.semanticweb.owlapi.io.XMLUtils;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
+/***
+ * Neo4j relationships for OWL / RDF axioms
+ */
 public class OwlRelationships {
 
   public static final RelationshipType RDF_SUBCLASS_OF = DynamicRelationshipType
@@ -56,9 +60,5 @@ public class OwlRelationships {
   public static final RelationshipType PROPERTY = DynamicRelationshipType.withName("property");
   
   public static final RelationshipType CLASS = DynamicRelationshipType.withName("class");
-
-  private static String getFragment(OWLRDFVocabulary vocab) {
-    return XMLUtils.getNCNameSuffix(vocab.getIRI());
-  }
 
 }

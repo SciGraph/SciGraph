@@ -21,12 +21,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.XMLUtils;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
 
@@ -92,11 +94,10 @@ public class OwlApiUtils {
     return property.asOWLAnnotationProperty().getIRI().toURI();
   }
 
-  @Deprecated
-  public static void removeOboParser() {
-    silenceOboParser();
+  public static String getFragment(OWLRDFVocabulary vocab) {
+    return XMLUtils.getNCNameSuffix(vocab.getIRI());
   }
-  
+
   public static void silenceOboParser() {
     OWLManager.createOWLOntologyManager();
     Logger logger = Logger.getLogger("org.obolibrary");
