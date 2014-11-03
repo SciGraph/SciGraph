@@ -26,8 +26,6 @@ import static org.hamcrest.Matchers.contains;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -205,12 +203,4 @@ public class BatchGraphTest {
     assertThat(size(graphDb.getNodeById(c).getRelationships(type)), is(2));
   }
 
-  @Test
-  public void testCollectIndexProperties() {
-    System.out.println(graph.collectIndexProperties("prop1", "foo"));
-    Map<String, Object> map = new HashMap<>();
-    map.put("prop1", "foo");
-    map.put("prop2", "bar");
-    System.out.println(graph.collectIndexProperties(map));
-  }
 }

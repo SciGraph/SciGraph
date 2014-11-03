@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Named;
 
 import org.apache.lucene.analysis.StopAnalyzer;
@@ -42,7 +42,6 @@ import org.neo4j.index.lucene.unsafe.batchinsert.LuceneBatchInserterIndexProvide
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
-import org.neo4j.unsafe.batchinsert.BatchRelationship;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Maps;
@@ -51,10 +50,12 @@ import com.google.inject.Inject;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
 
-@NotThreadSafe
+@ThreadSafe
 public class BatchGraph {
 
   private static final Logger logger = Logger.getLogger(BatchGraph.class.getName());
+
+  private final static Object graphLock = new Object();
 
   private final BatchInserter inserter;
   private final BatchInserterIndexProvider indexProvider;
@@ -97,9 +98,11 @@ public class BatchGraph {
    */
   public long getNode(String id) {
     long nodeId = idMap.get(id);
-    if (!inserter.nodeExists(nodeId)) {
-      inserter.createNode(nodeId, Collections.<String, Object>emptyMap());
-      setNodeProperty(nodeId, uniqueProperty, id);
+    synchronized(graphLock) {
+      if (!inserter.nodeExists(nodeId)) {
+        inserter.createNode(nodeId, Collections.<String, Object>emptyMap());
+        setNodeProperty(nodeId, uniqueProperty, id);
+      }
     }
     return nodeId;
   }
@@ -111,27 +114,23 @@ public class BatchGraph {
    * @return true if an undirected relationship with type exists between from and to
    */
   public boolean hasRelationship(long from, long to, RelationshipType type) {
-    //return relationshipMap.containsKey(from, to, type);
-    for (BatchRelationship rel : inserter.getRelationships(from)) {
-      if ((rel.getEndNode() == to) || (rel.getStartNode() == to)
-          && rel.getType().name().equals(type.name())) {
-        return true;
-      }
-    }
-    return false;
+    return relationshipMap.containsKey(from, to, type) 
+        || relationshipMap.containsKey(to, from, type);
   }
 
   /***
    * @param from
-   * @param to
+   * @param to  
    * @param type
    * @return A new or existing relationship with type type between from and to
    */
   public long createRelationship(long from, long to, RelationshipType type) {
     if (!relationshipMap.containsKey(from, to, type)) {
-      long relationshipId =
-          inserter.createRelationship(from, to, type, Collections.<String, Object>emptyMap());
-      relationshipMap.put(from, to, type, relationshipId);
+      synchronized (graphLock) {
+        long relationshipId =
+            inserter.createRelationship(from, to, type, Collections.<String, Object>emptyMap());
+        relationshipMap.put(from, to, type, relationshipId);
+      }
     }
     return relationshipMap.get(from, to, type);
   }
@@ -150,8 +149,10 @@ public class BatchGraph {
         if (start.equals(end)) {
           continue;
         } else {
-          if (!hasRelationship(start, end, type)) {
-            relationships.add(createRelationship(start, end, type));
+          synchronized (graphLock) {
+            if (!hasRelationship(start, end, type)) {
+              relationships.add(createRelationship(start, end, type));
+            }
           }
         }
       }
@@ -181,50 +182,47 @@ public class BatchGraph {
   }
 
   Map<String, Object> collectIndexProperties(String property, Object value) {
-    Map<String, Object> indexProperties = new HashMap<>();
-    if (indexedProperties.contains(property)) {
-      indexProperties.put(property, value);
-    }
-    if (indexedExactProperties.contains(property)) {
-      indexProperties.put(property + LuceneUtils.EXACT_SUFFIX, value);
-    }
-    return indexProperties;
+    Map<String, Object> properties = new HashMap<>();
+    properties.put(property, value);
+    return collectIndexProperties(properties);
   }
 
   public void addProperty(long node, String property, Object value) {
     if (!ignoreProperty(value)) {
-      if (inserter.getNodeProperties(node).containsKey(property)) {
-        // We might be creating or updating an array - read everything into a Set<>
-        Object origValue = inserter.getNodeProperties(node).get(property);
-        Class<?> clazz = value.getClass();
-        Set<Object> valueSet = new LinkedHashSet<>();
-        if (origValue.getClass().isArray()) {
-          for (int i = 0; i < Array.getLength(origValue); i++) {
-            valueSet.add(Array.get(origValue, i));
+      synchronized(graphLock) {
+        if (inserter.getNodeProperties(node).containsKey(property)) {
+          // We might be creating or updating an array - read everything into a Set<>
+          Object origValue = inserter.getNodeProperties(node).get(property);
+          Class<?> clazz = value.getClass();
+          Set<Object> valueSet = new LinkedHashSet<>();
+          if (origValue.getClass().isArray()) {
+            for (int i = 0; i < Array.getLength(origValue); i++) {
+              valueSet.add(Array.get(origValue, i));
+            }
+          } else {
+            valueSet.add(origValue);
+          }
+          valueSet.add(value);
+
+          // Now write the set back if necessary
+          if (valueSet.size() > 1) {
+            Object newArray = Array.newInstance(clazz, valueSet.size());
+            int i = 0;
+            for (Object obj : valueSet) {
+              Array.set(newArray, i++, clazz.cast(obj));
+            }
+            Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(node));
+            properties.put(property, newArray);
+            inserter.setNodeProperties(node, properties);
+          }
+          Map<String, Object> indexProperties = collectIndexProperties(property, value);
+          if (!indexProperties.isEmpty()) {
+            logger.fine("Indexing " + indexProperties);
+            nodeIndex.add(node, indexProperties);
           }
         } else {
-          valueSet.add(origValue);
+          setNodeProperty(node, property, value);
         }
-        valueSet.add(value);
-
-        // Now write the set back if necessary
-        if (valueSet.size() > 1) {
-          Object newArray = Array.newInstance(clazz, valueSet.size());
-          int i = 0;
-          for (Object obj : valueSet) {
-            Array.set(newArray, i++, clazz.cast(obj));
-          }
-          Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(node));
-          properties.put(property, newArray);
-          inserter.setNodeProperties(node, properties);
-        }
-        Map<String, Object> indexProperties = collectIndexProperties(property, value);
-        if (!indexProperties.isEmpty()) {
-          logger.fine("Indexing " + indexProperties);
-          nodeIndex.add(node, indexProperties);
-        }
-      } else {
-        setNodeProperty(node, property, value);
       }
     }
   }
@@ -232,14 +230,18 @@ public class BatchGraph {
   public void setNodeProperty(long batchId, String property, Object value) {
     try {
       if (!ignoreProperty(value)) {
-        Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(batchId));
-        properties.put(property, value);
-        inserter.setNodeProperties(batchId, properties);
-        Map<String, Object> indexProperties =
-            collectIndexProperties(properties);
+        Map<String, Object> properties = null;
+        synchronized (graphLock) {
+          properties = Maps.newHashMap(inserter.getNodeProperties(batchId));
+          properties.put(property, value);
+          inserter.setNodeProperties(batchId, properties);
+        }
+        Map<String, Object> indexProperties = collectIndexProperties(properties);
         if (!indexProperties.isEmpty()) {
           logger.fine("Indexing " + indexProperties);
-          nodeIndex.updateOrAdd(batchId, indexProperties);
+          synchronized (graphLock) {
+            nodeIndex.updateOrAdd(batchId, indexProperties);
+          }
         }
       }
     } catch (Exception e) {
@@ -249,22 +251,30 @@ public class BatchGraph {
 
   public void setRelationshipProperty(long batchId, String property, Object value) {
     if (!ignoreProperty(value)) {
-      inserter.setRelationshipProperty(batchId, property, value);
+      synchronized (graphLock) {
+        inserter.setRelationshipProperty(batchId, property, value);
+      }
     }
   }
 
   public void setLabel(long node, Label label) {
-    inserter.setNodeLabels(node, label);
+    synchronized(graphLock) {
+      inserter.setNodeLabels(node, label);
+    }
   }
 
   public void addLabel(long node, Label label) {
-    Set<Label> labels = newHashSet(inserter.getNodeLabels(node));
-    labels.add(label);
-    inserter.setNodeLabels(node, labels.toArray(new Label[labels.size()]));
+    synchronized(graphLock) {
+      Set<Label> labels = newHashSet(inserter.getNodeLabels(node));
+      labels.add(label);
+      inserter.setNodeLabels(node, labels.toArray(new Label[labels.size()]));
+    }
   }
 
   public boolean hasLabel(long node, Label label) {
-    return contains(inserter.getNodeLabels(node), label);
+    synchronized(graphLock) {
+      return contains(inserter.getNodeLabels(node), label);
+    }
   }
 
 }
