@@ -17,6 +17,10 @@ package edu.sdsc.scigraph.neo4j;
 
 import org.neo4j.graphdb.RelationshipType;
 
+/***
+ * @deprecated This class should be replaced with {@link edu.sdsc.scigraph.owlapi.OwlRelationships}
+ */
+@Deprecated
 public enum EdgeType implements RelationshipType {
    REL, OWLObjectPropertyAssertionAxiom
 }
