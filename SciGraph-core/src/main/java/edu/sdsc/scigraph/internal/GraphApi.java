@@ -15,8 +15,8 @@
  */
 package edu.sdsc.scigraph.internal;
 
-import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.common.collect.Iterables.isEmpty;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,21 +38,19 @@ import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import com.google.common.base.Function;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class GraphApi {
 
-  private final Graph graph;
   private final GraphDatabaseService graphDb;
 
   @Inject
-  GraphApi(Graph graph, GraphDatabaseService graphDb) {
-    this.graph = graph;
+  GraphApi(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
   }
 
@@ -102,13 +100,6 @@ public class GraphApi {
     return entailment;
   }
 
-  private final Function<Node, Concept> conceptTransformer = new Function<Node, Concept>() {
-    @Override
-    public Concept apply(Node input) {
-      return graph.getOrCreateFramedNode(input);
-    }
-  };
-
   /***
    * Get "inferred" classes.
    * 
@@ -127,8 +118,8 @@ public class GraphApi {
    * @param c
    * @return The inferred classes related to c
    */
-  public Collection<Concept> getInferredClasses(Concept c) {
-    Node parent = graph.getOrCreateNode(c.getUri());
+  public Collection<Node> getInferredClasses(Concept c) {
+    Node parent = graphDb.getNodeById(c.getId());
     Collection<Node> inferredClasses = new ArrayList<>();
     for (Relationship r : parent.getRelationships(Direction.OUTGOING, OwlRelationships.OWL_EQUIVALENT_CLASS)) {
       if (r.getEndNode().hasLabel(OwlLabels.OWL_SOME_VALUES_FROM)) {
@@ -136,7 +127,7 @@ public class GraphApi {
             r.getEndNode().getRelationships(Direction.OUTGOING, OwlRelationships.PROPERTY), null);
         if (null != property
             && "http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17"
-                .equals(property.getEndNode().getProperty("uri"))) {
+            .equals(property.getEndNode().getProperty("uri"))) {
           for (Relationship bearerOf : r.getEndNode().getRelationships(Direction.OUTGOING,
               OwlRelationships.CLASS)) {
             Node role = bearerOf.getEndNode();
@@ -146,7 +137,7 @@ public class GraphApi {
         }
       }
     }
-    return transform(inferredClasses, conceptTransformer);
+    return inferredClasses;
   }
 
   /**
@@ -165,7 +156,23 @@ public class GraphApi {
     }
     return result;
   }
-  
-  
+
+  public TinkerGraph getNeighbors(Node node, int distance, Set<DirectedRelationshipType> types/*, Optional<Predicate<Node>> includeNode*/) {
+    TraversalDescription description = graphDb.traversalDescription().depthFirst().evaluator(Evaluators.toDepth(distance));
+    for (DirectedRelationshipType type: types) {
+      description = description.relationships(type.getType(), type.getDirection());
+    }
+    TinkerGraph graph = new TinkerGraph();
+    for (Path path: description.traverse(node)) {
+      Relationship relationship = path.lastRelationship();
+      if (null != relationship) {
+        TinkerGraphUtil.addEdge(graph, relationship);
+      }
+    }
+    if (isEmpty(graph.getEdges())) {
+      TinkerGraphUtil.addNode(graph, node);
+    }
+    return graph;
+  }
 
 }
