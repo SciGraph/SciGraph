@@ -61,7 +61,7 @@ public class BatchGraph {
   private final BatchInserterIndexProvider indexProvider;
   private final BatchInserterIndex nodeIndex;
 
-  public final String uniqueProperty;
+  private final String uniqueProperty;
 
   private final Set<String> indexedProperties;
   private final Set<String> indexedExactProperties;
