@@ -69,15 +69,18 @@ public class BatchGraph {
   private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
       "lucene", "analyzer", VocabularyIndexAnalyzer.class.getName());
 
-  IdMap idMap = new IdMap();
+  private final IdMap idMap;
 
-  RelationshipMap relationshipMap = new RelationshipMap();
+  private final RelationshipMap relationshipMap;
 
   @Inject
   public BatchGraph(BatchInserter inserter, @Named("uniqueProperty") String uniqueProperty,
       @Named("indexedProperties") Set<String> indexedProperties,
-      @Named("exactProperties") Set<String> exactIndexedProperties) {
+      @Named("exactProperties") Set<String> exactIndexedProperties,
+      IdMap idMap, RelationshipMap relationshioMap) {
     this.inserter = inserter;
+    this.idMap = idMap;
+    this.relationshipMap = relationshioMap;
     indexProvider = new LuceneBatchInserterIndexProvider(inserter);
     nodeIndex = indexProvider.nodeIndex("node_auto_index", INDEX_CONFIG);
     this.uniqueProperty = uniqueProperty;

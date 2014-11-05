@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.neo4j;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,8 @@ import java.util.Set;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -90,6 +93,13 @@ public class Neo4jModule extends AbstractModule {
       setupIndex(graphDb.index().getNodeAutoIndexer(), NODE_PROPERTIES_TO_INDEX);
       tx.success();
     }
+  }
+  
+  @Provides
+  @Singleton
+  DB getMaker(@Named("neo4j.location") String neo4jLocation) {
+    File dbLocation = new File(neo4jLocation, "SciGraphIdMap");
+    return DBMaker.newFileDB(dbLocation).closeOnJvmShutdown().transactionDisable().mmapFileEnable().make();
   }
   
   @Provides

@@ -15,16 +15,18 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-class BatchEdge {
+class BatchEdge implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   private final Long start;
   private final Long end;
   private final String type;
 
   public BatchEdge(long start, long end, String type) {
-    super();
     this.start = start;
     this.end = end;
     this.type = type;
@@ -56,7 +58,11 @@ class BatchEdge {
     } else {
       return false;
     }
+  }
 
+  @Override
+  public String toString() {
+    return String.format("%s (%d-%d)", type, start, end);
   }
 
 }

@@ -60,7 +60,7 @@ public class BatchGraphTest {
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     graph =
         new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
-            newHashSet("prop1"));
+            newHashSet("prop1"), new IdMap(), new RelationshipMap());
     foo = graph.getNode("http://example.org/foo");
   }
 

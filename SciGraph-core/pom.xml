@@ -117,6 +117,16 @@
       <artifactId>commons-validator</artifactId>
       <version>1.4.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.semanticweb.elk</groupId>
+      <artifactId>elk-owlapi</artifactId>
+      <version>0.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mapdb</groupId>
+      <artifactId>mapdb</artifactId>
+      <version>1.0.6</version>
+    </dependency>
   </dependencies>
 
   <build>

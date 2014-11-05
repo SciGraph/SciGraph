@@ -35,6 +35,8 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -57,6 +59,8 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.neo4j.IdMap;
+import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class BatchOwlVisitorTest {
@@ -72,11 +76,12 @@ public class BatchOwlVisitorTest {
   public static void loadOwl() throws Exception {
     path = Files.createTempDirectory("SciGraph-BatchTest");
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
+    DB maker = DBMaker.newMemoryDB().make();
     batchGraph = new BatchGraph(inserter, CommonProperties.URI, newHashSet(CommonProperties.URI,
         NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
         CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX),
-        newHashSet(""));
+        newHashSet(""), new IdMap(maker), new RelationshipMap(maker));
     String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     IRI iri = IRI.create(uri);
