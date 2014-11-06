@@ -172,6 +172,8 @@ public class BatchOwlLoader {
     OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c').trim()),
         OwlLoadConfiguration.class);
     load(config);
+    // TODO: Is Guice causing this to hang? #44
+    System.exit(0);
   }
 
 }
