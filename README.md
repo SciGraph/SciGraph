@@ -58,12 +58,12 @@ Run the service:
 
 Check out some of the REST endpoints:
 <dl>
-<dt>http://localhost:9000/scigraph/vocabulary/autocomplete/Sp</dt>
+<dt>[http://localhost:9000/scigraph/vocabulary/autocomplete/Sp](http://localhost:9000/scigraph/vocabulary/autocomplete/Sp)</dt>
 <dd>Get autocomplete options for a prefix</dd>
-<dt>http://localhost:9000/scigraph/vocabulary/search/Shrimp</dt>
+<dt>[http://localhost:9000/scigraph/vocabulary/search/Shrimp](http://localhost:9000/scigraph/vocabulary/search/Shrimp)</dt>
 <dd>Find a class based on an "exactish" term match
 (try changing the term to "shrimps")</dd>
-<dt>http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping</dt>
+<dt>[http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping](http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping)</dt>
 <dd>Get the graph neighborhood or a class</dd>
 </dl>
 
