@@ -6,7 +6,8 @@ Motivation
 ----------
 SciGraph aims to represent ontologies as a Neo4j graph. SciGraph
 reads ontologies with [owlapi](http://owlapi.sourceforge.net/) and ingests
-ontology formats available to owlapi (OWL, RDF, OBO, TTL, etc).
+ontology formats available to owlapi (OWL, RDF, OBO, TTL, etc). 
+Have a look at [how SciGraph translates some simple ontologies](https://github.com/SciCrunch/SciGraph/wiki/Neo4jMapping).
 
 Goals:
 * OWL 2 Support
