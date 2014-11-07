@@ -60,7 +60,7 @@ applicationContextPath: scigraph
 #    checkConnectionWhileIdle: false
 
 graphConfiguration:
-  graphLocation: /temp/monarchGraph
+  graphLocation: /temp/earthGraph
   curies:
     http://purl.obolibrary.org/obo/DOID_ : DOID
     http://purl.obolibrary.org/obo/ORPHANET_ : ORPHANET

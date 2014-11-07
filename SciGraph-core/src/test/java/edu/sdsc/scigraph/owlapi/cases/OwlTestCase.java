@@ -47,6 +47,7 @@ import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
+import edu.sdsc.scigraph.owlapi.loader.OwlOntologyWalkerProducer;
 
 /***
  * An abstract test case for testing simple OWL axiom combinations.
@@ -83,6 +84,7 @@ public abstract class OwlTestCase {
         .toString();
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
+    OwlOntologyWalkerProducer.addDirectInferredEdges(manager);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
     BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());

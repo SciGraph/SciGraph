@@ -16,11 +16,12 @@
 package edu.sdsc.scigraph.owlapi;
 
 import java.net.URI;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 
+import org.coode.owlapi.oboformat.OBOFormatParserFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLParserFactory;
+import org.semanticweb.owlapi.io.OWLParserFactoryRegistry;
 import org.semanticweb.owlapi.io.XMLUtils;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -100,10 +101,13 @@ public class OwlApiUtils {
 
   public static void silenceOboParser() {
     OWLManager.createOWLOntologyManager();
-    Logger logger = Logger.getLogger("org.obolibrary");
-    logger.setLevel(Level.SEVERE);
-    for(Handler handler : logger.getHandlers()) {
-      handler.setLevel(Level.SEVERE);
+    OWLParserFactoryRegistry registry = OWLParserFactoryRegistry.getInstance();
+    List<OWLParserFactory> factories = registry.getParserFactories();
+    for (OWLParserFactory factory : factories) {
+      if (factory instanceof OBOFormatParserFactory) {
+        registry.unregisterParserFactory(factory); 
+        break;
+      }
     }
   }
 }

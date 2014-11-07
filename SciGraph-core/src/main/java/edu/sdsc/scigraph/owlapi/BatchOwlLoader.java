@@ -110,7 +110,7 @@ public class BatchOwlLoader {
 
     @Inject
     Provider<GraphDatabaseService> graphDbProvider;
-    
+
     GraphDatabaseService graphDb;
 
     @Override
@@ -170,6 +170,9 @@ public class BatchOwlLoader {
         }
         logger.info("Finished loading " + url);
       }
+
+      edu.sdsc.scigraph.owlapi.loader.OwlOntologyWalkerProducer.addDirectInferredEdges(manager);
+
       logger.info(format("loaded ontologies with owlapi in %d seconds",
           timer.elapsed(TimeUnit.SECONDS)));
       return new OWLOntologyWalker(manager.getOntologies());

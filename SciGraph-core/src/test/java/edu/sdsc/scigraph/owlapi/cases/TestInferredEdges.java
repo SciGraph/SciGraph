@@ -1,6 +1,8 @@
 package edu.sdsc.scigraph.owlapi.cases;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
@@ -18,8 +20,7 @@ public class TestInferredEdges extends OwlTestCase {
 
     Iterable<Relationship> superclasses = dx.getRelationships(OwlRelationships.RDF_SUBCLASS_OF, Direction.OUTGOING);
     Relationship r = getOnlyElement(superclasses);
-    // TODO: Fix this
-    // assertThat(r.getOtherNode(dx), is(cx));
+    assertThat(r.getOtherNode(dx), is(cx));
   }
 
 }
