@@ -62,7 +62,7 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
   }
 
   public static void addDirectInferredEdges(OWLOntologyManager manager) {
-    if (true) {
+    if (false) {
       return;
     }
     org.apache.log4j.Logger.getLogger("org.semanticweb.elk").setLevel(Level.WARN);
