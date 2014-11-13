@@ -370,6 +370,10 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") @DefaultValue("fn") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
+    Collection<Concept> concepts = vocabulary.getConceptFromId(query);
+    if (concepts.isEmpty()) {
+      throw new UnknownClassException(id);
+    }
     Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
     NodeDTO dto = new NodeDTO();
     try (Transaction tx = graph.getGraphDb().beginTx()) {
