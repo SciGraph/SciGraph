@@ -54,7 +54,7 @@ Build the graph:
 
 Run the service:
 
-	cd SciGraph-services
+	cd ../SciGraph-services
     mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
 
 Check out some of the REST endpoints:
