@@ -40,6 +40,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
@@ -161,17 +162,18 @@ public class BatchOwlLoader {
       logger.info("Loading ontologies with owlapi...");
       Stopwatch timer = Stopwatch.createStarted();
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+      OWLOntology ont = null;
       for (String url : config.getOntologyUrls()) {
         logger.info("Loading " + url);
         if (url.startsWith("http://") || url.startsWith("https://")) {
-          manager.loadOntology(IRI.create(url));
+          ont = manager.loadOntology(IRI.create(url));
         } else {
-          manager.loadOntologyFromOntologyDocument(new File(url));
+          ont = manager.loadOntologyFromOntologyDocument(new File(url));
         }
         logger.info("Finished loading " + url);
       }
 
-      edu.sdsc.scigraph.owlapi.loader.OwlOntologyWalkerProducer.addDirectInferredEdges(manager);
+      //edu.sdsc.scigraph.owlapi.loader.OwlOntologyWalkerProducer.addDirectInferredEdges(manager, ont);
 
       logger.info(format("loaded ontologies with owlapi in %d seconds",
           timer.elapsed(TimeUnit.SECONDS)));
