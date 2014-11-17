@@ -64,6 +64,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -336,7 +337,17 @@ public class GraphService extends BaseResource {
     TinkerGraph tg = new TinkerGraph();
     try (Transaction tx = graph.getGraphDb().beginTx()) {
       Node node = graph.getGraphDb().getNodeById(concept.getId());
-      tg = api.getNeighbors(node, depth, types);
+      Optional<Predicate<Node>> nodePredicate = Optional.absent();
+      if (!traverseBlankNodes) {
+        Predicate<Node> predicate = new Predicate<Node>() {
+          @Override
+          public boolean apply(Node node) {
+            //TODO: This should be done with properties...
+            return !((String)node.getProperty(CommonProperties.URI)).startsWith("http://example.org");
+          }};
+        nodePredicate = Optional.of(predicate);
+      }
+      tg = api.getNeighbors(node, depth, types, nodePredicate);
       tx.success();
     }
     GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};

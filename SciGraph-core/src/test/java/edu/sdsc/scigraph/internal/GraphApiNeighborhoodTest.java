@@ -29,6 +29,8 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
@@ -43,6 +45,7 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
   Node a, b, c, d, e, f;
   RelationshipType subclass = DynamicRelationshipType.withName("subclassOf");
   RelationshipType fizz = DynamicRelationshipType.withName("fizz");
+  Optional<Predicate<Node>> absent = Optional.absent();
 
   @Before
   public void addNodes() throws Exception {
@@ -62,39 +65,51 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
 
   @Test
   public void test1Neighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(b, 1, Collections.<DirectedRelationshipType>emptySet());
+    TinkerGraph graph = graphApi.getNeighbors(b, 1, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(4)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(3)));
   }
 
   @Test
   public void testKNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(b, 10, Collections.<DirectedRelationshipType>emptySet());
+    TinkerGraph graph = graphApi.getNeighbors(b, 10, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(5)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(4)));
   }
 
   @Test
   public void testTypedNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(b, 2, newHashSet(new DirectedRelationshipType(subclass, Direction.INCOMING)));
+    TinkerGraph graph = graphApi.getNeighbors(b, 2, newHashSet(new DirectedRelationshipType(subclass, Direction.INCOMING)), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(3)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(2)));
   }
-  
+
   @Test
   public void testMultiTypedNeighborhood() {
     TinkerGraph graph = graphApi.getNeighbors(b, 1, 
         newHashSet(new DirectedRelationshipType(subclass, Direction.INCOMING),
-            new DirectedRelationshipType(fizz, Direction.INCOMING)));
+            new DirectedRelationshipType(fizz, Direction.INCOMING)), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(3)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(2)));
   }
-  
+
   @Test
   public void testSingleNodeNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(f, 1, Collections.<DirectedRelationshipType>emptySet());
+    TinkerGraph graph = graphApi.getNeighbors(f, 1, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(1)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(0)));
+  }
+
+  @Test
+  public void testPredicate() {
+    Predicate<Node> testPredicate = new Predicate<Node>() {
+      @Override
+      public boolean apply(Node node) {
+        return !((String)node.getProperty("uri")).endsWith("c");
+      }};
+    TinkerGraph graph = graphApi.getNeighbors(b, 1, Collections.<DirectedRelationshipType>emptySet(), Optional.of(testPredicate));
+    assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(3)));
+    assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(2)));
   }
 
 }

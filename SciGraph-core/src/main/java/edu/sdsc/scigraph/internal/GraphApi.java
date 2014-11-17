@@ -38,6 +38,8 @@ import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.frames.Concept;
@@ -157,10 +159,22 @@ public class GraphApi {
     return result;
   }
 
-  public TinkerGraph getNeighbors(Node node, int distance, Set<DirectedRelationshipType> types/*, Optional<Predicate<Node>> includeNode*/) {
+  public TinkerGraph getNeighbors(Node node, int distance, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
     TraversalDescription description = graphDb.traversalDescription().depthFirst().evaluator(Evaluators.toDepth(distance));
     for (DirectedRelationshipType type: types) {
       description = description.relationships(type.getType(), type.getDirection());
+    }
+    if (includeNode.isPresent()) {
+      description = description.evaluator(new Evaluator() {
+        @Override
+        public Evaluation evaluate(Path path) {
+          if (includeNode.get().apply(path.endNode())) {
+            return Evaluation.INCLUDE_AND_CONTINUE;
+          } else {
+            return Evaluation.EXCLUDE_AND_PRUNE;
+          }
+        }
+      });
     }
     TinkerGraph graph = new TinkerGraph();
     for (Path path: description.traverse(node)) {
@@ -169,7 +183,8 @@ public class GraphApi {
         TinkerGraphUtil.addEdge(graph, relationship);
       }
     }
-    if (isEmpty(graph.getEdges())) {
+    if (isEmpty(graph.getEdges())) { 
+      // If nothing was added to the graph add the root node
       TinkerGraphUtil.addNode(graph, node);
     }
     return graph;
