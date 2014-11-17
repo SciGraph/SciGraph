@@ -36,6 +36,7 @@ import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
@@ -83,8 +84,8 @@ public abstract class OwlTestCase {
     String uri = Resources.getResource("ontologies/cases/" + getTestName() + ".owl").toURI()
         .toString();
     IRI iri = IRI.create(uri);
-    manager.loadOntologyFromOntologyDocument(iri);
-    OwlOntologyWalkerProducer.addDirectInferredEdges(manager);
+    OWLOntology ont = manager.loadOntologyFromOntologyDocument(iri);
+    //OwlOntologyWalkerProducer.addDirectInferredEdges(manager, ont);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
     BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
