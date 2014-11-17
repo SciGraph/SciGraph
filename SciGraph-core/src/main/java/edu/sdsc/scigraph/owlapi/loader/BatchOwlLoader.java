@@ -67,8 +67,10 @@ public class BatchOwlLoader {
   static final OWLOntologyWalker POISON = new OWLOntologyWalker(Collections.<OWLOntology>emptySet());
   static final String POISON_STR = "Poison String";
 
-  static final int CONSUMER_COUNT = 5;
-  static final int PRODUCER_COUNT = 4;
+  private static final int numCores = Runtime.getRuntime().availableProcessors();
+  
+  static final int CONSUMER_COUNT = (numCores / 2) + 1;
+  static final int PRODUCER_COUNT = numCores / 2;
 
   @Inject
   PostpostprocessorProvider postprocessorProvider;
