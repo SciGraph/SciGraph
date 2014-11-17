@@ -133,7 +133,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>1.6</version>
+        <version>1.7.1</version>
         <configuration>
           <createDependencyReducedPom>true</createDependencyReducedPom>
           <filters>
@@ -167,7 +167,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.1</version>
+        <version>2.8.2</version>
         <configuration>
           <skip>true</skip>
         </configuration>
