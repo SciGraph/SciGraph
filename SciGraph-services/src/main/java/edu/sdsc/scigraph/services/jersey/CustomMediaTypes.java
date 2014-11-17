@@ -33,5 +33,15 @@ public class CustomMediaTypes {
 
   public final static String APPLICATION_RIS = "application/x-research-info-systems";
   public final static MediaType APPLICATION_RIS_TYPE = new MediaType("application", "x-research-info-systems");
+  
+  // Graph Media Types
+  public final static String APPLICATION_GRAPHML = "application/graphml+xml";
+  public final static MediaType APPLICATION_GRAPHML_TYPE = new MediaType("application", "graphml+xml");
+
+  public final static String APPLICATION_GRAPHSON = "application/graphson";
+  public final static MediaType APPLICATION_GRAPHSON_TYPE = new MediaType("application", "graphson");
+
+  public final static String TEXT_GML = "text/gml";
+  public final static MediaType TEXT_GML_TYPE = new MediaType("text", "gml");
 
 }

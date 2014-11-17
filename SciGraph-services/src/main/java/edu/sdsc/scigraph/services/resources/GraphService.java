@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Iterables.transform;
@@ -63,6 +64,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -70,6 +72,8 @@ import com.wordnik.swagger.annotations.ApiParam;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
+import edu.sdsc.scigraph.internal.GraphApi;
+import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.representations.monarch.GraphPath;
@@ -91,11 +95,13 @@ public class GraphService extends BaseResource {
 
   private final Vocabulary vocabulary;
   private final Graph graph;
+  private final GraphApi api;
 
   @Inject
-  GraphService(Vocabulary vocabulary, Graph graph) {
+  GraphService(Vocabulary vocabulary, Graph graph, GraphApi api) {
     this.vocabulary = vocabulary;
     this.graph = graph;
+    this.api = api;
   }
 
   GraphPath getGraphPathFromPath(org.neo4j.graphdb.Path path) {
@@ -284,6 +290,56 @@ public class GraphService extends BaseResource {
       tx.success();
     }
     GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(dtos.getLast()) {};
+    return JaxRsUtil.wrapJsonp(request, response, callback);
+  }
+
+  @GET
+  @Path("/neighbors2/{id}")
+  @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
+    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML})
+  public Object getNeighbors2(
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("id") String id,
+      @ApiParam(value = "How far to traverse neighbors", required = false)
+      @QueryParam("depth") @DefaultValue("1") final int depth,
+      @ApiParam(value = "Traverse blank nodes", required = false)
+      @QueryParam("blankNodes") @DefaultValue("false") final boolean traverseBlankNodes,
+      @ApiParam(value = "Which relationship to traverse", required = false)
+      @QueryParam("relationshipType") final String relationshipType,
+      @ApiParam(value = "Which direction to traverse: in, out, both (default). Only used if relationshipType is specified.", required = false)
+      @QueryParam("direction") @DefaultValue("both") final String direction,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
+      @QueryParam("callback") @DefaultValue("fn") String callback) {
+    Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
+    Collection<Concept> concepts = vocabulary.getConceptFromId(query);
+    if (concepts.isEmpty()) {
+      throw new UnknownClassException(id);
+    }
+    Concept concept = getFirst(vocabulary.getConceptFromId(query), null);
+    Set<DirectedRelationshipType> types = new HashSet<>();
+    if (!isNullOrEmpty(relationshipType)) {
+      RelationshipType type = DynamicRelationshipType.withName(relationshipType);
+      Direction dir = Direction.BOTH;
+      switch (direction) {
+        case "in" : dir = Direction.INCOMING;
+        break;
+        case "out" : dir = Direction.OUTGOING;
+        break;
+        case "both" : dir = Direction.BOTH;
+        break;
+      }
+      types.add(new DirectedRelationshipType(type, dir));
+    }
+    TinkerGraph tg = new TinkerGraph();
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      Node node = graph.getGraphDb().getNodeById(concept.getId());
+      tg = api.getNeighbors(node, depth, types);
+      tx.success();
+    }
+    GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};
     return JaxRsUtil.wrapJsonp(request, response, callback);
   }
 

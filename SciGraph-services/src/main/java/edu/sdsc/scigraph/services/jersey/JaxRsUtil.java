@@ -36,7 +36,10 @@ public class JaxRsUtil {
           MediaType.APPLICATION_XML_TYPE, 
           MediaType.APPLICATION_JSON_TYPE,
           CustomMediaTypes.APPLICATION_JSONP_TYPE,
-          CustomMediaTypes.APPLICATION_RIS_TYPE).add().build();
+          CustomMediaTypes.APPLICATION_RIS_TYPE,
+          CustomMediaTypes.APPLICATION_GRAPHML_TYPE,
+          CustomMediaTypes.APPLICATION_GRAPHSON_TYPE,
+          CustomMediaTypes.TEXT_GML_TYPE).add().build();
 
   public static boolean isVariant(Request request, MediaType type) {
     return request.selectVariant(VARIANTS).getMediaType().equals(type);

@@ -15,9 +15,9 @@
  */
 package edu.sdsc.scigraph.services.jersey;
 
-import java.util.Map;
-
 import static com.google.common.collect.Maps.newHashMap;
+
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
@@ -45,6 +45,10 @@ public class CommonResourceConfig extends PackagesResourceConfig {
     map.put("csv", CustomMediaTypes.TEXT_CSV_TYPE);
     map.put("tsv", CustomMediaTypes.TEXT_TSV_TYPE);
     map.put("ris", CustomMediaTypes.APPLICATION_RIS_TYPE);
+    // Graph Media Types
+    map.put("graphson", CustomMediaTypes.APPLICATION_GRAPHSON_TYPE);
+    map.put("graphml", CustomMediaTypes.APPLICATION_GRAPHML_TYPE);
+    map.put("gml", CustomMediaTypes.TEXT_GML_TYPE);
     return map;
   }
 

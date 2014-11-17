@@ -26,6 +26,7 @@ import org.junit.Test;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
@@ -33,12 +34,13 @@ public class GraphServiceIT {
 
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
   private static final Graph graph = mock(Graph.class);
+  private static final GraphApi api = mock(GraphApi.class);
 
   private final Concept foo = mock(Concept.class);
 
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
-      .addResource(new GraphService(vocabulary, graph)).build();
+      .addResource(new GraphService(vocabulary, graph, api)).build();
 
   @Before
   public void setup() {

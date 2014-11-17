@@ -61,6 +61,9 @@ import edu.sdsc.scigraph.services.auth.BasicAuthenticator;
 import edu.sdsc.scigraph.services.configuration.ApiConfiguration;
 import edu.sdsc.scigraph.services.configuration.ApplicationConfiguration;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
+import edu.sdsc.scigraph.services.jersey.writers.GmlWriter;
+import edu.sdsc.scigraph.services.jersey.writers.GraphMlWriter;
+import edu.sdsc.scigraph.services.jersey.writers.GraphsonWriter;
 
 public class MainApplication extends Application<ApplicationConfiguration> {
 
@@ -82,6 +85,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     //Add providers
     //environment.register(LiteratureCsvWriter.class);
     //environment.register(LiteratureRisWriter.class);
+    environment.register(GmlWriter.class);
+    environment.register(GraphMlWriter.class);
+    environment.register(GraphsonWriter.class);
 
     //Add mediaType mappings
     Map<String, MediaType> map = newHashMap();
@@ -91,6 +97,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     map.put("csv", CustomMediaTypes.TEXT_CSV_TYPE);
     map.put("tsv", CustomMediaTypes.TEXT_TSV_TYPE);
     map.put("ris", CustomMediaTypes.APPLICATION_RIS_TYPE);
+    map.put("graphson", CustomMediaTypes.APPLICATION_GRAPHSON_TYPE);
+    map.put("graphml", CustomMediaTypes.APPLICATION_GRAPHML_TYPE);
+    map.put("gml", CustomMediaTypes.TEXT_GML_TYPE);
     environment.getResourceConfig().getMediaTypeMappings().putAll(map);
   }
 
