@@ -343,7 +343,7 @@ public class GraphService extends BaseResource {
           @Override
           public boolean apply(Node node) {
             //TODO: This should be done with properties...
-            return !((String)node.getProperty(CommonProperties.URI)).startsWith("http://example.org");
+            return !((String)node.getProperty(CommonProperties.URI)).startsWith("http://ontology.neuinfo.org/anon/");
           }};
         nodePredicate = Optional.of(predicate);
       }
