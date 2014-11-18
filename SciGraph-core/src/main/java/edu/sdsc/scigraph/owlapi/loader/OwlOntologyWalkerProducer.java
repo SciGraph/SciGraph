@@ -16,7 +16,7 @@
 package edu.sdsc.scigraph.owlapi.loader;
 
 import java.io.File;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -28,6 +28,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLAxiomChange;
@@ -35,10 +36,9 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.reasoner.Node;
-import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
@@ -65,28 +65,55 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
     this.numConsumers = numConsumers;
   }
 
+  static int removeAxioms(OWLOntologyManager manager, OWLOntology ont, AxiomType<?> type) {
+    int count = 0;
+    for (OWLOntology currentOnt: ont.getImportsClosure()) {
+      Set<? extends OWLAxiom> axioms = currentOnt.getAxioms(type);
+      List<OWLOntologyChange> removals= manager.removeAxioms(currentOnt, axioms);
+      count += removals.size();
+    }
+    return count;
+  }
+
   public static void addDirectInferredEdges(OWLOntologyManager manager, OWLOntology ont) {
     org.apache.log4j.Logger.getLogger("org.semanticweb.elk").setLevel(org.apache.log4j.Level.FATAL);
+
+    // Remove all axioms that would generate extra unsatisfiable classes for the reasoner
+    int removalCount = 0;
+    removalCount += removeAxioms(manager, ont, AxiomType.DISJOINT_CLASSES);
+    removalCount += removeAxioms(manager, ont, AxiomType.DATA_PROPERTY_DOMAIN);
+    removalCount += removeAxioms(manager, ont, AxiomType.DATA_PROPERTY_RANGE);
+    logger.info("Removed " + removalCount + " axioms to prevent unsatisfiable classes");
 
     logger.info("Creating reasoner for " + ont);
     OWLReasoner reasoner = reasonerFactory.createReasoner(ont);
     logger.info("Completed creating reasoner for " + ont);
 
-    List<OWLAxiomChange> batchedAdds = new LinkedList<>();
-    List<OWLAxiomChange> batchedRemoves = new LinkedList<>();
-    //For each class x
+    if (!reasoner.isConsistent()) {
+      logger.warning("Not reasoning on " + ont + " because it is inconsistent.");
+      return;
+    }
+    Set<OWLClass> nothingSubclasses = reasoner.getSubClasses(factory.getOWLNothing(), true).getFlattened();
+    if (!nothingSubclasses.isEmpty()) {
+      logger.warning("Not reasoning on " + ont + " because " + nothingSubclasses.size() + " classes are sublasses of nothing");
+      return;
+    }
+
+    List<OWLAxiomChange> batchedAdds = new ArrayList<>();
+    List<OWLAxiomChange> batchedRemoves = new ArrayList<>();
+    // #42: For each class x
     for (OWLClass ce: ont.getClassesInSignature(true)) {
       //find direct inferred superclasses, D
-      NodeSet<OWLClass> directSuperclasses = reasoner.getSuperClasses(ce, true);
+      Set<OWLClass> directSuperclasses = reasoner.getSuperClasses(ce, true).getFlattened();
       //find indirect superclasses, I
-      NodeSet<OWLClass> indirectSuperclasses = reasoner.getSuperClasses(ce, false);
+      Set<OWLClass> indirectSuperclasses = reasoner.getSuperClasses(ce, false).getFlattened();
       //find asserted superclasses, A
       Set<OWLClassExpression> assertedSuperclasses = ce.asOWLClass().getSuperClasses(ont);
       //for each d in D, add an edge SubClassOf(x d)
-      for (Node<OWLClass> directSuperclass: directSuperclasses) {
-        OWLAxiom axiom = factory.getOWLSubClassOfAxiom(ce, directSuperclass.getRepresentativeElement());
+      for (OWLClass directSuperclass: directSuperclasses) {
+        OWLAxiom axiom = factory.getOWLSubClassOfAxiom(ce, directSuperclass);
         AddAxiom addAxiom = new AddAxiom(ont, axiom);
-        //manager.applyChange(addAxiom);
+        manager.applyChange(addAxiom);
         batchedAdds.add(addAxiom);
       }
       //for each a in A
@@ -95,16 +122,17 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
           continue;
         }
         //if a is in I and not in D, then remove edge SubClassOf(x a)
-        if (indirectSuperclasses.containsEntity(assertedSuperclass.asOWLClass()) &&
-            !directSuperclasses.containsEntity(assertedSuperclass.asOWLClass())) {
+        if (indirectSuperclasses.contains(assertedSuperclass.asOWLClass()) &&
+            !directSuperclasses.contains(assertedSuperclass.asOWLClass())) {
           OWLAxiom axiom = factory.getOWLSubClassOfAxiom(ce, assertedSuperclass);
           RemoveAxiom removeAxiom = new RemoveAxiom(ont, axiom);
-          //manager.applyChange(removeAxiom);
+          manager.applyChange(removeAxiom);
           batchedRemoves.add(removeAxiom);
         }
       }
     }
     logger.info("Applying superclass axioms: adds " + batchedAdds.size() + " removes " + batchedRemoves.size());
+    //TODO: Why doesn't this work in batch?
     //manager.applyChanges(batchedChanges);
     logger.info("Completed applying superclass axioms");
     reasoner.dispose();
@@ -119,7 +147,7 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
           break;
         } else {
           OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-          //manager.addIRIMapper(new FileCachingIRIMapper());
+          manager.addIRIMapper(new FileCachingIRIMapper());
           logger.info("Loading ontology: " + url);
           try {
             OWLOntology ont = null;
@@ -128,8 +156,10 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
             } else {
               ont = manager.loadOntologyFromOntologyDocument(new File(url));
             }
-            // TODO: fix this
-            // addDirectInferredEdges(manager, ont);
+            if ("http://purl.obolibrary.org/obo/upheno/monarch.owl".equals(url)) {
+              // TODO: fix this - move to configuration
+              addDirectInferredEdges(manager, ont);
+            }
             queue.put(new OWLOntologyWalker(manager.getOntologies()));
           } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to load ontology: " + url, e);
