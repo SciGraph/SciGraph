@@ -147,7 +147,7 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
           break;
         } else {
           OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-          manager.addIRIMapper(new FileCachingIRIMapper());
+          //manager.addIRIMapper(new FileCachingIRIMapper());
           logger.info("Loading ontology: " + url);
           try {
             OWLOntology ont = null;
