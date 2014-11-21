@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.owlapi;
 import java.net.URI;
 import java.util.List;
 
+import org.coode.owlapi.obo12.parser.OBO12ParserFactory;
 import org.coode.owlapi.oboformat.OBOFormatParserFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLParserFactory;
@@ -101,12 +102,19 @@ public class OwlApiUtils {
 
   public static void silenceOboParser() {
     OWLManager.createOWLOntologyManager();
+    /* TODO: Why does this logging never become silent?
+     * Logger logger = Logger.getLogger("org.obolibrary");
+    logger.setLevel(java.util.logging.Level.SEVERE);
+    Handler[] handlers = logger.getHandlers();
+    for (Handler handler : handlers) {
+      handler.setLevel(Level.SEVERE);
+    }*/
     OWLParserFactoryRegistry registry = OWLParserFactoryRegistry.getInstance();
     List<OWLParserFactory> factories = registry.getParserFactories();
     for (OWLParserFactory factory : factories) {
-      if (factory instanceof OBOFormatParserFactory) {
-        registry.unregisterParserFactory(factory); 
-        break;
+      if (factory instanceof OBOFormatParserFactory ||
+          factory instanceof OBO12ParserFactory) {
+        registry.unregisterParserFactory(factory);
       }
     }
   }
