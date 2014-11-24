@@ -18,14 +18,35 @@ package edu.sdsc.scigraph.neo4j;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class IdMapTest {
 
+  static long FIRST_ID_VALUE = 0L;
+
+  IdMap map;
+
+  @Before
+  public void setup() {
+    map = new IdMap();
+  }
+
   @Test
-  public void test() {
-    IdMap map = new IdMap();
-    assertThat(0L, is(map.get("http://example.org/a")));
+  public void idValuesAreReturned() {
+    assertThat(FIRST_ID_VALUE, is(map.get("http://example.org/a")));
+  }
+
+  @Test
+  public void subsequentIdValuesAreReturned_whenDifferentKeysAreAlreadyAdded() {
+    assertThat(FIRST_ID_VALUE, is(map.get("http://example.org/a")));
+    assertThat(FIRST_ID_VALUE + 1, is(map.get("http://example.org/b")));
+  }
+
+  @Test
+  public void identicalIdValuesAreReturned_whenKeysAreAlreadyPresent() {
+    map.get("http://example.org/a");
+    assertThat(FIRST_ID_VALUE, is(map.get("http://example.org/a")));
   }
 
 }
