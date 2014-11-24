@@ -47,7 +47,7 @@ public class RelationshipMap extends ForwardingConcurrentMap<BatchEdge, Long> {
 
   @Override
   protected ConcurrentMap<BatchEdge, Long> delegate() {
-    return delegate();
+    return delegate;
   }
 
   public Long get(long start, long end, RelationshipType type) {

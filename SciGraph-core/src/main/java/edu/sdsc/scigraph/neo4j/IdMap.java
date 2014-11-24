@@ -50,7 +50,7 @@ public class IdMap extends ForwardingConcurrentMap<String, Long> {
 
   @Override
   protected ConcurrentMap<String, Long> delegate() {
-    return delegate();
+    return delegate;
   }
 
   @Override
