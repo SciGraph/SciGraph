@@ -16,38 +16,41 @@
 package edu.sdsc.scigraph.owlapi.cases;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 
-import com.google.common.base.Optional;
-
-import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class TestGCISubClassOf extends OwlTestCase {
 
-  /**
-   */
-  @Test
-  public void testSubclass() {
-    Node subclass = getNode("http://example.org/subclass");
-    Node superclass = getNode("http://example.org/superclass");
+  Node subclass, superclass;
+  RelationshipType p = DynamicRelationshipType.withName("p");
+  
+  @Before
+  public void setup() {
+    subclass = getNode("http://example.org/subclass");
+    superclass = getNode("http://example.org/superclass");
+  }
 
-    RelationshipType p = DynamicRelationshipType.withName("p");
-    // TODO
-    // test for this:
-    // _:1 -[p]-> subclass
-    // _:1 subClassOf _:2
-    // _:2 -[p]-> superclass
-    
+  @Test
+  public void testSubclassBlankNodeFiller() {
+    Relationship r = getOnlyElement(subclass.getRelationships(Direction.INCOMING, OwlRelationships.FILLER));
+    Node blankNode1 = r.getOtherNode(subclass);
+    assertThat(blankNode1.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
+    r = getOnlyElement(blankNode1.getRelationships(Direction.OUTGOING, OwlRelationships.RDF_SUBCLASS_OF));
+    Node blankNode2 = r.getOtherNode(blankNode1);
+    assertThat(blankNode2.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
+    r = getOnlyElement(blankNode1.getRelationships(Direction.OUTGOING, p));
+    assertThat(r.getOtherNode(blankNode1), is(superclass));
   }
 
 }

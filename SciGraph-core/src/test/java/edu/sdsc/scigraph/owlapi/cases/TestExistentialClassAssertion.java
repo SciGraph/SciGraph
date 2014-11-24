@@ -26,7 +26,6 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.GraphUtil;

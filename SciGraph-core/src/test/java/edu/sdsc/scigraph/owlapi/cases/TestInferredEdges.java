@@ -28,6 +28,10 @@ import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class TestInferredEdges extends OwlTestCase {
 
+  public TestInferredEdges() {
+    performInference = true;
+  }
+  
   @Test
   public void testInferredEdges() {
     Node cx = getNode("http://example.org/cx");
@@ -35,7 +39,7 @@ public class TestInferredEdges extends OwlTestCase {
 
     Iterable<Relationship> superclasses = dx.getRelationships(OwlRelationships.RDF_SUBCLASS_OF, Direction.OUTGOING);
     Relationship r = getOnlyElement(superclasses);
-    assertThat(r.getOtherNode(dx), is(cx));
+    assertThat("A subclassOf relationship is introduced.    ", r.getOtherNode(dx), is(cx));
   }
 
 }

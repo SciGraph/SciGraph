@@ -29,7 +29,7 @@ public class TestAnnotationAssertionLiteral extends OwlTestCase {
   @Test
   public void testAnnotationAssertion() {
     Node i = getNode("http://example.org/i");
-    assertThat("property value is set to foo", i.getProperty("http://example.org/p").toString(),
+    assertThat("p is set to foo", (String)i.getProperty("http://example.org/p"),
         is("foo"));
   }
 
