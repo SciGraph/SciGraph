@@ -18,7 +18,7 @@ package edu.sdsc.scigraph.neo4j;
 import java.io.Serializable;
 import java.util.Objects;
 
-class BatchEdge implements Serializable {
+final class BatchEdge implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -51,13 +51,12 @@ class BatchEdge implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof BatchEdge) {
-      BatchEdge c = (BatchEdge) obj;
-      return Objects.equals(start, c.getStart()) && Objects.equals(end, c.getEnd())
-          && Objects.equals(type, c.getType());
-    } else {
+    if (!(obj instanceof BatchEdge)) {
       return false;
     }
+    BatchEdge c = (BatchEdge) obj;
+    return Objects.equals(start, c.getStart()) && Objects.equals(end, c.getEnd())
+        && Objects.equals(type, c.getType());
   }
 
   @Override
