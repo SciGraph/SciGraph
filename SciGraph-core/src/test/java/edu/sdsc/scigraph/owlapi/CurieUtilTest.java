@@ -43,33 +43,38 @@ public class CurieUtilTest {
   }
 
   @Test
-  public void testGetCuriePrefixes() {
+  public void curiePrefixes() {
     assertThat(util.getPrefixes(), hasItems("A", "B"));
   }
 
   @Test
-  public void testGetAllExpansions() {
+  public void multipleExpansions() {
     assertThat(util.getAllExpansions("A"), hasItems("http://example.org/a_", "http://example.org/A_"));
   }
 
   @Test
-  public void testGetFullUri() {
+  public void multipleUris_whenThereAreMultipleMappings() {
     assertThat(util.getFullUri("A:foo"), containsInAnyOrder("http://example.org/a_foo", "http://example.org/A_foo"));
   }
 
   @Test
-  public void testUnknownCurie() {
+  public void emptyUris_whenMappingIsNotPresent() {
     assertThat(util.getFullUri("NONE:foo"), is(empty()));
   }
 
   @Test
-  public void testGetCurie() {
+  public void emptyUris_whenInputHasNoPrefix() {
+    assertThat(util.getFullUri(":foo"), is(empty()));
+  }
+
+  @Test
+  public void currie_whenMappingIsPresent() {
     assertThat(util.getCurie("http://example.org/a_foo"), is(Optional.of("A:foo")));
   }
 
   @Test
-  public void testUnknownUri() {
-    assertThat(util.getFullUri("http://example.org/none_foo"), is(empty()));
+  public void noCurrie_whenMappingIsNotPresent() {
+    assertThat(util.getCurie("http://example.org/none"), is(Optional.<String>absent()));
   }
 
 }

@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.owlapi;
 
 import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Iterables.getFirst;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +29,6 @@ import javax.inject.Named;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
@@ -72,8 +70,9 @@ public class CurieUtil {
 
   public Collection<String> getFullUri(final String curie) {
     Preconditions.checkNotNull(curie);
-    String prefix = getFirst(Splitter.on(':').split(curie), null);
-    if (null != prefix && uriMap.containsKey(prefix)) {
+    Preconditions.checkState(curie.contains(":"), "curie does not appear to be a curie");
+    String prefix = curie.split(":")[0];
+    if (uriMap.containsKey(prefix)) {
       return transform(uriMap.get(prefix), new Function<String, String>() {
         @Override
         public String apply(String uriPrefix) {
