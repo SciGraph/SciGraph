@@ -63,6 +63,8 @@ public abstract class OwlTestCase {
   Path path;
   GraphDatabaseService graphDb;
   ReadableIndex<Node> nodeIndex;
+  
+  boolean performInference = false;
 
   String getTestName() {
     return getClass().getSimpleName();
@@ -85,7 +87,9 @@ public abstract class OwlTestCase {
         .toString();
     IRI iri = IRI.create(uri);
     OWLOntology ont = manager.loadOntologyFromOntologyDocument(iri);
-    OwlOntologyWalkerProducer.addDirectInferredEdges(manager, ont);
+    if (performInference) {
+      OwlOntologyWalkerProducer.addDirectInferredEdges(manager, ont);
+    }
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
     BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
