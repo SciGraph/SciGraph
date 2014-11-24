@@ -27,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,7 +70,7 @@ public class BatchGraph {
   private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
       "lucene", "analyzer", VocabularyIndexAnalyzer.class.getName());
 
-  private final IdMap idMap;
+  private final ConcurrentMap<String, Long> idMap;
 
   private final RelationshipMap relationshipMap;
 
@@ -77,7 +78,7 @@ public class BatchGraph {
   public BatchGraph(BatchInserter inserter, @Named("uniqueProperty") String uniqueProperty,
       @Named("indexedProperties") Set<String> indexedProperties,
       @Named("exactProperties") Set<String> exactIndexedProperties,
-      IdMap idMap, RelationshipMap relationshioMap) {
+      ConcurrentMap<String, Long> idMap, RelationshipMap relationshioMap) {
     this.inserter = inserter;
     this.idMap = idMap;
     this.relationshipMap = relationshioMap;

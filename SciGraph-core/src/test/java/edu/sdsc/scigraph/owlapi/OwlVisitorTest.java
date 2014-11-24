@@ -43,7 +43,6 @@ import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -197,8 +196,8 @@ public class OwlVisitorTest extends GraphTestBase {
         graph.hasRelationship(parent, intersection, OwlRelationships.OWL_EQUIVALENT_CLASS), is(true));
     Node mother = graph.getNode(ROOT + "/Mother").get();
     Node father = graph.getNode(ROOT + "/Father").get();
-    assertThat(graph.hasRelationship(intersection, mother, EdgeType.REL), is(true));
-    assertThat(graph.hasRelationship(intersection, father, EdgeType.REL), is(true));
+    assertThat(graph.hasRelationship(intersection, mother, OwlRelationships.OPERAND), is(true));
+    assertThat(graph.hasRelationship(intersection, father, OwlRelationships.OPERAND), is(true));
   }
 
   @Test
@@ -206,7 +205,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node parent = graph.getNode(ROOT + "/Parent").get();
     Node complement = graph.getNode("http://ontology.neuinfo.org/anon/-1761792206").get();
     assertThat(complement.hasLabel(OwlLabels.OWL_COMPLEMENT_OF), is(true));
-    assertThat(graph.hasRelationship(complement, parent, EdgeType.REL), is(true));
+    assertThat(graph.hasRelationship(complement, parent, OwlRelationships.OPERAND), is(true));
   }
 
   @Test
@@ -235,10 +234,10 @@ public class OwlVisitorTest extends GraphTestBase {
     Node chain = graph.getNode(ROOT + "/hasUncle").get();
     Node father = graph.getNode(ROOT + "/hasFather").get();
     Node brother = graph.getNode(ROOT + "/hasBrother").get();
-    assertThat(graph.hasRelationship(chain, father, EdgeType.REL), is(true));
-    assertThat(graph.hasRelationship(chain, brother, EdgeType.REL), is(true));
-    Relationship firstLink = graph.getOrCreateRelationship(chain, father, EdgeType.REL);
-    Relationship secondLink = graph.getOrCreateRelationship(chain, brother, EdgeType.REL);
+    assertThat(graph.hasRelationship(chain, father, OwlRelationships.RDFS_SUB_PROPERTY_OF), is(true));
+    assertThat(graph.hasRelationship(chain, brother, OwlRelationships.RDFS_SUB_PROPERTY_OF), is(true));
+    Relationship firstLink = graph.getOrCreateRelationship(chain, father, OwlRelationships.RDFS_SUB_PROPERTY_OF);
+    Relationship secondLink = graph.getOrCreateRelationship(chain, brother, OwlRelationships.RDFS_SUB_PROPERTY_OF);
     assertThat(graph.getProperty(firstLink, "order", Integer.class).get(), is(0));
     assertThat(graph.getProperty(secondLink, "order", Integer.class).get(), is(1));
   }

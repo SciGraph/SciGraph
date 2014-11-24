@@ -45,8 +45,6 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.inject.Inject;
 
-import edu.sdsc.scigraph.owlapi.FileCachingIRIMapper;
-
 public class OwlOntologyWalkerProducer implements Callable<Void>{
 
   private static final Logger logger = Logger.getLogger(OwlOntologyWalkerProducer.class.getName());

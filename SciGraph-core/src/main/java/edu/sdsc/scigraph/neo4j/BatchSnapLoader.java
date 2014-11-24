@@ -24,7 +24,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 
-public class BatchSnapLoader {
+class BatchSnapLoader {
 
   private final BatchInserter inserter;
   private static final RelationshipType RELATIONSHIP = DynamicRelationshipType

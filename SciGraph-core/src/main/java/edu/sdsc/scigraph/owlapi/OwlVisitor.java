@@ -80,7 +80,6 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.neo4j.EdgeType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
@@ -257,7 +256,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.setProperty(subjectNode, NodeProperties.ANONYMOUS, true);
     for (OWLClassExpression expression: desc.getOperands()) {
       Node object = graph.getOrCreateNode(getUri(expression));
-      graph.getOrCreateRelationship(subjectNode, object, EdgeType.REL);
+      graph.getOrCreateRelationship(subjectNode, object, OwlRelationships.OPERAND);
     }
     return null;
   }
@@ -269,7 +268,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.setProperty(subjectNode, NodeProperties.ANONYMOUS, true);
     for (OWLClassExpression expression: desc.getOperands()) {
       Node object = graph.getOrCreateNode(getUri(expression));
-      graph.getOrCreateRelationship(subjectNode, object, EdgeType.REL);
+      graph.getOrCreateRelationship(subjectNode, object, OwlRelationships.OPERAND);
     }
     return null;
   }
@@ -278,7 +277,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     Node subject = graph.getOrCreateNode(getUri(axiom.getSubject()));
     URI property = getUri(axiom.getProperty());
     Node object = graph.getOrCreateNode(getUri(axiom.getObject()));
-    RelationshipType type = EdgeType.OWLObjectPropertyAssertionAxiom;
+    RelationshipType type = DynamicRelationshipType.withName(property.toString());
     if (null != property.getFragment()) {
       type = DynamicRelationshipType.withName(property.getFragment());
     }
@@ -329,7 +328,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     subject.addLabel(OwlLabels.OWL_COMPLEMENT_OF);
     graph.setProperty(subject, NodeProperties.ANONYMOUS, true);
     Node operand = graph.getOrCreateNode(getUri(desc.getOperand()));
-    graph.getOrCreateRelationship(subject, operand, EdgeType.REL);
+    graph.getOrCreateRelationship(subject, operand, OwlRelationships.OPERAND);
     return null;
   }
 
@@ -347,7 +346,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     int i = 0;
     for (OWLObjectPropertyExpression property: axiom.getPropertyChain()) {
       Node link = graph.getOrCreateNode(getUri(property));
-      Relationship relationship = graph.getOrCreateRelationship(chain, link, EdgeType.REL);
+      Relationship relationship = graph.getOrCreateRelationship(chain, link, OwlRelationships.RDFS_SUB_PROPERTY_OF);
       graph.setProperty(relationship, "order", i++);
     }
     return null;
