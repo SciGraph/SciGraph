@@ -1,6 +1,7 @@
 SciGraph
 ========
 [![Build Status](https://travis-ci.org/SciCrunch/SciGraph.svg?branch=master)](https://travis-ci.org/SciCrunch/SciGraph)
+
 Represent ontologies in a Neo4j graph.
 
 Motivation
