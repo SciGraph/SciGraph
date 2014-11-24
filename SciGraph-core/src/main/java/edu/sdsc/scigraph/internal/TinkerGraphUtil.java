@@ -28,7 +28,7 @@ import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
-public class TinkerGraphUtil {
+class TinkerGraphUtil {
 
   static void mapProperties(PropertyContainer container, Element element) {
     for (String key: container.getPropertyKeys()) {
