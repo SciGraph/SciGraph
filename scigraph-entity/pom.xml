@@ -24,7 +24,7 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
   <artifactId>scigraph-entity</artifactId>
-  <name>SciGraph-entity</name>
+  <name>SciGraph - Entity</name>
 
   <dependencies>
     <dependency>
