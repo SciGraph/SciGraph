@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -70,6 +71,7 @@ public class Neo4jModule extends AbstractModule {
     bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(Names.named("neo4j.curieMap")).toInstance(curieMap);
     bind(CurieUtil.class);
     bind(Vocabulary.class).to(VocabularyNeo4jImpl.class).in(Singleton.class);
+    bind(new TypeLiteral<ConcurrentMap<String, Long>>(){}).to(IdMap.class).in(Singleton.class);
   }
 
   private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
