@@ -3,3 +3,6 @@ jdk:
   # TODO: Investigate why this is failing - oraclejdk8
   - oraclejdk7
   - openjdk7
+branches:
+  only:
+  - master
