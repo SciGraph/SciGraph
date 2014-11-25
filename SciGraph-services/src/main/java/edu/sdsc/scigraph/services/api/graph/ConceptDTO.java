@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.services.api.graph;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -29,15 +30,15 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_DEFAULT)
 public class ConceptDTO extends ConceptDTOLite {
 
-  private String definition;
+  private Collection<String> definitions;
   private List<ConceptDTO> descendants = new ArrayList<>();
 
-  public String getDefinition() {
-    return definition;
+  public Collection<String> getDefinitions() {
+    return definitions;
   }
 
-  public void setDefinition(String definition) {
-    this.definition = definition;
+  public void setDefinitions(Collection<String> definitions) {
+    this.definitions = definitions;
   }
 
   @XmlElementWrapper(name="descendants")
