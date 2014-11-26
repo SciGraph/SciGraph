@@ -70,8 +70,11 @@ public class CurieUtil {
 
   public Collection<String> getFullUri(final String curie) {
     Preconditions.checkNotNull(curie);
-    Preconditions.checkState(curie.contains(":"), "curie does not appear to be a curie");
-    String prefix = curie.split(":")[0];
+    String[] parts = curie.split(":");
+    if (1 == parts.length) {
+      return Collections.emptySet();
+    }
+    String prefix = parts[0];
     if (uriMap.containsKey(prefix)) {
       return transform(uriMap.get(prefix), new Function<String, String>() {
         @Override
