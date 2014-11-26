@@ -68,6 +68,11 @@ public class CurieUtilTest {
   }
 
   @Test
+  public void emptyUris_whenNotValidCurie() {
+    assertThat(util.getFullUri("A"), is(empty()));
+  }
+
+  @Test
   public void currie_whenMappingIsPresent() {
     assertThat(util.getCurie("http://example.org/a_foo"), is(Optional.of("A:foo")));
   }
