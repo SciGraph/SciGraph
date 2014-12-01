@@ -21,28 +21,28 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import edu.sdsc.scigraph.neo4j.Graph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public class Neo4jManager implements Managed {
 
   private final Logger logger = Logger.getLogger(Neo4jManager.class.getName());
   
-  private final Graph graph;
+  private final GraphDatabaseService graphDb;
 
   @Inject
-  public Neo4jManager(Graph graph) {
-    this.graph = graph;
+  public Neo4jManager(GraphDatabaseService graphDb) {
+    this.graphDb = graphDb;
   }
 
   @Override
   public void start() throws Exception {
-    logger.info("Starting Neo4j graph");
+    logger.info("Starting Neo4j graph manager");
   }
 
   @Override
   public void stop() throws Exception {
     logger.info("Shutting down Neo4j graph");
-    graph.shutdown();
+    graphDb.shutdown();
   }
 
 }

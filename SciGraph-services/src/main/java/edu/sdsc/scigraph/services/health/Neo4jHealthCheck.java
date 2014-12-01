@@ -17,27 +17,26 @@ package edu.sdsc.scigraph.services.health;
 
 import javax.inject.Inject;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 import com.codahale.metrics.health.HealthCheck;
 
-import edu.sdsc.scigraph.neo4j.Graph;
-
 public class Neo4jHealthCheck extends HealthCheck {
 
-  private final Graph graph;
+  private final GraphDatabaseService graphDb;
 
   @Inject
-  Neo4jHealthCheck(Graph graph) {
-    this.graph = graph;
+  Neo4jHealthCheck(GraphDatabaseService graphDb) {
+    this.graphDb = graphDb;
   }
 
   @Override
   protected Result check() throws Exception {
     Node node = null;
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      node = graph.getGraphDb().getNodeById(1);
+    try (Transaction tx = graphDb.beginTx()) {
+      node = graphDb.getNodeById(1);
       tx.success();
     }
 

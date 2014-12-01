@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.services;
 
-import static com.google.common.collect.Maps.newHashMap;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.basic.BasicAuthProvider;
@@ -42,6 +41,7 @@ import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.sun.jersey.api.core.ResourceConfig;
 import com.wordnik.swagger.config.ConfigFactory;
 import com.wordnik.swagger.config.ScannerFactory;
 import com.wordnik.swagger.config.SwaggerConfig;
@@ -81,16 +81,14 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     initializeSwaggger(bootstrap);
   }
 
-  void configureJersey(JerseyEnvironment environment) {
-    //Add providers
-    //environment.register(LiteratureCsvWriter.class);
-    //environment.register(LiteratureRisWriter.class);
+  void addWriters(JerseyEnvironment environment) {
     environment.register(GmlWriter.class);
     environment.register(GraphMlWriter.class);
     environment.register(GraphsonWriter.class);
-
-    //Add mediaType mappings
-    Map<String, MediaType> map = newHashMap();
+  }
+  
+  void addMediaTypeMappings(ResourceConfig config) {
+    Map<String, MediaType> map = config.getMediaTypeMappings();
     map.put("xml", MediaType.APPLICATION_XML_TYPE);
     map.put("json", MediaType.APPLICATION_JSON_TYPE);
     map.put("jsonp", CustomMediaTypes.APPLICATION_JSONP_TYPE);
@@ -100,7 +98,11 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     map.put("graphson", CustomMediaTypes.APPLICATION_GRAPHSON_TYPE);
     map.put("graphml", CustomMediaTypes.APPLICATION_GRAPHML_TYPE);
     map.put("gml", CustomMediaTypes.TEXT_GML_TYPE);
-    environment.getResourceConfig().getMediaTypeMappings().putAll(map);
+  }
+  
+  void configureJersey(JerseyEnvironment environment) {
+    addWriters(environment);
+    addMediaTypeMappings(environment.getResourceConfig());
   }
 
   void initializeSwaggger(Bootstrap<ApplicationConfiguration> bootstrap) {
