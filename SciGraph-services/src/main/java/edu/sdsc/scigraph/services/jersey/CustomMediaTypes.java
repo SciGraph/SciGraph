@@ -27,13 +27,13 @@ public class CustomMediaTypes {
 
   public final static String TEXT_CSV = "text/csv";
   public final static MediaType TEXT_CSV_TYPE = new MediaType("text", "csv");
-  
+
   public final static String TEXT_TSV = "text/tab-separated-values";
   public final static MediaType TEXT_TSV_TYPE = new MediaType("text", "tab-separated-values");
 
   public final static String APPLICATION_RIS = "application/x-research-info-systems";
   public final static MediaType APPLICATION_RIS_TYPE = new MediaType("application", "x-research-info-systems");
-  
+
   // Graph Media Types
   public final static String APPLICATION_GRAPHML = "application/graphml+xml";
   public final static MediaType APPLICATION_GRAPHML_TYPE = new MediaType("application", "graphml+xml");
@@ -43,5 +43,11 @@ public class CustomMediaTypes {
 
   public final static String TEXT_GML = "text/gml";
   public final static MediaType TEXT_GML_TYPE = new MediaType("text", "gml");
+
+  public final static String IMAGE_JPEG = "image/jpeg";
+  public final static MediaType IMAGE_JPEG_TYPE = new MediaType("image", "jpeg");
+
+  public final static String IMAGE_PNG = "image/png";
+  public final static MediaType IMAGE_PNG_TYPE = new MediaType("image", "png");
 
 }

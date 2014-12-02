@@ -64,6 +64,7 @@ import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.writers.GmlWriter;
 import edu.sdsc.scigraph.services.jersey.writers.GraphMlWriter;
 import edu.sdsc.scigraph.services.jersey.writers.GraphsonWriter;
+import edu.sdsc.scigraph.services.jersey.writers.ImageWriter;
 
 public class MainApplication extends Application<ApplicationConfiguration> {
 
@@ -85,6 +86,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     environment.register(GmlWriter.class);
     environment.register(GraphMlWriter.class);
     environment.register(GraphsonWriter.class);
+    environment.register(ImageWriter.class);
   }
   
   void addMediaTypeMappings(ResourceConfig config) {
@@ -98,6 +100,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     map.put("graphson", CustomMediaTypes.APPLICATION_GRAPHSON_TYPE);
     map.put("graphml", CustomMediaTypes.APPLICATION_GRAPHML_TYPE);
     map.put("gml", CustomMediaTypes.TEXT_GML_TYPE);
+    map.put("jpg", CustomMediaTypes.IMAGE_JPEG_TYPE);
+    map.put("jpeg", CustomMediaTypes.IMAGE_JPEG_TYPE);
+    map.put("png", CustomMediaTypes.IMAGE_PNG_TYPE);
   }
   
   void configureJersey(JerseyEnvironment environment) {
