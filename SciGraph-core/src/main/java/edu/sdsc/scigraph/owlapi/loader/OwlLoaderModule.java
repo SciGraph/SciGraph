@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import com.google.inject.name.Names;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 class OwlLoaderModule extends AbstractModule {
 
@@ -49,6 +51,8 @@ class OwlLoaderModule extends AbstractModule {
     }).annotatedWith(Names.named("exactProperties")).toInstance(config.getExactNodeProperties());
     bind(new TypeLiteral<Map<String, String>>() {
     }).annotatedWith(Names.named("owl.categories")).toInstance(config.getCategories());
+    bind(new TypeLiteral<List<MappedProperty>>() {
+    }).annotatedWith(Names.named("owl.mappedProperties")).toInstance(config.getMappedProperties());
   }
 
   @Provides
