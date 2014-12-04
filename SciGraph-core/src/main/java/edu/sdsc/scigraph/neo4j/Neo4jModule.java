@@ -30,6 +30,7 @@ import javax.inject.Singleton;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -57,7 +58,7 @@ import edu.sdsc.scigraph.vocabulary.VocabularyNeo4jImpl;
 public class Neo4jModule extends AbstractModule {
 
   private Optional<String> graphLocation = Optional.absent();
-  
+
   private Map<String, String> curieMap = new HashMap<>();
 
   public Neo4jModule(OntologyConfiguration configuration) {
@@ -96,14 +97,14 @@ public class Neo4jModule extends AbstractModule {
       tx.success();
     }
   }
-  
+
   @Provides
   @Singleton
   DB getMaker(@Named("neo4j.location") String neo4jLocation) {
     File dbLocation = new File(neo4jLocation, "SciGraphIdMap");
     return DBMaker.newFileDB(dbLocation).closeOnJvmShutdown().transactionDisable().mmapFileEnable().make();
   }
-  
+
   @Provides
   @Singleton
   GraphDatabaseService getGraphDatabaseService(@Named("neo4j.location") String neo4jLocation) throws IOException {
@@ -120,7 +121,7 @@ public class Neo4jModule extends AbstractModule {
         @Override
         public void run() { graphDb.shutdown(); }
       });
-      
+
       setupAutoIndexing(graphDb);
       return graphDb;
     } catch (Exception e) {
@@ -130,5 +131,12 @@ public class Neo4jModule extends AbstractModule {
       throw e;
     }
   }
+
+  @Provides
+  @Singleton
+  ExecutionEngine getExecutionEngine(GraphDatabaseService graphDb) {
+    return new ExecutionEngine(graphDb);
+  }
+
 
 }
