@@ -17,20 +17,17 @@ package edu.sdsc.scigraph.services.api.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 @XmlRootElement(name="class")
-@JsonInclude(Include.NON_DEFAULT)
 public class ConceptDTO extends ConceptDTOLite {
 
-  private Collection<String> definitions;
+  private Collection<String> definitions = new HashSet<>();
   private List<ConceptDTO> descendants = new ArrayList<>();
 
   public Collection<String> getDefinitions() {
@@ -47,7 +44,7 @@ public class ConceptDTO extends ConceptDTOLite {
     return descendants;
   }
 
-  public void getDescendants(List<ConceptDTO> descendants) {
+  public void setDescendants(List<ConceptDTO> descendants) {
     this.descendants = descendants;
   }
 

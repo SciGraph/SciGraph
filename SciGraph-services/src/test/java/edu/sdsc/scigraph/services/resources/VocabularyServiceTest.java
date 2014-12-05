@@ -16,15 +16,13 @@
 package edu.sdsc.scigraph.services.resources;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static io.dropwizard.testing.FixtureHelpers.fixture;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.dropwizard.testing.FixtureHelpers;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import io.dropwizard.testing.junit.ResourceTestRule;
-
-import java.io.IOException;
 
 import javax.ws.rs.core.MediaType;
 
@@ -58,6 +56,7 @@ public class VocabularyServiceTest {
     when(vocabulary.getConceptFromUri("http://example.org/none")).thenReturn(Optional.<Concept>absent());
     when(vocabulary.getConceptFromUri("http://example.org/foo")).thenReturn(Optional.of(hippocampus));
     when(hippocampus.getLabels()).thenReturn(newArrayList("Hippocampus"));
+    when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
   }
 
   @Test(expected=UniformInterfaceException.class)
@@ -66,16 +65,18 @@ public class VocabularyServiceTest {
   }
 
   @Test
-  public void testKnownUriJson() throws IOException {
+  public void testKnownUriJson() throws Exception {
     String response = resources.client().resource("/vocabulary/uri/http%3A%2F%2Fexample.org%2Ffoo").accept(MediaType.APPLICATION_JSON).get(String.class);
-    assertThat(response, is(equalTo(FixtureHelpers.fixture("fixtures/hippocampus.json"))));
+    String expected = fixture("fixtures/hippocampus.json");
+    assertEquals(expected, response, true);
   }
   
   @Test
-  public void testKnownIdJson() throws IOException {
-    /*when(vocabulary.getConceptFromId(any())).thenReturn(newArrayList(hippocampus));
+  public void testKnownIdJson() throws Exception {
+    when(vocabulary.getConceptFromId(any(Vocabulary.Query.class))).thenReturn(newArrayList(hippocampus));
     String response = resources.client().resource("/vocabulary/id/foo").accept(MediaType.APPLICATION_JSON).get(String.class);
-    assertThat(response, is(equalTo(FixtureHelpers.fixture("fixtures/hippocampus.json"))));*/
+    String expected = fixture("fixtures/hippocampusInList.json");
+    assertEquals(expected, response, true);
   }
 
 }

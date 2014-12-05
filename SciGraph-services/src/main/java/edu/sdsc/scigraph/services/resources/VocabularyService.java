@@ -375,13 +375,13 @@ public class VocabularyService extends BaseResource {
   private static class ConceptWrapper {
     @XmlElement(name="concept")
     @JsonProperty
-    List<ConceptDTO> list = new ArrayList<>();
+    List<ConceptDTO> concepts = new ArrayList<>();
 
     @SuppressWarnings("unused")
     ConceptWrapper() {}
 
     ConceptWrapper(Collection<ConceptDTO> items) {
-      list.addAll(items);
+      concepts.addAll(items);
     }
   }
 

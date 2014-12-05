@@ -16,27 +16,24 @@
 package edu.sdsc.scigraph.services.api.graph;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 @XmlRootElement(name="class")
-@JsonInclude(Include.NON_DEFAULT)
 public class ConceptDTOLite {
 
   private String uri;
-  private Collection<String> labels;
+  private Collection<String> labels = new HashSet<>();
   private String fragment;
   private String curie;
-  private Collection<String> categories;
-  private Collection<String> synonyms;
-  private Collection<String> acronyms;
-  private Collection<String> abbreviations;
+  private Collection<String> categories = new HashSet<>();
+  private Collection<String> synonyms = new HashSet<>();
+  private Collection<String> acronyms = new HashSet<>();
+  private Collection<String> abbreviations = new HashSet<>();
 
   @XmlAttribute
   public String getUri() {
