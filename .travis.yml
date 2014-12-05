@@ -2,7 +2,7 @@ language: java
 jdk:
   # TODO: Investigate why this is failing - oraclejdk8
   - oraclejdk7
-  - openjdk7
+  # Reduce log size - openjdk7
 branches:
   only:
   - master
