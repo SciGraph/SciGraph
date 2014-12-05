@@ -22,22 +22,4 @@ public class EdgeProperties extends CommonProperties {
   public static final String SYMMETRIC = "symmetric";
   public static final String QUANTIFICATION_TYPE = "quantificationType";
 
-  /*
-   * void setTransitive(boolean transitive);
-   * 
-   * boolean isTransitive();
-   * 
-   * void setReflexive(boolean reflexive);
-   * 
-   * boolean isReflexive();
-   * 
-   * void setSymmetric(boolean symmetric);
-   * 
-   * boolean isSymmetric();
-   * 
-   * void setQuantificationType(String type);
-   * 
-   * String getQuantificationType();
-   */
-
 }

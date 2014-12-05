@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.frames;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public class NodeProperties extends CommonProperties {
     labels.add(label);
   }
 
-  public Iterable<String> getLabels() {
+  public Collection<String> getLabels() {
     return labels;
   }
 

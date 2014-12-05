@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.frames;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,7 +47,7 @@ public class Concept extends NodeProperties {
     return preferredLabel;
   }
 
-  public Iterable<String> getSynonyms() {
+  public Collection<String> getSynonyms() {
     return synonyms;
   }
 
@@ -54,7 +55,7 @@ public class Concept extends NodeProperties {
     synonyms.add(synonym);
   }
 
-  public Iterable<String> getAcronyms() {
+  public Collection<String> getAcronyms() {
     return acronyms;
   }
 
@@ -62,7 +63,7 @@ public class Concept extends NodeProperties {
     acronyms.add(acronym);
   }
 
-  public Iterable<String> getAbbreviations() {
+  public Collection<String> getAbbreviations() {
     return abbreviations;
   }
 
@@ -74,7 +75,7 @@ public class Concept extends NodeProperties {
     this.definitions.add(definition);
   }
 
-  public Iterable<String> getDefinitions() {
+  public Collection<String> getDefinitions() {
     return definitions;
   }
 
@@ -82,7 +83,7 @@ public class Concept extends NodeProperties {
     categories.add(category);
   }
 
-  public Iterable<String> getCategories() {
+  public Collection<String> getCategories() {
     return categories;
   }
 
@@ -106,7 +107,7 @@ public class Concept extends NodeProperties {
 
   @Override
   public String toString() {
-    return String.format("%s (%s)", Iterables.toString(getLabels()), this.getFragment());
+    return String.format("%s (%s)", Iterables.toString(getLabels()), getFragment());
   }
 
 }

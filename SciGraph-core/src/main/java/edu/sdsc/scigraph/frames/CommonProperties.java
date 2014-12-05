@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.frames;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -102,7 +103,7 @@ public class CommonProperties {
     types.add(type);
   }
 
-  public Iterable<String> getTypes() {
+  public Collection<String> getTypes() {
     return types;
   }
 
