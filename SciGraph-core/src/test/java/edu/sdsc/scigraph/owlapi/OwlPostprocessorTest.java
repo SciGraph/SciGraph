@@ -39,7 +39,7 @@ import edu.sdsc.scigraph.neo4j.GraphUtil;
 public class OwlPostprocessorTest {
 
   GraphDatabaseService graphDb;
-  Node parent, child, grandChild;
+  Node parent, child, grandChild, equivalent, equivalentSubclass;
   OwlPostprocessor postprocessor;
 
   @Before
@@ -55,6 +55,10 @@ public class OwlPostprocessorTest {
     child.createRelationshipTo(parent, OwlRelationships.RDF_SUBCLASS_OF);
     grandChild = graphDb.createNode();
     grandChild.createRelationshipTo(child, OwlRelationships.RDF_SUBCLASS_OF);
+    equivalent = graphDb.createNode();
+    equivalentSubclass = graphDb.createNode();
+    equivalentSubclass.createRelationshipTo(equivalent, OwlRelationships.RDF_SUBCLASS_OF);
+    equivalent.createRelationshipTo(child, OwlRelationships.OWL_EQUIVALENT_CLASS);
     tx.success();
     postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
   }
@@ -70,6 +74,10 @@ public class OwlPostprocessorTest {
         GraphUtil.getProperty(child, Concept.CATEGORY, String.class), is(Optional.of("foo")));
     assertThat("grandchild category should be set",
         GraphUtil.getProperty(grandChild, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat("equivalent category should be set",
+        GraphUtil.getProperty(equivalent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat("equivalent subclass category should be set",
+        GraphUtil.getProperty(equivalentSubclass, Concept.CATEGORY, String.class), is(Optional.of("foo")));
   }
 
 }
