@@ -15,9 +15,11 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+
+import javax.inject.Named;
 
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
@@ -34,12 +36,17 @@ public class OwlOntologyWalkerConsumer implements Callable<Void> {
   BatchGraph graph;
   
   int numProducers;
+  
+  List<MappedProperty> mappedProperties;
 
+  // TODO: Switch this to assisted inject
   @Inject
-  OwlOntologyWalkerConsumer(BlockingQueue<OWLOntologyWalker> queue, BatchGraph graph, int numProducers) {
+  OwlOntologyWalkerConsumer(BlockingQueue<OWLOntologyWalker> queue, BatchGraph graph, int numProducers,
+      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
     this.queue = queue;
     this.graph = graph;
     this.numProducers = numProducers;
+    this.mappedProperties = mappedProperties;
   }
   
   @Override
@@ -54,7 +61,7 @@ public class OwlOntologyWalkerConsumer implements Callable<Void> {
             break;
           }
         } else {
-          BatchOwlVisitor visitor = new BatchOwlVisitor(walker, graph, Collections.<MappedProperty>emptyList());
+          BatchOwlVisitor visitor = new BatchOwlVisitor(walker, graph, mappedProperties);
           walker.walkStructure(visitor);
         }
       }  

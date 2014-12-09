@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -59,6 +61,7 @@ import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class BatchOwlLoader {
 
@@ -77,6 +80,9 @@ public class BatchOwlLoader {
 
   @Inject
   BatchGraph graph;
+  
+  @Inject
+  @Named("owl.mappedProperties") List<MappedProperty> mappedProperties;
 
   Collection<String> urls;
 
@@ -92,7 +98,7 @@ public class BatchOwlLoader {
 
   void loadOntology() throws InterruptedException {
     for (int i = 0; i < CONSUMER_COUNT; i++) {
-      exec.submit(new OwlOntologyWalkerConsumer(queue, graph, PRODUCER_COUNT));
+      exec.submit(new OwlOntologyWalkerConsumer(queue, graph, PRODUCER_COUNT, mappedProperties));
     }
     for (int i = 0; i < PRODUCER_COUNT; i++) {
       exec.submit(new OwlOntologyWalkerProducer(queue, urlQueue, CONSUMER_COUNT));
