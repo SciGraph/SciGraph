@@ -108,6 +108,9 @@ public class OwlPostprocessor {
         } else {
           processCategory(root, OwlRelationships.RDF_SUBCLASS_OF, Direction.INCOMING,
               category.getValue());
+          // TODO: A hack for Earthcube - move this to configuation?
+          processCategory(root, DynamicRelationshipType.withName("narrower"), Direction.OUTGOING,
+              category.getValue());
         }
       }
       tx.success();
