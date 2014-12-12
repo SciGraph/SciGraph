@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -78,6 +79,16 @@ public class OwlPostprocessorTest {
         GraphUtil.getProperty(equivalent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
     assertThat("equivalent subclass category should be set",
         GraphUtil.getProperty(equivalentSubclass, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat("parent label should be set",
+        parent.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat("child label should be set",
+        child.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat("grandchild label should be set",
+        grandChild.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat("equivalent label should be set",
+        equivalent.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat("equivalent label category should be set",
+        equivalentSubclass.hasLabel(DynamicLabel.label("foo")), is(true));
   }
 
 }
