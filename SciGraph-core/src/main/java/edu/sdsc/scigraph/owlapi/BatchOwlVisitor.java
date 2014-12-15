@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
@@ -171,18 +173,22 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
       String property = getUri(axiom.getProperty()).toString();
       if (axiom.getValue() instanceof OWLLiteral) {
-        Optional<Object> literal = getTypedLiteralValue((OWLLiteral) (axiom.getValue()));
-        if (literal.isPresent()) {
-          try {
-            graph.addProperty(subject, property, literal.get());
+        //Optional<Object> literal = getTypedLiteralValue((OWLLiteral) (axiom.getValue()));
+        OWLLiteral owlLiteral = (OWLLiteral) axiom.getValue();
+        if (owlLiteral.hasLang() && !"en".equals(owlLiteral.getLang())) {
+          // TODO: Ignore non-english literals for now
+          return null;
+        }
+        //TODO: Store mixed types at some point?
+        try {
+          graph.addProperty(subject, property, owlLiteral.getLiteral());
 
-            if (mappedProperties.containsKey(property)) {
-              graph.addProperty(subject, mappedProperties.get(property), literal.get());
-            }
-          } catch (ClassCastException e) {
-            logger.warning("Can't store property arrays with mixed types. Ignoring " + property + " with value "
-                + literal.get().toString() + " on " + ((IRI) axiom.getSubject()).toURI().toString());
+          if (mappedProperties.containsKey(property)) {
+            graph.addProperty(subject, mappedProperties.get(property), owlLiteral.getLiteral());
           }
+        } catch (ClassCastException e) {
+          logger.warning("Can't store property arrays with mixed types. Ignoring " + property + " with value "
+              + owlLiteral.getLiteral() + " on " + ((IRI) axiom.getSubject()).toURI().toString());
         }
       } else if (axiom.getValue() instanceof IRI) {
         long object = getOrCreateNode(((IRI) axiom.getValue()).toURI());
@@ -199,7 +205,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     }
     return null;
   }
-
+ 
   @Override
   public Void visit(OWLSubAnnotationPropertyOfAxiom axiom) {
     long subProperty = getOrCreateNode(getUri(axiom.getSubProperty()));
@@ -245,12 +251,26 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLDataPropertyAssertionAxiom axiom) {
     long individual = getOrCreateNode(getUri(axiom.getSubject()));
-    String property = axiom.getProperty().asOWLDataProperty().getIRI().toString();
-    Optional<Object> literal = getTypedLiteralValue(axiom.getObject());
+    OWLDataProperty property = axiom.getProperty().asOWLDataProperty();
+    Set<OWLDataRange> ranges = property.getRanges(ontology);
+    String propertyName = property.getIRI().toString();
+    OWLLiteral owlLiteral = axiom.getObject();
+    if (owlLiteral.hasLang() && !"en".equals(owlLiteral.getLang())) {
+      // TODO: Ignore non-english literals for now
+      return null;
+    }
+    Optional<Object> literal = Optional.absent();
+    if (ranges.isEmpty()) {
+      // If there's no range assume that this property is a string (#28)
+      literal = Optional.<Object>of(owlLiteral.getLiteral());
+    } else {
+      // TODO: Check that this conforms to the range constraint 
+      literal = getTypedLiteralValue(owlLiteral);
+    }
     if (literal.isPresent()) {
-      graph.setNodeProperty(individual, property, literal.get());
-      if (mappedProperties.containsKey(property)) {
-        graph.addProperty(individual, mappedProperties.get(property), literal.get());
+      graph.setNodeProperty(individual, propertyName, literal.get());
+      if (mappedProperties.containsKey(propertyName)) {
+        graph.addProperty(individual, mappedProperties.get(propertyName), literal.get());
       }
     }
     return null;
