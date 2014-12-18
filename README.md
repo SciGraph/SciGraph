@@ -35,6 +35,8 @@ in text can be found in the `scigraph-entity` module.
 
 SciGraph can also be used as a stand-alone DropWizard web service (via `scigraph-services`).
 
+Note that SciGraph is "OWL-centric". If you have, for example, and arbitrary SKOS ontology that doesn't assert skos:Concept as an owl:Class these skos:Concepts will not be visible to the owlapi and not visible in the resulting Neo4j graph.
+
 Alternatives
 ------------
 * [tinkerpop sail implementation](https://github.com/tinkerpop/blueprints/wiki/Sail-Implementation)
