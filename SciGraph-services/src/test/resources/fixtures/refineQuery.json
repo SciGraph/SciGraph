@@ -1,0 +1,9 @@
+{
+  "query": "foo",
+  "limit": 10,
+  "type": "type",
+  "type_strict": "any",
+  "properties": {
+    "bar" : "baz"
+  }
+}
