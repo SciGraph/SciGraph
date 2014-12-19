@@ -1,0 +1,18 @@
+{
+  "result" : [
+    {
+      "id" : "id",
+      "name" : "name",
+      "type" : ["type"],
+      "score" : 10.8,
+      "match" : true
+    },
+    {
+      "id" : "id2",
+      "name" : "name2",
+      "type" : ["type"],
+      "score" : 10.6,
+      "match" : false
+    }
+  ]
+}

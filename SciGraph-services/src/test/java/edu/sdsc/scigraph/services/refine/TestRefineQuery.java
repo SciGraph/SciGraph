@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestRefineQuery {
@@ -33,7 +32,7 @@ public class TestRefineQuery {
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
 
   @Test
-  public void deserializationIsCorrect_withAllFields() throws Exception {
+  public void deserializationIsCorrect_withAllRefineFields() throws Exception {
     RefineQuery expected = new RefineQuery();
     expected.setQuery("foo");
     expected.setLimit(10);
@@ -46,18 +45,18 @@ public class TestRefineQuery {
     RefineQuery actual = MAPPER.readValue(fixture("fixtures/refineQuery.json"), RefineQuery.class);
     assertThat(actual, is(expected));
   }
-  
+
   @Test
-  public void deserializationIsCorrect_withMultipleQueries() throws Exception {
+  public void deserializationIsCorrect_withMultipleRefineQueries() throws Exception {
     RefineQuery foo = new RefineQuery();
     foo.setQuery("foo");
     RefineQuery bar = new RefineQuery();
     bar.setQuery("bar");
-    Map<String, RefineQuery> expected = new HashMap<>();
+    RefineQueries expected = new RefineQueries();
     expected.put("q0", foo);
     expected.put("q1", bar);
     
-    Map<String, RefineQuery> actual = MAPPER.readValue(fixture("fixtures/refineQueries.json"), new TypeReference<HashMap<String,RefineQuery>>(){});
+    RefineQueries actual = MAPPER.readValue(fixture("fixtures/refineQueries.json"), RefineQueries.class);
     assertThat(actual, is(expected));
   }
 

@@ -1,0 +1,22 @@
+{
+  "q0" : {
+  "result" : [
+    {
+      "id" : "id",
+      "name" : "name",
+      "type" : ["type"],
+      "score" : 10.8,
+      "match" : true
+    }
+  ]
+  },
+  "q1" : {
+    "result" : [{
+    "id" : "id2",
+    "name" : "name2",
+    "type" : ["type"],
+    "score" : 10.6,
+    "match" : false
+    }]
+  }
+}
