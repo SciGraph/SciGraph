@@ -20,6 +20,8 @@ public class ServiceMetadata {
   String name;
   String identifierSpace;
   String schemaSpace;
+  View view;
+  Preview preview;
 
   public String getName() {
     return name;
@@ -43,6 +45,66 @@ public class ServiceMetadata {
 
   public void setSchemaSpace(String schemaSpace) {
     this.schemaSpace = schemaSpace;
+  }
+
+  public View getView() {
+    return view;
+  }
+
+  public void setView(View view) {
+    this.view = view;
+  }
+
+  public Preview getPreview() {
+    return preview;
+  }
+
+  public void setPreview(Preview preview) {
+    this.preview = preview;
+  }
+
+  public static class Preview {
+    String url;
+    int width;
+    int height;
+
+    public String getUrl() {
+      return url;
+    }
+
+    public void setUrl(String url) {
+      this.url = url;
+    }
+
+    public int getWidth() {
+      return width;
+    }
+
+    public void setWidth(int width) {
+      this.width = width;
+    }
+
+    public int getHeight() {
+      return height;
+    }
+
+    public void setHeight(int height) {
+      this.height = height;
+    }
+
+  }
+
+  public static class View {
+    String url;
+
+    public String getUrl() {
+      return url;
+    }
+
+    public void setUrl(String url) {
+      this.url = url;
+    }
+
   }
 
 }

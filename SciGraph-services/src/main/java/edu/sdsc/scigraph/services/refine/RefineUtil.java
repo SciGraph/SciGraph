@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2014 The SciGraph authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package edu.sdsc.scigraph.services.refine;
 
 import static com.google.common.collect.Iterables.getFirst;
@@ -8,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Splitter;
 
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
@@ -22,14 +38,14 @@ public class RefineUtil {
 
   public static RefineQuery getQuery(String query) throws IOException {
     RefineQuery refineQuery = new RefineQuery();
+    // Is probable JSON string
     if ((query.startsWith("[") && query.endsWith("]")) ||
         (query.startsWith("{") && query.endsWith("}"))) {
-      // Is probable JSON string
       refineQuery = MAPPER.readValue(query, RefineQuery.class);
     } else {
+      // Just treat the string as the query
       refineQuery.setQuery(query);
     }
-
     return refineQuery;
   }
 
@@ -39,7 +55,7 @@ public class RefineUtil {
       builder.limit(refineQuery.getLimit().get());
     }
     if (refineQuery.getType().isPresent()) {
-      // TODO: Convert this to categories
+      builder.categories(Splitter.on(',').splitToList(refineQuery.getType().get()));
     }
     return builder.build();
   }
