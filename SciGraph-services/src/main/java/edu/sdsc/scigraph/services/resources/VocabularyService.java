@@ -246,8 +246,10 @@ public class VocabularyService extends BaseResource {
   @GET
   @Path("/term/{term}")
   @ApiOperation(value = "Find a concept from a term",
-  notes = "Makes a best effort to provide \"exactish\" matching. Fragments of labels are not matched " + 
-      " (ie: \"foo bar\" would not be returned by a search for \"bar\"). Results are not guarenteed to be unique.",
+  notes = "Makes a best effort to provide \"exactish\" matching. " +
+      "Individual tokens within multi-token labels are not matched" + 
+      " (ie: \"foo bar\" would not be returned by a search for \"bar\")."
+      + " Results are not guaranteed to be unique.",
       response = Concept.class)
   @ApiResponses({
     @ApiResponse(code = 404, message = "Concept with term could not be found")
@@ -285,8 +287,9 @@ public class VocabularyService extends BaseResource {
   @GET
   @Path("/search/{term}")
   @ApiOperation(value = "Find a concept from a term fragment",
-  notes = "Searches the complete text of the term. Fragments of labels are  matched " + 
-      " (ie: \"foo bar\" would be returned by a search for \"bar\"). Results are not guarenteed to be unique.",
+  notes = "Searches the complete text of the term. "
+      + "Individual tokens within multi-token labels are matched" + 
+      " (ie: \"foo bar\" would be returned by a search for \"bar\"). Results are not guaranteed to be unique.",
       response = Concept.class)
   @ApiResponses({
     @ApiResponse(code = 404, message = "Concept with term could not be found")
