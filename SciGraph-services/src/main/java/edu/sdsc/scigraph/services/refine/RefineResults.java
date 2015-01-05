@@ -35,7 +35,7 @@ public class RefineResults extends ForwardingMap<String, List<RefineResult>> {
     return delegate;
   }
   
-  void addResult(RefineResult result) {
+  public void addResult(RefineResult result) {
     delegate.get("result").add(result);
   }
 

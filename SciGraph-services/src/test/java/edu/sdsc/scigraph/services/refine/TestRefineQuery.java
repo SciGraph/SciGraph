@@ -47,6 +47,14 @@ public class TestRefineQuery {
   }
 
   @Test
+  public void deserializationIsCorrect_withOptionalFields() throws Exception {
+    RefineQuery expected = new RefineQuery();
+    expected.setQuery("foo"); 
+    RefineQuery actual = MAPPER.readValue(fixture("fixtures/refineQueryOptionalFields.json"), RefineQuery.class);
+    assertThat(actual, is(expected));
+  }
+  
+  @Test
   public void deserializationIsCorrect_withMultipleRefineQueries() throws Exception {
     RefineQuery foo = new RefineQuery();
     foo.setQuery("foo");

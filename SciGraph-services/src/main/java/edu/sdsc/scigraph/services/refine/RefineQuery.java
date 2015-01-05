@@ -15,21 +15,27 @@
  */
 package edu.sdsc.scigraph.services.refine;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import com.google.common.base.Optional;
 
 public class RefineQuery {
 
   String query;
 
-  int limit;
+  Optional<Integer> limit = Optional.absent();
 
-  String type;
+  Optional<String> type = Optional.absent();
 
-  String type_strict;
+  Optional<String> type_strict = Optional.absent();
 
-  Map<String, Object> properties;
+  Map<String, Object> properties = new HashMap<>();
 
+  /***
+   * @return A string to search for
+   */
   public String getQuery() {
     return query;
   }
@@ -38,30 +44,44 @@ public class RefineQuery {
     this.query = query;
   }
 
-  public int getLimit() {
+  /***
+   * @return An integer to specify how many results to return
+   */
+  public Optional<Integer> getLimit() {
     return limit;
   }
 
   public void setLimit(int limit) {
-    this.limit = limit;
+    this.limit = Optional.of(limit);
   }
 
-  public String getType() {
+  /*** 
+   * @return A single string, or an array of strings, specifying the types of result e.g., person, product,
+   *  ... The actual format of each type depends on the service 
+   *  (e.g., "/government/politician" as a Freebase type).
+   */
+  public Optional<String> getType() {
     return type;
   }
 
   public void setType(String type) {
-    this.type = type;
+    this.type = Optional.of(type);
   }
 
-  public String getType_strict() {
+  /***
+   * @return A string, one of "any", "all", "should"
+   */
+  public Optional<String> getType_strict() {
     return type_strict;
   }
 
   public void setType_strict(String type_strict) {
-    this.type_strict = type_strict;
+    this.type_strict = Optional.of(type_strict);
   }
 
+  /***
+   * @return Array of json object literals.
+   */
   public Map<String, Object> getProperties() {
     return properties;
   }

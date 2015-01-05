@@ -15,10 +15,12 @@
  */
 package edu.sdsc.scigraph.services.jersey;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -26,6 +28,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
 
 import com.fasterxml.jackson.databind.util.JSONWrappedObject;
+import com.google.common.base.Optional;
 
 public class JaxRsUtil {
 
@@ -51,8 +54,21 @@ public class JaxRsUtil {
     return request.selectVariant(VARIANTS);
   }
 
-  public static Object wrapJsonp(Request request, GenericEntity<?> response, String callback) {
-    if (JaxRsUtil.isVariant(request, CustomMediaTypes.APPLICATION_JSONP_TYPE)) {
+  /***
+   * Build a Response, optionally wrapped in a JSONP callback.
+   * <p>The response will be wrapped in a JSONP callback if any of the following apply:
+   * <ul>
+   * <li> The requested media type is <em>application/javascript</em>
+   * <li> The callback is not null or empty
+   * </ul>
+   * @param request The request
+   * @param response The response to wrap
+   * @param callback The callback
+   * @return A Response object, wrapped if necessary.
+   */
+  public static Object wrapJsonp(Request request, GenericEntity<?> response, @Nullable String callback) {
+    if (JaxRsUtil.isVariant(request, CustomMediaTypes.APPLICATION_JSONP_TYPE) || !isNullOrEmpty(callback)) {
+      callback = Optional.of(callback).or("fn");
       return new JSONWrappedObject(format("%s(", callback), ");", response.getEntity());
     } else {
       return Response.ok(response).build();
