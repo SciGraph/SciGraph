@@ -70,7 +70,7 @@ public class LexicalService extends BaseResource {
       @ApiParam( value = "The text to split", required = true )
       @QueryParam("text") @DefaultValue("") String text,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     SentenceWrapper sentences = new SentenceWrapper(lexicalLib.extractSentences(text));
     GenericEntity<SentenceWrapper> response = new GenericEntity<SentenceWrapper>(sentences){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
@@ -92,7 +92,7 @@ public class LexicalService extends BaseResource {
       @ApiParam( value = "The text to tag", required = true )
       @QueryParam("text") @DefaultValue("") String text,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     final List<PosToken> tokens = lexicalLib.tagPOS(text);
     GenericEntity<List<PosToken>> response = new GenericEntity<List<PosToken>>(tokens){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
@@ -115,7 +115,7 @@ public class LexicalService extends BaseResource {
       @ApiParam( value = "The text from which to extract chunks", required = true )
       @QueryParam("text") @DefaultValue("") String text,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     final List<Token<String>> chunks = lexicalLib.getChunks(text);
     GenericEntity<List<Token<String>>> response = new GenericEntity<List<Token<String>>>(chunks){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
@@ -138,7 +138,7 @@ public class LexicalService extends BaseResource {
       @ApiParam( value = "The text from which to extract entities", required = true )
       @QueryParam("text") @DefaultValue("") String text,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     final List<Token<String>> chunks = lexicalLib.getEntities(text);
     GenericEntity<List<Token<String>>> response = new GenericEntity<List<Token<String>>>(chunks){};
     return JaxRsUtil.wrapJsonp(request, response, callback);

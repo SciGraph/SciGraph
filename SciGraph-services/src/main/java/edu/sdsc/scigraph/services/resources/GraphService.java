@@ -152,7 +152,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "Maximum path length", required = false)
       @QueryParam("length") @DefaultValue("1") int length,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(startId).build();
     Concept startConcept = getOnlyElement(vocabulary.getConceptFromId(query));
     Node startNode = graph.getGraphDb().getNodeById(startConcept.getId());
@@ -203,7 +203,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "Maximum path length", required = false)
       @QueryParam("length") @DefaultValue("1") int length,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false) 
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(startId).build();
     Concept startConcept = getOnlyElement(vocabulary.getConceptFromId(query));
     Node startNode = graph.getGraphDb().getNodeById(startConcept.getId());
@@ -258,7 +258,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true) @PathParam("id") String id,
       @ApiParam(value = "How deep to traverse descendants", required = false) @QueryParam("depth") @DefaultValue("1") int depth,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
     Node node = graph.getGraphDb().getNodeById(concept.getId());
@@ -314,7 +314,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "Which direction to traverse: in, out, both (default). Only used if relationshipType is specified.", required = false)
       @QueryParam("direction") @DefaultValue("both") final String direction,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Collection<Concept> concepts = vocabulary.getConceptFromId(query);
     if (concepts.isEmpty()) {
@@ -368,7 +368,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "Traverse blank nodes", required = false)
       @QueryParam("blankNodes") @DefaultValue("false") final boolean traverseBlankNodes,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Collection<Concept> concepts = vocabulary.getConceptFromId(query);
     if (concepts.isEmpty()) {
@@ -412,7 +412,7 @@ public class GraphService extends BaseResource {
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getRelationships(
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     List<String> relationships = new ArrayList<>();
     try (Transaction tx = graph.getGraphDb().beginTx()) {
       relationships = newArrayList(transform(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationshipTypes(),
@@ -436,7 +436,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Collection<Concept> concepts = vocabulary.getConceptFromId(query);
     if (concepts.isEmpty()) {

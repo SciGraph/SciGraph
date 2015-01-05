@@ -15,12 +15,13 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
-
 class DocumentationStrings {
 
   final static String REST_ABUSE_DOC = "<em>NOTE:</em> This is an abuse of REST principals. This POST operation doesn't create resources";
 
-  final static String JSONP_DOC = "JSONP callback";
+  final static String JSONP_DOC = 
+      "Name of the JSONP callback ('fn' by default). "
+          + "Supplying this parameter or requesting a javascript media type will cause a JSONP response to be rendered.";
 
   final static String CONTENT_DOC = "The content to annotate";
 

@@ -295,7 +295,7 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     List<EntityAnnotation> entities = newArrayList();
     try {
       EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
@@ -374,7 +374,7 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") @DefaultValue("fn") String callback) throws IOException {
+      @QueryParam("callback") String callback) throws IOException {
     Annotations annotation = new Annotations();
     StringWriter writer = new StringWriter();
     EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));

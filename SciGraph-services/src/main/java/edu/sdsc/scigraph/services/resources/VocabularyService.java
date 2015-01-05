@@ -129,7 +129,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "URI to find", required = true )
       @PathParam("uri") String uri,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) throws Exception {
+      @QueryParam("callback") String callback) throws Exception {
     Optional<Concept> concept = vocabulary.getConceptFromUri(uri);
     if (concept.isPresent()) {
       GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(mapper.map(concept.get(), ConceptDTO.class)){};
@@ -158,7 +158,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "ID to find", required = true)
       @PathParam("id") String id,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) throws Exception {
+      @QueryParam("callback") String callback) throws Exception {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     List<Concept> concepts = newArrayList(vocabulary.getConceptFromId(query));
     if (concepts.isEmpty()) {
@@ -230,7 +230,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
       @QueryParam("prefix") List<String> prefixes,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(termPrefix).
         categories(categories).
         prefixes(prefixes).
@@ -268,7 +268,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
       @QueryParam("prefix") List<String> prefixes,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
         prefixes(prefixes).
@@ -308,7 +308,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
       @QueryParam("prefix") List<String> prefixes,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
         prefixes(prefixes).
@@ -337,7 +337,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("1") int limit,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit));
     SuggestionWrapper wrapper = new SuggestionWrapper(suggestions);
     GenericEntity<SuggestionWrapper> response = new GenericEntity<SuggestionWrapper>(wrapper){};
@@ -353,7 +353,7 @@ public class VocabularyService extends BaseResource {
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getCategories(
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     CategoryWrapper categories = new CategoryWrapper(vocabulary.getAllCategories());
     GenericEntity<CategoryWrapper> response = new GenericEntity<CategoryWrapper>(categories){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
@@ -368,7 +368,7 @@ public class VocabularyService extends BaseResource {
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getCuriePrefixes(
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") @DefaultValue("fn") String callback) {
+      @QueryParam("callback") String callback) {
     OntologyWrapper ontologies = new OntologyWrapper(vocabulary.getAllCuriePrefixes());
     GenericEntity<OntologyWrapper> response = new GenericEntity<OntologyWrapper>(ontologies){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
