@@ -29,7 +29,7 @@ no SciGraph dependency.
 
 It could be used in an application with the
 `scigraph-core` dependency which adds some convenience methods and includes "vocabulary" support. "Vocabulary" support includes searching a Lucene index
-for ontology classes in the graph, auto-complete functionality, and CURIE to
+for ontology classes in the graph, auto-complete functionality, OpenRefine resolution services, and CURIE to
 class resolution. Additional support for identifying these vocabulary entities
 in text can be found in the `scigraph-entity` module.
 
