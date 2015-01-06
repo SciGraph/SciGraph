@@ -31,7 +31,7 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 
-@Produces(CustomMediaTypes.APPLICATION_GRAPHML)
+@Produces({CustomMediaTypes.APPLICATION_GRAPHML, MediaType.APPLICATION_XML})
 @Provider
 public class GraphMlWriter implements MessageBodyWriter<Graph> {
 
