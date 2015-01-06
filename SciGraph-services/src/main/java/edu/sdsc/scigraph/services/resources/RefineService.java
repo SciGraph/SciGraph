@@ -45,6 +45,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
+import edu.sdsc.scigraph.services.jersey.JSONProcessingException;
 import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 import edu.sdsc.scigraph.services.refine.ConceptView;
 import edu.sdsc.scigraph.services.refine.RefineQueries;
@@ -79,7 +80,7 @@ public class RefineService extends BaseResource {
   response = RefineResult.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object suggestFromTermGET(
+  public Object suggestFromTerm_POST(
       @ApiParam( value = DocumentationStrings.RECONCILE_QUERY_DOC, required = false)
       @FormParam("query") String query,
       @ApiParam( value = DocumentationStrings.RECONCILE_QUERIES_DOC, required = false )
@@ -119,13 +120,12 @@ public class RefineService extends BaseResource {
         RefineResults results = getResults(refineQuery);
         GenericEntity<RefineResults> response = new GenericEntity<RefineResults>(results){};
         return JaxRsUtil.wrapJsonp(request, response, callback);
-      } else {
-        // TODO: throw exception
-        return null;
       }
     } catch (IOException e) {
-      return null;
+      String badJson = isNullOrEmpty(query) ? queries : query;
+      throw new JSONProcessingException(badJson);
     }
+    return null;
   }
 
   RefineResults getResults(RefineQuery refineQuery) {

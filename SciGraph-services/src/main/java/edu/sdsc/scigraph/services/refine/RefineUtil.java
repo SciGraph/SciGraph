@@ -36,14 +36,16 @@ public class RefineUtil {
     return MAPPER.readValue(queries, RefineQueries.class);
   }
 
+  private static boolean isProbableJSON(String text) {
+    return (text.startsWith("[") && text.endsWith("]")) ||
+        (text.startsWith("{") && text.endsWith("}"));
+  }
+
   public static RefineQuery getQuery(String query) throws IOException {
     RefineQuery refineQuery = new RefineQuery();
-    // Is probable JSON string
-    if ((query.startsWith("[") && query.endsWith("]")) ||
-        (query.startsWith("{") && query.endsWith("}"))) {
+    if (isProbableJSON(query)) {
       refineQuery = MAPPER.readValue(query, RefineQuery.class);
     } else {
-      // Just treat the string as the query
       refineQuery.setQuery(query);
     }
     return refineQuery;
@@ -60,6 +62,7 @@ public class RefineUtil {
     return builder.build();
   }
 
+  // TODO: Can this be done with Dozer?
   public static RefineResults conceptsToRefineResults(List<Concept> concepts) {
     RefineResults results = new RefineResults();
     for (Concept concept: concepts) {
