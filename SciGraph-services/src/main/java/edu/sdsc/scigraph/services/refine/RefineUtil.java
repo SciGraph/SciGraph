@@ -64,7 +64,7 @@ public class RefineUtil {
     RefineResults results = new RefineResults();
     for (Concept concept: concepts) {
       RefineResult result = new RefineResult();
-      result.setId(concept.getUri());
+      result.setId(concept.getFragment());
       result.setName(getFirst(concept.getLabels(), ""));
       result.setScore(1.0);
       result.setType(newHashSet(concept.getCategories()));

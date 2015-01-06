@@ -1,0 +1,34 @@
+<html>
+<dl>
+  <dt>uri</dt>
+  <dd>{{concept.uri}}</dd>
+  <dt>labels</dt>
+  <dd><ul>
+  {{#concept.labels}}
+  <li>{{.}}</li>
+  {{/concept.labels}}
+  </ul>
+  </dd>
+  <dt>synonyms</dt>
+  <dd><ul>
+  {{#concept.synonyms}}
+  <li>{{.}}</li>
+  {{/concept.synonyms}}
+  </ul>
+  </dd>
+  <dt>categories</dt>
+  <dd><ul>
+  {{#concept.categories}}
+  <li>{{.}}</li>
+  {{/concept.categories}}
+  </ul>
+  </dd>
+  <dt>definition</dt>
+  <dd><ul>
+  {{#concept.definitions}}
+  <li>{{.}}</li>
+  {{/concept.definitions}}
+  </ul>
+  </dd>
+</dl>
+</html>

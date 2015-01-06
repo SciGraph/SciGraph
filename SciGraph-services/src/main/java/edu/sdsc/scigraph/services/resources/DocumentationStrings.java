@@ -54,4 +54,36 @@ class DocumentationStrings {
 
   final static String GRAPH_ID_DOC = "This ID should be either a CURIE or a URL fragment";
 
+  /********** Reconcile documentation **************/
+  final static String RECONCILE_NOTES = "An implementation of "
+      + "<a href=\"https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation-Service-API\" target=\"_blank\">"
+      + "OpenRefine reconciliation services</a> "
+      + "supporting OpenRefine term resolution backed by a SciGraph instance. It is unlikely that a client will use these services "
+      + "directly but would instead point an OpenRefine instance to <em>http://example.org/SciGraph/refine/reconcile<em>";
+  
+  final static String RECONCILE_QUERY_DOC = "A call to a reconciliation service API for a single query looks like either of these:"
+      + "<ul><li>http://foo.com/bar/reconcile?query=...string...</li>"
+      + "<li>http://foo.com/bar/reconcile?query={...json object literal...}</li></ul>"
+      + "If the query parameter is a string, then it's an abbreviation of <em>query={\"query\":...string...}</em>."
+      + "<em>NOTE:</em> We encourage all API consumers to consider the single query mode <b>DEPRECATED</b>."
+      + "Refine currently only uses the multiple query mode, "
+      + "but other consumers of the API may use the single query option since it was included in the spec.";
+
+  final static String RECONCILE_QUERIES_DOC = "A call to a standard reconciliation service API for multiple queries looks like this:"
+      + "<ul><li>http://foo.com/bar/reconcile?queries={...json object literal...}</li></ul>"
+      + "The json object literal has zero or more key/value pairs with arbitrary keys where the value is in the same "
+      + "format as a single query, e.g."
+      + "<ul><li>http://foo.com/bar/reconcile?queries={ \"q0\" : { \"query\" : \"foo\" }, \"q1\" : { \"query\" : \"bar\" } }</li></ul>"
+      + "\"q0\" and \"q1\" can be arbitrary strings.";
+
+  final static String RECONCILE_LIMIT_DOC = "An integer to specify how many results to return.";
+
+  final static String RECONCILE_TYPE_DOC = "A single string, or an array of strings, specifying the types of result e.g.,"
+      + " person, product, ... The actual format of each type depends on the service "
+      + "(e.g., \"/government/politician\" as a Freebase type). ";
+
+  final static String RECONCILE_TYPE_STRICT_DOC = "A string, one of \"any\", \"all\", \"should\". "
+      + "<em>NOTE:</em> This is unused at this time and defaults to \"any\"";
+
+  final static String RECONCILE_PROPERTIES_DOC = "Array of json object literals.";
 }

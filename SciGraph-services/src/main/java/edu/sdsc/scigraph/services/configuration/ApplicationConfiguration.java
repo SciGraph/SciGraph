@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
+import edu.sdsc.scigraph.services.refine.ServiceMetadata;
 
 public class ApplicationConfiguration extends Configuration {
 
@@ -40,6 +41,10 @@ public class ApplicationConfiguration extends Configuration {
   @JsonProperty(required=false)
   private Optional<ApiConfiguration> apiConfiguration = Optional.absent();
 
+  @Valid
+  @JsonProperty(required=false)
+  private Optional<ServiceMetadata> serviceMetadata = Optional.absent();
+
   public String getApplicationContextPath() {
     return applicationContextPath;
   }
@@ -50,6 +55,10 @@ public class ApplicationConfiguration extends Configuration {
 
   public Optional<ApiConfiguration> getApiConfiguration() {
     return apiConfiguration;
+  }
+
+  public Optional<ServiceMetadata> getServiceMetadata() {
+    return serviceMetadata;
   }
 
 }

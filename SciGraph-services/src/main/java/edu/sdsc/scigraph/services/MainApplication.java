@@ -21,8 +21,11 @@ import io.dropwizard.auth.basic.BasicAuthProvider;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.dropwizard.views.ViewBundle;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.DispatcherType;
@@ -41,6 +44,7 @@ import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.wordnik.swagger.config.ConfigFactory;
 import com.wordnik.swagger.config.ScannerFactory;
@@ -65,6 +69,7 @@ import edu.sdsc.scigraph.services.jersey.writers.GmlWriter;
 import edu.sdsc.scigraph.services.jersey.writers.GraphMlWriter;
 import edu.sdsc.scigraph.services.jersey.writers.GraphsonWriter;
 import edu.sdsc.scigraph.services.jersey.writers.ImageWriter;
+import edu.sdsc.scigraph.services.refine.RefineModule;
 
 public class MainApplication extends Application<ApplicationConfiguration> {
 
@@ -80,6 +85,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
   @Override
   public void initialize(Bootstrap<ApplicationConfiguration> bootstrap) {
     initializeSwaggger(bootstrap);
+    bootstrap.addBundle(new ViewBundle());
   }
 
   void addWriters(JerseyEnvironment environment) {
@@ -161,12 +167,15 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     if (configuration.getApiConfiguration().isPresent()) {
       configureAuthentication(configuration.getApiConfiguration().get(), environment);
     }
-
-    Injector i = Guice.createInjector(
-        new Neo4jModule(configuration.getGraphConfiguration()),
-        new EntityModule(),
-        new LexicalLibModule(),
-        new OpenNlpModule());
+    
+    List<Module> modules = new ArrayList<>();
+    modules.add(new Neo4jModule(configuration.getGraphConfiguration()));
+    modules.add(new EntityModule());
+    modules.add(new LexicalLibModule());
+    modules.add(new OpenNlpModule());
+    modules.add(new RefineModule(configuration.getServiceMetadata()));
+    Injector i = Guice.createInjector(modules);
+    
     //Add managed objects
     environment.lifecycle().manage(i.getInstance(Neo4jManager.class));
 
