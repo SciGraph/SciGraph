@@ -239,6 +239,7 @@ public class VocabularyService extends BaseResource {
         limit(1000);
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
     List<Completion> completions = getCompletions(builder.build(), concepts);
+    // TODO: Move completions to scigraph-core for #51
     Collections.sort(completions);
     completions = completions.subList(0, limit.get() - 1);
     CompletionWrapper wrapper = new CompletionWrapper(completions);
