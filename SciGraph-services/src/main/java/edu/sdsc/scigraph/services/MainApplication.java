@@ -23,6 +23,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -88,11 +89,10 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     bootstrap.addBundle(new ViewBundle());
   }
 
-  void addWriters(JerseyEnvironment environment) {
-    environment.register(GmlWriter.class);
-    environment.register(GraphMlWriter.class);
-    environment.register(GraphsonWriter.class);
-    environment.register(ImageWriter.class);
+  void addWriters(JerseyEnvironment environment) throws IOException {
+    for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.jersey.writers")) {
+      environment.register(classInfo.load());
+    }
   }
   
   void addMediaTypeMappings(ResourceConfig config) {
@@ -111,7 +111,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     map.put("png", CustomMediaTypes.IMAGE_PNG_TYPE);
   }
   
-  void configureJersey(JerseyEnvironment environment) {
+  void configureJersey(JerseyEnvironment environment) throws IOException {
     addWriters(environment);
     addMediaTypeMappings(environment.getResourceConfig());
   }
