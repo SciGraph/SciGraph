@@ -23,6 +23,7 @@ import io.dropwizard.jersey.params.IntParam;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -235,9 +236,11 @@ public class VocabularyService extends BaseResource {
         categories(categories).
         prefixes(prefixes).
         includeSynonyms(searchSynonyms).
-        limit(limit.get());
+        limit(1000);
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
     List<Completion> completions = getCompletions(builder.build(), concepts);
+    Collections.sort(completions);
+    completions = completions.subList(0, limit.get() - 1);
     CompletionWrapper wrapper = new CompletionWrapper(completions);
     GenericEntity<CompletionWrapper> response = new GenericEntity<CompletionWrapper>(wrapper){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
