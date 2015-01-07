@@ -66,10 +66,6 @@ import edu.sdsc.scigraph.services.auth.BasicAuthenticator;
 import edu.sdsc.scigraph.services.configuration.ApiConfiguration;
 import edu.sdsc.scigraph.services.configuration.ApplicationConfiguration;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
-import edu.sdsc.scigraph.services.jersey.writers.GmlWriter;
-import edu.sdsc.scigraph.services.jersey.writers.GraphMlWriter;
-import edu.sdsc.scigraph.services.jersey.writers.GraphsonWriter;
-import edu.sdsc.scigraph.services.jersey.writers.ImageWriter;
 import edu.sdsc.scigraph.services.refine.RefineModule;
 
 public class MainApplication extends Application<ApplicationConfiguration> {
