@@ -242,7 +242,8 @@ public class VocabularyService extends BaseResource {
     List<Completion> completions = getCompletions(builder.build(), concepts);
     // TODO: Move completions to scigraph-core for #51
     Collections.sort(completions);
-    completions = completions.subList(0, limit.get() - 1);
+    int endIndex = limit.get() - 1 > completions.size() ? completions.size() : limit.get() - 1;
+    completions = completions.subList(0, endIndex);
     CompletionWrapper wrapper = new CompletionWrapper(completions);
     GenericEntity<CompletionWrapper> response = new GenericEntity<CompletionWrapper>(wrapper){};
     return JaxRsUtil.wrapJsonp(request, response, callback);
