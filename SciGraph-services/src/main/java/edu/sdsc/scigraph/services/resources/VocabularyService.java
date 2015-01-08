@@ -19,6 +19,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static java.util.Collections.sort;
 import io.dropwizard.jersey.caching.CacheControl;
+import io.dropwizard.jersey.params.BooleanParam;
 import io.dropwizard.jersey.params.IntParam;
 
 import java.util.ArrayList;
@@ -225,7 +226,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") IntParam limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
-      @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
+      @QueryParam("searchSynonyms") @DefaultValue("true") BooleanParam searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
@@ -235,7 +236,7 @@ public class VocabularyService extends BaseResource {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(termPrefix).
         categories(categories).
         prefixes(prefixes).
-        includeSynonyms(searchSynonyms).
+        includeSynonyms(searchSynonyms.get()).
         limit(1000);
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
     List<Completion> completions = getCompletions(builder.build(), concepts);
@@ -264,9 +265,9 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
-      @QueryParam("limit") @DefaultValue("20") int limit,
+      @QueryParam("limit") @DefaultValue("20") IntParam limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
-      @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
+      @QueryParam("searchSynonyms") @DefaultValue("true") BooleanParam searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
@@ -276,8 +277,8 @@ public class VocabularyService extends BaseResource {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
         prefixes(prefixes).
-        includeSynonyms(searchSynonyms).
-        limit(limit);
+        includeSynonyms(searchSynonyms.get()).
+        limit(limit.get());
     List<Concept> concepts = vocabulary.getConceptsFromTerm(builder.build());
     if (concepts.isEmpty()) {
       throw new WebApplicationException(404);
@@ -304,9 +305,9 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
-      @QueryParam("limit") @DefaultValue("20") int limit,
+      @QueryParam("limit") @DefaultValue("20") IntParam limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
-      @QueryParam("searchSynonyms") @DefaultValue("true") boolean searchSynonyms,
+      @QueryParam("searchSynonyms") @DefaultValue("true") BooleanParam searchSynonyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
@@ -316,8 +317,8 @@ public class VocabularyService extends BaseResource {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
         prefixes(prefixes).
-        includeSynonyms(searchSynonyms).
-        limit(limit);
+        includeSynonyms(searchSynonyms.get()).
+        limit(limit.get());
     List<Concept> concepts = vocabulary.searchConcepts(builder.build());
     if (concepts.isEmpty()) {
       throw new WebApplicationException(404);
@@ -339,10 +340,10 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "Mispelled term", required = true )
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
-      @QueryParam("limit") @DefaultValue("1") int limit,
+      @QueryParam("limit") @DefaultValue("1") IntParam limit,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
-    List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit));
+    List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit.get()));
     SuggestionWrapper wrapper = new SuggestionWrapper(suggestions);
     GenericEntity<SuggestionWrapper> response = new GenericEntity<SuggestionWrapper>(wrapper){};
     return JaxRsUtil.wrapJsonp(request, response, callback);

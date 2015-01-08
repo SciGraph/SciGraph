@@ -17,6 +17,8 @@ package edu.sdsc.scigraph.services.resources;
 
 import static com.google.common.collect.Lists.newArrayList;
 import io.dropwizard.jersey.caching.CacheControl;
+import io.dropwizard.jersey.params.BooleanParam;
+import io.dropwizard.jersey.params.IntParam;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -92,15 +94,15 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
       @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
-      final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      final @QueryParam("minLength") @DefaultValue("4") IntParam minLength,
       @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
-      final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      final @QueryParam("longestOnly") @DefaultValue("false") BooleanParam longestOnly,
       @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
-      final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      final @QueryParam("includeAbbrev") @DefaultValue("false") BooleanParam includeAbbrev,
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
-      final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      final @QueryParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers) {
+      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers) {
     StreamingOutput stream = new StreamingOutput() {
       @Override
       public void write(OutputStream os) throws IOException,
@@ -110,11 +112,11 @@ public class AnnotateService extends BaseResource {
         EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content)).writeTo(writer);
         configBuilder.includeCategories(includeCategories);
         configBuilder.excludeCategories(excludeCategories);
-        configBuilder.longestOnly(longestOnly);
-        configBuilder.includeAbbreviations(includeAbbrev);
-        configBuilder.includeAncronyms(includeAcronym);
-        configBuilder.includeNumbers(includeNumbers);
-        configBuilder.minLength(minLength);
+        configBuilder.longestOnly(longestOnly.get());
+        configBuilder.includeAbbreviations(includeAbbrev.get());
+        configBuilder.includeAncronyms(includeAcronym.get());
+        configBuilder.includeNumbers(includeNumbers.get());
+        configBuilder.minLength(minLength.get());
 
         try {
           processor.annotateEntities(configBuilder.get());
@@ -143,15 +145,15 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
       @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
-      final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      final @QueryParam("minLength") @DefaultValue("4") IntParam minLength,
       @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
-      final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      final @QueryParam("longestOnly") @DefaultValue("false") BooleanParam longestOnly,
       @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
-      final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      final @QueryParam("includeAbbrev") @DefaultValue("false") BooleanParam includeAbbrev,
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
-      final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      final @QueryParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers,
       @ApiParam( value = DocumentationStrings.IGNORE_TAGS_DOC, required = false)
       final @QueryParam("ignoreTag") Set<String> ignoreTags,
       @ApiParam( value = DocumentationStrings.STYLESHEETS_DOC, required = false)
@@ -173,11 +175,11 @@ public class AnnotateService extends BaseResource {
           EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(reader).writeTo(writer);
           configBuilder.includeCategories(includeCategories);
           configBuilder.excludeCategories(excludeCategories);
-          configBuilder.longestOnly(longestOnly);
-          configBuilder.includeAbbreviations(includeAbbrev);
-          configBuilder.includeAncronyms(includeAcronym);
-          configBuilder.includeNumbers(includeNumbers);
-          configBuilder.minLength(minLength);
+          configBuilder.longestOnly(longestOnly.get());
+          configBuilder.includeAbbreviations(includeAbbrev.get());
+          configBuilder.includeAncronyms(includeAcronym.get());
+          configBuilder.includeNumbers(includeNumbers.get());
+          configBuilder.minLength(minLength.get());
           if (!ignoreTags.isEmpty()) {
             configBuilder.ignoreTags(ignoreTags);
           }
@@ -218,15 +220,15 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("excludeCat") Set<String> excludeCategories,
       @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
-      final @FormParam("minLength") @DefaultValue("4") int minLength,
+      final @FormParam("minLength") @DefaultValue("4") IntParam minLength,
       @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
-      final @FormParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      final @FormParam("longestOnly") @DefaultValue("false") BooleanParam longestOnly,
       @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
-      final @FormParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      final @FormParam("includeAbbrev") @DefaultValue("false") BooleanParam includeAbbrev,
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
-      final @FormParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      final @FormParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      final @FormParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers,
       @ApiParam( value = DocumentationStrings.IGNORE_TAGS_DOC, required = false)
       final @FormParam("ignoreTag") Set<String> ignoreTags,
       @ApiParam( value = DocumentationStrings.STYLESHEETS_DOC, required = false)
@@ -246,11 +248,11 @@ public class AnnotateService extends BaseResource {
         EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content)).writeTo(writer);
         configBuilder.includeCategories(includeCategories);
         configBuilder.excludeCategories(excludeCategories);
-        configBuilder.longestOnly(longestOnly);
-        configBuilder.includeAbbreviations(includeAbbrev);
-        configBuilder.includeAncronyms(includeAcronym);
-        configBuilder.includeNumbers(includeNumbers);
-        configBuilder.minLength(minLength);
+        configBuilder.longestOnly(longestOnly.get());
+        configBuilder.includeAbbreviations(includeAbbrev.get());
+        configBuilder.includeAncronyms(includeAcronym.get());
+        configBuilder.includeNumbers(includeNumbers.get());
+        configBuilder.minLength(minLength.get());
         if (!ignoreTags.isEmpty()) {
           configBuilder.ignoreTags(ignoreTags);
         }
@@ -285,15 +287,15 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
       @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
-      final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      final @QueryParam("minLength") @DefaultValue("4") IntParam minLength,
       @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
-      final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      final @QueryParam("longestOnly") @DefaultValue("false") BooleanParam longestOnly,
       @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
-      final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      final @QueryParam("includeAbbrev") @DefaultValue("false") BooleanParam includeAbbrev,
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
-      final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      final @QueryParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
     List<EntityAnnotation> entities = newArrayList();
@@ -301,11 +303,11 @@ public class AnnotateService extends BaseResource {
       EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
       configBuilder.includeCategories(includeCategories);
       configBuilder.excludeCategories(excludeCategories);
-      configBuilder.includeAbbreviations(includeAbbrev);
-      configBuilder.includeAncronyms(includeAcronym);
-      configBuilder.includeNumbers(includeNumbers);
-      configBuilder.minLength(minLength);
-      configBuilder.longestOnly(longestOnly);
+      configBuilder.includeAbbreviations(includeAbbrev.get());
+      configBuilder.includeAncronyms(includeAcronym.get());
+      configBuilder.includeNumbers(includeNumbers.get());
+      configBuilder.minLength(minLength.get());
+      configBuilder.longestOnly(longestOnly.get());
       entities = processor.annotateEntities(configBuilder.get());
     } catch (Exception e) {
       logger.log(Level.WARNING, e.getMessage(), e);
@@ -332,17 +334,17 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("excludeCat") Set<String> excludeCategories,
       @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
-      final @FormParam("minLength") @DefaultValue("4") int minLength,
+      final @FormParam("minLength") @DefaultValue("4") IntParam minLength,
       @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
-      final @FormParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      final @FormParam("longestOnly") @DefaultValue("false") BooleanParam longestOnly,
       @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
-      final @FormParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      final @FormParam("includeAbbrev") @DefaultValue("false") BooleanParam includeAbbrev,
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
-      final @FormParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      final @FormParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers) {
+      final @FormParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers) {
     return getEntities(content, includeCategories, excludeCategories, minLength, 
-        longestOnly, includeAbbrev, includeAcronym, includeNumbers, "fn");
+        longestOnly, includeAbbrev, includeAcronym, includeNumbers, "");
   }
 
   /*** 
@@ -364,15 +366,15 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @QueryParam("excludeCat") Set<String> excludeCategories,
       @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
-      final @QueryParam("minLength") @DefaultValue("4") int minLength,
+      final @QueryParam("minLength") @DefaultValue("4") IntParam minLength,
       @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
-      final @QueryParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      final @QueryParam("longestOnly") @DefaultValue("false") BooleanParam longestOnly,
       @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
-      final @QueryParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      final @QueryParam("includeAbbrev") @DefaultValue("false") BooleanParam includeAbbrev,
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
-      final @QueryParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      final @QueryParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @QueryParam("includeNumbers") @DefaultValue("false") boolean includeNumbers,
+      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) throws IOException {
     Annotations annotation = new Annotations();
@@ -380,11 +382,11 @@ public class AnnotateService extends BaseResource {
     EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
     configBuilder.includeCategories(includeCategories);
     configBuilder.excludeCategories(excludeCategories);
-    configBuilder.includeAbbreviations(includeAbbrev);
-    configBuilder.includeAncronyms(includeAcronym);
-    configBuilder.includeNumbers(includeNumbers);
-    configBuilder.minLength(minLength);
-    configBuilder.longestOnly(longestOnly);
+    configBuilder.includeAbbreviations(includeAbbrev.get());
+    configBuilder.includeAncronyms(includeAcronym.get());
+    configBuilder.includeNumbers(includeNumbers.get());
+    configBuilder.minLength(minLength.get());
+    configBuilder.longestOnly(longestOnly.get());
     configBuilder.writeTo(writer);
     annotation.delegate = processor.annotateEntities(configBuilder.get());
     annotation.content = writer.toString();
@@ -424,25 +426,25 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.EXCLUDE_CATEGORIES_DOC, required = false)
       final @FormParam("excludeCat") Set<String> excludeCategories,
       @ApiParam( value = DocumentationStrings.MINIMUM_LENGTH_DOC, required = false)
-      final @FormParam("minLength") @DefaultValue("4") int minLength,
+      final @FormParam("minLength") @DefaultValue("4") IntParam minLength,
       @ApiParam( value = DocumentationStrings.LONGEST_ENTITY_DOC, required = false)
-      final @FormParam("longestOnly") @DefaultValue("false") boolean longestOnly,
+      final @FormParam("longestOnly") @DefaultValue("false") BooleanParam longestOnly,
       @ApiParam( value = DocumentationStrings.INCLUDE_ABBREV_DOC, required = false)
-      final @FormParam("includeAbbrev") @DefaultValue("false") boolean includeAbbrev,
+      final @FormParam("includeAbbrev") @DefaultValue("false") BooleanParam includeAbbrev,
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
-      final @FormParam("includeAcronym") @DefaultValue("false") boolean includeAcronym,
+      final @FormParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @FormParam("includeNumbers") @DefaultValue("false") boolean includeNumbers) throws IOException {
+      final @FormParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers) throws IOException {
     Annotations annotation = new Annotations();
     StringWriter writer = new StringWriter();
     EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
     configBuilder.includeCategories(includeCategories);
     configBuilder.excludeCategories(excludeCategories);
-    configBuilder.includeAbbreviations(includeAbbrev);
-    configBuilder.includeAncronyms(includeAcronym);
-    configBuilder.includeNumbers(includeNumbers);
-    configBuilder.minLength(minLength);
-    configBuilder.longestOnly(longestOnly);
+    configBuilder.includeAbbreviations(includeAbbrev.get());
+    configBuilder.includeAncronyms(includeAcronym.get());
+    configBuilder.includeNumbers(includeNumbers.get());
+    configBuilder.minLength(minLength.get());
+    configBuilder.longestOnly(longestOnly.get());
     configBuilder.writeTo(writer);
     annotation.delegate = processor.annotateEntities(configBuilder.get());
     annotation.content = writer.toString();
