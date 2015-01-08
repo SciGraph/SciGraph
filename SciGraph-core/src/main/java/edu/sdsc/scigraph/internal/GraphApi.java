@@ -15,18 +15,14 @@
  */
 package edu.sdsc.scigraph.internal;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Iterables.isEmpty;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -42,7 +38,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
@@ -84,64 +79,6 @@ public class GraphApi {
     return false;
   }
 
-  /***
-   * TODO: Add a boolean for equivalent classes
-   * 
-   * @param parent
-   * @param type
-   * @param direction
-   * @return
-   */
-  Collection<Node> getEntailment(Node parent, RelationshipType type, Direction direction) {
-    Set<Node> entailment = new HashSet<>();
-    for (Path path : graphDb.traversalDescription().depthFirst()
-        .relationships(type, direction)
-        .evaluator(Evaluators.fromDepth(1)).evaluator(Evaluators.all()).traverse(parent)) {
-      entailment.add(path.endNode());
-    }
-    return entailment;
-  }
-
-  /***
-   * Get "inferred" classes.
-   * 
-   * <p>
-   * "Inferred" classes are a legacy NIF graph pattern. They are sometimes called "defined" classes.
-   * They translate to the following graph pattern:
-   * 
-   * <pre>
-   * (c)-[:EQUIVALENT_TO]->(SomeValuesFrom)->[:PROPERTY]->(birnlex_17)
-   *                              |
-   *                            [:CLASS]
-   *                              |
-   *                           (someRole)<-[:birnlex_17]-(inferredClass)
-   * </pre>
-   * 
-   * @param c
-   * @return The inferred classes related to c
-   */
-  public Collection<Node> getInferredClasses(Concept c) {
-    Node parent = graphDb.getNodeById(c.getId());
-    Collection<Node> inferredClasses = new ArrayList<>();
-    for (Relationship r : parent.getRelationships(Direction.OUTGOING, OwlRelationships.OWL_EQUIVALENT_CLASS)) {
-      if (r.getEndNode().hasLabel(OwlLabels.OWL_SOME_VALUES_FROM)) {
-        Relationship property = getOnlyElement(
-            r.getEndNode().getRelationships(Direction.OUTGOING, OwlRelationships.PROPERTY), null);
-        if (null != property
-            && "http://ontology.neuinfo.org/NIF/Backend/BIRNLex-OBO-UBO.owl#birnlex_17"
-            .equals(property.getEndNode().getProperty("uri"))) {
-          for (Relationship bearerOf : r.getEndNode().getRelationships(Direction.OUTGOING,
-              OwlRelationships.CLASS)) {
-            Node role = bearerOf.getEndNode();
-            inferredClasses.addAll(getEntailment(role,
-                DynamicRelationshipType.withName("birnlex_17"), Direction.INCOMING));
-          }
-        }
-      }
-    }
-    return inferredClasses;
-  }
-
   /**
    * Get all the self loops in the Neo4j graph.
    * 
@@ -159,8 +96,8 @@ public class GraphApi {
     return result;
   }
 
-  public TinkerGraph getNeighbors(Node node, int distance, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
-    TraversalDescription description = graphDb.traversalDescription().depthFirst().evaluator(Evaluators.toDepth(distance));
+  public TinkerGraph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
+    TraversalDescription description = graphDb.traversalDescription().depthFirst().evaluator(Evaluators.toDepth(depth));
     for (DirectedRelationshipType type: types) {
       description = description.relationships(type.getType(), type.getDirection());
     }
@@ -177,15 +114,17 @@ public class GraphApi {
       });
     }
     TinkerGraph graph = new TinkerGraph();
-    for (Path path: description.traverse(node)) {
+    for (Path path: description.traverse(nodes)) {
       Relationship relationship = path.lastRelationship();
       if (null != relationship) {
         TinkerGraphUtil.addEdge(graph, relationship);
       }
     }
     if (isEmpty(graph.getEdges())) { 
-      // If nothing was added to the graph add the root node
-      TinkerGraphUtil.addNode(graph, node);
+      // If nothing was added to the graph add the root nodes
+      for (Node node: nodes) {
+        TinkerGraphUtil.addNode(graph, node);
+      }
     }
     return graph;
   }

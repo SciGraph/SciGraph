@@ -65,28 +65,28 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
 
   @Test
   public void test1Neighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(b, 1, Collections.<DirectedRelationshipType>emptySet(), absent);
+    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(4)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(3)));
   }
 
   @Test
   public void testKNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(b, 10, Collections.<DirectedRelationshipType>emptySet(), absent);
+    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 10, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(5)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(4)));
   }
 
   @Test
   public void testTypedNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(b, 2, newHashSet(new DirectedRelationshipType(subclass, Direction.INCOMING)), absent);
+    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 2, newHashSet(new DirectedRelationshipType(subclass, Direction.INCOMING)), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(3)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(2)));
   }
 
   @Test
   public void testMultiTypedNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(b, 1, 
+    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 1, 
         newHashSet(new DirectedRelationshipType(subclass, Direction.INCOMING),
             new DirectedRelationshipType(fizz, Direction.INCOMING)), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(3)));
@@ -95,7 +95,7 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
 
   @Test
   public void testSingleNodeNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(f, 1, Collections.<DirectedRelationshipType>emptySet(), absent);
+    TinkerGraph graph = graphApi.getNeighbors(newHashSet(f), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(1)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(0)));
   }
@@ -107,7 +107,7 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
       public boolean apply(Node node) {
         return !((String)node.getProperty("uri")).endsWith("c");
       }};
-    TinkerGraph graph = graphApi.getNeighbors(b, 1, Collections.<DirectedRelationshipType>emptySet(), Optional.of(testPredicate));
+    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 1, Collections.<DirectedRelationshipType>emptySet(), Optional.of(testPredicate));
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(3)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(2)));
   }
