@@ -17,7 +17,6 @@ package edu.sdsc.scigraph.services.resources;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.getFirst;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -44,7 +43,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -65,7 +63,6 @@ import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTO;
-import edu.sdsc.scigraph.services.api.graph.NodeDTO;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
@@ -97,7 +94,7 @@ public class GraphService extends BaseResource {
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
     CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
-  public Object getNeighbors2(
+  public Object getNeighbors(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,
       @ApiParam(value = "How far to traverse neighbors", required = false)
@@ -151,6 +148,22 @@ public class GraphService extends BaseResource {
   }
 
   @GET
+  @Path("/{id}")
+  @ApiOperation(value = "Get all properties of a node", response = ConceptDTO.class)
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
+    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
+    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+  public Object getNode(
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @PathParam("id") String id,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
+      @QueryParam("callback") String callback) {
+    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), null, null, null);
+  }
+
+  @GET
   @Path("/relationship_types")
   @ApiOperation(value = "Get all relationship types", response = String.class)
   @Timed
@@ -170,40 +183,6 @@ public class GraphService extends BaseResource {
       }));
     }
     return JaxRsUtil.wrapJsonp(request, new GenericEntity<List<String>>(relationships) {}, callback);
-  }
-
-  @GET
-  @Path("/{id}")
-  @ApiOperation(value = "Get all properties of a node", response = ConceptDTO.class)
-  @Timed
-  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getNode(
-      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
-      @PathParam("id") String id,
-      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") String callback) {
-    Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-    Collection<Concept> concepts = vocabulary.getConceptFromId(query);
-    if (concepts.isEmpty()) {
-      throw new UnknownClassException(id);
-    }
-    Concept concept = getOnlyElement(vocabulary.getConceptFromId(query));
-    NodeDTO dto = new NodeDTO();
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      dto.setUri(concept.getUri());
-      Node node = graph.getGraphDb().getNodeById(concept.getId());
-      for (String key: node.getPropertyKeys()) {
-        if (CommonProperties.URI.equals(key)) {
-          continue;
-        }
-        dto.getProperties().put(key, node.getProperty(key));
-      }
-      for (Label label: node.getLabels()) {
-        dto.getTypes().add(label.name());
-      }
-      tx.success();
-    }
-    return JaxRsUtil.wrapJsonp(request, new GenericEntity<NodeDTO>(dto) {}, callback);
   }
 
 }
