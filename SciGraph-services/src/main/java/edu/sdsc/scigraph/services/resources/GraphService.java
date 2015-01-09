@@ -20,6 +20,7 @@ import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.sort;
 import io.dropwizard.jersey.caching.CacheControl;
 import io.dropwizard.jersey.params.BooleanParam;
 import io.dropwizard.jersey.params.IntParam;
@@ -179,9 +180,9 @@ public class GraphService extends BaseResource {
         public String apply(RelationshipType relationshipType) {
           return relationshipType.name();
         }
-
       }));
     }
+    sort(relationships);
     return JaxRsUtil.wrapJsonp(request, new GenericEntity<List<String>>(relationships) {}, callback);
   }
 
