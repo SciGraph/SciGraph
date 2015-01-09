@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -56,8 +55,6 @@ import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class Graph {
-
-  private static final Logger logger = Logger.getLogger(Graph.class.getName());
 
   public static final String UNIQUE_PROPERTY = CommonProperties.URI;
 
@@ -119,23 +116,19 @@ public class Graph {
     return getOrCreateNode(getURI(uri));
   }
 
+  //TODO: This makes the class not threadsafe. Ideally this should be coordinated with 
+  // the IdMap in BatchGraph so that the two can co-exist.
   public Node getOrCreateNode(final URI uri) {
     checkNotNull(uri);
     try (Transaction tx = graphDb.beginTx()) {
-      UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory(graphDb, "uniqueNodeIndex") {
-        @Override
-        protected void initialize(Node created, Map<String, Object> properties) {
-          logger.fine("Creating node: " + properties.get(UNIQUE_PROPERTY));
-          try (Transaction tx = graphDb.beginTx()) {
-            created.setProperty(UNIQUE_PROPERTY, properties.get(UNIQUE_PROPERTY));
-            created.setProperty(CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
-            tx.success();
-          }
-        }
-      };
-      Node n = factory.getOrCreate(UNIQUE_PROPERTY, uri.toString());
+      Node node = nodeAutoIndex.get(CommonProperties.URI, uri.toString()).getSingle();
+      if (null == node) {
+        node = graphDb.createNode();
+        node.setProperty(CommonProperties.URI, uri.toString());
+        node.setProperty(CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
+      }
       tx.success();
-      return n;
+      return node;
     }
   }
 
@@ -271,6 +264,7 @@ public class Graph {
     return getOrCreateRelationship(a, b, type, Optional.of(getURI(uri)));
   }
 
+  // TODO: Also fix this to use the external indexes from the batch loader
   public Relationship getOrCreateRelationship(final Node a, final Node b,
       final RelationshipType type, final Optional<URI> uri) {
     checkNotNull(a);
