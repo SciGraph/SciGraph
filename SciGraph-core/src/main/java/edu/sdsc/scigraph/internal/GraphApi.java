@@ -17,6 +17,7 @@ package edu.sdsc.scigraph.internal;
 
 import static com.google.common.collect.Iterables.isEmpty;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,10 +48,29 @@ public class GraphApi {
   private final GraphDatabaseService graphDb;
 
   @Inject
-  GraphApi(GraphDatabaseService graphDb) {
+  public GraphApi(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
   }
 
+  /***
+   * TODO: Add a boolean for equivalent classes
+   * 
+   * @param parent
+   * @param type
+   * @param direction
+   * @return
+   */
+  public Collection<Node> getEntailment(Node parent, RelationshipType type, Direction direction) {
+    Set<Node> entailment = new HashSet<>();
+    for (Path path : graphDb.traversalDescription().depthFirst()
+        .relationships(type, direction)
+        .evaluator(Evaluators.fromDepth(0)).evaluator(Evaluators.all()).traverse(parent)) {
+      entailment.add(path.endNode());
+    }
+    return entailment;
+  }
+
+  
   public boolean classIsInCategory(Node candidate, Node parentConcept) {
     return classIsInCategory(candidate, parentConcept, OwlRelationships.RDF_SUBCLASS_OF);
   }
