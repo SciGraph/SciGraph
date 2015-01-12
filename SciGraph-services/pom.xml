@@ -67,7 +67,7 @@
     <dependency>
       <groupId>edu.sdsc</groupId>
       <artifactId>scigraph-core</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>slf4j-log4j12</artifactId>
@@ -78,7 +78,7 @@
     <dependency>
       <groupId>edu.sdsc</groupId>
       <artifactId>scigraph-entity</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>slf4j-log4j12</artifactId>
