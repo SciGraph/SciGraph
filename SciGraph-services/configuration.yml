@@ -60,7 +60,7 @@ applicationContextPath: scigraph
 #    checkConnectionWhileIdle: false
 
 graphConfiguration:
-  graphLocation: /temp/monarchGraph
+  graphLocation: /temp/nifGraph
   curies:
     http://purl.obolibrary.org/obo/DOID_ : DOID
     http://purl.obolibrary.org/obo/ORPHANET_ : ORPHANET
@@ -94,3 +94,15 @@ graphConfiguration:
     http://purl.obolibrary.org/obo/OMIABreed_ : OMIABreed
     http://purl.obolibrary.org/obo/OMIAPub_ : OMIAPub
 
+serviceMetadata:
+  name: 'SciGraph Reconciliation Service'
+  identifierSpace: 'http://example.org'
+  schemaSpace: 'http://example.org'
+  view: {
+    url: 'http://localhost:9000/scigraph/refine/view/{{id}}'
+  }
+  preview: {
+    url: 'http://localhost:9000/scigraph/refine/preview/{{id}}',
+    width: 400,
+    height: 400
+  }
