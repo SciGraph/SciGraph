@@ -185,7 +185,6 @@ public class LoggingOWLVisitor extends OWLOntologyWalkerVisitor<Object> {
 
   @Override
   public Object visit(OWLEquivalentDataPropertiesAxiom axiom) {
-    // TODO Auto-generated method stub
     return super.visit(axiom);
   }
 
