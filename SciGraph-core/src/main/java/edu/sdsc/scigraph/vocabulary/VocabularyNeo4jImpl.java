@@ -136,7 +136,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }
   }
 
-  // TODO: Can this be done in the query?
   List<Concept> limitHits(IndexHits<Node> hits, Query query) {
     try (Transaction tx = graph.getGraphDb().beginTx()) {
       Iterable<Concept> limitedHits = limit(graph.getOrCreateFramedNodes(hits), query.getLimit());
