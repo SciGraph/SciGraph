@@ -53,12 +53,12 @@ public class OwlPostprocessorTest {
     parent = graphDb.createNode();
     parent.setProperty(CommonProperties.URI, "http://example.org/a");
     child = graphDb.createNode();
-    child.createRelationshipTo(parent, OwlRelationships.RDF_SUBCLASS_OF);
+    child.createRelationshipTo(parent, OwlRelationships.RDFS_SUBCLASS_OF);
     grandChild = graphDb.createNode();
-    grandChild.createRelationshipTo(child, OwlRelationships.RDF_SUBCLASS_OF);
+    grandChild.createRelationshipTo(child, OwlRelationships.RDFS_SUBCLASS_OF);
     equivalent = graphDb.createNode();
     equivalentSubclass = graphDb.createNode();
-    equivalentSubclass.createRelationshipTo(equivalent, OwlRelationships.RDF_SUBCLASS_OF);
+    equivalentSubclass.createRelationshipTo(equivalent, OwlRelationships.RDFS_SUBCLASS_OF);
     equivalent.createRelationshipTo(child, OwlRelationships.OWL_EQUIVALENT_CLASS);
     tx.success();
     postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());

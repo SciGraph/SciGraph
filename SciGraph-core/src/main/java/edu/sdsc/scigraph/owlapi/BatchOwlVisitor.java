@@ -280,7 +280,7 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLSubClassOfAxiom axiom) {
     long subclass = getOrCreateNode(getUri(axiom.getSubClass()));
     long superclass = getOrCreateNode(getUri(axiom.getSuperClass()));
-    graph.createRelationship(subclass, superclass, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.createRelationship(subclass, superclass, OwlRelationships.RDFS_SUBCLASS_OF);
     return null;
   }
 

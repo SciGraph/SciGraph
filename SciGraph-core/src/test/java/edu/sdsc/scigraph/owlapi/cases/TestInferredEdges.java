@@ -37,7 +37,7 @@ public class TestInferredEdges extends OwlTestCase {
     Node cx = getNode("http://example.org/cx");
     Node dx = getNode("http://example.org/dx");
 
-    Iterable<Relationship> superclasses = dx.getRelationships(OwlRelationships.RDF_SUBCLASS_OF, Direction.OUTGOING);
+    Iterable<Relationship> superclasses = dx.getRelationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.OUTGOING);
     Relationship r = getOnlyElement(superclasses);
     assertThat("A subclassOf relationship is introduced.    ", r.getOtherNode(dx), is(cx));
   }

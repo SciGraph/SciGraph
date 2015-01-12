@@ -46,7 +46,7 @@ public class TestGCISubClassOf extends OwlTestCase {
     Relationship r = getOnlyElement(subclass.getRelationships(Direction.INCOMING, OwlRelationships.FILLER));
     Node blankNode1 = r.getOtherNode(subclass);
     assertThat(blankNode1.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
-    r = getOnlyElement(blankNode1.getRelationships(Direction.OUTGOING, OwlRelationships.RDF_SUBCLASS_OF));
+    r = getOnlyElement(blankNode1.getRelationships(Direction.OUTGOING, OwlRelationships.RDFS_SUBCLASS_OF));
     Node blankNode2 = r.getOtherNode(blankNode1);
     assertThat(blankNode2.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
     r = getOnlyElement(blankNode1.getRelationships(Direction.OUTGOING, p));

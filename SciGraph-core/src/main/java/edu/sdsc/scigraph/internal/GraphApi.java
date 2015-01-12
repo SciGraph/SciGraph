@@ -72,7 +72,7 @@ public class GraphApi {
 
   
   public boolean classIsInCategory(Node candidate, Node parentConcept) {
-    return classIsInCategory(candidate, parentConcept, OwlRelationships.RDF_SUBCLASS_OF);
+    return classIsInCategory(candidate, parentConcept, OwlRelationships.RDFS_SUBCLASS_OF);
   }
 
   public boolean classIsInCategory(Node candidate, Node parent, RelationshipType... relationships) {

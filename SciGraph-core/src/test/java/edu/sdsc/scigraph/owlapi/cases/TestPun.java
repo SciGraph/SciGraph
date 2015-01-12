@@ -42,7 +42,7 @@ public class TestPun extends OwlTestCase {
     Relationship relationship = getOnlyElement(GraphUtil.getRelationships(i, j, p));
     assertThat("OPE edge should start with the subject.", relationship.getStartNode(), is(i));
     assertThat("OPE edge should end with the target.", relationship.getEndNode(), is(j));
-    relationship = getOnlyElement(GraphUtil.getRelationships(i, k, OwlRelationships.RDF_SUBCLASS_OF));
+    relationship = getOnlyElement(GraphUtil.getRelationships(i, k, OwlRelationships.RDFS_SUBCLASS_OF));
     assertThat("Subclass edge should start with i.", relationship.getStartNode(), is(i));
     assertThat("Subclass edge should end with k.", relationship.getEndNode(), is(k));
     assertThat("i is both a class an a named individual" , i.getLabels(), 

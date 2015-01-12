@@ -26,7 +26,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
  */
 public class OwlRelationships {
 
-  public static final RelationshipType RDF_SUBCLASS_OF = DynamicRelationshipType
+  public static final RelationshipType RDFS_SUBCLASS_OF = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.RDFS_SUBCLASS_OF));
 
   public static final RelationshipType RDF_TYPE = DynamicRelationshipType

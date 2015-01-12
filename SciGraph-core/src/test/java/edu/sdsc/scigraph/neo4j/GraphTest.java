@@ -127,7 +127,7 @@ public class GraphTest extends GraphTestBase {
         .getAllRelationships()), hasSize(1));
     assertThat("The graph should have r", GlobalGraphOperations.at(graphDb).getAllRelationships(),
         contains(r));
-    graph.getOrCreateRelationship(a, b, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(a, b, OwlRelationships.RDFS_SUBCLASS_OF);
     assertThat("There should be two relationships", newArrayList(GlobalGraphOperations.at(graphDb)
         .getAllRelationships()), hasSize(2));
   }

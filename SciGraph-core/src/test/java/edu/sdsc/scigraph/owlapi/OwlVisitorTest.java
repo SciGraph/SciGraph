@@ -109,7 +109,7 @@ public class OwlVisitorTest extends GraphTestBase {
     Node mother = graph.getNode(ROOT + "/Mother").get();
     Node woman = graph.getNode(ROOT + "/Woman").get();
     assertThat(
-        graph.hasRelationship(mother, woman, OwlRelationships.RDF_SUBCLASS_OF), is(true));
+        graph.hasRelationship(mother, woman, OwlRelationships.RDFS_SUBCLASS_OF), is(true));
   }
 
   @Test

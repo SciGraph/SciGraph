@@ -110,7 +110,7 @@ public class OwlPostprocessor {
         if (null == root) {
           logger.warning("Failed to locate " + category.getKey() + " while processing categories");
         } else {
-          processCategory(root, OwlRelationships.RDF_SUBCLASS_OF, Direction.INCOMING,
+          processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
               category.getValue());
           // TODO: A hack for Earthcube - move this to configuation?
           processCategory(root, DynamicRelationshipType.withName("narrower"), Direction.OUTGOING,

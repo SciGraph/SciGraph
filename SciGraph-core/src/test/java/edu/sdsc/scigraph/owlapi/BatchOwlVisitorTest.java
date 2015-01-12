@@ -136,10 +136,10 @@ public class BatchOwlVisitorTest {
   public void testConcreteSubclass() {
     Node mother = getNode(ROOT + "/Mother");
     Node woman = getNode(ROOT + "/Woman");
-    assertThat(mother.hasRelationship(Direction.OUTGOING, OwlRelationships.RDF_SUBCLASS_OF),
+    assertThat(mother.hasRelationship(Direction.OUTGOING, OwlRelationships.RDFS_SUBCLASS_OF),
         is(true));
     Relationship relationship = getOnlyElement(mother.getRelationships(Direction.OUTGOING,
-        OwlRelationships.RDF_SUBCLASS_OF));
+        OwlRelationships.RDFS_SUBCLASS_OF));
     assertThat(relationship.getEndNode(), is(woman));
   }
 

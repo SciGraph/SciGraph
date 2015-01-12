@@ -57,7 +57,7 @@ public class TestSubClassOfExistential extends OwlTestCase {
         is(Optional.of(true)));
     assertThat("owltype is added",
         GraphUtil.getProperty(relationship, CommonProperties.OWL_TYPE, String.class),
-        is(Optional.of(OwlRelationships.RDF_SUBCLASS_OF.name())));
+        is(Optional.of(OwlRelationships.RDFS_SUBCLASS_OF.name())));
   }
 
 }

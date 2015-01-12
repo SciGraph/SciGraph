@@ -219,7 +219,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLSubClassOfAxiom axiom) {
     Node subjectNode = graph.getOrCreateNode(getUri(axiom.getSubClass()));
     Node objectNode = graph.getOrCreateNode(getUri(axiom.getSuperClass()));
-    graph.getOrCreateRelationship(subjectNode, objectNode, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(subjectNode, objectNode, OwlRelationships.RDFS_SUBCLASS_OF);
     return null;
   }
 
@@ -429,7 +429,7 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     logger.info("Processing categories");
     for (Entry<String, String> category: categoryMap.entrySet()) {
       Node root = graph.getOrCreateNode(category.getKey());
-      processCategories(root, OwlRelationships.RDF_SUBCLASS_OF, category.getValue());
+      processCategories(root, OwlRelationships.RDFS_SUBCLASS_OF, category.getValue());
     }
 
   }

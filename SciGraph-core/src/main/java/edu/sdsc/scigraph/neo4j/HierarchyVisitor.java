@@ -137,7 +137,7 @@ public class HierarchyVisitor {
           @Override
           public Iterable<Relationship> expand(Path path, BranchState<Void> state) {
             Set<Relationship> relationships = new HashSet<>();
-            addAll(relationships, path.endNode().getRelationships(Direction.INCOMING, OwlRelationships.RDF_SUBCLASS_OF));
+            addAll(relationships, path.endNode().getRelationships(Direction.INCOMING, OwlRelationships.RDFS_SUBCLASS_OF));
             if (includeEquivalentClasses && null != path.lastRelationship()
                 && !path.lastRelationship().isType(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
               addAll(relationships, path.endNode().getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS));

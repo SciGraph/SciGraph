@@ -53,7 +53,7 @@ public class GraphApiCategoryTest extends GraphTestBase {
     b.addLabel(OwlLabels.OWL_CLASS);
     c = graph.getOrCreateNode(uri3);
     c.addLabel(OwlLabels.OWL_CLASS);
-    graph.getOrCreateRelationship(a, b, OwlRelationships.RDF_SUBCLASS_OF);
+    graph.getOrCreateRelationship(a, b, OwlRelationships.RDFS_SUBCLASS_OF);
     this.graphApi = new GraphApi(graphDb);
   }
 
@@ -74,7 +74,7 @@ public class GraphApiCategoryTest extends GraphTestBase {
   public void testSelfLoop() {
     assertThat(graphApi.getSelfLoops(), is(empty()));
     Node t = graph.getOrCreateNode(BASE_URI + "#fozz");
-    Relationship r = graph.getOrCreateRelationship(t, t, OwlRelationships.RDF_SUBCLASS_OF);
+    Relationship r = graph.getOrCreateRelationship(t, t, OwlRelationships.RDFS_SUBCLASS_OF);
     assertThat(graphApi.getSelfLoops(), contains(r));
   }
 
