@@ -63,7 +63,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLQuantifiedObjectRestriction;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
@@ -78,7 +77,6 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
@@ -90,13 +88,9 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private final Graph graph;
 
-  private OWLOntology ontology;
-
   private Map<String, String> categoryMap;
 
   private Map<String, String> mappedProperties;
-
-  private OWLOntology parentOntology = null;
 
   @Inject
   OwlVisitor(OWLOntologyWalker walker, Graph graph,
@@ -114,31 +108,11 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   @Override
-  public Void visit(OWLOntology ontology) {
-    logger.info("Walking ontology: " + ontology.getOntologyID());
-    this.ontology = ontology;
-    if (null == parentOntology) {
-      parentOntology = ontology;
-    }
-    return null;
-  }
-
-  @Override
   public Void visit(OWLClass desc) {
     logger.fine(desc.toString());
     Node node = graph.getOrCreateNode(getUri(desc));
-    //TODO: Move this to the object creation:
     node.addLabel(OwlLabels.OWL_CLASS);
     graph.setProperty(node, NodeProperties.ANONYMOUS, false);
-    if (null != ontology.getOntologyID().getOntologyIRI()) {
-      graph.setProperty(node, NodeProperties.ONTOLOGY, ontology.getOntologyID().getOntologyIRI().toString());
-    }
-    if (null != parentOntology.getOntologyID().getOntologyIRI()) {
-      graph.setProperty(node, CommonProperties.PARENT_ONTOLOGY, parentOntology.getOntologyID().getOntologyIRI().toString());
-    }
-    if (null != ontology.getOntologyID().getVersionIRI()) {
-      graph.setProperty(node, NodeProperties.ONTOLOGY_VERSION, ontology.getOntologyID().getVersionIRI().toString());
-    }
     return null;
   }
 
@@ -282,10 +256,6 @@ public class OwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       type = DynamicRelationshipType.withName(property.getFragment());
     }
     Relationship relationship = graph.getOrCreateRelationship(subject, object, type, Optional.of(property));
-    graph.setProperty(relationship, EdgeProperties.NEGATED, false);
-    graph.setProperty(relationship, EdgeProperties.SYMMETRIC, !axiom.getProperty().isAsymmetric(ontology));
-    graph.setProperty(relationship, EdgeProperties.REFLEXIVE, axiom.getProperty().isReflexive(ontology));
-    graph.setProperty(relationship, EdgeProperties.TRANSITIVE, axiom.getProperty().isTransitive(ontology));
     return relationship;
   }
 

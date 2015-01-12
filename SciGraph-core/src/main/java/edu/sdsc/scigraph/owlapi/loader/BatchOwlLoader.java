@@ -21,7 +21,6 @@ import static java.lang.String.format;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -43,9 +42,9 @@ import org.apache.commons.cli.PosixParser;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -60,20 +59,20 @@ import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
-import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 
 public class BatchOwlLoader {
 
   static final Logger logger = Logger.getLogger(BatchOwlLoader.class.getName());
 
-  static final OWLOntologyWalker POISON = new OWLOntologyWalker(Collections.<OWLOntology>emptySet());
+  static final OWLObject POISON = IRI.create("http://poison.org");
   static final String POISON_STR = "Poison String";
 
   private static final int numCores = Runtime.getRuntime().availableProcessors();
   
-  static final int CONSUMER_COUNT = (numCores / 2) + 1;
-  static final int PRODUCER_COUNT = numCores / 2;
+  static final int CONSUMER_COUNT = numCores;
+  static final int PRODUCER_COUNT = numCores;
 
   @Inject
   PostpostprocessorProvider postprocessorProvider;
@@ -86,7 +85,7 @@ public class BatchOwlLoader {
 
   Collection<String> urls;
 
-  BlockingQueue<OWLOntologyWalker> queue = new LinkedBlockingQueue<>();
+  BlockingQueue<OWLObject> queue = new LinkedBlockingQueue<>();
   BlockingQueue<String> urlQueue = new LinkedBlockingQueue<>();
 
   ExecutorService exec = Executors.newFixedThreadPool(CONSUMER_COUNT + PRODUCER_COUNT);
@@ -135,8 +134,8 @@ public class BatchOwlLoader {
 
     public void shutdown() {
       try (Transaction tx = graphDb.beginTx()) {
-        System.out.println(size(GlobalGraphOperations.at(graphDb).getAllNodes()));
-        System.out.println(size(GlobalGraphOperations.at(graphDb).getAllRelationships()));
+        logger.info(size(GlobalGraphOperations.at(graphDb).getAllNodes()) + " nodes");
+        logger.info(size(GlobalGraphOperations.at(graphDb).getAllRelationships()) + " relationships");
         tx.success();
       }
       graphDb.shutdown();

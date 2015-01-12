@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.owlapi;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
@@ -36,13 +35,13 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
 
-import edu.sdsc.scigraph.frames.EdgeProperties;
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -63,6 +62,7 @@ public class OwlVisitorTest extends GraphTestBase {
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
+    
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
     Map<String, String> categoryMap = new HashMap<>();
     try (Transaction tx = graphDb.beginTx()) {
@@ -73,7 +73,19 @@ public class OwlVisitorTest extends GraphTestBase {
       propertyMap.add(age);
 
       OwlVisitor visitor = new OwlVisitor(walker, graph, categoryMap, propertyMap);
-      walker.walkStructure(visitor);
+      for (OWLOntology ontology: manager.getOntologies()) {
+        for (OWLObject object: ontology.getNestedClassExpressions()) {
+          object.accept(visitor);
+        }
+        for (OWLObject entity: ontology.getSignature(true)) {
+          entity.accept(visitor);
+        }
+        for (OWLObject axiom: ontology.getAxioms()) {
+          axiom.accept(visitor);
+        }
+        
+      }  
+      //walker.walkStructure(visitor);
       visitor.postProcess();
       tx.success();
     }
@@ -164,10 +176,8 @@ public class OwlVisitorTest extends GraphTestBase {
   public void testObjectPropertyAssertions() {
     Node susan = graph.getNode(ROOT + "/Susan").get();
     Node meg = graph.getNode(ROOT + "/Meg").get();
-    Relationship relationship = graph.getOrCreateRelationship(susan, meg,
-        DynamicRelationshipType.withName("hasAncestor"));
-    assertThat(graph.getProperty(relationship, EdgeProperties.TRANSITIVE, Boolean.class).get(),
-        is(true));
+    assertThat(
+        graph.hasRelationship(susan, meg, DynamicRelationshipType.withName("hasAncestor")), is(true));
   }
 
   @Test
@@ -206,20 +216,6 @@ public class OwlVisitorTest extends GraphTestBase {
     Node complement = graph.getNode("http://ontology.neuinfo.org/anon/-1761792206").get();
     assertThat(complement.hasLabel(OwlLabels.OWL_COMPLEMENT_OF), is(true));
     assertThat(graph.hasRelationship(complement, parent, OwlRelationships.OPERAND), is(true));
-  }
-
-  @Test
-  public void testOntologyProperty() {
-    Node parent = graph.getNode(ROOT + "/Parent").get();
-    assertThat(graph.getProperty(parent, NodeProperties.ONTOLOGY, String.class).get(),
-        is(equalTo(ROOT)));
-  }
-
-  @Test
-  public void testParentOntologyProperty() {
-    Node parent = graph.getNode(ROOT + "/Parent").get();
-    assertThat(graph.getProperty(parent, NodeProperties.PARENT_ONTOLOGY, String.class).get(),
-        is(equalTo(ROOT)));
   }
 
   @Test

@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
 
 import javax.inject.Named;
 
-import org.semanticweb.owlapi.util.OWLOntologyWalker;
+import org.semanticweb.owlapi.model.OWLObject;
 
 import com.google.inject.Inject;
 
@@ -31,22 +31,25 @@ import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class OwlOntologyWalkerConsumer implements Callable<Void> {
 
-  BlockingQueue<OWLOntologyWalker> queue;
+  BlockingQueue<OWLObject> queue;
 
   BatchGraph graph;
   
   int numProducers;
   
   List<MappedProperty> mappedProperties;
+  
+  BatchOwlVisitor visitor;
 
   // TODO: Switch this to assisted inject
   @Inject
-  OwlOntologyWalkerConsumer(BlockingQueue<OWLOntologyWalker> queue, BatchGraph graph, int numProducers,
+  OwlOntologyWalkerConsumer(BlockingQueue<OWLObject> queue, BatchGraph graph, int numProducers,
       @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
     this.queue = queue;
     this.graph = graph;
     this.numProducers = numProducers;
     this.mappedProperties = mappedProperties;
+    visitor = new BatchOwlVisitor(null, graph, mappedProperties);
   }
   
   @Override
@@ -54,15 +57,14 @@ public class OwlOntologyWalkerConsumer implements Callable<Void> {
     try {
       int poisonCount = 0;
       while (true) {
-        OWLOntologyWalker walker = queue.take();
+        OWLObject walker = queue.take();
         if (BatchOwlLoader.POISON == walker) {
           poisonCount++;
           if (numProducers == poisonCount) {
             break;
           }
         } else {
-          BatchOwlVisitor visitor = new BatchOwlVisitor(walker, graph, mappedProperties);
-          walker.walkStructure(visitor);
+          walker.accept(visitor);
         }
       }  
     } catch (InterruptedException consumed) {}

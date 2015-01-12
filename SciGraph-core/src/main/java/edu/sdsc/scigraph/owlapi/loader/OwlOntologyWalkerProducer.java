@@ -35,13 +35,13 @@ import org.semanticweb.owlapi.model.OWLAxiomChange;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.inject.Inject;
 
@@ -49,7 +49,7 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
 
   private static final Logger logger = Logger.getLogger(OwlOntologyWalkerProducer.class.getName());
 
-  private final BlockingQueue<OWLOntologyWalker> queue;
+  private final BlockingQueue<OWLObject> queue;
   private final BlockingQueue<String> urlQueue;
   private final int numConsumers;
   private final UrlValidator validator = UrlValidator.getInstance();
@@ -57,7 +57,7 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
   private final static OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
   @Inject
-  OwlOntologyWalkerProducer(BlockingQueue<OWLOntologyWalker> queue, BlockingQueue<String> urlQueue, int numConsumers) {
+  OwlOntologyWalkerProducer(BlockingQueue<OWLObject> queue, BlockingQueue<String> urlQueue, int numConsumers) {
     this.queue = queue;
     this.urlQueue = urlQueue;
     this.numConsumers = numConsumers;
@@ -158,7 +158,17 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
               // TODO: fix this - move to configuration
               addDirectInferredEdges(manager, ont);
             }
-            queue.put(new OWLOntologyWalker(manager.getOntologies()));
+            for (OWLOntology ontology: manager.getOntologies()) {
+              for (OWLObject object: ontology.getNestedClassExpressions()) {
+                queue.put(object);
+              }
+              for (OWLObject object: ontology.getSignature(true)) {
+                queue.put(object);
+              }
+              for (OWLObject object: ontology.getAxioms()) {
+                queue.put(object);
+              }
+            }
           } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to load ontology: " + url, e);
           }
