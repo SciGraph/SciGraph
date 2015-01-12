@@ -162,6 +162,7 @@ public class ReachabilityIndex {
     logger.info("Reachability index created.");
   }
 
+  @SuppressWarnings("deprecation")
   Transaction batchTransactions(Transaction tx, int operationCount) {
     if (operationCount % transactionBatchSize == 0) {
       tx.success();
@@ -172,6 +173,7 @@ public class ReachabilityIndex {
     }
   }
 
+  @SuppressWarnings("deprecation")
   void commitIndexToGraph(InMemoryReachabilityIndex inMemoryIndex) {
     Transaction tx = graphDb.beginTx();
 
@@ -188,6 +190,7 @@ public class ReachabilityIndex {
     tx.finish();
   }
 
+  @SuppressWarnings("deprecation")
   public void dropIndex() {
     if (indexExists()) {
       Transaction tx = graphDb.beginTx();
