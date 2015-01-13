@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.vocabulary;
 
+import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.limit;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
@@ -60,6 +61,7 @@ import org.neo4j.graphdb.index.IndexHits;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
@@ -138,7 +140,15 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   List<Concept> limitHits(IndexHits<Node> hits, Query query) {
     try (Transaction tx = graph.getGraphDb().beginTx()) {
-      Iterable<Concept> limitedHits = limit(graph.getOrCreateFramedNodes(hits), query.getLimit());
+      Iterable<Concept> concepts = graph.getOrCreateFramedNodes(hits);
+      if (!query.isIncludeDeprecated()) {
+        concepts = filter(concepts, new Predicate<Concept>() {
+          @Override
+          public boolean apply(Concept concept) {
+            return !concept.isDeprecated();
+          }});
+      }
+      Iterable<Concept> limitedHits = limit(concepts, query.getLimit());
       List<Concept> ret = newArrayList(limitedHits);
       tx.success();
       return ret;

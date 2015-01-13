@@ -20,6 +20,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -36,6 +37,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
 
@@ -63,6 +65,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   Concept specialChars;
   Concept parkinsons;
   Concept als;
+  Concept deprecated;
 
   Concept buildConcept(String uri, String label, String... categories) {
     Node concept = graph.getOrCreateNode(uri);
@@ -102,6 +105,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
       graph.addProperty(graph.getNode(als), Concept.SYNONYM, "motor neuron disease, bulbar");
       graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "motor neuron disease, bulbar");
+      deprecated = buildConcept("http://example.org/#cerebellum2", "Cerebellum", "baz", "foo");
+      graph.addProperty(graph.getNode(deprecated), OWLRDFVocabulary.OWL_DEPRECATED.toString(), "true");
       tx.success();
     }
 
@@ -331,6 +336,18 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testQuotedIdQuery() {
     Query query = new Vocabulary.Query.Builder("\"HP:0008\"").build();
     assertThat(vocabulary.getConceptFromId(query), contains(hippocampus));
+  }
+
+  @Test
+  public void deprecatedClassesNotReturned() {
+    Query query = new Vocabulary.Query.Builder("Cerebellum").build();
+    assertThat(vocabulary.getConceptsFromTerm(query), contains(cerebellum));
+  }
+
+  @Test
+  public void deprecatedClassesReturned_whenRequested() {
+    Query query = new Vocabulary.Query.Builder("Cerebellum").includeDeprecated(true).build();
+    assertThat(vocabulary.getConceptsFromTerm(query), containsInAnyOrder(cerebellum, deprecated));
   }
 
   @Test

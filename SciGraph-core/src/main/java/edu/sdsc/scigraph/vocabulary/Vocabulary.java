@@ -116,6 +116,7 @@ public interface Vocabulary {
   class Query {
     private final String input;
     private final int limit;
+    private final boolean includeDeprecated;
     private final boolean includeSynonyms;
     private final boolean includeAcronyms;
     private final boolean includeAbbreviations;
@@ -125,6 +126,7 @@ public interface Vocabulary {
     public static class Builder {
       private final String input;
       private int limit = 1000;
+      private boolean includeDeprecated = false;
       private boolean includeSynonyms = true;
       private boolean includeAcronyms = false;
       private boolean includeAbbreviations = false;
@@ -146,6 +148,10 @@ public interface Vocabulary {
        */
       public Builder limit(int limit) {
         this.limit = limit; return this;
+      }
+
+      public Builder includeDeprecated(boolean include) {
+        this.includeDeprecated = include; return this;
       }
 
       public Builder includeSynonyms(boolean include) {
@@ -188,6 +194,7 @@ public interface Vocabulary {
     private Query(Builder builder) {
       this.input = builder.input;
       this.limit = builder.limit;
+      this.includeDeprecated = builder.includeDeprecated;
       this.includeSynonyms = builder.includeSynonyms;
       this.includeAcronyms = builder.includeAcronyms;
       this.includeAbbreviations = builder.includeAbbreviations;
@@ -201,6 +208,10 @@ public interface Vocabulary {
 
     public int getLimit() {
       return limit;
+    }
+
+    public boolean isIncludeDeprecated() {
+      return includeDeprecated;
     }
 
     public boolean isIncludeSynonyms() {
