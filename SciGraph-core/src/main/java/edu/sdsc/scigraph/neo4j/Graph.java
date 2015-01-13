@@ -43,6 +43,7 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.index.UniqueFactory;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
@@ -148,6 +149,11 @@ public class Graph {
     return graphDb.getNodeById(id);
   }
 
+  public boolean isDeprecated(Node n) {
+    boolean owlDeprecated = Boolean.valueOf((String)n.getProperty(OWLRDFVocabulary.OWL_DEPRECATED.toString(), "false"));
+    return owlDeprecated;
+  }
+  
   Concept getVertex(long id) {
     Concept concept = new Concept();
     try (Transaction tx = graphDb.beginTx()) {
@@ -163,6 +169,7 @@ public class Graph {
       concept.setParentOntology((String) n.getProperty(Concept.PARENT_ONTOLOGY, null));
       concept.setPreferredLabel((String) n.getProperty(Concept.PREFERRED_LABEL, null));
       concept.setUri((String) n.getProperty(Concept.URI, null));
+      concept.setDeprecated(isDeprecated(n));
 
       for (String definition : getProperties(n, Concept.DEFINITION, String.class)) {
         concept.addDefinition(definition);

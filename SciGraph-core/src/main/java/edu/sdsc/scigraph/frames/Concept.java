@@ -30,6 +30,7 @@ public class Concept extends NodeProperties {
   public static final String DEFINITION = "definition";
   public static final String CATEGORY = "category";
 
+  private boolean deprecated;
   private String preferredLabel;
   private Set<String> definitions = new HashSet<>();
   private Set<String> categories = new HashSet<>();
@@ -38,6 +39,14 @@ public class Concept extends NodeProperties {
   private Set<String> abbreviations = new HashSet<>();
 
   private Set<String> equivalentClasses = new HashSet<>();
+
+  public boolean isDeprecated() {
+    return deprecated;
+  }
+
+  public void setDeprecated(boolean deprecated) {
+    this.deprecated = deprecated;
+  }
 
   public void setPreferredLabel(String preferredLabel) {
     this.preferredLabel = preferredLabel;

@@ -34,6 +34,7 @@ public class ConceptDTOLite {
   private Collection<String> synonyms = new HashSet<>();
   private Collection<String> acronyms = new HashSet<>();
   private Collection<String> abbreviations = new HashSet<>();
+  private boolean deprecated;
 
   @XmlAttribute
   public String getUri() {
@@ -108,6 +109,15 @@ public class ConceptDTOLite {
 
   public void setAbbreviations(Collection<String> abbreviations) {
     this.abbreviations = abbreviations;
+  }
+
+  @XmlAttribute
+  public boolean isDeprecated() {
+    return deprecated;
+  }
+
+  public void setDeprecated(boolean deprecated) {
+    this.deprecated = deprecated;
   }
 
 }
