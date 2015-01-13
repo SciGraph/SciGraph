@@ -34,6 +34,8 @@ class DocumentationStrings {
   final static String LONGEST_ENTITY_DOC =
       "Should only the longest entity be returned for an overlapping group";
 
+  final static String INCLUDE_DEPRECATED_CLASSES = "Should deprecated classes be included";
+
   final static String INCLUDE_ABBREV_DOC = "Should abbreviations be included";
 
   final static String INCLUDE_ACRONYMS_DOC = "Should acronyms be included";

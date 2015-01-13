@@ -227,6 +227,8 @@ public class VocabularyService extends BaseResource {
       @QueryParam("limit") @DefaultValue("20") IntParam limit,
       @ApiParam( value = "Should synonyms be matched", required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") BooleanParam searchSynonyms,
+      @ApiParam( value = DocumentationStrings.INCLUDE_DEPRECATED_CLASSES, required = false )
+      @QueryParam("includeDeprecated") @DefaultValue("false") BooleanParam includeDeprecated,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
@@ -236,6 +238,7 @@ public class VocabularyService extends BaseResource {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(termPrefix).
         categories(categories).
         prefixes(prefixes).
+        includeDeprecated(includeDeprecated.get()).
         includeSynonyms(searchSynonyms.get()).
         limit(1000);
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
