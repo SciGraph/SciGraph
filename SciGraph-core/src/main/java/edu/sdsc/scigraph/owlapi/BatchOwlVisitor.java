@@ -33,6 +33,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -168,8 +169,13 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   @Override
   public Void visit(OWLAnnotationAssertionAxiom axiom) {
-    if (axiom.getSubject() instanceof IRI) {
-      long subject = getOrCreateNode(((IRI) axiom.getSubject()).toURI());
+    if ((axiom.getSubject() instanceof IRI)  || (axiom.getValue() instanceof OWLAnonymousIndividual)) {
+      long subject = 0L;
+      if (axiom.getSubject() instanceof IRI) {
+        subject = getOrCreateNode(((IRI) axiom.getSubject()).toURI());
+      } else if (axiom.getSubject() instanceof OWLAnonymousIndividual) {
+        subject = getOrCreateNode(OwlApiUtils.getUri((OWLAnonymousIndividual)axiom.getSubject()));
+      }
 
       String property = getUri(axiom.getProperty()).toString();
       if (axiom.getValue() instanceof OWLLiteral) {
@@ -190,8 +196,13 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
           logger.warning("Can't store property arrays with mixed types. Ignoring " + property + " with value "
               + owlLiteral.getLiteral() + " on " + ((IRI) axiom.getSubject()).toURI().toString());
         }
-      } else if (axiom.getValue() instanceof IRI) {
-        long object = getOrCreateNode(((IRI) axiom.getValue()).toURI());
+      } else if ((axiom.getValue() instanceof IRI) || (axiom.getValue() instanceof OWLAnonymousIndividual)) {
+        long object = 0L;
+        if (axiom.getValue() instanceof IRI) {
+          object = getOrCreateNode(((IRI) axiom.getValue()).toURI());
+        } else if (axiom.getValue() instanceof OWLAnonymousIndividual) {
+          object = getOrCreateNode(OwlApiUtils.getUri((OWLAnonymousIndividual)axiom.getValue()));
+        }
         URI uri = Graph.getURI(property);
         String fragment = GraphUtil.getFragment(uri);
         long assertion =
@@ -199,9 +210,11 @@ public class BatchOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         graph.setRelationshipProperty(assertion, CommonProperties.URI, uri.toString());
         graph.setRelationshipProperty(assertion, CommonProperties.OWL_TYPE,
             OwlRelationships.OWL_ANNOTATION.name());
+      } else {
+        logger.info("Ignoring assertion axiom: " + axiom);
       }
     } else {
-      logger.fine("Ignoring non IRI assertion axiom: " + axiom.toString());
+      logger.info("Ignoring assertion axiom: " + axiom);
     }
     return null;
   }

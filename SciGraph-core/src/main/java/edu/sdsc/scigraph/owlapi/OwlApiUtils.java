@@ -20,11 +20,14 @@ import java.util.List;
 
 import org.coode.owlapi.obo12.parser.OBO12ParserFactory;
 import org.coode.owlapi.oboformat.OBOFormatParserFactory;
+import org.neo4j.helpers.collection.Iterables;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLParserFactory;
 import org.semanticweb.owlapi.io.OWLParserFactoryRegistry;
 import org.semanticweb.owlapi.io.XMLUtils;
+import org.semanticweb.owlapi.model.NodeID;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -33,6 +36,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 
 import edu.sdsc.scigraph.neo4j.Graph;
 
@@ -86,7 +90,9 @@ public class OwlApiUtils {
 
   public static URI getUri(OWLIndividual individual) {
     if (individual.isAnonymous()) {
-      return Graph.getURI(ANONYMOUS_NODE_PREFIX + individual.hashCode());
+      String id = ((OWLAnonymousIndividual)individual).getID().getID();
+      String trueId = Iterables.last(Splitter.on("_:").split(id));
+      return Graph.getURI(ANONYMOUS_NODE_PREFIX + trueId);
     } else {
       return individual.asOWLNamedIndividual().getIRI().toURI();
     }
