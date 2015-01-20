@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,9 +46,9 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import com.google.inject.Inject;
 
-public class OwlOntologyWalkerProducer implements Callable<Void>{
+public class OwlOntologyProducer implements Callable<Void>{
 
-  private static final Logger logger = Logger.getLogger(OwlOntologyWalkerProducer.class.getName());
+  private static final Logger logger = Logger.getLogger(OwlOntologyProducer.class.getName());
 
   private final BlockingQueue<OWLObject> queue;
   private final BlockingQueue<String> urlQueue;
@@ -55,12 +56,15 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
   private final UrlValidator validator = UrlValidator.getInstance();
   private final static OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
   private final static OWLDataFactory factory = OWLManager.getOWLDataFactory();
+  private final AtomicInteger numProducersShutdown;
 
   @Inject
-  OwlOntologyWalkerProducer(BlockingQueue<OWLObject> queue, BlockingQueue<String> urlQueue, int numConsumers) {
+  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<String> urlQueue, int numConsumers, AtomicInteger numProducersShutdown) {
+    logger.info("Producer starting up...");
     this.queue = queue;
     this.urlQueue = urlQueue;
     this.numConsumers = numConsumers;
+    this.numProducersShutdown = numProducersShutdown;
   }
 
   static int removeAxioms(OWLOntologyManager manager, OWLOntology ont, AxiomType<?> type) {
@@ -154,10 +158,11 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
             } else {
               ont = manager.loadOntologyFromOntologyDocument(new File(url));
             }
-            if ("http://purl.obolibrary.org/obo/upheno/monarch.owl".equals(url)) {
+            //if ("http://purl.obolibrary.org/obo/upheno/monarch.owl".equals(url)) {
               // TODO: fix this - move to configuration
               addDirectInferredEdges(manager, ont);
-            }
+            //}
+            logger.info("Adding axioms for: " + url);
             for (OWLOntology ontology: manager.getOntologies()) {
               for (OWLObject object: ontology.getNestedClassExpressions()) {
                 queue.put(object);
@@ -169,6 +174,7 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
                 queue.put(object);
               }
             }
+            logger.info("Finished processing ontology: " + url);
           } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to load ontology: " + url, e);
           }
@@ -188,6 +194,8 @@ public class OwlOntologyWalkerProducer implements Callable<Void>{
         } catch (InterruptedException e1) { /* Retry */}
       }
     }
+    numProducersShutdown.incrementAndGet();
+    logger.info("Producer shutting down...");
     return null;
   }
 

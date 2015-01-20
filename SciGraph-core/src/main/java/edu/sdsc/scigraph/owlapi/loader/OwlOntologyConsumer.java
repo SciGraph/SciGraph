@@ -18,6 +18,8 @@ package edu.sdsc.scigraph.owlapi.loader;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import javax.inject.Named;
 
@@ -29,8 +31,10 @@ import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
-public class OwlOntologyWalkerConsumer implements Callable<Void> {
+public class OwlOntologyConsumer implements Callable<Void> {
 
+  private static final Logger logger = Logger.getLogger(OwlOntologyConsumer.class.getName());
+  
   BlockingQueue<OWLObject> queue;
 
   BatchGraph graph;
@@ -40,34 +44,45 @@ public class OwlOntologyWalkerConsumer implements Callable<Void> {
   List<MappedProperty> mappedProperties;
   
   BatchOwlVisitor visitor;
+  
+  private final AtomicInteger numProducersShutdown;
 
   // TODO: Switch this to assisted inject
   @Inject
-  OwlOntologyWalkerConsumer(BlockingQueue<OWLObject> queue, BatchGraph graph, int numProducers,
-      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
+  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, BatchGraph graph, int numProducers,
+      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties,
+      AtomicInteger numProducersShutdown) {
+    logger.info("Ontology consumer starting up...");
     this.queue = queue;
     this.graph = graph;
     this.numProducers = numProducers;
     this.mappedProperties = mappedProperties;
+    this.numProducersShutdown = numProducersShutdown;
     visitor = new BatchOwlVisitor(null, graph, mappedProperties);
   }
   
   @Override
-  public Void call() throws Exception {
+  public Void call() {
     try {
-      int poisonCount = 0;
       while (true) {
-        OWLObject walker = queue.take();
-        if (BatchOwlLoader.POISON == walker) {
-          poisonCount++;
-          if (numProducers == poisonCount) {
+        OWLObject walker = null;
+        if (numProducersShutdown.get() < numProducers) {
+          walker = queue.take();
+        } else {
+          if (!queue.isEmpty()) {
+            walker = queue.take();
+          } else {
             break;
           }
+        }
+        if (BatchOwlLoader.POISON == walker) {
+          // Ignore the poison
         } else {
           walker.accept(visitor);
         }
       }  
     } catch (InterruptedException consumed) {}
+    logger.info("Ontology consumer shutting down...");
     return null;
   }
 

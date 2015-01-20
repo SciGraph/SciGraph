@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -71,8 +72,8 @@ public class BatchOwlLoader {
 
   private static final int numCores = Runtime.getRuntime().availableProcessors();
   
-  static final int CONSUMER_COUNT = numCores;
-  static final int PRODUCER_COUNT = numCores;
+  static final int CONSUMER_COUNT = numCores / 2;
+  static final int PRODUCER_COUNT = numCores / 2;
 
   @Inject
   PostpostprocessorProvider postprocessorProvider;
@@ -96,11 +97,12 @@ public class BatchOwlLoader {
   }
 
   void loadOntology() throws InterruptedException {
+    AtomicInteger numProducersShutdown = new AtomicInteger();
     for (int i = 0; i < CONSUMER_COUNT; i++) {
-      exec.submit(new OwlOntologyWalkerConsumer(queue, graph, PRODUCER_COUNT, mappedProperties));
+      exec.submit(new OwlOntologyConsumer(queue, graph, PRODUCER_COUNT, mappedProperties, numProducersShutdown));
     }
     for (int i = 0; i < PRODUCER_COUNT; i++) {
-      exec.submit(new OwlOntologyWalkerProducer(queue, urlQueue, CONSUMER_COUNT));
+      exec.submit(new OwlOntologyProducer(queue, urlQueue, CONSUMER_COUNT, numProducersShutdown));
     }
     for (String url: urls) {
       urlQueue.offer(url);
