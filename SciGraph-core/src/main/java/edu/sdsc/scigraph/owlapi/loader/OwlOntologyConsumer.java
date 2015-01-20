@@ -75,11 +75,7 @@ public class OwlOntologyConsumer implements Callable<Void> {
             break;
           }
         }
-        if (BatchOwlLoader.POISON == walker) {
-          // Ignore the poison
-        } else {
-          walker.accept(visitor);
-        }
+        walker.accept(visitor);
       }  
     } catch (InterruptedException consumed) {}
     logger.info("Ontology consumer shutting down...");

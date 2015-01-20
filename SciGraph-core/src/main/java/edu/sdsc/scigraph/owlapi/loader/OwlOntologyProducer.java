@@ -41,18 +41,15 @@ public class OwlOntologyProducer implements Callable<Void>{
 
   private final BlockingQueue<OWLObject> queue;
   private final BlockingQueue<String> urlQueue;
-  private final int numConsumers;
   private final UrlValidator validator = UrlValidator.getInstance();
   private final static OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
   private final AtomicInteger numProducersShutdown;
 
   @Inject
-  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<String> urlQueue, 
-      int numConsumers, AtomicInteger numProducersShutdown) {
+  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<String> urlQueue, AtomicInteger numProducersShutdown) {
     logger.info("Producer starting up...");
     this.queue = queue;
     this.urlQueue = urlQueue;
-    this.numConsumers = numConsumers;
     this.numProducersShutdown = numProducersShutdown;
   }
 
@@ -75,8 +72,8 @@ public class OwlOntologyProducer implements Callable<Void>{
               ont = manager.loadOntologyFromOntologyDocument(new File(url));
             }
             //if ("http://purl.obolibrary.org/obo/upheno/monarch.owl".equals(url)) {
-              // TODO: fix this - move to configuration
-            
+            // TODO: fix this - move to configuration
+
             ReasonerUtil util = new ReasonerUtil(reasonerFactory, manager, ont);
             util.reason(true, true);
             //}
@@ -102,17 +99,9 @@ public class OwlOntologyProducer implements Callable<Void>{
       logger.log(Level.WARNING, "Failed to load ontology", e);
     }
     finally {
-      int poisonCount = numConsumers;
-      while (true) {
-        try {
-          while (poisonCount-- > 0) {
-            queue.put(BatchOwlLoader.POISON);
-          }
-          break;
-        } catch (InterruptedException e1) { /* Retry */}
-      }
+      numProducersShutdown.incrementAndGet();
     }
-    numProducersShutdown.incrementAndGet();
+
     logger.info("Producer shutting down...");
     return null;
   }

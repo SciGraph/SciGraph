@@ -43,7 +43,6 @@ import org.apache.commons.cli.PosixParser;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -67,7 +66,6 @@ public class BatchOwlLoader {
 
   static final Logger logger = Logger.getLogger(BatchOwlLoader.class.getName());
 
-  static final OWLObject POISON = IRI.create("http://poison.org");
   static final String POISON_STR = "Poison String";
 
   private static final int numCores = Runtime.getRuntime().availableProcessors();
@@ -102,7 +100,7 @@ public class BatchOwlLoader {
       exec.submit(new OwlOntologyConsumer(queue, graph, PRODUCER_COUNT, mappedProperties, numProducersShutdown));
     }
     for (int i = 0; i < PRODUCER_COUNT; i++) {
-      exec.submit(new OwlOntologyProducer(queue, urlQueue, CONSUMER_COUNT, numProducersShutdown));
+      exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
     }
     for (String url: urls) {
       urlQueue.offer(url);
