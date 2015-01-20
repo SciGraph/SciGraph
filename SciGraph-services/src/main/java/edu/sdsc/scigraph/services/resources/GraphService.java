@@ -88,6 +88,77 @@ public class GraphService extends BaseResource {
   }
 
   @GET
+  @Path("/neighbors")
+  @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
+    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
+    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+  public Object getNeighborsFromMultipleRoots(
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
+      @QueryParam("id") Set<String> ids,
+      @ApiParam(value = "How far to traverse neighbors", required = false)
+      @QueryParam("depth") @DefaultValue("1") final IntParam depth,
+      @ApiParam(value = "Traverse blank nodes", required = false)
+      @QueryParam("blankNodes") @DefaultValue("false") final BooleanParam traverseBlankNodes,
+      @ApiParam(value = "Which relationship to traverse", required = false)
+      @QueryParam("relationshipType") final String relationshipType,
+      @ApiParam(value = "Which direction to traverse: in, out, both (default). Only used if relationshipType is specified.", required = false)
+      @QueryParam("direction") @DefaultValue("both") final String direction,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
+      @QueryParam("callback") String callback) {
+    Set<Concept> roots = new HashSet<>();
+    for (String id: ids) {
+      Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
+      Collection<Concept> concepts = vocabulary.getConceptFromId(query);
+      if (concepts.isEmpty()) {
+        throw new UnknownClassException(id);
+      }
+      Concept concept = getFirst(vocabulary.getConceptFromId(query), null);
+      roots.add(concept);
+    }
+    Set<DirectedRelationshipType> types = new HashSet<>();
+    if (!isNullOrEmpty(relationshipType)) {
+      RelationshipType type = DynamicRelationshipType.withName(relationshipType);
+      Direction dir = Direction.BOTH;
+      switch (direction) {
+        case "in" : dir = Direction.INCOMING;
+        break;
+        case "out" : dir = Direction.OUTGOING;
+        break;
+        case "both" : dir = Direction.BOTH;
+        break;
+      }
+      types.add(new DirectedRelationshipType(type, dir));
+    }
+    TinkerGraph tg = new TinkerGraph();
+    try (Transaction tx = graph.getGraphDb().beginTx()) {
+      Iterable<Node> nodes = transform(roots, new Function<Concept, Node>() {
+        @Override
+        public Node apply(Concept concept) {
+          return graph.getGraphDb().getNodeById(concept.getId());
+        }
+      });
+      Optional<Predicate<Node>> nodePredicate = Optional.absent();
+      if (!traverseBlankNodes.get()) {
+        Predicate<Node> predicate = new Predicate<Node>() {
+          @Override
+          public boolean apply(Node node) {
+            //TODO: This should be done with properties...
+            return !((String)node.getProperty(CommonProperties.URI)).startsWith("http://ontology.neuinfo.org/anon/");
+          }};
+          nodePredicate = Optional.of(predicate);
+      }
+      tg = api.getNeighbors(newHashSet(nodes), depth.get(), types, nodePredicate);
+      tx.success();
+    }
+    GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};
+    return JaxRsUtil.wrapJsonp(request, response, callback);
+  }
+
+
+  @GET
   @Path("/neighbors/{id}")
   @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
   @Timed
@@ -108,44 +179,7 @@ public class GraphService extends BaseResource {
       @QueryParam("direction") @DefaultValue("both") final String direction,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
-    Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-    Collection<Concept> concepts = vocabulary.getConceptFromId(query);
-    if (concepts.isEmpty()) {
-      throw new UnknownClassException(id);
-    }
-    Concept concept = getFirst(vocabulary.getConceptFromId(query), null);
-    Set<DirectedRelationshipType> types = new HashSet<>();
-    if (!isNullOrEmpty(relationshipType)) {
-      RelationshipType type = DynamicRelationshipType.withName(relationshipType);
-      Direction dir = Direction.BOTH;
-      switch (direction) {
-        case "in" : dir = Direction.INCOMING;
-        break;
-        case "out" : dir = Direction.OUTGOING;
-        break;
-        case "both" : dir = Direction.BOTH;
-        break;
-      }
-      types.add(new DirectedRelationshipType(type, dir));
-    }
-    TinkerGraph tg = new TinkerGraph();
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      Node node = graph.getGraphDb().getNodeById(concept.getId());
-      Optional<Predicate<Node>> nodePredicate = Optional.absent();
-      if (!traverseBlankNodes.get()) {
-        Predicate<Node> predicate = new Predicate<Node>() {
-          @Override
-          public boolean apply(Node node) {
-            //TODO: This should be done with properties...
-            return !((String)node.getProperty(CommonProperties.URI)).startsWith("http://ontology.neuinfo.org/anon/");
-          }};
-        nodePredicate = Optional.of(predicate);
-      }
-      tg = api.getNeighbors(newHashSet(node), depth.get(), types, nodePredicate);
-      tx.success();
-    }
-    GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes, relationshipType, direction, callback);
   }
 
   @GET
