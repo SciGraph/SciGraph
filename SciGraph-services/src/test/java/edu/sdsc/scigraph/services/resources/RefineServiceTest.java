@@ -60,10 +60,9 @@ public class RefineServiceTest {
         resources.client().resource("/refine/reconcile?query=hippocampus").get(RefineResults.class), instanceOf(RefineResults.class));
   }
 
-  //TODO: Verify that this is the correct exception
   @Test(expected=UniformInterfaceException.class)
   public void exceptionIsThrown_whenJsonIsMalformed() {
-    resources.client().resource("/refine/reconcile?query=%5Bbad%20json%5D%5D").get(RefineResults.class);
+      resources.client().resource("/refine/reconcile?query=%5Bbad%20json%5D%5D").get(RefineResults.class);
   }
 
 }

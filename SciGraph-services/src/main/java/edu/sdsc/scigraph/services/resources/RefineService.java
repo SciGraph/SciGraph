@@ -58,9 +58,7 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 @Path("/refine") 
 @Api(value = "/refine", 
-description = "OpenRefine Reconciliation Services"
-
-    )
+description = "OpenRefine Reconciliation Services")
 @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP})
 public class RefineService extends BaseResource {
 
@@ -148,9 +146,7 @@ public class RefineService extends BaseResource {
   @Path("/preview/{id}")
   @Produces(MediaType.TEXT_HTML)
   public ConceptView getPreview(@PathParam("id") String id) {
-    Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-    Collection<Concept> concepts = vocabulary.getConceptFromId(query);
-    return new ConceptView(concepts.iterator().next());
+    return getView(id);
   }
 
 }
