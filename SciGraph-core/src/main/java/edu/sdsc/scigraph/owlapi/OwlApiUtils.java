@@ -15,9 +15,12 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import java.io.File;
 import java.net.URI;
 import java.util.List;
+import java.util.logging.Logger;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.coode.owlapi.obo12.parser.OBO12ParserFactory;
 import org.coode.owlapi.oboformat.OBOFormatParserFactory;
 import org.neo4j.helpers.collection.Iterables;
@@ -25,6 +28,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLParserFactory;
 import org.semanticweb.owlapi.io.OWLParserFactoryRegistry;
 import org.semanticweb.owlapi.io.XMLUtils;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -32,6 +36,9 @@ import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
@@ -41,7 +48,11 @@ import edu.sdsc.scigraph.neo4j.Graph;
 
 public class OwlApiUtils {
 
+  private static final Logger logger = Logger.getLogger(OwlApiUtils.class.getName());
+
   private static final String ANONYMOUS_NODE_PREFIX = "http://ontology.neuinfo.org/anon/";
+
+  private static final UrlValidator validator = UrlValidator.getInstance();
 
   /*** 
    * @param literal An OWLLiteral
@@ -103,6 +114,24 @@ public class OwlApiUtils {
 
   public static String getFragment(OWLRDFVocabulary vocab) {
     return XMLUtils.getNCNameSuffix(vocab.getIRI());
+  }
+
+  /***
+   * @param manager The ontology manager to use
+   * @param ontology A string representing the ontology to load. This can be an URI or a file path
+   * @return The loaded ontology
+   * @throws OWLOntologyCreationException
+   */
+  public static OWLOntology loadOntology(OWLOntologyManager manager, String ontology) throws OWLOntologyCreationException {
+    logger.info(String.format("Reading ontology: %s", ontology));
+    OWLOntology ont;
+    if (validator.isValid(ontology)) {
+      ont = manager.loadOntology(IRI.create(ontology));
+    } else {
+      ont = manager.loadOntologyFromOntologyDocument(new File(ontology));
+    }
+    logger.info(String.format("Finished reasing ontology: %s", ontology));
+    return ont;
   }
 
   public static void silenceOboParser() {

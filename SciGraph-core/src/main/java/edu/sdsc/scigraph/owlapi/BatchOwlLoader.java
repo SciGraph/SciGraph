@@ -164,13 +164,7 @@ public class BatchOwlLoader {
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
       OWLOntology ont = null;
       for (String url : config.getOntologyUrls()) {
-        logger.info("Loading " + url);
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-          ont = manager.loadOntology(IRI.create(url));
-        } else {
-          ont = manager.loadOntologyFromOntologyDocument(new File(url));
-        }
-        logger.info("Finished loading " + url);
+        ont = OwlApiUtils.loadOntology(manager, url);
       }
 
       //edu.sdsc.scigraph.owlapi.loader.OwlOntologyWalkerProducer.addDirectInferredEdges(manager, ont);

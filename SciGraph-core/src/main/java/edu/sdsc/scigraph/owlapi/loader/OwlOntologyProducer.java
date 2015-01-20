@@ -15,17 +15,14 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
-import java.io.File;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.validator.routines.UrlValidator;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -33,6 +30,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import com.google.inject.Inject;
 
+import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 
 public class OwlOntologyProducer implements Callable<Void>{
@@ -41,7 +39,6 @@ public class OwlOntologyProducer implements Callable<Void>{
 
   private final BlockingQueue<OWLObject> queue;
   private final BlockingQueue<String> urlQueue;
-  private final UrlValidator validator = UrlValidator.getInstance();
   private final static OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
   private final AtomicInteger numProducersShutdown;
 
@@ -65,15 +62,9 @@ public class OwlOntologyProducer implements Callable<Void>{
           //manager.addIRIMapper(new FileCachingIRIMapper());
           logger.info("Loading ontology: " + url);
           try {
-            OWLOntology ont = null;
-            if (validator.isValid(url)) {
-              ont = manager.loadOntology(IRI.create(url));
-            } else {
-              ont = manager.loadOntologyFromOntologyDocument(new File(url));
-            }
+            OWLOntology ont = OwlApiUtils.loadOntology(manager, url);
             //if ("http://purl.obolibrary.org/obo/upheno/monarch.owl".equals(url)) {
             // TODO: fix this - move to configuration
-
             ReasonerUtil util = new ReasonerUtil(reasonerFactory, manager, ont);
             util.reason(true, true);
             //}
