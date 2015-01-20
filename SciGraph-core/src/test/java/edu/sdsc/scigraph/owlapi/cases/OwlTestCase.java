@@ -34,6 +34,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
+import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -48,7 +49,7 @@ import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
-import edu.sdsc.scigraph.owlapi.loader.OwlOntologyProducer;
+import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 
 /***
  * An abstract test case for testing simple OWL axiom combinations.
@@ -88,7 +89,8 @@ public abstract class OwlTestCase {
     IRI iri = IRI.create(uri);
     OWLOntology ont = manager.loadOntologyFromOntologyDocument(iri);
     if (performInference) {
-      OwlOntologyProducer.addDirectInferredEdges(manager, ont);
+      ReasonerUtil util = new ReasonerUtil(new ElkReasonerFactory(), manager, ont);
+      util.reason(false, true);
     }
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 

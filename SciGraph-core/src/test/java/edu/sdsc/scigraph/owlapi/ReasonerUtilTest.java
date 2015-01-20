@@ -50,10 +50,14 @@ public class ReasonerUtilTest {
   public void subclassHierarchyIsRepaired() throws Exception {
     OWLClass dx = dataFactory.getOWLClass(IRI.create("http://example.org/dx"));
     OWLClass cx = dataFactory.getOWLClass(IRI.create("http://example.org/cx"));
-    OWLClassAxiom subClass = dataFactory.getOWLSubClassOfAxiom(dx, cx);
-    assertThat(ont.containsAxiom(subClass), is(false));
+    OWLClass root = dataFactory.getOWLClass(IRI.create("http://example.org/root"));
+    OWLClassAxiom inferrredSubclass = dataFactory.getOWLSubClassOfAxiom(dx, cx);
+    OWLClassAxiom originalSubclass = dataFactory.getOWLSubClassOfAxiom(dx, root);
+    assertThat(ont.containsAxiom(inferrredSubclass), is(false));
+    assertThat(ont.containsAxiom(originalSubclass), is(true));
     util.reason(false, true);
-    assertThat(ont.containsAxiom(subClass), is(true));
+    assertThat(ont.containsAxiom(inferrredSubclass), is(true));
+    assertThat(ont.containsAxiom(originalSubclass), is(false));
   }
 
   @Test

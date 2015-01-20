@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
-class ReasonerUtil {
+public class ReasonerUtil {
 
   private static final Logger logger = Logger.getLogger(ReasonerUtil.class.getName());
   private final static OWLDataFactory factory = OWLManager.getOWLDataFactory();
@@ -32,7 +32,7 @@ class ReasonerUtil {
   private final OWLOntology ont;
 
   @Inject
-  ReasonerUtil(OWLReasonerFactory reasonerFactory, OWLOntologyManager manager, OWLOntology ont) {
+  public ReasonerUtil(OWLReasonerFactory reasonerFactory, OWLOntologyManager manager, OWLOntology ont) {
     this.reasonerFactory = reasonerFactory;
     this.manager = manager;
     this.ont = ont;
@@ -103,7 +103,7 @@ class ReasonerUtil {
           !directSuperclasses.contains(assertedSuperclass.asOWLClass())) {
         OWLAxiom axiom = factory.getOWLSubClassOfAxiom(ce, assertedSuperclass);
         RemoveAxiom removeAxiom = new RemoveAxiom(ont, axiom);
-        changes.remove(removeAxiom);
+        changes.add(removeAxiom);
       }
     }
     return changes;
