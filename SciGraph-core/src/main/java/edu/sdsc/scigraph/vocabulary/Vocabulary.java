@@ -126,7 +126,7 @@ public interface Vocabulary {
     public static class Builder {
       private final String input;
       private int limit = 1000;
-      private boolean includeDeprecated = false;
+      private boolean includeDeprecated = true;
       private boolean includeSynonyms = true;
       private boolean includeAcronyms = false;
       private boolean includeAbbreviations = false;
