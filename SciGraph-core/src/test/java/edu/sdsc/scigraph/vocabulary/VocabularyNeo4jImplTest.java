@@ -339,15 +339,15 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
-  public void deprecatedClassesNotReturned() {
+  public void deprecatedClassesReturned() {
     Query query = new Vocabulary.Query.Builder("Cerebellum").build();
-    assertThat(vocabulary.getConceptsFromTerm(query), contains(cerebellum));
+    assertThat(vocabulary.getConceptsFromTerm(query), containsInAnyOrder(cerebellum, deprecated));
   }
 
   @Test
-  public void deprecatedClassesReturned_whenRequested() {
-    Query query = new Vocabulary.Query.Builder("Cerebellum").includeDeprecated(true).build();
-    assertThat(vocabulary.getConceptsFromTerm(query), containsInAnyOrder(cerebellum, deprecated));
+  public void deprecatedClassesNotReturned_whenRequested() {
+    Query query = new Vocabulary.Query.Builder("Cerebellum").includeDeprecated(false).build();
+    assertThat(vocabulary.getConceptsFromTerm(query), contains(cerebellum));
   }
 
   @Test
