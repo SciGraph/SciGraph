@@ -48,8 +48,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.primitives.Longs;
 
-import edu.sdsc.scigraph.neo4j.DirectionalPathExpander;
-
 /***
  * A Neo4j implementation of the <a href="http://www.vldb.org/pvldb/vol6/p1978-jin.pdf">
  * "Simple, Fast, and Scalable Reachability Oracle"</a>

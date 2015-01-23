@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.neo4j;
+package edu.sdsc.scigraph.internal.reachability;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Path;
