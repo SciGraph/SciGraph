@@ -98,7 +98,9 @@ public class OwlPostprocessor {
         .depthFirst().relationships(type, direction)
         .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).traverse(root)) {
       Node end = position.endNode();
-      GraphUtil.addProperty(end, Concept.CATEGORY, category);
+      if (!GraphUtil.getProperties(end, Concept.CATEGORY, String.class).contains(category)) {
+        GraphUtil.addProperty(end, Concept.CATEGORY, category);
+      }
       end.addLabel(DynamicLabel.label(category));
     }
   }

@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.owlapi;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +70,7 @@ public class OwlPostprocessorTest {
     Map<String, String> categoryMap = new HashMap<>();
     categoryMap.put("http://example.org/a", "foo");
     postprocessor.processCategories(categoryMap);
+
     assertThat("parent category should be set",
         GraphUtil.getProperty(parent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
     assertThat("child category should be set",

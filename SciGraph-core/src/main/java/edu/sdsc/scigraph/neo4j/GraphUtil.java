@@ -21,9 +21,7 @@ import static com.google.common.collect.Iterables.filter;
 import java.lang.reflect.Array;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
@@ -56,30 +54,30 @@ public class GraphUtil {
    */
   public static void addProperty(PropertyContainer container, String property, Object value) {
     if (container.hasProperty(property)) {
-      // We might be creating or updating an array - read everything into a Set<>
       Object origValue = container.getProperty(property);
-      Class<?> clazz = value.getClass();
-      Set<Object> valueSet = new LinkedHashSet<>();
-      if (origValue.getClass().isArray()) {
-        for (int i = 0; i < Array.getLength(origValue); i++) {
-          valueSet.add(Array.get(origValue, i));
-        }
-      } else {
-        valueSet.add(origValue);
-      }
-      valueSet.add(value);
-
-      // Now write the set back if necessary
-      if (valueSet.size() > 1) {
-        Object newArray = Array.newInstance(clazz, valueSet.size());
-        int i = 0;
-        for (Object obj : valueSet) {
-          Array.set(newArray, i++, clazz.cast(obj));
-        }
-        container.setProperty(property, newArray);
-      }
+      Object newValue = getNewPropertyValue(origValue, value);
+      container.setProperty(property, newValue);
     } else {
       container.setProperty(property, value);
+    }
+  }
+  
+  public static Object getNewPropertyValue(Object originalValue, Object newValue) {
+    Class<?> clazz = checkNotNull(newValue).getClass();
+    if (null != originalValue && originalValue.getClass().isArray()) {
+      Object newArray = Array.newInstance(clazz, Array.getLength(originalValue) + 1);
+      for (int i = 0; i < Array.getLength(originalValue); i++) {
+        Array.set(newArray, i, Array.get(originalValue, i));
+      }
+      Array.set(newArray, Array.getLength(originalValue), newValue);
+      return newArray;
+    } else if (null != originalValue) {
+      Object newArray = Array.newInstance(clazz, 2);
+      Array.set(newArray, 0, originalValue);
+      Array.set(newArray, 1, newValue);
+      return newArray;
+    } else {
+      return newValue;
     }
   }
 
@@ -122,18 +120,23 @@ public class GraphUtil {
       Class<T> type) {
     List<T> list = new ArrayList<>();
     if (container.hasProperty(property)) {
-      if (container.getProperty(property).getClass().isArray()) {
-        Object value = container.getProperty(property);
-        List<Object> objects = new ArrayList<>();
-        for (int i = 0; i < Array.getLength(value); i++) {
-          objects.add(Array.get(value, i));
-        }
-        for (Object o : objects) {
-          list.add(type.cast(o));
-        }
-      } else {
-        list.add(type.cast(container.getProperty(property)));
+      return getPropertiesAsList(container.getProperty(property), type);
+    }
+    return list;
+  }
+  
+  static public <T> List<T> getPropertiesAsList(Object value, Class<T> type) {
+    List<T> list = new ArrayList<>();
+    if (value.getClass().isArray()) {
+      List<Object> objects = new ArrayList<>();
+      for (int i = 0; i < Array.getLength(value); i++) {
+        objects.add(Array.get(value, i));
       }
+      for (Object o : objects) {
+        list.add(type.cast(o));
+      }
+    } else {
+      list.add(type.cast(value));
     }
     return list;
   }

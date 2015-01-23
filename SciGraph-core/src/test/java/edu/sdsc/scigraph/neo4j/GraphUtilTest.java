@@ -55,7 +55,7 @@ public class GraphUtilTest {
     assertThat((int[]) node.getProperty("p"), is(new int[] { 1, 2 }));
   }
 
-  @Test(expected = ClassCastException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testAddMultipleTypedValues() {
     GraphUtil.addProperty(node, "p", 1);
     GraphUtil.addProperty(node, "p", "bad");
@@ -112,6 +112,31 @@ public class GraphUtilTest {
   public void testGetWrongPropertiesType() {
     GraphUtil.addProperty(node, "p", 1);
     GraphUtil.getProperties(node, "p", Float.class);
+  }
+
+  @Test
+  public void newPropertyIsSingleValuedArray() {
+    assertThat((String)GraphUtil.getNewPropertyValue(null, "1"), is("1"));
+  }
+
+  @Test
+  public void newPropertyIsMultiValuedArray() {
+    assertThat((String[])GraphUtil.getNewPropertyValue("1", "2"), is(new String[]{"1", "2"}));
+  }
+
+  @Test
+  public void newPropertyIsMultiValuedArray_whenStartingFromAnArray() {
+    assertThat((String[])GraphUtil.getNewPropertyValue(new String[]{"1", "2"}, "3"), is(new String[]{"1", "2", "3"}));
+  }
+
+  @Test
+  public void duplicateNewValues() {
+    assertThat((String[])GraphUtil.getNewPropertyValue("2", "2"), is(new String[]{"2", "2"}));
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testHeterogeneousValues_throwException() {
+    assertThat((String[])GraphUtil.getNewPropertyValue(1, "2"), is(new Object[]{1, "2"}));
   }
 
 }

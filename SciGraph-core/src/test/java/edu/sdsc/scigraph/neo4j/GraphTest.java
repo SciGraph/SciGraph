@@ -181,7 +181,7 @@ public class GraphTest extends GraphTestBase {
     Node node = graph.getOrCreateNode(BASE_URI);
     graph.addProperty(node, "foo", "bar");
     graph.addProperty(node, "foo", "bar");
-    assertThat(newArrayList((String) node.getProperty("foo")), contains("bar"));
+    assertThat((String[]) node.getProperty("foo"), is(new String[]{"bar", "bar"}));
   }
 
   @Test
@@ -222,7 +222,7 @@ public class GraphTest extends GraphTestBase {
     graph.getProperty(node, "foo", Integer.class).get();
   }
 
-  @Test(expected = ClassCastException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testDifferentMultiplePropertyTypes() {
     Node node = graph.getOrCreateNode(BASE_URI);
     graph.addProperty(node, "foo", "bar");
