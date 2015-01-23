@@ -28,39 +28,32 @@ import org.semanticweb.owlapi.model.OWLObject;
 import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.neo4j.BatchGraph;
+import edu.sdsc.scigraph.neo4j.GraphInterface;
 import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
+import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
 public class OwlOntologyConsumer implements Callable<Void> {
 
   private static final Logger logger = Logger.getLogger(OwlOntologyConsumer.class.getName());
-  
-  BlockingQueue<OWLObject> queue;
 
-  BatchGraph graph;
-  
-  int numProducers;
-  
-  List<MappedProperty> mappedProperties;
-  
-  BatchOwlVisitor visitor;
-  
+  private final BlockingQueue<OWLObject> queue;
+  private final int numProducers;
+  private final GraphOwlVisitor visitor;
   private final AtomicInteger numProducersShutdown;
 
   // TODO: Switch this to assisted inject
   @Inject
-  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, BatchGraph graph, int numProducers,
+  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, GraphInterface graph, int numProducers,
       @Named("owl.mappedProperties") List<MappedProperty> mappedProperties,
       AtomicInteger numProducersShutdown) {
     logger.info("Ontology consumer starting up...");
     this.queue = queue;
-    this.graph = graph;
     this.numProducers = numProducers;
-    this.mappedProperties = mappedProperties;
     this.numProducersShutdown = numProducersShutdown;
-    visitor = new BatchOwlVisitor(null, graph, mappedProperties);
+    visitor = new GraphOwlVisitor(null, graph, mappedProperties);
   }
-  
+
   @Override
   public Void call() {
     try {

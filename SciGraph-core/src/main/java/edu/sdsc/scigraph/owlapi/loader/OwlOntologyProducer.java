@@ -66,7 +66,7 @@ public class OwlOntologyProducer implements Callable<Void>{
             //if ("http://purl.obolibrary.org/obo/upheno/monarch.owl".equals(url)) {
             // TODO: fix this - move to configuration
             ReasonerUtil util = new ReasonerUtil(reasonerFactory, manager, ont);
-            util.reason(true, true);
+            util.reason(false, true);
             //}
             logger.info("Adding axioms for: " + url);
             for (OWLOntology ontology: manager.getOntologies()) {
