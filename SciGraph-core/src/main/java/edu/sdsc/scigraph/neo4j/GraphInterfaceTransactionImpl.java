@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.inject.Inject;
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -25,6 +27,7 @@ public class GraphInterfaceTransactionImpl implements GraphInterface {
   private final RelationshipMap relationshipMap;
   private final GraphDatabaseService graphDb;
 
+  @Inject
   public GraphInterfaceTransactionImpl(GraphDatabaseService graphDb,
       ConcurrentMap<String, Long> idMap, RelationshipMap relationshipMap) {
     this.idMap = idMap;
