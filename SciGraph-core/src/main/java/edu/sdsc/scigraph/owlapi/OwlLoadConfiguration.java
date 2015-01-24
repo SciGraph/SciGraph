@@ -34,6 +34,7 @@ public class OwlLoadConfiguration {
   private List<MappedProperty> mappedProperties = new ArrayList<>();
   private Set<String> indexedNodeProperties = new HashSet<>();
   private Set<String> exactNodeProperties = new HashSet<>();
+  private Map<String, String> neo4jConfig = new HashMap<>();
 
   public OntologyConfiguration getOntologyConfiguration() {
     return ontologyConfiguration;
@@ -61,6 +62,10 @@ public class OwlLoadConfiguration {
 
   public Set<String> getExactNodeProperties() {
     return exactNodeProperties;
+  }
+
+  public Map<String, String> getNeo4jConfig() {
+    return neo4jConfig;
   }
 
   public static class MappedProperty {
