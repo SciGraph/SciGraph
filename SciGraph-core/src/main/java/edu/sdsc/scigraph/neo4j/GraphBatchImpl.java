@@ -289,6 +289,7 @@ public class GraphBatchImpl implements GraphInterface {
   }
 
   void index() {
+    logger.info("Starting indexing");
     for (long id: idMap.values()) {
       Map<String, Object> properties = inserter.getNodeProperties(id);
       Map<String, Object> indexProperties = collectIndexProperties(properties);
@@ -296,6 +297,7 @@ public class GraphBatchImpl implements GraphInterface {
         nodeIndex.add(id, indexProperties);
       }
     }
+    logger.info("Finished indexing");
   }
 
   @Override
