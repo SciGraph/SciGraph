@@ -39,7 +39,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -70,7 +69,7 @@ public class BatchOwlLoader {
   OWLOntologyWalker walker;
 
   @Inject
-  BatchOwlVisitor visitor;
+  GraphOwlVisitor visitor;
 
   @Inject
   PostpostprocessorProvider postprocessorProvider;

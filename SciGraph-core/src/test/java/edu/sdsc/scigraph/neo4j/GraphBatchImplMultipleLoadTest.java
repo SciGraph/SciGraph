@@ -41,7 +41,7 @@ import org.neo4j.tooling.GlobalGraphOperations;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
-public class BatchGraphMultipleLoadTest {
+public class GraphBatchImplMultipleLoadTest {
 
   private static final RelationshipType TYPE = DynamicRelationshipType.withName("type");
 
@@ -62,9 +62,9 @@ public class BatchGraphMultipleLoadTest {
     // FileUtils.deleteDirectory(path.toFile());
   }
 
-  BatchGraph getBatchGraph() {
+  GraphInterface getBatchGraph() {
     BatchInserter inserter = BatchInserters.inserter(path.toString());
-    return new BatchGraph(inserter, "uri", Collections.<String>emptySet(), Collections.<String>emptySet(),
+    return new GraphBatchImpl(inserter, "uri", Collections.<String>emptySet(), Collections.<String>emptySet(),
         new IdMap(maker), new RelationshipMap(maker));
   }
 
@@ -75,14 +75,14 @@ public class BatchGraphMultipleLoadTest {
 
   @Test
   public void testMultipleInserts() {
-    BatchGraph batchGraph = getBatchGraph();
-    long a = batchGraph.getNode("a");
-    long b = batchGraph.getNode("b");
+    GraphInterface batchGraph = getBatchGraph();
+    long a = batchGraph.createNode("a");
+    long b = batchGraph.createNode("b");
     batchGraph.createRelationship(a, b, TYPE);
     batchGraph.shutdown();
     batchGraph = getBatchGraph();
-    a = batchGraph.getNode("a");
-    long c = batchGraph.getNode("c");
+    a = batchGraph.createNode("a");
+    long c = batchGraph.createNode("c");
     batchGraph.createRelationship(a, c, TYPE);
     batchGraph.shutdown();
     GraphDatabaseService graphDb = getGraphDB();

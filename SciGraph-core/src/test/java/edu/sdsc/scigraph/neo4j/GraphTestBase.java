@@ -198,8 +198,11 @@ public abstract class GraphTestBase<T extends GraphInterface> {
     long c = graph.createNode("c");
     graph.createRelationshipsPairwise(newHashSet(a, b, c), TYPE);
     assertThat(graph.getRelationship(a, b, TYPE).isPresent(), is(true));
+    assertThat(graph.getRelationship(b, a, TYPE).isPresent(), is(false));
     assertThat(graph.getRelationship(a, c, TYPE).isPresent(), is(true));
+    assertThat(graph.getRelationship(c, a, TYPE).isPresent(), is(false));
     assertThat(graph.getRelationship(b, c, TYPE).isPresent(), is(true));
+    assertThat(graph.getRelationship(c, b, TYPE).isPresent(), is(false));
   }
 
 }

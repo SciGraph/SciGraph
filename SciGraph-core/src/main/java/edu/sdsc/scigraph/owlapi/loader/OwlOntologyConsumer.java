@@ -27,9 +27,7 @@ import org.semanticweb.owlapi.model.OWLObject;
 
 import com.google.inject.Inject;
 
-import edu.sdsc.scigraph.neo4j.BatchGraph;
 import edu.sdsc.scigraph.neo4j.GraphInterface;
-import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 

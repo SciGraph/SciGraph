@@ -265,7 +265,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLDataPropertyAssertionAxiom axiom) {
     long individual = getOrCreateNode(getUri(axiom.getSubject()));
     OWLDataProperty property = axiom.getProperty().asOWLDataProperty();
-    Set<OWLDataRange> ranges = property.getRanges(ontology);
+    // TODO: fix this Set<OWLDataRange> ranges = property.getRanges(ontology);
     String propertyName = property.getIRI().toString();
     OWLLiteral owlLiteral = axiom.getObject();
     if (owlLiteral.hasLang() && !"en".equals(owlLiteral.getLang())) {
@@ -273,7 +273,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       return null;
     }
     Optional<Object> literal = Optional.absent();
-    if (ranges.isEmpty()) {
+    if (/*ranges.isEmpty()*/true) {
       // If there's no range assume that this property is a string (#28)
       literal = Optional.<Object>of(owlLiteral.getLiteral());
     } else {

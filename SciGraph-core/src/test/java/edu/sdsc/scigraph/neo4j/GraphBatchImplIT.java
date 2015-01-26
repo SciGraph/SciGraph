@@ -46,10 +46,12 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 
-public class BatchGraphTest {
+public class GraphBatchImplIT {
 
+  static RelationshipType TYPE = DynamicRelationshipType.withName("foo");
+  
   Path path;
-  BatchGraph graph;
+  GraphBatchImpl graph;
   GraphDatabaseService graphDb;
   ReadableIndex<Node> nodeIndex;
   long foo;
@@ -59,9 +61,9 @@ public class BatchGraphTest {
     path = Files.createTempDirectory("SciGraph-BatchTest");
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     graph =
-        new BatchGraph(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
+        new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
-    foo = graph.getNode("http://example.org/foo");
+    foo = graph.createNode("http://example.org/foo");
   }
 
   @After
@@ -88,7 +90,7 @@ public class BatchGraphTest {
 
   @Test
   public void testPropertySetting() {
-    graph.addProperty(foo, "prop1", "foo");
+    graph.addNodeProperty(foo, "prop1", "foo");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1:foo");
     assertThat((String)hits.getSingle().getProperty("prop1"), is("foo"));
@@ -96,8 +98,8 @@ public class BatchGraphTest {
 
   @Test
   public void testMultiplePropertySetting() {
-    graph.addProperty(foo, "prop1", "bar");
-    graph.addProperty(foo, "prop1", "baz");
+    graph.addNodeProperty(foo, "prop1", "bar");
+    graph.addNodeProperty(foo, "prop1", "baz");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1:bar");
     assertThat((String[])hits.getSingle().getProperty("prop1"), is(arrayContaining("bar", "baz")));
@@ -105,7 +107,7 @@ public class BatchGraphTest {
 
   @Test
   public void testPropertyIndex() {
-    graph.addProperty(foo, "prop1", "foo");
+    graph.addNodeProperty(foo, "prop1", "foo");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1:foo");
     assertThat(hits.getSingle().getId(), is(foo));
@@ -113,7 +115,7 @@ public class BatchGraphTest {
 
   @Test
   public void testExactPropertyIndex() {
-    graph.addProperty(foo, "prop1", "foo");
+    graph.addNodeProperty(foo, "prop1", "foo");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1" + LuceneUtils.EXACT_SUFFIX + ":foo");
     assertThat(hits.getSingle().getId(), is(foo));
@@ -132,8 +134,8 @@ public class BatchGraphTest {
 
   @Test
   public void testMultiplePropertyValueIndex() {
-    graph.addProperty(foo, "prop1", "foo");
-    graph.addProperty(foo, "prop1", "bar");
+    graph.addNodeProperty(foo, "prop1", "foo");
+    graph.addNodeProperty(foo, "prop1", "bar");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1:foo");
     assertThat(hits.size(), is(1));
@@ -143,8 +145,8 @@ public class BatchGraphTest {
 
   @Test
   public void testMultiplePropertyNameIndex() {
-    graph.addProperty(foo, "prop1", "foo");
-    graph.addProperty(foo, "prop2", "bar");
+    graph.addNodeProperty(foo, "prop1", "foo");
+    graph.addNodeProperty(foo, "prop2", "bar");
     getGraphDB();
     IndexHits<Node> hits = nodeIndex.query("prop1:foo");
     assertThat(hits.size(), is(1));
@@ -170,20 +172,18 @@ public class BatchGraphTest {
 
   @Test
   public void testHasRelationship() {
-    long a = graph.getNode("a");
-    long b = graph.getNode("b");
-    RelationshipType type = DynamicRelationshipType.withName("foo");
-    graph.createRelationship(a, b, type);
-    assertThat(graph.hasRelationship(a, b, type), is(true));
-    assertThat(graph.hasRelationship(b, a, type), is(true));
+    long a = graph.createNode("a");
+    long b = graph.createNode("b");
+    graph.createRelationship(a, b, TYPE);
+    assertThat(graph.getRelationship(a, b, TYPE).isPresent(), is(true));
+    assertThat(graph.getRelationship(b, a, TYPE).isPresent(), is(false));
   }
 
   @Test
   public void testRelationshipProperty() {
-    long a = graph.getNode("a");
-    long b = graph.getNode("b");
-    RelationshipType type = DynamicRelationshipType.withName("foo");
-    long foo = graph.createRelationship(a, b, type);
+    long a = graph.createNode("a");
+    long b = graph.createNode("b");
+    long foo = graph.createRelationship(a, b, TYPE);
     graph.setRelationshipProperty(foo, "foo", "bar");
     getGraphDB();
     Relationship rel = graphDb.getRelationshipById(foo);
@@ -192,15 +192,14 @@ public class BatchGraphTest {
 
   @Test
   public void testCreateRelationshipPairwise() {
-    long a = graph.getNode("a");
-    long b = graph.getNode("b");
-    long c = graph.getNode("c");
-    RelationshipType type = DynamicRelationshipType.withName("foo");
-    graph.createRelationshipPairwise(newHashSet(a, b, c), type);
+    long a = graph.createNode("a");
+    long b = graph.createNode("b");
+    long c = graph.createNode("c");
+    graph.createRelationshipsPairwise(newHashSet(a, b, c), TYPE);
     getGraphDB();
-    assertThat(size(graphDb.getNodeById(a).getRelationships(type)), is(2));
-    assertThat(size(graphDb.getNodeById(b).getRelationships(type)), is(2));
-    assertThat(size(graphDb.getNodeById(c).getRelationships(type)), is(2));
+    assertThat(size(graphDb.getNodeById(a).getRelationships(TYPE)), is(2));
+    assertThat(size(graphDb.getNodeById(b).getRelationships(TYPE)), is(2));
+    assertThat(size(graphDb.getNodeById(c).getRelationships(TYPE)), is(2));
   }
 
 }

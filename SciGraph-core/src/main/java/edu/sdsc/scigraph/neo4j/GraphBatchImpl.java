@@ -138,7 +138,9 @@ public class GraphBatchImpl implements GraphInterface {
           continue;
         } else {
           synchronized (graphLock) {
-            createRelationship(start, end, type);
+            if (!getRelationship(end, start, type).isPresent()) {
+              relationships.add(createRelationship(start, end, type));
+            }
           }
         }
       }

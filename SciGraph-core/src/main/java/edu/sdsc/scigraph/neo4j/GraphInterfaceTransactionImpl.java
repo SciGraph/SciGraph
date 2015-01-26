@@ -96,7 +96,9 @@ public class GraphInterfaceTransactionImpl implements GraphInterface {
         if (start.equals(end)) {
           continue;
         } else {
-          createRelationship(start, end, type);
+          if (!getRelationship(end, start, type).isPresent()) {
+            relationships.add(createRelationship(start, end, type));
+          }
         }
       }
     }

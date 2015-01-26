@@ -57,7 +57,8 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
-import edu.sdsc.scigraph.neo4j.BatchGraph;
+import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
+import edu.sdsc.scigraph.neo4j.GraphInterface;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
@@ -67,7 +68,7 @@ public class BatchOwlVisitorTest {
 
   static GraphDatabaseService graphDb;
   static ReadableIndex<Node> nodeIndex;
-  static BatchGraph batchGraph;
+  static GraphInterface batchGraph;
   static Path path;
   static final String ROOT = "http://example.com/owl/families";
   static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
@@ -77,7 +78,7 @@ public class BatchOwlVisitorTest {
     path = Files.createTempDirectory("SciGraph-BatchTest");
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     DB maker = DBMaker.newMemoryDB().make();
-    batchGraph = new BatchGraph(inserter, CommonProperties.URI, newHashSet(CommonProperties.URI,
+    batchGraph = new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet(CommonProperties.URI,
         NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
         CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX),
@@ -93,7 +94,7 @@ public class BatchOwlVisitorTest {
     when(age.getProperties()).thenReturn(newArrayList(ROOT + "/hasAge"));
     propertyMap.add(age);
 
-    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, propertyMap);
+    GraphOwlVisitor visitor = new GraphOwlVisitor(walker, batchGraph, propertyMap);
     walker.walkStructure(visitor);
 
     batchGraph.shutdown();

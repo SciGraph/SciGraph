@@ -43,10 +43,11 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
 
-import edu.sdsc.scigraph.neo4j.BatchGraph;
+import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
+import edu.sdsc.scigraph.neo4j.GraphInterface;
 import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
-import edu.sdsc.scigraph.owlapi.BatchOwlVisitor;
+import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
@@ -81,7 +82,7 @@ public abstract class OwlTestCase {
 
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     DB maker = DBMaker.newMemoryDB().make();
-    BatchGraph batchGraph = new BatchGraph(inserter, "uri", Collections.<String> emptySet(),
+    GraphInterface batchGraph = new GraphBatchImpl(inserter, "uri", Collections.<String> emptySet(),
         Collections.<String> emptySet(), new IdMap(maker), new RelationshipMap(maker));
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     String uri = Resources.getResource("ontologies/cases/" + getTestName() + ".owl").toURI()
@@ -94,7 +95,7 @@ public abstract class OwlTestCase {
     }
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
-    BatchOwlVisitor visitor = new BatchOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
+    GraphOwlVisitor visitor = new GraphOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
     walker.walkStructure(visitor);
     batchGraph.shutdown();
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());

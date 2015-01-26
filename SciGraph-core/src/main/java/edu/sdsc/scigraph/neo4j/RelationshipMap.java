@@ -35,7 +35,7 @@ public class RelationshipMap extends ForwardingConcurrentMap<BatchEdge, Long> {
 
   private final ConcurrentMap<BatchEdge, Long> delegate;
 
-  protected RelationshipMap() {
+  public RelationshipMap() {
     DB maker = DBMaker.newMemoryDB().make();
     delegate = maker.createHashMap(RelationshipMap.class.getName()).make();
   }
