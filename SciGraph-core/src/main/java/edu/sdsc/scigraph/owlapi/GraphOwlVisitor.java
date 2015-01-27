@@ -114,9 +114,14 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   private long getOrCreateNode(URI uri) {
-    long node = graph.createNode(uri.toString());
-    graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
-    return node;
+    Optional<Long> node = graph.getNode(uri.toString());
+    if (!node.isPresent()) {
+      long nodeId = graph.createNode(uri.toString());
+      graph.setNodeProperty(nodeId, CommonProperties.URI, uri.toString());
+      graph.setNodeProperty(nodeId, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
+      node = Optional.of(nodeId);
+    }
+    return node.get();
   }
 
   @Override
@@ -403,13 +408,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     return null;
   }
 
-  /*
-   * Node addQuantifiedRestriction(OWLQuantifiedObjectRestriction desc) { Node restriction =
-   * graph.getOrCreateNode(getUri(desc)); Node property =
-   * graph.getOrCreateNode(getUri(desc.getProperty())); graph.getOrCreateRelationship(restriction,
-   * property, EdgeType.PROPERTY); Node cls = graph.getOrCreateNode(getUri(desc.getFiller()));
-   * graph.getOrCreateRelationship(restriction, cls, EdgeType.CLASS); return restriction; }
-   */
   long addCardinalityRestriction(OWLObjectCardinalityRestriction desc) {
     long restriction = getOrCreateNode(getUri(desc));
     graph.setNodeProperty(restriction, "cardinality", desc.getCardinality());

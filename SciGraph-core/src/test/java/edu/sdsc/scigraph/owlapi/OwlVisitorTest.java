@@ -19,6 +19,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
@@ -68,7 +70,7 @@ public class OwlVisitorTest extends GraphTestBase {
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     IRI iri = IRI.create(uri);
     manager.loadOntologyFromOntologyDocument(iri);
-    
+
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
     Map<String, String> categoryMap = new HashMap<>();
     try (Transaction tx = graphDb.beginTx()) {
@@ -89,7 +91,7 @@ public class OwlVisitorTest extends GraphTestBase {
         for (OWLObject axiom: ontology.getAxioms()) {
           axiom.accept(visitor);
         }
-        
+
       }  
       //walker.walkStructure(visitor);
       // TODO: add this back visitor.postProcess();
@@ -97,21 +99,21 @@ public class OwlVisitorTest extends GraphTestBase {
     }
   }
 
-  Node getNode(String iri) {
-    long id = graph.getNode(iri).get();
-    return graphDb.getNodeById(id);
-  }
-  
   @Test
-  public void testConcreteClassCreation() {
-    assertThat(graph.getNode(ROOT + "/Mother").isPresent(), is(true));
-    Node mother = getNode(ROOT + "/Mother");
-    assertThat(mother.hasLabel(OwlLabels.OWL_CLASS), is(true));
+  public void classesAreCreated() {
+    long mother = graph.getNode(ROOT + "/Mother").get();
+    assertThat(graph.getLabels(mother), hasItem(OwlLabels.OWL_CLASS));
+    assertThat(graph.getNodeProperty(mother, CommonProperties.URI, String.class).get(), is(ROOT + "/Mother"));
   }
 
   @Test
   public void testAnonymousClassCreation() {
     long complement = graph.getNode("http://ontology.neuinfo.org/anon/-1761792206").get();
+    System.out.println(Iterables.toString(graphDb.getNodeById(complement).getRelationships()));
+    System.out.println(graphDb.getRelationshipById(7).getType());
+    System.out.println(graphDb.getRelationshipById(7).getOtherNode(graphDb.getNodeById(complement)));
+    System.out.println(Iterables.toString(graphDb.getNodeById(17).getPropertyKeys()));
+    System.out.println(graphDb.getNodeById(17).getProperty("uri"));
     assertThat(graph.getNodeProperty(complement, NodeProperties.ANONYMOUS, Boolean.class).get(), is(true));
   }
 
@@ -128,7 +130,7 @@ public class OwlVisitorTest extends GraphTestBase {
     long person = graph.getNode(ROOT + "/Person").get();
     assertThat(
         graph.getNodeProperty(person, "http://www.w3.org/2000/01/rdf-schema#comment", String.class)
-            .get(), is("Represents the set of all people."));
+        .get(), is("Represents the set of all people."));
   }
 
   @Test
@@ -162,7 +164,7 @@ public class OwlVisitorTest extends GraphTestBase {
   public void testSameIndividual() {
     long james = graph.getNode(ROOT + "/James").get();
     long jim = graph.getNode(ROOT + "/Jim").get();
-    assertThat(graph.getRelationship(jim, james, OwlRelationships.OWL_SAME_AS).isPresent(), is(true));
+    assertThat(graph.getRelationship(james, jim, OwlRelationships.OWL_SAME_AS).isPresent(), is(true));
   }
 
   @Test
@@ -175,13 +177,13 @@ public class OwlVisitorTest extends GraphTestBase {
   @Test
   public void testDataPropertyAssertions() {
     long john = graph.getNode(ROOT + "/John").get();
-    assertThat(graph.getNodeProperty(john, ROOT + "hasAge", Integer.class).get(), is(51));
+    assertThat(graph.getNodeProperty(john, ROOT + "/hasAge", String.class).get(), is("51"));
   }
 
   @Test
   public void testMappedDataPropertyAssertion() {
     long john = graph.getNode(ROOT + "/John").get();
-    assertThat(graph.getNodeProperty(john, "isAged", Integer.class).get(), is(51));
+    assertThat(graph.getNodeProperty(john, "isAged", String.class).get(), is("51"));
   }
 
   @Test
@@ -198,8 +200,6 @@ public class OwlVisitorTest extends GraphTestBase {
     long grownup = graph.getNode(OTHER_ROOT + "/Grownup").get();
     assertThat(
         graph.getRelationship(adult, grownup, OwlRelationships.OWL_EQUIVALENT_CLASS).isPresent(), is(true));
-    assertThat(
-        graph.getRelationship(grownup, adult, OwlRelationships.OWL_EQUIVALENT_CLASS).isPresent(), is(true));
   }
 
   @Test
@@ -226,7 +226,7 @@ public class OwlVisitorTest extends GraphTestBase {
   public void testObjectComplementOf() {
     long parent = graph.getNode(ROOT + "/Parent").get();
     long complement = graph.getNode("http://ontology.neuinfo.org/anon/-1761792206").get();
-    assertThat(graph.getLabels(complement), contains(OwlLabels.OWL_COMPLEMENT_OF));
+    assertThat(graph.getLabels(complement), hasItem(OwlLabels.OWL_COMPLEMENT_OF));
     assertThat(graph.getRelationship(complement, parent, OwlRelationships.OPERAND).isPresent(), is(true));
   }
 
@@ -242,10 +242,8 @@ public class OwlVisitorTest extends GraphTestBase {
     long chain = graph.getNode(ROOT + "/hasUncle").get();
     long father = graph.getNode(ROOT + "/hasFather").get();
     long brother = graph.getNode(ROOT + "/hasBrother").get();
-    assertThat(graph.getRelationship(chain, father, OwlRelationships.RDFS_SUB_PROPERTY_OF).isPresent(), is(true));
-    assertThat(graph.getRelationship(chain, brother, OwlRelationships.RDFS_SUB_PROPERTY_OF).isPresent(), is(true));
-    long firstLink = graph.getRelationship(chain, father, OwlRelationships.RDFS_SUB_PROPERTY_OF).get();
-    long secondLink = graph.getRelationship(chain, brother, OwlRelationships.RDFS_SUB_PROPERTY_OF).get();
+    long firstLink = graph.getRelationship(chain, father, OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM).get();
+    long secondLink = graph.getRelationship(chain, brother, OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM).get();
     assertThat(graph.getRelationshipProperty(firstLink, "order", Integer.class).get(), is(0));
     assertThat(graph.getRelationshipProperty(secondLink, "order", Integer.class).get(), is(1));
   }
@@ -266,7 +264,7 @@ public class OwlVisitorTest extends GraphTestBase {
     long hasChild = graph.getNode(ROOT + "/hasChild").get();
     long happyPerson = graph.getNode(ROOT + "/HappyPerson").get();
     assertThat(graph.getRelationship(svf, hasChild, OwlRelationships.PROPERTY).isPresent(), is(true));
-    assertThat(graph.getRelationship(svf, happyPerson, OwlRelationships.CLASS).isPresent(), is(true));
+    assertThat(graph.getRelationship(svf, happyPerson, OwlRelationships.FILLER).isPresent(), is(true));
   }
 
   @Test
@@ -275,7 +273,7 @@ public class OwlVisitorTest extends GraphTestBase {
     long hasChild = graph.getNode(ROOT + "/hasChild").get();
     long happyPerson = graph.getNode(ROOT + "/HappyPerson").get();
     assertThat(graph.getRelationship(avf, hasChild, OwlRelationships.PROPERTY).isPresent(), is(true));
-    assertThat(graph.getRelationship(avf, happyPerson, OwlRelationships.CLASS).isPresent(), is(true));
+    assertThat(graph.getRelationship(avf, happyPerson, OwlRelationships.FILLER).isPresent(), is(true));
   }
 
   /*** http://www.w3.org/TR/owl2-new-features/#F12:_Punning */
