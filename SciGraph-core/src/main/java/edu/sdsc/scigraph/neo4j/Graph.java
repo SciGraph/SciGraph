@@ -22,37 +22,25 @@ import static com.google.common.collect.Sets.newHashSet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.lucene.analysis.StopAnalyzer;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.ReadableIndex;
-import org.neo4j.graphdb.index.UniqueFactory;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class Graph {
@@ -171,22 +159,22 @@ public class Graph {
       concept.setUri((String) n.getProperty(Concept.URI, null));
       concept.setDeprecated(isDeprecated(n));
 
-      for (String definition : getProperties(n, Concept.DEFINITION, String.class)) {
+      for (String definition : GraphUtil.getProperties(n, Concept.DEFINITION, String.class)) {
         concept.addDefinition(definition);
       }
-      for (String abbreviation : getProperties(n, Concept.ABREVIATION, String.class)) {
+      for (String abbreviation : GraphUtil.getProperties(n, Concept.ABREVIATION, String.class)) {
         concept.addAbbreviation(abbreviation);
       }
-      for (String acronym : getProperties(n, Concept.ACRONYM, String.class)) {
+      for (String acronym : GraphUtil.getProperties(n, Concept.ACRONYM, String.class)) {
         concept.addAcronym(acronym);
       }
-      for (String category : getProperties(n, Concept.CATEGORY, String.class)) {
+      for (String category : GraphUtil.getProperties(n, Concept.CATEGORY, String.class)) {
         concept.addCategory(category);
       }
-      for (String label : getProperties(n, Concept.LABEL, String.class)) {
+      for (String label : GraphUtil.getProperties(n, Concept.LABEL, String.class)) {
         concept.addLabel(label);
       }
-      for (String synonym : getProperties(n, Concept.SYNONYM, String.class)) {
+      for (String synonym : GraphUtil.getProperties(n, Concept.SYNONYM, String.class)) {
         concept.addSynonym(synonym);
       }
       for (Label type : n.getLabels()) {
@@ -231,167 +219,6 @@ public class Graph {
       return Optional.of(getOrCreateFramedNode(uri));
     }
     return Optional.absent();
-  }
-
-  public boolean hasRelationship(Node a, Node b, RelationshipType type) {
-    return hasRelationship(a, b, type, Optional.<URI> absent());
-  }
-
-  public boolean hasRelationship(Node a, Node b, RelationshipType type, String uri) {
-    return hasRelationship(a, b, type, Optional.of(getURI(uri)));
-  }
-
-  public boolean hasRelationship(Node a, Node b, RelationshipType type, Optional<URI> uri) {
-    checkNotNull(a);
-    checkNotNull(b);
-    checkNotNull(type);
-    checkNotNull(uri);
-    try (Transaction tx = graphDb.beginTx()) {
-      for (Relationship r : a.getRelationships(type)) {
-        if (uri.isPresent() && r.getEndNode().equals(b)) {
-          if (r.getProperty(CommonProperties.URI).equals(uri.get().toString())) {
-            tx.success();
-            return true;
-          }
-        } else if (!uri.isPresent() && r.getEndNode().equals(b)) {
-          tx.success();
-          return true;
-        }
-      }
-      tx.success();
-      return false;
-    }
-  }
-
-  public Relationship getOrCreateRelationship(Node a, Node b, RelationshipType type) {
-    return getOrCreateRelationship(a, b, type, Optional.<URI> absent());
-  }
-
-  public Relationship getOrCreateRelationship(Node a, Node b, RelationshipType type, String uri) {
-    return getOrCreateRelationship(a, b, type, Optional.of(getURI(uri)));
-  }
-
-  // TODO: Also fix this to use the external indexes from the batch loader
-  public Relationship getOrCreateRelationship(final Node a, final Node b,
-      final RelationshipType type, final Optional<URI> uri) {
-    checkNotNull(a);
-    checkNotNull(b);
-    checkNotNull(type);
-    checkNotNull(uri);
-
-    try (Transaction tx = graphDb.beginTx()) {
-      UniqueFactory<Relationship> factory = new UniqueFactory.UniqueRelationshipFactory(graphDb,
-          "uniqueRelationshipIndex") {
-        @Override
-        protected Relationship create(Map<String, Object> properties) {
-          try (Transaction tx = graphDb.beginTx()) {
-            Relationship r = a.createRelationshipTo(b, type);
-            if (uri.isPresent()) {
-              r.setProperty(CommonProperties.URI, uri.get().toString());
-              r.setProperty(CommonProperties.FRAGMENT, GraphUtil.getFragment(uri.get()));
-            }
-            tx.success();
-            return r;
-          }
-        }
-      };
-
-      Relationship r = factory.getOrCreate("relationship", a.getProperty(CommonProperties.URI)
-          + type.name() + b.getProperty(CommonProperties.URI));
-      tx.success();
-      return r;
-    }
-  }
-
-  public Collection<Relationship> getOrCreateRelationshipPairwise(Collection<Node> nodes,
-      RelationshipType type, Optional<URI> uri) {
-    Set<Relationship> relationships = new HashSet<>();
-    for (Node start : nodes) {
-      for (Node end : nodes) {
-        if (start.equals(end)) {
-          continue;
-        }
-        relationships.add(getOrCreateRelationship(start, end, type, uri));
-      }
-    }
-    return relationships;
-  }
-
-  /***
-   * Set property to single valued value for node or relationship
-   * 
-   * @param container
-   *          node or relationship
-   * @param property
-   * @param value
-   */
-  @Transactional
-  public void setProperty(PropertyContainer container, String property, Object value) {
-    // Ignore whitespace properties and stop words
-    // HACK: This stop word check should be done at OWL load time
-    if (value instanceof String
-        && (CharMatcher.WHITESPACE.matchesAllOf((String) value) || StopAnalyzer.ENGLISH_STOP_WORDS_SET
-            .contains(((String) value).toLowerCase()))) {
-      return;
-    }
-    container.setProperty(property, value);
-    if (EXACT_PROPERTIES.contains(property)) {
-      container.setProperty(property + LuceneUtils.EXACT_SUFFIX, value);
-    }
-  }
-
-  /***
-   * Add value to property for a node or relationship.
-   * <p>
-   * If necessary this will concatenate value to an array.
-   * <ul>
-   * <li>Duplicate values for the same property will be ignored.</li>
-   * <li>Property value insertion order will be preserved.</li>
-   * </ul>
-   * 
-   * @param container
-   *          node or relationship
-   * @param property
-   * @param value
-   */
-  @Transactional
-  public void addProperty(PropertyContainer container, String property, Object value) {
-    // Ignore whitespace properties and stop words
-    // HACK: This stop word check should be done at OWL load time
-    if (value instanceof String
-        && (CharMatcher.WHITESPACE.matchesAllOf((String) value) || StopAnalyzer.ENGLISH_STOP_WORDS_SET
-            .contains(((String) value).toLowerCase()))) {
-      return;
-    }
-    GraphUtil.addProperty(container, property, value);
-    if (EXACT_PROPERTIES.contains(property)) {
-      addProperty(container, property + LuceneUtils.EXACT_SUFFIX, value);
-    }
-  }
-
-  /***
-   * @param container
-   * @param property
-   * @param type
-   * @return the single property value for node with the supplied type
-   */
-  public <T> Optional<T> getProperty(PropertyContainer container, String property, Class<T> type) {
-    return GraphUtil.getProperty(container, property, type);
-  }
-
-  /***
-   * @param container
-   * @param property
-   * @param type
-   * @return a list of properties for node with the supplied type
-   */
-  public <T> List<T> getProperties(PropertyContainer container, String property, Class<T> type) {
-    return GraphUtil.getProperties(container, property, type);
-  }
-
-  public ResourceIterator<Map<String, Object>> runCypherQuery(String query) {
-    ExecutionResult result = engine.execute(query);
-    return result.iterator();
   }
 
 }

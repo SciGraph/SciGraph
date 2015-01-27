@@ -45,6 +45,7 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.*;
 import edu.sdsc.scigraph.util.GraphTestBase;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
@@ -69,10 +70,10 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   Concept buildConcept(String uri, String label, String... categories) {
     Node concept = graph.getOrCreateNode(uri);
-    graph.addProperty(concept, Concept.LABEL, label);
-    graph.setProperty(concept, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
+    GraphUtil.addProperty(concept, Concept.LABEL, label);
+    GraphUtil.addProperty(concept, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
     for (String category : categories) {
-      graph.addProperty(concept, Concept.CATEGORY, category);
+      GraphUtil.addProperty(concept, Concept.CATEGORY, category);
     }
     return graph.getOrCreateFramedNode(concept);
   }
@@ -83,30 +84,30 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     try (Transaction tx = graphDb.beginTx()) {
       hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation");
       hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "foo", "fizz");
-      graph.setProperty(graph.getNode(hippocampus), Concept.ONTOLOGY, "http://foo.org");
-      graph.addProperty(graph.getNode(hippocampus), Concept.SYNONYM, "cornu ammonis");
-      graph.addProperty(graph.getNode(hippocampus), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+      GraphUtil.addProperty(graph.getNode(hippocampus), Concept.ONTOLOGY, "http://foo.org");
+      GraphUtil.addProperty(graph.getNode(hippocampus), Concept.SYNONYM, "cornu ammonis");
+      GraphUtil.addProperty(graph.getNode(hippocampus), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "cornu ammonis");
       hippocampusStructure = buildConcept("http://example.org/#hippocampusStructure",
           "Hippocampus structure", "baz");
-      graph.setProperty(graph.getNode(hippocampusStructure), Concept.ONTOLOGY, "http://baz.org");
+      GraphUtil.addProperty(graph.getNode(hippocampusStructure), Concept.ONTOLOGY, "http://baz.org");
       structureOfHippocampus = buildConcept("http://example.org/#structureOfHippocampus",
           "Structure of hippocampus", "baz");
       cerebellum = buildConcept("http://example.org/#cerebellum", "Cerebellum", "baz", "foo");
-      graph.setProperty(graph.getNode(cerebellum), Concept.ONTOLOGY, "http://baz.org");
+      GraphUtil.addProperty(graph.getNode(cerebellum), Concept.ONTOLOGY, "http://baz.org");
       specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz",
           "foo bar");
       parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
-      graph.addProperty(graph.getNode(parkinsons), Concept.SYNONYM, "the");
+      GraphUtil.addProperty(graph.getNode(parkinsons), Concept.SYNONYM, "the");
       als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis");
-      graph.addProperty(graph.getNode(als), Concept.SYNONYM, "Lou Gehrig's");
-      graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM, "Lou Gehrig's");
+      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "Lou Gehrig's");
-      graph.addProperty(graph.getNode(als), Concept.SYNONYM, "motor neuron disease, bulbar");
-      graph.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM, "motor neuron disease, bulbar");
+      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "motor neuron disease, bulbar");
       deprecated = buildConcept("http://example.org/#cerebellum2", "Cerebellum", "baz", "foo");
-      graph.addProperty(graph.getNode(deprecated), OWLRDFVocabulary.OWL_DEPRECATED.toString(), "true");
+      GraphUtil.addProperty(graph.getNode(deprecated), OWLRDFVocabulary.OWL_DEPRECATED.toString(), "true");
       tx.success();
     }
 

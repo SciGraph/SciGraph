@@ -15,10 +15,7 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.addAll;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.PathExpander;
@@ -40,7 +39,6 @@ import org.neo4j.graphdb.traversal.BranchState;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 
@@ -52,29 +50,30 @@ import edu.sdsc.scigraph.owlapi.OwlRelationships;
  */
 public class HierarchyVisitor {
 
-  private final Graph graph;
+  private final GraphDatabaseService graph;
+  private final ExecutionEngine engine;
   private final RelationshipType edgeType;
-  private final Set<String> rootUris;
+  private final Set<Node> rootNodes;
   private final boolean includeEquivalentClasses;
   private final Callback callback;
 
   public static class Builder {
-    private final Graph graph;
+    private final GraphDatabaseService graph;
     private final RelationshipType edgeType;
     private final Callback callback;
 
-    private Set<String> rootUris = new HashSet<>();
+    private Set<Node> rootNodes = new HashSet<>();
     private boolean includeEquivalentClasses = true;
 
-    public Builder(Graph graph, RelationshipType edgeType, Callback callback) {
+    public Builder(GraphDatabaseService graph, RelationshipType edgeType, Callback callback) {
       this.graph = graph;
       this.edgeType = edgeType;
       this.callback = callback;
     }
 
-    public Builder rootUris(String ... uris) {
-      for (String uri: uris) {
-        rootUris.add(uri); 
+    public Builder rootUris(Node ... nodes) {
+      for (Node node: nodes) {
+        rootNodes.add(node); 
       }
       return this;
     }
@@ -95,31 +94,26 @@ public class HierarchyVisitor {
 
   private HierarchyVisitor(Builder builder) {
     this.graph = builder.graph;
+    engine = new ExecutionEngine(graph);
     this.edgeType = builder.edgeType;
-    this.rootUris = builder.rootUris;
+    this.rootNodes = builder.rootNodes;
     this.includeEquivalentClasses = builder.includeEquivalentClasses;
     this.callback = builder.callback;
   }
 
   Collection<Node> getRootNodes() {
     Set<Node> roots = new HashSet<>();
-    if (!rootUris.isEmpty()) {
-      roots.addAll(newHashSet(transform(rootUris, new Function<String, Node>() {
-        @Override
-        public Node apply(String uri) {
-          checkState(graph.nodeExists(uri), "Failed to find root node " + uri);
-          return graph.getOrCreateNode(uri);
-        }
-      })));
-    } else {
-      ResourceIterator<Map<String,Object>> result = graph.runCypherQuery(
+    if (rootNodes.isEmpty()) {
+      ResourceIterator<Map<String,Object>> result = engine.execute(
           String.format("MATCH (n)<-[:%1$s]-(s) " +
               "WHERE not(()<-[:%1$s]-n) AND not(n:anonymous) " +
-              "RETURN DISTINCT n", edgeType.toString()));
+              "RETURN DISTINCT n", edgeType.toString())).iterator();
       while (result.hasNext()) {
         Map<String, Object> map = result.next();
         roots.add((Node)map.get("n"));
       }
+    } else {
+      roots.addAll(rootNodes);
     }
     return roots;
   }
@@ -129,7 +123,7 @@ public class HierarchyVisitor {
   }
 
   void traverse(Node... roots) {
-    TraversalDescription description = graph.getGraphDb().traversalDescription()
+    TraversalDescription description = graph.traversalDescription()
         .uniqueness(Uniqueness.RELATIONSHIP_PATH)
         .depthFirst()
         .expand(new PathExpander<Void>() {
@@ -151,14 +145,14 @@ public class HierarchyVisitor {
           }
         });
 
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
+    try (Transaction tx = graph.beginTx()) {
       for (Path position: description.traverse(roots)) {
         List<Node> path = new ArrayList<>();
         PeekingIterator<PropertyContainer> iter = Iterators.peekingIterator(position.iterator());
         while (iter.hasNext()) {
           PropertyContainer container = iter.next();
           if (container instanceof Node) {
-            if (graph.getProperty(container, NodeProperties.ANONYMOUS, Boolean.class).or(false)) {
+            if (GraphUtil.getProperty(container, NodeProperties.ANONYMOUS, Boolean.class).or(false)) {
               // Ignore paths with anonymous nodes
             }
             else if (iter.hasNext() &&

@@ -91,6 +91,20 @@ public abstract class GraphTestBase<T extends GraphInterface> {
     assertThat(graph.getNodeProperties(node, "bar", String.class), contains("baz", "faz"));
   }
 
+  @Test(expected = ClassCastException.class)
+  public void nodeProperty_castException() {
+    long node = graph.createNode("foo");
+    graph.setNodeProperty(node, "bar", "baz");
+    graph.getNodeProperty(node, "bar", Integer.class).get();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void multipleNodePropertyTypes_throwsException() {
+    long node = graph.createNode("foo");
+    graph.addNodeProperty(node, "bar", "baz");
+    graph.addNodeProperty(node, "bar", 1);
+  }
+
   @Test
   public void absentRelationships_areAbsent() {
     long start = graph.createNode("foo");
@@ -102,6 +116,7 @@ public abstract class GraphTestBase<T extends GraphInterface> {
   public void relationships_areCreated() {
     long start = graph.createNode("foo");
     long end = graph.createNode("bar");
+    assertThat(graph.getRelationship(start, end, TYPE).isPresent(), is(false));
     long relationship = graph.createRelationship(start, end, TYPE);
     assertThat(graph.getRelationship(start, end, TYPE), is(Optional.of(relationship)));
   }

@@ -20,12 +20,15 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphInterface;
+import edu.sdsc.scigraph.neo4j.GraphInterfaceTransactionImpl;
+import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -33,38 +36,38 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 public class GraphApiCategoryTest extends GraphTestBase {
 
   GraphApi graphApi;
-  Graph graph;
+  GraphInterface graph;
 
   static String BASE_URI = "http://example.org/";
 
   static String uri = BASE_URI + "#fizz";
   static String uri2 = BASE_URI + "#fuzz";
   static String uri3 = BASE_URI + "#fazz";
-  Node a;
-  Node b;
-  Node c;
+  long a;
+  long b;
+  long c;
 
   @Before
   public void addNodes() throws Exception {
-    graph = new Graph(graphDb);
-    a = graph.getOrCreateNode(uri);
-    a.addLabel(OwlLabels.OWL_CLASS);
-    b = graph.getOrCreateNode(uri2);
-    b.addLabel(OwlLabels.OWL_CLASS);
-    c = graph.getOrCreateNode(uri3);
-    c.addLabel(OwlLabels.OWL_CLASS);
-    graph.getOrCreateRelationship(a, b, OwlRelationships.RDFS_SUBCLASS_OF);
+    graph = new GraphInterfaceTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
+    a = graph.createNode(uri);
+    graph.addLabel(a, OwlLabels.OWL_CLASS);
+    b = graph.createNode(uri2);
+    graph.addLabel(b, OwlLabels.OWL_CLASS);
+    c = graph.createNode(uri3);
+    graph.addLabel(c, OwlLabels.OWL_CLASS);
+    graph.createRelationship(a, b, OwlRelationships.RDFS_SUBCLASS_OF);
     this.graphApi = new GraphApi(graphDb);
   }
 
   @Test
   public void testFoundClass() {
-    assertThat(graphApi.classIsInCategory(a, b), is(true));
+    assertThat(graphApi.classIsInCategory(graphDb.getNodeById(a), graphDb.getNodeById(b)), is(true));
   }
 
   @Test
   public void testUnconnectedClass() {
-    assertThat(graphApi.classIsInCategory(b, c), is(false));
+    assertThat(graphApi.classIsInCategory(graphDb.getNodeById(b), graphDb.getNodeById(c)), is(false));
   }
 
   /***
@@ -73,9 +76,10 @@ public class GraphApiCategoryTest extends GraphTestBase {
   @Test
   public void testSelfLoop() {
     assertThat(graphApi.getSelfLoops(), is(empty()));
-    Node t = graph.getOrCreateNode(BASE_URI + "#fozz");
-    Relationship r = graph.getOrCreateRelationship(t, t, OwlRelationships.RDFS_SUBCLASS_OF);
-    assertThat(graphApi.getSelfLoops(), contains(r));
+    long t = graph.createNode(BASE_URI + "#fozz");
+    long r = graph.createRelationship(t, t, OwlRelationships.RDFS_SUBCLASS_OF);
+    Relationship relationship = graphDb.getRelationshipById(r);
+    assertThat(graphApi.getSelfLoops(), contains(relationship));
   }
 
 }
