@@ -48,6 +48,7 @@ import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
+import edu.sdsc.scigraph.neo4j.GraphDump;
 import edu.sdsc.scigraph.neo4j.GraphInterface;
 import edu.sdsc.scigraph.neo4j.GraphInterfaceTransactionImpl;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
@@ -109,12 +110,7 @@ public class OwlVisitorTest extends GraphTestBase {
   @Test
   public void testAnonymousClassCreation() {
     long complement = graph.getNode("http://ontology.neuinfo.org/anon/-1761792206").get();
-    System.out.println(Iterables.toString(graphDb.getNodeById(complement).getRelationships()));
-    System.out.println(graphDb.getRelationshipById(7).getType());
-    System.out.println(graphDb.getRelationshipById(7).getOtherNode(graphDb.getNodeById(complement)));
-    System.out.println(Iterables.toString(graphDb.getNodeById(17).getPropertyKeys()));
-    System.out.println(graphDb.getNodeById(17).getProperty("uri"));
-    assertThat(graph.getNodeProperty(complement, NodeProperties.ANONYMOUS, Boolean.class).get(), is(true));
+    assertThat(graph.getLabels(complement), hasItem(OwlLabels.OWL_ANONYMOUS));
   }
 
   @Test

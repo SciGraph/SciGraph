@@ -197,13 +197,13 @@ public class BatchOwlVisitorTest {
   @Test
   public void testDataPropertyAssertions() {
     Node john = getNode(ROOT + "/John");
-    assertThat((Integer) john.getProperty(ROOT + "/hasAge"), is(51));
+    assertThat((String) john.getProperty(ROOT + "/hasAge"), is("51"));
   }
 
   @Test
   public void testMappedDataPropertyAssertion() {
     Node john = getNode(ROOT + "/John");
-    assertThat((Integer) john.getProperty("isAged"), is(51));
+    assertThat((String) john.getProperty("isAged"), is("51"));
   }
 
   @Test
