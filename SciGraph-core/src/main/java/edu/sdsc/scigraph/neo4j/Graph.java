@@ -18,11 +18,9 @@ package edu.sdsc.scigraph.neo4j;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Sets.newHashSet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -40,15 +38,9 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class Graph {
-
-  public static final String UNIQUE_PROPERTY = CommonProperties.URI;
-
-  private static final Set<String> EXACT_PROPERTIES = newHashSet(NodeProperties.LABEL,
-      Concept.SYNONYM);
 
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;

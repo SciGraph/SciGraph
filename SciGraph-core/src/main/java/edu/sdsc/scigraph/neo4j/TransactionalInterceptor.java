@@ -15,8 +15,6 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.inject.Inject;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -24,30 +22,19 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
-import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4j;
-
 public class TransactionalInterceptor implements MethodInterceptor {
 
   @Inject
   GraphDatabaseService graphDb;
 
-  @Inject
-  @IndicatesNeo4j
-  AtomicBoolean inTransaction;
-
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
-    if (inTransaction.compareAndSet(false, true)) {
-      Object result = null;
-      try (Transaction tx = graphDb.beginTx()) {
-        result = invocation.proceed();
-        tx.success();
-      }
-      inTransaction.set(false);
-      return result;
-    } else {
-      return invocation.proceed();
+    Object result = null;
+    try (Transaction tx = graphDb.beginTx()) {
+      result = invocation.proceed();
+      tx.success();
     }
+    return result;
   }
 
 }

@@ -16,11 +16,8 @@
 package edu.sdsc.scigraph.neo4j;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Before;
@@ -40,7 +37,6 @@ public class TransactionalInterceptorTest {
     tx = mock(Transaction.class);
     graphDb = mock(GraphDatabaseService.class);
     interceptor.graphDb = graphDb;
-    interceptor.inTransaction = new AtomicBoolean();
     when(interceptor.graphDb.beginTx()).thenReturn(tx);
     invocation = mock(MethodInvocation.class);
   }
@@ -50,14 +46,6 @@ public class TransactionalInterceptorTest {
     interceptor.invoke(invocation);
     verify(graphDb).beginTx();
     verify(tx).success();
-  }
-
-  @Test
-  public void testBatchTransaction() throws Throwable {
-    interceptor.inTransaction = new AtomicBoolean(true);
-    interceptor.invoke(invocation);
-    verify(graphDb, never()).beginTx();
-    verify(tx, never()).success();
   }
 
 }
