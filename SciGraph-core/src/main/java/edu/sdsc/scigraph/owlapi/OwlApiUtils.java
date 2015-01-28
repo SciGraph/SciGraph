@@ -15,8 +15,12 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -44,8 +48,6 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 
-import edu.sdsc.scigraph.neo4j.Graph;
-
 public class OwlApiUtils {
 
   private static final Logger logger = Logger.getLogger(OwlApiUtils.class.getName());
@@ -53,6 +55,15 @@ public class OwlApiUtils {
   private static final String ANONYMOUS_NODE_PREFIX = "http://ontology.neuinfo.org/anon/";
 
   private static final UrlValidator validator = UrlValidator.getInstance();
+
+  public static URI getURI(String uri) {
+    try {
+      return new URI(checkNotNull(uri));
+    } catch (URISyntaxException e) {
+      checkState(false, "URIs passed to this method should always be valid: " + uri);
+      return null;
+    }
+  }
 
   /*** 
    * @param literal An OWLLiteral
@@ -84,7 +95,7 @@ public class OwlApiUtils {
 
   public static URI getUri(OWLClassExpression expression) {
     if (expression.isAnonymous()) {
-      return Graph.getURI(ANONYMOUS_NODE_PREFIX + expression.hashCode());
+      return getURI(ANONYMOUS_NODE_PREFIX + expression.hashCode());
     } else {
       return expression.asOWLClass().getIRI().toURI();
     }
@@ -92,7 +103,7 @@ public class OwlApiUtils {
 
   public static URI getUri(OWLObjectPropertyExpression property) {
     if (property.isAnonymous()) {
-      return Graph.getURI(ANONYMOUS_NODE_PREFIX + property.hashCode());
+      return getURI(ANONYMOUS_NODE_PREFIX + property.hashCode());
     } else {
       return property.asOWLObjectProperty().getIRI().toURI();
     }
@@ -102,7 +113,7 @@ public class OwlApiUtils {
     if (individual.isAnonymous()) {
       String id = ((OWLAnonymousIndividual)individual).getID().getID();
       String trueId = Iterables.last(Splitter.on("_:").split(id));
-      return Graph.getURI(ANONYMOUS_NODE_PREFIX + trueId);
+      return getURI(ANONYMOUS_NODE_PREFIX + trueId);
     } else {
       return individual.asOWLNamedIndividual().getIRI().toURI();
     }

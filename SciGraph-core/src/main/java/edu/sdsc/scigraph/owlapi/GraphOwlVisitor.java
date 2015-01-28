@@ -16,14 +16,12 @@
 package edu.sdsc.scigraph.owlapi;
 
 import static com.google.common.collect.Lists.transform;
-import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getTypedLiteralValue;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getUri;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -39,7 +37,6 @@ import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
@@ -74,7 +71,6 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
-import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphInterface;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
@@ -208,7 +204,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         } else if (axiom.getValue() instanceof OWLAnonymousIndividual) {
           object = getOrCreateNode(OwlApiUtils.getUri((OWLAnonymousIndividual)axiom.getValue()));
         }
-        URI uri = Graph.getURI(property);
+        URI uri = OwlApiUtils.getURI(property);
         String fragment = GraphUtil.getFragment(uri);
         long assertion =
             graph.createRelationship(subject, object, DynamicRelationshipType.withName(fragment));
@@ -278,13 +274,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       return null;
     }
     Optional<Object> literal = Optional.absent();
-    if (/*ranges.isEmpty()*/true) {
-      // If there's no range assume that this property is a string (#28)
-      literal = Optional.<Object>of(owlLiteral.getLiteral());
-    } else {
-      // TODO: Check that this conforms to the range constraint 
-      literal = getTypedLiteralValue(owlLiteral);
-    }
+    // If there's no range assume that this property is a string (#28)
+    // Except that without the ontology we can't verify the range...
+    literal = Optional.<Object>of(owlLiteral.getLiteral());
+
     if (literal.isPresent()) {
       graph.setNodeProperty(individual, propertyName, literal.get());
       if (mappedProperties.containsKey(propertyName)) {

@@ -16,11 +16,9 @@
 package edu.sdsc.scigraph.neo4j;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.inject.Inject;
 
@@ -38,8 +36,10 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
+@Deprecated
 public class Graph {
 
   private final GraphDatabaseService graphDb;
@@ -57,16 +57,6 @@ public class Graph {
     graphDb.shutdown();
   }
 
-  public static URI getURI(String uri) {
-    checkNotNull(uri);
-    try {
-      return new URI(uri);
-    } catch (URISyntaxException e) {
-      checkState(false, "URIs passed to this method should always be valid: " + uri);
-      return null;
-    }
-  }
-
   public GraphDatabaseService getGraphDb() {
     return graphDb;
   }
@@ -80,7 +70,7 @@ public class Graph {
   }
 
   public boolean nodeExists(String uri) {
-    return nodeExists(getURI(uri));
+    return nodeExists(OwlApiUtils.getURI(uri));
   }
 
   @Transactional
@@ -94,7 +84,7 @@ public class Graph {
   }
 
   public Node getOrCreateNode(String uri) {
-    return getOrCreateNode(getURI(uri));
+    return getOrCreateNode(OwlApiUtils.getURI(uri));
   }
 
   //TODO: This makes the class not threadsafe. Ideally this should be coordinated with 
@@ -114,7 +104,7 @@ public class Graph {
   }
 
   public Optional<Node> getNode(String uri) {
-    return getNode(getURI(uri));
+    return getNode(OwlApiUtils.getURI(uri));
   }
 
   public Optional<Node> getNode(final URI uri) {
