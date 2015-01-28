@@ -44,6 +44,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -62,7 +63,6 @@ import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
-import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTO;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
@@ -77,13 +77,13 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 public class GraphService extends BaseResource {
 
   private final Vocabulary vocabulary;
-  private final Graph graph;
+  private final GraphDatabaseService graphDb;
   private final GraphApi api;
 
   @Inject
-  GraphService(Vocabulary vocabulary, Graph graph, GraphApi api) {
+  GraphService(Vocabulary vocabulary, GraphDatabaseService graphDb, GraphApi api) {
     this.vocabulary = vocabulary;
-    this.graph = graph;
+    this.graphDb = graphDb;
     this.api = api;
   }
 
@@ -133,11 +133,11 @@ public class GraphService extends BaseResource {
       types.add(new DirectedRelationshipType(type, dir));
     }
     TinkerGraph tg = new TinkerGraph();
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
+    try (Transaction tx = graphDb.beginTx()) {
       Iterable<Node> nodes = transform(roots, new Function<Concept, Node>() {
         @Override
         public Node apply(Concept concept) {
-          return graph.getGraphDb().getNodeById(concept.getId());
+          return graphDb.getNodeById(concept.getId());
         }
       });
       Optional<Predicate<Node>> nodePredicate = Optional.absent();
@@ -207,14 +207,15 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
     List<String> relationships = new ArrayList<>();
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      relationships = newArrayList(transform(GlobalGraphOperations.at(graph.getGraphDb()).getAllRelationshipTypes(),
+    try (Transaction tx = graphDb.beginTx()) {
+      relationships = newArrayList(transform(GlobalGraphOperations.at(graphDb).getAllRelationshipTypes(),
           new Function<RelationshipType, String>() {
         @Override
         public String apply(RelationshipType relationshipType) {
           return relationshipType.name();
         }
       }));
+      tx.success();
     }
     sort(relationships);
     return JaxRsUtil.wrapJsonp(request, new GenericEntity<List<String>>(relationships) {}, callback);
