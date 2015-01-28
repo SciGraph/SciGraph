@@ -15,6 +15,8 @@
  */
 package edu.sdsc.scigraph.util;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -23,18 +25,31 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import edu.sdsc.scigraph.neo4j.GraphInterface;
+import edu.sdsc.scigraph.neo4j.GraphInterfaceTransactionImpl;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
+import edu.sdsc.scigraph.neo4j.RelationshipMap;
+import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 
 public class GraphTestBase {
 
   protected GraphDatabaseService graphDb;
+  protected GraphInterface graph;
   Transaction tx;
   protected static boolean cleanup = true;
 
+  protected Node createNode(String uri) {
+    long node = graph.createNode(uri);
+    graph.setNodeProperty(node, "uri", uri);
+    graph.setNodeProperty(node, "fragment", OwlApiUtils.getURI(uri).getFragment());
+    return graphDb.getNodeById(node);
+  }
+  
   @Before
   public void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
     Neo4jModule.setupAutoIndexing(graphDb);
+    graph = new GraphInterfaceTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
   }
 
   @Before

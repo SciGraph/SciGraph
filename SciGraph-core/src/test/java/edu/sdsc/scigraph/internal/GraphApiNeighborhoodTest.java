@@ -51,12 +51,6 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
   Optional<Predicate<Node>> absent = Optional.absent();
   GraphInterface graph;
 
-  Node createNode(String uri) {
-    long node = graph.createNode(uri);
-    graph.setNodeProperty(node, "uri", uri);
-    return graphDb.getNodeById(node);
-  }
-
   @Before
   public void addNodes() throws Exception {
     graph = new GraphInterfaceTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());

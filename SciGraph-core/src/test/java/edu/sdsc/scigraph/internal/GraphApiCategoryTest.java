@@ -36,7 +36,6 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 public class GraphApiCategoryTest extends GraphTestBase {
 
   GraphApi graphApi;
-  GraphInterface graph;
 
   static String BASE_URI = "http://example.org/";
 
@@ -49,7 +48,6 @@ public class GraphApiCategoryTest extends GraphTestBase {
 
   @Before
   public void addNodes() throws Exception {
-    graph = new GraphInterfaceTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
     a = graph.createNode(uri);
     graph.addLabel(a, OwlLabels.OWL_CLASS);
     b = graph.createNode(uri2);

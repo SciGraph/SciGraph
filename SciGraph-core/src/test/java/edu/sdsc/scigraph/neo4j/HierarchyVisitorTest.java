@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.neo4j;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.transform;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItems;
@@ -24,23 +23,18 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 
-import com.google.common.base.Function;
-
-import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.HierarchyVisitor.Callback;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class HierarchyVisitorTest extends GraphTestBase {
 
-  GraphInterface graph;
-  long a, b, c, d, e, f, g, h, i, j;
+  Node a, b, c, d, e, f, g, h, i, j;
 
   Callback emptyCallback = new Callback() {
     @Override
@@ -49,25 +43,16 @@ public class HierarchyVisitorTest extends GraphTestBase {
 
   static class CollectingCallback implements Callback {
 
-    List<List<String>> fragments = new ArrayList<>();
+    List<List<Node>> nodes = new ArrayList<>();
 
     @Override
     public void processPath(List<Node> path) {
-      fragments.add(transform(path, new Function<Node, String>() {
-        @Override
-        public String apply(Node input) {
-          return (String)input.getProperty(CommonProperties.FRAGMENT);
-        }
-      }));
+      nodes.add(path);
     }
 
   };
-
-  long createNode(String id) {
-    long node = graph.createNode("http://example.org/" + id);
-    graph.setNodeProperty(node, CommonProperties.FRAGMENT, id);
-    return node;
-  }
+  
+  CollectingCallback callback = new CollectingCallback();
 
   /**********
    *   a   d l    g
@@ -78,61 +63,60 @@ public class HierarchyVisitorTest extends GraphTestBase {
    **********/
   @Before
   public void createNodes() {
-    graph = new GraphInterfaceTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
-    a = createNode("a");
-    b = createNode("b");
-    c = createNode("c");
-    d = createNode("d");
-    e = createNode("e");
-    f = createNode("f");
-    g = createNode("g");
-    h = createNode("h");
-    i = createNode("i");
-    j = createNode("j");
-    graph.createRelationship(b, a, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(c, a, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(e, d, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(f, e, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(e, c, OwlRelationships.OWL_EQUIVALENT_CLASS);
+    a = graphDb.createNode();
+    b = graphDb.createNode();
+    c = graphDb.createNode();
+    d = graphDb.createNode();
+    e = graphDb.createNode();
+    f = graphDb.createNode();
+    g = graphDb.createNode();
+    h = graphDb.createNode();
+    i = graphDb.createNode();
+    j = graphDb.createNode();
+    b.createRelationshipTo(a, OwlRelationships.RDFS_SUBCLASS_OF);
+    c.createRelationshipTo(a, OwlRelationships.RDFS_SUBCLASS_OF);
+    e.createRelationshipTo(d, OwlRelationships.RDFS_SUBCLASS_OF);
+    f.createRelationshipTo(e, OwlRelationships.RDFS_SUBCLASS_OF);
+    e.createRelationshipTo(c, OwlRelationships.OWL_EQUIVALENT_CLASS);
 
-    graph.createRelationship(h, g, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(i, g, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(j, h, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(j, i, OwlRelationships.RDFS_SUBCLASS_OF);
+    h.createRelationshipTo(g, OwlRelationships.RDFS_SUBCLASS_OF);
+    i.createRelationshipTo(g, OwlRelationships.RDFS_SUBCLASS_OF);
+    j.createRelationshipTo(h, OwlRelationships.RDFS_SUBCLASS_OF);
+    j.createRelationshipTo(i, OwlRelationships.RDFS_SUBCLASS_OF);
   }
 
   @Test
   public void testGetRootNodesWithProvidedRoot() {
-    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graphDb, OwlRelationships.RDFS_SUBCLASS_OF, emptyCallback).rootUris(graphDb.getNodeById(a)).build();
-    assertThat(visitor.getRootNodes(), contains(graphDb.getNodeById(a)));
+    HierarchyVisitor visitor = new HierarchyVisitor.Builder(graphDb, OwlRelationships.RDFS_SUBCLASS_OF, emptyCallback).rootUris(a).build();
+    assertThat(visitor.getRootNodes(), contains(a));
   }
 
   @Test
   public void testGetRootNodesWithProvidedRoots() {
     HierarchyVisitor visitor = new HierarchyVisitor.Builder(graphDb, OwlRelationships.RDFS_SUBCLASS_OF, emptyCallback).
-        rootUris(graphDb.getNodeById(a), graphDb.getNodeById(d)).build();
-    assertThat(visitor.getRootNodes(), hasItems(graphDb.getNodeById(a), graphDb.getNodeById(d)));
+        rootUris(a, d).build();
+    assertThat(visitor.getRootNodes(), hasItems(a, d));
   }
 
   @Test
   public void testGetRootNodesWithoutProvidedRoots() {
     HierarchyVisitor visitor = new HierarchyVisitor.Builder(graphDb, OwlRelationships.RDFS_SUBCLASS_OF, emptyCallback).build();
-    assertThat(visitor.getRootNodes(), hasItems(graphDb.getNodeById(a), graphDb.getNodeById(d)));
+    assertThat(visitor.getRootNodes(), hasItems(a, d));
   }
 
-  List<List<String>> getExpectedNonEquivalentFragments() {
-    List<List<String>> expected= new ArrayList<>();
-    expected.add(newArrayList("a"));
-    expected.add(newArrayList("a", "b"));
-    expected.add(newArrayList("a", "c"));
-    expected.add(newArrayList("d"));
-    expected.add(newArrayList("d", "e"));
-    expected.add(newArrayList("d", "e", "f"));
-    expected.add(newArrayList("g"));
-    expected.add(newArrayList("g", "h"));
-    expected.add(newArrayList("g", "i"));
-    expected.add(newArrayList("g", "h", "j"));
-    expected.add(newArrayList("g", "i", "j"));
+  List<List<Node>> getExpectedNonEquivalentFragments() {
+    List<List<Node>> expected= new ArrayList<>();
+    expected.add(newArrayList(a));
+    expected.add(newArrayList(a, b));
+    expected.add(newArrayList(a, c));
+    expected.add(newArrayList(d));
+    expected.add(newArrayList(d, e));
+    expected.add(newArrayList(d, e, f));
+    expected.add(newArrayList(g));
+    expected.add(newArrayList(g, h));
+    expected.add(newArrayList(g, i));
+    expected.add(newArrayList(g, h, j));
+    expected.add(newArrayList(g, i, j));
     return expected;
   }
 
@@ -141,7 +125,7 @@ public class HierarchyVisitorTest extends GraphTestBase {
     CollectingCallback callback = new CollectingCallback();
     HierarchyVisitor visitor = new HierarchyVisitor.Builder(graphDb, OwlRelationships.RDFS_SUBCLASS_OF, callback).includeEquivalentClasses(false).build();
     visitor.traverse();
-    assertThat(callback.fragments, containsInAnyOrder(getExpectedNonEquivalentFragments().toArray()));
+    assertThat(callback.nodes, containsInAnyOrder(getExpectedNonEquivalentFragments().toArray()));
   }
 
   @Test
@@ -149,35 +133,34 @@ public class HierarchyVisitorTest extends GraphTestBase {
     CollectingCallback callback = new CollectingCallback();
     HierarchyVisitor visitor = new HierarchyVisitor.Builder(graphDb, OwlRelationships.RDFS_SUBCLASS_OF, callback).includeEquivalentClasses(true).build();
     visitor.traverse();
-    List<List<String>> expected = getExpectedNonEquivalentFragments();
-    expected.add(newArrayList("a", "e"));
-    expected.add(newArrayList("a", "e", "f"));
-    expected.add(newArrayList("d", "c"));
-    assertThat(callback.fragments, containsInAnyOrder(expected.toArray()));
+    List<List<Node>> expected = getExpectedNonEquivalentFragments();
+    expected.add(newArrayList(a, e));
+    expected.add(newArrayList(a, e, f));
+    expected.add(newArrayList(d, c));
+    assertThat(callback.nodes, containsInAnyOrder(expected.toArray()));
   }
 
   @Test
   public void testMultipleEquivalences() {
-    long l = createNode("l");
-    long k = createNode("k");
-    graph.createRelationship(k, l, OwlRelationships.RDFS_SUBCLASS_OF);
-    graph.createRelationship(e, k, OwlRelationships.OWL_EQUIVALENT_CLASS);
-    graph.createRelationship(c, k, OwlRelationships.OWL_EQUIVALENT_CLASS);
-    CollectingCallback callback = new CollectingCallback();
+    Node l = graphDb.createNode();
+    Node k = graphDb.createNode();
+    k.createRelationshipTo(l, OwlRelationships.RDFS_SUBCLASS_OF);
+    e.createRelationshipTo(k, OwlRelationships.OWL_EQUIVALENT_CLASS);
+    c.createRelationshipTo(k, OwlRelationships.OWL_EQUIVALENT_CLASS);
     HierarchyVisitor visitor = new HierarchyVisitor.Builder(graphDb, OwlRelationships.RDFS_SUBCLASS_OF, callback).includeEquivalentClasses(true).build();
     visitor.traverse();
-    List<List<String>> expected = getExpectedNonEquivalentFragments();
-    expected.add(newArrayList("a", "e"));
-    expected.add(newArrayList("a", "k"));
-    expected.add(newArrayList("a", "e", "f"));
-    expected.add(newArrayList("d", "c"));
-    expected.add(newArrayList("d", "k"));
-    expected.add(newArrayList("l"));
-    expected.add(newArrayList("l", "k"));
-    expected.add(newArrayList("l", "e"));
-    expected.add(newArrayList("l", "e", "f"));
-    expected.add(newArrayList("l", "c"));
-    assertThat(callback.fragments, containsInAnyOrder(expected.toArray()));
+    List<List<Node>> expected = getExpectedNonEquivalentFragments();
+    expected.add(newArrayList(a, e));
+    expected.add(newArrayList(a, k));
+    expected.add(newArrayList(a, e, f));
+    expected.add(newArrayList(d, c));
+    expected.add(newArrayList(d, k));
+    expected.add(newArrayList(l));
+    expected.add(newArrayList(l, k));
+    expected.add(newArrayList(l, e));
+    expected.add(newArrayList(l, e, f));
+    expected.add(newArrayList(l, c));
+    assertThat(callback.nodes, containsInAnyOrder(expected.toArray()));
   }
 
 }
