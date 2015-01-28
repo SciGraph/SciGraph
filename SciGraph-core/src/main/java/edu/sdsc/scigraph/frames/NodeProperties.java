@@ -22,11 +22,9 @@ import java.util.Set;
 public class NodeProperties extends CommonProperties {
 
   public static final String LABEL = "label";
-  public static final String INFERRED = "inferred";
   public static final String ANONYMOUS = "anonymous";
 
   private Set<String> labels = new HashSet<>();
-  private boolean inferred;
   private boolean anonymous;
 
   public void addLabel(String label) {
@@ -35,14 +33,6 @@ public class NodeProperties extends CommonProperties {
 
   public Collection<String> getLabels() {
     return labels;
-  }
-
-  public void setInferred(boolean inferred) {
-    this.inferred = inferred;
-  }
-
-  public boolean isInferred() {
-    return inferred;
   }
 
   public void setAnonymous(boolean anonymous) {

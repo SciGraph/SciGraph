@@ -27,14 +27,12 @@ public class CommonProperties {
 
   public static final String URI = "uri";
   public static final String FRAGMENT = "fragment";
-  public static final String NEGATED = "negated";
   public static final String CONVENIENCE = "convenience";
   public static final String OWL_TYPE = "owlType";
 
   private long id;
   private String uri;
   private String fragment;
-  private boolean negated;
   private Set<String> types = new HashSet<>();
 
   public void setId(long id) {
@@ -59,14 +57,6 @@ public class CommonProperties {
 
   public String getFragment() {
     return fragment;
-  }
-
-  public void setNegated(boolean negated) {
-    this.negated = negated;
-  }
-
-  public boolean isNegated() {
-    return negated;
   }
 
   public void addType(String type) {

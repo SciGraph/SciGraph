@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -43,12 +42,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.neo4j.GraphDump;
 import edu.sdsc.scigraph.neo4j.GraphInterface;
 import edu.sdsc.scigraph.neo4j.GraphInterfaceTransactionImpl;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;

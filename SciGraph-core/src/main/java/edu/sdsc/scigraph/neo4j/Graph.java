@@ -139,8 +139,6 @@ public class Graph {
     try (Transaction tx = graphDb.beginTx()) {
       Node n = graphDb.getNodeById(id);
       concept.setAnonymous((boolean) n.getProperty(Concept.ANONYMOUS, false));
-      concept.setInferred((boolean) n.getProperty(Concept.INFERRED, false));
-      concept.setNegated((boolean) n.getProperty(Concept.NEGATED, false));
 
       concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
       concept.setId(id);
