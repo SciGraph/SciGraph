@@ -28,9 +28,6 @@ public class CommonProperties {
   public static final String URI = "uri";
   public static final String FRAGMENT = "fragment";
   public static final String NEGATED = "negated";
-  public static final String PARENT_ONTOLOGY = "parentOntology";
-  public static final String ONTOLOGY = "ontology";
-  public static final String ONTOLOGY_VERSION = "ontologyVersion";
   public static final String CONVENIENCE = "convenience";
   public static final String OWL_TYPE = "owlType";
 
@@ -38,9 +35,6 @@ public class CommonProperties {
   private String uri;
   private String fragment;
   private boolean negated;
-  private String parentOntology;
-  private String ontology;
-  private String ontologyVersion;
   private Set<String> types = new HashSet<>();
 
   public void setId(long id) {
@@ -73,30 +67,6 @@ public class CommonProperties {
 
   public boolean isNegated() {
     return negated;
-  }
-
-  public void setParentOntology(String ontology) {
-    this.parentOntology = ontology;
-  }
-
-  public String getParentOntology() {
-    return parentOntology;
-  }
-  
-  public void setOntology(String ontology) {
-    this.ontology = ontology;
-  }
-
-  public String getOntology() {
-    return ontology;
-  }
-
-  public void setOntologyVersion(String version) {
-    this.ontologyVersion = version;
-  }
-
-  public String getOntologyVersion() {
-    return ontologyVersion;
   }
 
   public void addType(String type) {

@@ -84,17 +84,14 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     try (Transaction tx = graphDb.beginTx()) {
       hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation");
       hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "foo", "fizz");
-      GraphUtil.addProperty(graph.getNode(hippocampus), Concept.ONTOLOGY, "http://foo.org");
       GraphUtil.addProperty(graph.getNode(hippocampus), Concept.SYNONYM, "cornu ammonis");
       GraphUtil.addProperty(graph.getNode(hippocampus), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "cornu ammonis");
       hippocampusStructure = buildConcept("http://example.org/#hippocampusStructure",
           "Hippocampus structure", "baz");
-      GraphUtil.addProperty(graph.getNode(hippocampusStructure), Concept.ONTOLOGY, "http://baz.org");
       structureOfHippocampus = buildConcept("http://example.org/#structureOfHippocampus",
           "Structure of hippocampus", "baz");
       cerebellum = buildConcept("http://example.org/#cerebellum", "Cerebellum", "baz", "foo");
-      GraphUtil.addProperty(graph.getNode(cerebellum), Concept.ONTOLOGY, "http://baz.org");
       specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz",
           "foo bar");
       parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");

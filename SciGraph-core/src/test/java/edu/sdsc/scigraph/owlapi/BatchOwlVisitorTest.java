@@ -80,7 +80,7 @@ public class BatchOwlVisitorTest {
     DB maker = DBMaker.newMemoryDB().make();
     batchGraph = new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet(CommonProperties.URI,
         NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
-        CommonProperties.ONTOLOGY, CommonProperties.FRAGMENT,
+        CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX),
         newHashSet(""), new IdMap(maker), new RelationshipMap(maker));
     String uri = Resources.getResource("ontologies/family.owl").toURI().toString();

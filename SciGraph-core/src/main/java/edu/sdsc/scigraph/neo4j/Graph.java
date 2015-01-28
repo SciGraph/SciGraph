@@ -144,9 +144,6 @@ public class Graph {
 
       concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
       concept.setId(id);
-      concept.setOntology((String) n.getProperty(Concept.ONTOLOGY, null));
-      concept.setOntologyVersion((String) n.getProperty(Concept.ONTOLOGY_VERSION, null));
-      concept.setParentOntology((String) n.getProperty(Concept.PARENT_ONTOLOGY, null));
       concept.setPreferredLabel((String) n.getProperty(Concept.PREFERRED_LABEL, null));
       concept.setUri((String) n.getProperty(Concept.URI, null));
       concept.setDeprecated(isDeprecated(n));
