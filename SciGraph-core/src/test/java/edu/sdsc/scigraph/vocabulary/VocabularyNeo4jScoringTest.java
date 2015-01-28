@@ -29,6 +29,7 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.NodeTransformer;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.util.GraphTestBase;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
@@ -61,7 +62,7 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
     cell = buildConcept("http://example.org/#birnlex5", "Cell", "BL:5");
     onCell = buildConcept("http://example.org/#birnlex6", "Something on cell", "HP:0008");
     onCell.addSynonym("on cell");
-    vocabulary = new VocabularyNeo4jImpl(graph, null, mock(CurieUtil.class));
+    vocabulary = new VocabularyNeo4jImpl(graphDb, null, mock(CurieUtil.class), new NodeTransformer());
   }
 
   // TODO: fix this

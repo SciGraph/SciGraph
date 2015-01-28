@@ -142,7 +142,6 @@ public class Graph {
 
       concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
       concept.setId(id);
-      concept.setPreferredLabel((String) n.getProperty(Concept.PREFERRED_LABEL, null));
       concept.setUri((String) n.getProperty(Concept.URI, null));
       concept.setDeprecated(isDeprecated(n));
 
@@ -174,8 +173,6 @@ public class Graph {
       }
 
       tx.success();
-
-
     }
 
     return concept;

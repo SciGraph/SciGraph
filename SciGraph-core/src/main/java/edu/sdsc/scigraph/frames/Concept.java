@@ -23,7 +23,6 @@ import com.google.common.collect.Iterables;
 
 public class Concept extends NodeProperties {
 
-  public static final String PREFERRED_LABEL = "preferedLabel";
   public static final String SYNONYM = "synonym";
   public static final String ACRONYM = "acronym";
   public static final String ABREVIATION = "abbreviation";
@@ -31,7 +30,6 @@ public class Concept extends NodeProperties {
   public static final String CATEGORY = "category";
 
   private boolean deprecated;
-  private String preferredLabel;
   private Set<String> definitions = new HashSet<>();
   private Set<String> categories = new HashSet<>();
   private Set<String> synonyms = new HashSet<>();
@@ -46,14 +44,6 @@ public class Concept extends NodeProperties {
 
   public void setDeprecated(boolean deprecated) {
     this.deprecated = deprecated;
-  }
-
-  public void setPreferredLabel(String preferredLabel) {
-    this.preferredLabel = preferredLabel;
-  }
-
-  public String getPreferredLabel() {
-    return preferredLabel;
   }
 
   public Collection<String> getSynonyms() {

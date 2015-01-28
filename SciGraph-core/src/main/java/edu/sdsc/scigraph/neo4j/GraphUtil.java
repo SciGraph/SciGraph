@@ -23,11 +23,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.analysis.StopAnalyzer;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
@@ -61,7 +63,7 @@ public class GraphUtil {
       container.setProperty(property, value);
     }
   }
-  
+
   public static Object getNewPropertyValue(Object originalValue, Object newValue) {
     Class<?> clazz = checkNotNull(newValue).getClass();
     if (null != originalValue && originalValue.getClass().isArray()) {
@@ -124,7 +126,7 @@ public class GraphUtil {
     }
     return list;
   }
-  
+
   static public <T> List<T> getPropertiesAsList(Object value, Class<T> type) {
     List<T> list = new ArrayList<>();
     if (value.getClass().isArray()) {
@@ -173,6 +175,15 @@ public class GraphUtil {
     } else {
       return getLastPathFragment(uri);
     }
+  }
+
+  static public boolean ignoreProperty(Object value) {
+    if (value instanceof String
+        && (CharMatcher.WHITESPACE.matchesAllOf((String) value)
+            || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(((String) value).toLowerCase()))) {
+      return true;
+    } 
+    return false;
   }
 
 }

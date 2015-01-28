@@ -46,6 +46,7 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.neo4j.NodeTransformer;
 import edu.sdsc.scigraph.owlapi.*;
 import edu.sdsc.scigraph.util.GraphTestBase;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
@@ -114,7 +115,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     when(curieUtil.getAllExpansions("S")).thenReturn(newHashSet("http://example.org/#s"));
     when(curieUtil.getFullUri(anyString())).thenReturn(Collections.<String>emptySet());
     when(curieUtil.getFullUri("HP:0008")).thenReturn(newHashSet("http://example.org/#hippocampus"));
-    vocabulary = new VocabularyNeo4jImpl(graph, null, curieUtil);
+    vocabulary = new VocabularyNeo4jImpl(graphDb, null, curieUtil, new NodeTransformer());
   }
 
   @Test

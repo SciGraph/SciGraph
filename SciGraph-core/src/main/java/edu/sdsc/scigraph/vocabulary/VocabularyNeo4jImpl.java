@@ -54,7 +54,9 @@ import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexHits;
@@ -64,28 +66,33 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterables;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyQueryAnalyzer;
-import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.NodeTransformer;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
 
 public class VocabularyNeo4jImpl implements Vocabulary {
 
   private static final Logger logger = Logger.getLogger(VocabularyNeo4jImpl.class.getName());
 
-  private final Graph graph;
+  private final GraphDatabaseService graph;
+  private final ExecutionEngine engine;
   private final SpellChecker spellChecker;
   private final CurieUtil curieUtil;
-
+  private final NodeTransformer transformer;
+  
   @Inject
-  public VocabularyNeo4jImpl(Graph graph, @Nullable @Named("neo4j.location") String neo4jLocation,
-      CurieUtil curieUtil) throws IOException {
+  public VocabularyNeo4jImpl(GraphDatabaseService graph, @Nullable @Named("neo4j.location") String neo4jLocation,
+      CurieUtil curieUtil, NodeTransformer transformer) throws IOException {
     this.graph = graph;
+    engine = new ExecutionEngine(graph);
     this.curieUtil = curieUtil;
+    this.transformer = transformer;
     if (null != neo4jLocation) {
       Directory indexDirectory =
           FSDirectory.open(new File(new File(neo4jLocation), "index/lucene/node/node_auto_index"));
@@ -139,8 +146,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   List<Concept> limitHits(IndexHits<Node> hits, Query query) {
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      Iterable<Concept> concepts = graph.getOrCreateFramedNodes(hits);
+    try (Transaction tx = graph.beginTx()) {
+      Iterable<Concept> concepts = Iterables.transform(hits, transformer);
       if (!query.isIncludeDeprecated()) {
         concepts = filter(concepts, new Predicate<Concept>() {
           @Override
@@ -157,7 +164,15 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
   @Override
   public Optional<Concept> getConceptFromUri(String uri) {
-    return graph.getFramedNode(uri);
+    try (Transaction tx = graph.beginTx()) {
+      Node node = graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.URI, uri.toString()).getSingle();
+      tx.success();
+      Concept concept = null;
+      if (null != node) {
+        concept = transformer.apply(node);
+      }
+      return Optional.fromNullable(concept);
+    }
   }
 
   @Override
@@ -173,8 +188,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
           String.format(" %s:%s", CommonProperties.URI, QueryParser.escape(fullUri));
     }
     IndexHits<Node> hits;
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      hits = graph.getNodeAutoIndex().query(parser.parse(queryString));
+    try (Transaction tx = graph.beginTx()) {
+      hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(parser.parse(queryString));
       tx.success();
       return limitHits(hits, query);
     } catch (ParseException e) {
@@ -211,8 +226,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }
     addCommonConstraints(finalQuery, query);
     IndexHits<Node> hits = null;
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      hits = graph.getNodeAutoIndex().query(finalQuery);
+    try (Transaction tx = graph.beginTx()) {
+      hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
     }
     return limitHits(hits, query);
@@ -237,8 +252,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }
     addCommonConstraints(finalQuery, query);
     IndexHits<Node> hits = null;
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      hits = graph.getNodeAutoIndex().query(finalQuery);
+    try (Transaction tx = graph.beginTx()) {
+      hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
     }
     return limitHits(hits, query);
@@ -263,8 +278,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }
     addCommonConstraints(finalQuery, query);
     logger.finest(finalQuery.toString());
-    try (Transaction tx = graph.getGraphDb().beginTx()) {
-      IndexHits<Node> hits = graph.getNodeAutoIndex().query(finalQuery);
+    try (Transaction tx = graph.beginTx()) {
+      IndexHits<Node> hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
       return limitHits(hits, query);
     }
@@ -276,7 +291,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       @Override
       public Set<String> get() {
         ExecutionResult result =
-            graph.getExecutionEngine().execute(
+            engine.execute(
                 "START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
         Set<String> categories = new HashSet<>();
         while (result.iterator().hasNext()) {
