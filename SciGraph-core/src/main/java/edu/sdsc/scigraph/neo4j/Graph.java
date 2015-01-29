@@ -23,7 +23,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.base.Optional;
 
-public interface GraphInterface {
+public interface Graph {
 
   long createNode(String id);
 

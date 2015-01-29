@@ -25,8 +25,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import edu.sdsc.scigraph.neo4j.GraphInterface;
-import edu.sdsc.scigraph.neo4j.GraphInterfaceTransactionImpl;
+import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphTransactionImpl;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
@@ -34,7 +34,7 @@ import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 public class GraphTestBase {
 
   protected GraphDatabaseService graphDb;
-  protected GraphInterface graph;
+  protected Graph graph;
   Transaction tx;
   protected static boolean cleanup = true;
 
@@ -49,7 +49,7 @@ public class GraphTestBase {
   public void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
     Neo4jModule.setupAutoIndexing(graphDb);
-    graph = new GraphInterfaceTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
+    graph = new GraphTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
   }
 
   @Before

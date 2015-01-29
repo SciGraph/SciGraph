@@ -45,8 +45,8 @@ import com.google.common.base.Optional;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.neo4j.GraphInterface;
-import edu.sdsc.scigraph.neo4j.GraphInterfaceTransactionImpl;
+import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphTransactionImpl;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -54,7 +54,7 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 public class OwlVisitorTest extends GraphTestBase {
 
   // static GraphDatabaseService graphDb;
-  static GraphInterface graph;
+  static Graph graph;
   static final String ROOT = "http://example.com/owl/families";
   static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
 
@@ -62,7 +62,7 @@ public class OwlVisitorTest extends GraphTestBase {
   public void loadOwl() throws Exception {
     cleanup = false;
     // graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    graph = new GraphInterfaceTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
+    graph = new GraphTransactionImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
     String uri = Resources.getResource("ontologies/family.owl").toURI().toString();
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     IRI iri = IRI.create(uri);

@@ -44,7 +44,7 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
-import edu.sdsc.scigraph.neo4j.GraphInterface;
+import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
@@ -82,7 +82,7 @@ public abstract class OwlTestCase {
 
     BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
     DB maker = DBMaker.newMemoryDB().make();
-    GraphInterface batchGraph = new GraphBatchImpl(inserter, "uri", Collections.<String> emptySet(),
+    Graph batchGraph = new GraphBatchImpl(inserter, "uri", Collections.<String> emptySet(),
         Collections.<String> emptySet(), new IdMap(maker), new RelationshipMap(maker));
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     String uri = Resources.getResource("ontologies/cases/" + getTestName() + ".owl").toURI()

@@ -50,7 +50,7 @@ import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
 
 @ThreadSafe
-public class GraphBatchImpl implements GraphInterface {
+public class GraphBatchImpl implements Graph {
 
   private static final Logger logger = Logger.getLogger(GraphBatchImpl.class.getName());
 

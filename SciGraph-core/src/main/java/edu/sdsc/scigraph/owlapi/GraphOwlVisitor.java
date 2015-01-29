@@ -71,7 +71,7 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
-import edu.sdsc.scigraph.neo4j.GraphInterface;
+import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
@@ -79,14 +79,14 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private static final Logger logger = Logger.getLogger(GraphOwlVisitor.class.getName());
 
-  private final GraphInterface graph;
+  private final Graph graph;
 
   private OWLOntology ontology;
 
   private Map<String, String> mappedProperties;
 
   @Inject
-  public GraphOwlVisitor(OWLOntologyWalker walker, GraphInterface graph,
+  public GraphOwlVisitor(OWLOntologyWalker walker, Graph graph,
       @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
     super(walker);
     this.graph = graph;

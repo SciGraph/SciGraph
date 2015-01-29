@@ -55,7 +55,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 
-import edu.sdsc.scigraph.neo4j.GraphInterface;
+import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
@@ -77,7 +77,7 @@ public class BatchOwlLoader {
   PostpostprocessorProvider postprocessorProvider;
 
   @Inject
-  GraphInterface graph;
+  Graph graph;
   
   @Inject
   @Named("owl.mappedProperties") List<MappedProperty> mappedProperties;

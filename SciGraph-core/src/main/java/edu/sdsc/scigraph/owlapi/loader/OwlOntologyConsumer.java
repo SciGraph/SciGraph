@@ -27,7 +27,7 @@ import org.semanticweb.owlapi.model.OWLObject;
 
 import com.google.inject.Inject;
 
-import edu.sdsc.scigraph.neo4j.GraphInterface;
+import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
@@ -42,7 +42,7 @@ public class OwlOntologyConsumer implements Callable<Void> {
 
   // TODO: Switch this to assisted inject
   @Inject
-  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, GraphInterface graph, int numProducers,
+  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, Graph graph, int numProducers,
       @Named("owl.mappedProperties") List<MappedProperty> mappedProperties,
       AtomicInteger numProducersShutdown) {
     logger.info("Ontology consumer starting up...");

@@ -31,7 +31,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.base.Optional;
 
-public abstract class GraphTestBase<T extends GraphInterface> {
+public abstract class GraphTestBase<T extends Graph> {
 
   private T graph;
 

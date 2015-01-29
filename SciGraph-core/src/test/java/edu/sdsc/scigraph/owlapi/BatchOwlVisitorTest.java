@@ -58,7 +58,7 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
-import edu.sdsc.scigraph.neo4j.GraphInterface;
+import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
@@ -68,7 +68,7 @@ public class BatchOwlVisitorTest {
 
   static GraphDatabaseService graphDb;
   static ReadableIndex<Node> nodeIndex;
-  static GraphInterface batchGraph;
+  static Graph batchGraph;
   static Path path;
   static final String ROOT = "http://example.com/owl/families";
   static final String OTHER_ROOT = "http://example.org/otherOntologies/families";

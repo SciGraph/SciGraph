@@ -62,7 +62,7 @@ public class GraphBatchImplMultipleLoadTest {
     // FileUtils.deleteDirectory(path.toFile());
   }
 
-  GraphInterface getBatchGraph() {
+  Graph getBatchGraph() {
     BatchInserter inserter = BatchInserters.inserter(path.toString());
     return new GraphBatchImpl(inserter, "uri", Collections.<String>emptySet(), Collections.<String>emptySet(),
         new IdMap(maker), new RelationshipMap(maker));
@@ -75,7 +75,7 @@ public class GraphBatchImplMultipleLoadTest {
 
   @Test
   public void testMultipleInserts() {
-    GraphInterface batchGraph = getBatchGraph();
+    Graph batchGraph = getBatchGraph();
     long a = batchGraph.createNode("a");
     long b = batchGraph.createNode("b");
     batchGraph.createRelationship(a, b, TYPE);
