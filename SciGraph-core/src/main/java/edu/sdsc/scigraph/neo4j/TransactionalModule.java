@@ -15,24 +15,10 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.inject.Singleton;
-
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
 import com.google.inject.matcher.Matchers;
 
-import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4j;
-
 public class TransactionalModule extends AbstractModule {
-
-  @Provides
-  @Singleton
-  @IndicatesNeo4j
-  AtomicBoolean getInTransaction() {
-    return new AtomicBoolean();
-  }
 
   @Override
   protected void configure() {
