@@ -150,6 +150,9 @@ public class GraphBatchImpl implements Graph {
 
   @Override
   public void setNodeProperty(long node, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     try {
       synchronized (graphLock) {
         Map<String, Object> properties = Maps.newHashMap(inserter.getNodeProperties(node));
@@ -163,6 +166,9 @@ public class GraphBatchImpl implements Graph {
 
   @Override
   public void addNodeProperty(long node, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     synchronized(graphLock) {
       Map<String, Object> properties = inserter.getNodeProperties(node);
       if (properties.containsKey(property)) {
@@ -205,6 +211,9 @@ public class GraphBatchImpl implements Graph {
 
   @Override
   public void setRelationshipProperty(long batchId, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     synchronized (graphLock) {
       inserter.setRelationshipProperty(batchId, property, value);
     }
@@ -212,6 +221,9 @@ public class GraphBatchImpl implements Graph {
 
   @Override
   public void addRelationshipProperty(long relationship, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     synchronized(graphLock) {
       Map<String, Object> propertyMap = inserter.getRelationshipProperties(relationship);
       if (propertyMap.containsKey(property)) {

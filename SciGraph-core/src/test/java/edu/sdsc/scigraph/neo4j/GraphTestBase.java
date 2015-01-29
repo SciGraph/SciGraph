@@ -235,4 +235,34 @@ public abstract class GraphTestBase<T extends Graph> {
     assertThat(graph.getRelationship(c, b, TYPE).isPresent(), is(false));
   }
 
+  @Test
+  public void nonUsableNodeProperties_areIgnored() {
+    long a = graph.createNode("a");
+    graph.setNodeProperty(a, "foo", "the");
+    assertThat(graph.getNodeProperty(a, "foo", String.class).isPresent(), is(false));
+  }
+
+  @Test
+  public void nonUsableAddedNodeProperties_areIgnored() {
+    long a = graph.createNode("a");
+    graph.addNodeProperty(a, "foo", "the");
+    assertThat(graph.getNodeProperty(a, "foo", String.class).isPresent(), is(false));
+  }
+
+  @Test
+  public void nonUsableRelationshipProperties_areIgnored() {
+    long a = graph.createNode("a");
+    long relationship = graph.createRelationship(a, a, TYPE);
+    graph.setRelationshipProperty(relationship, "foo", "the");
+    assertThat(graph.getRelationshipProperty(relationship, "foo", String.class).isPresent(), is(false));
+  }
+
+  @Test
+  public void nonUsableAddedRelationshipProperties_areIgnored() {
+    long a = graph.createNode("a");
+    long relationship = graph.createRelationship(a, a, TYPE);
+    graph.addRelationshipProperty(relationship, "foo", "the");
+    assertThat(graph.getRelationshipProperty(relationship, "foo", String.class).isPresent(), is(false));
+  }
+
 }

@@ -131,6 +131,9 @@ public class GraphTransactionalImpl implements Graph {
 
   @Override
   public void setNodeProperty(long nodeId, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     try (Transaction tx = graphDb.beginTx()) {
       Node node = graphDb.getNodeById(nodeId);
       node.setProperty(property, value);
@@ -140,6 +143,9 @@ public class GraphTransactionalImpl implements Graph {
 
   @Override
   public void addNodeProperty(long nodeId, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     try (Transaction tx = graphDb.beginTx()) {
       Node node = graphDb.getNodeById(nodeId);
       if (node.hasProperty(property)) {
@@ -179,6 +185,9 @@ public class GraphTransactionalImpl implements Graph {
 
   @Override
   public void setRelationshipProperty(long relationshipId, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     try (Transaction tx = graphDb.beginTx()) {
       Relationship relationship = graphDb.getRelationshipById(relationshipId);
       relationship.setProperty(property, value);
@@ -188,6 +197,9 @@ public class GraphTransactionalImpl implements Graph {
 
   @Override
   public void addRelationshipProperty(long relationshipId, String property, Object value) {
+    if (GraphUtil.ignoreProperty(value)) {
+      return;
+    }
     try (Transaction tx = graphDb.beginTx()) {
       Relationship relationship = graphDb.getRelationshipById(relationshipId);
       if (relationship.hasProperty(property)) {

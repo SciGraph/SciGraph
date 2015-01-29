@@ -177,6 +177,12 @@ public class GraphUtil {
     }
   }
 
+  /***
+   * TODO: This and every spot that uses it is a bit of a hack
+   * This should ideally be handled by the index.
+   * @param value
+   * @return
+   */
   static public boolean ignoreProperty(Object value) {
     if (value instanceof String
         && (CharMatcher.WHITESPACE.matchesAllOf((String) value)
