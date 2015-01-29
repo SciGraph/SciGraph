@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.neo4j;
 
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
@@ -34,29 +33,20 @@ import com.google.common.collect.ForwardingConcurrentMap;
 public class IdMap extends ForwardingConcurrentMap<String, Long> {
 
   private final ConcurrentMap<String, Long> delegate;
-  private final AtomicLong idCounter;
 
   public IdMap() {
     DB maker = DBMaker.newMemoryDB().make();
     delegate = maker.createHashMap(IdMap.class.getName()).make();
-    idCounter = new AtomicLong();
   }
 
   @Inject
   public IdMap(DB maker) {
     delegate = maker.getHashMap(IdMap.class.getName());
-    idCounter = new AtomicLong(delegate.size());
   }
 
   @Override
   protected ConcurrentMap<String, Long> delegate() {
     return delegate;
-  }
-
-  @Override
-  public Long get(Object key) {
-    delegate.putIfAbsent((String) key, idCounter.getAndIncrement());
-    return delegate.get(key);
   }
 
 }

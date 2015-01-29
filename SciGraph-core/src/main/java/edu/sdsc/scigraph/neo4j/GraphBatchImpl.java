@@ -90,12 +90,12 @@ public class GraphBatchImpl implements Graph {
   @Override
   public long createNode(String id) {
     synchronized(graphLock) {
-      long nodeId = idMap.get(id);
-      if (!inserter.nodeExists(nodeId)) {
-        inserter.createNode(nodeId, Collections.<String, Object>emptyMap());
+      if (!idMap.containsKey(id)) {
+        long nodeId = inserter.createNode(Collections.<String, Object>emptyMap());
+        idMap.put(id, nodeId);
         setNodeProperty(nodeId, uniqueProperty, id);
       }
-      return nodeId;
+      return idMap.get(id);
     }
   }
 
