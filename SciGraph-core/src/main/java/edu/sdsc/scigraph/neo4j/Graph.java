@@ -25,10 +25,28 @@ import com.google.common.base.Optional;
 
 public interface Graph {
 
+  /***
+   * Create a node
+   * 
+   * @param id The String ID of the node
+   * @return The Neo4j ID of a newly created node or the ID of an existing node
+   */
   long createNode(String id);
 
+  /***
+   * @param id
+   * @return An optional node with this ID
+   */
   Optional<Long> getNode(String id);
 
+  /***
+   * Create a relationship
+   * 
+   * @param start The ID of the start node 
+   * @param end The ID of the end node
+   * @param type The type of relationship
+   * @return The Neo4j ID of a newly created node or the ID of an existing node
+   */
   long createRelationship(long start, long end, RelationshipType type);
 
   Optional<Long> getRelationship(long start, long end, RelationshipType type);

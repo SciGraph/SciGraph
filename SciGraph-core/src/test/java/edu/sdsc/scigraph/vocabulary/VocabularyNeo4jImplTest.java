@@ -94,9 +94,9 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
       cerebellum = buildConcept("http://example.org/#cerebellum", "Cerebellum", "baz", "foo");
       specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz",
           "foo bar");
-      parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
+      parkinsons = buildConcept("http://example.org/#parkinsons", "Parkinson's Disease", "baz");
       GraphUtil.addProperty(graphDb.getNodeById(parkinsons.getId()), Concept.SYNONYM, "the");
-      als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis");
+      als = buildConcept("http://example.org/#als", "amyotrophic lateral sclerosis");
       GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM, "Lou Gehrig's");
       GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "Lou Gehrig's");

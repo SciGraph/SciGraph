@@ -35,7 +35,7 @@ import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Optional;
 
-public class GraphTransactionImpl implements Graph {
+public class GraphTransactionalImpl implements Graph {
 
   private static Object graphLock = new Object();
   private final ConcurrentMap<String, Long> idMap;
@@ -43,7 +43,7 @@ public class GraphTransactionImpl implements Graph {
   private final GraphDatabaseService graphDb;
 
   @Inject
-  public GraphTransactionImpl(GraphDatabaseService graphDb,
+  public GraphTransactionalImpl(GraphDatabaseService graphDb,
       ConcurrentMap<String, Long> idMap, RelationshipMap relationshipMap) {
     this.idMap = idMap;
     this.relationshipMap = relationshipMap;

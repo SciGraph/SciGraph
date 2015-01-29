@@ -18,14 +18,14 @@ package edu.sdsc.scigraph.neo4j;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
-public class GraphInterfaceTransactionImplTest extends GraphTestBase<GraphTransactionImpl> {
+public class GraphTransactionalImplTest extends GraphTestBase<GraphTransactionalImpl> {
 
   @Override
-  protected GraphTransactionImpl createInstance() {
+  protected GraphTransactionalImpl createInstance() {
     GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     IdMap idMap = new IdMap();
     RelationshipMap relationahipMap = new RelationshipMap();
-    return new GraphTransactionImpl(graphDb, idMap, relationahipMap);
+    return new GraphTransactionalImpl(graphDb, idMap, relationahipMap);
   }
 
 }
