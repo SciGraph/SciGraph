@@ -36,7 +36,7 @@ public class IdMap extends ForwardingConcurrentMap<String, Long> {
   private final ConcurrentMap<String, Long> delegate;
   private final AtomicLong idCounter;
 
-  protected IdMap() {
+  public IdMap() {
     DB maker = DBMaker.newMemoryDB().make();
     delegate = maker.createHashMap(IdMap.class.getName()).make();
     idCounter = new AtomicLong();

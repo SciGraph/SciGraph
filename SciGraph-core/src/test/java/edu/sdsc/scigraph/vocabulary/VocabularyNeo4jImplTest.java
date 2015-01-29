@@ -44,10 +44,9 @@ import com.google.common.base.Optional;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
-import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.NodeTransformer;
-import edu.sdsc.scigraph.owlapi.*;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.util.GraphTestBase;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
@@ -57,7 +56,6 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   VocabularyNeo4jImpl vocabulary;
-  Graph graph;
 
   Concept hippocampus;
   Concept hippocampusStructure;
@@ -68,25 +66,26 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   Concept parkinsons;
   Concept als;
   Concept deprecated;
+  
+  NodeTransformer transformer = new NodeTransformer();
 
   Concept buildConcept(String uri, String label, String... categories) {
-    Node concept = graph.getOrCreateNode(uri);
+    Node concept = createNode(uri);
     GraphUtil.addProperty(concept, Concept.LABEL, label);
     GraphUtil.addProperty(concept, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
     for (String category : categories) {
       GraphUtil.addProperty(concept, Concept.CATEGORY, category);
     }
-    return graph.getOrCreateFramedNode(concept);
+    return transformer.apply(concept);
   }
 
   @Before
   public void setupGraph() throws IOException {
-    graph = new Graph(graphDb);
     try (Transaction tx = graphDb.beginTx()) {
       hippocampalFormation = buildConcept("http://example.org/#birnlex5", "Hippocampal formation");
       hippocampus = buildConcept("http://example.org/#hippocampus", "Hippocampus", "foo", "fizz");
-      GraphUtil.addProperty(graph.getNode(hippocampus), Concept.SYNONYM, "cornu ammonis");
-      GraphUtil.addProperty(graph.getNode(hippocampus), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+      GraphUtil.addProperty(graphDb.getNodeById(hippocampus.getId()), Concept.SYNONYM, "cornu ammonis");
+      GraphUtil.addProperty(graphDb.getNodeById(hippocampus.getId()), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "cornu ammonis");
       hippocampusStructure = buildConcept("http://example.org/#hippocampusStructure",
           "Hippocampus structure", "baz");
@@ -96,16 +95,16 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
       specialChars = buildConcept("http://example.org/#specialChars", "(-)-protein alpha", "baz",
           "foo bar");
       parkinsons = buildConcept("http://example.org/parkinsons", "Parkinson's Disease", "baz");
-      GraphUtil.addProperty(graph.getNode(parkinsons), Concept.SYNONYM, "the");
+      GraphUtil.addProperty(graphDb.getNodeById(parkinsons.getId()), Concept.SYNONYM, "the");
       als = buildConcept("http://example.org/als", "amyotrophic lateral sclerosis");
-      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM, "Lou Gehrig's");
-      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+      GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM, "Lou Gehrig's");
+      GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "Lou Gehrig's");
-      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM, "motor neuron disease, bulbar");
-      GraphUtil.addProperty(graph.getNode(als), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+      GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM, "motor neuron disease, bulbar");
+      GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "motor neuron disease, bulbar");
       deprecated = buildConcept("http://example.org/#cerebellum2", "Cerebellum", "baz", "foo");
-      GraphUtil.addProperty(graph.getNode(deprecated), OWLRDFVocabulary.OWL_DEPRECATED.toString(), "true");
+      GraphUtil.addProperty(graphDb.getNodeById(deprecated.getId()), OWLRDFVocabulary.OWL_DEPRECATED.toString(), "true");
       tx.success();
     }
 

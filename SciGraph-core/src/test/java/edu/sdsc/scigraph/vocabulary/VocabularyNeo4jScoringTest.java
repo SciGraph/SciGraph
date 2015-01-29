@@ -24,11 +24,12 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.neo4j.graphdb.Node;
 
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
-import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.NodeTransformer;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -40,25 +41,24 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 public class VocabularyNeo4jScoringTest extends GraphTestBase {
 
   VocabularyNeo4jImpl vocabulary;
-  Graph graph;
 
   Concept cell;
   Concept onCell;
+  
+  NodeTransformer transformer = new NodeTransformer();
 
-  Concept buildConcept(String uri, String label, String curie, String ... categories) {
-    Concept concept = graph.getOrCreateFramedNode(uri);
-    concept.addLabel(label);
-    graph.getGraphDb().getNodeById(concept.getId())
-        .setProperty(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
-    for (String category: categories) {
-      concept.addCategory(category);
+  Concept buildConcept(String uri, String label, String... categories) {
+    Node concept = createNode(uri);
+    GraphUtil.addProperty(concept, Concept.LABEL, label);
+    GraphUtil.addProperty(concept, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
+    for (String category : categories) {
+      GraphUtil.addProperty(concept, Concept.CATEGORY, category);
     }
-    return concept;
+    return transformer.apply(concept);
   }
 
   @Before
   public void setupGraph() throws IOException {
-    graph = new Graph(graphDb);
     cell = buildConcept("http://example.org/#birnlex5", "Cell", "BL:5");
     onCell = buildConcept("http://example.org/#birnlex6", "Something on cell", "HP:0008");
     onCell.addSynonym("on cell");
