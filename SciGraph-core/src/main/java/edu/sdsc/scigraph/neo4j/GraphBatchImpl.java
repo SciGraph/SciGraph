@@ -308,6 +308,7 @@ public class GraphBatchImpl implements Graph {
       Map<String, Object> properties = inserter.getNodeProperties(id);
       Map<String, Object> indexProperties = collectIndexProperties(properties);
       if (!indexProperties.isEmpty()) {
+        //logger.info("Indexing " + indexProperties);
         nodeIndex.add(id, indexProperties);
       }
     }

@@ -19,6 +19,7 @@ import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getUri;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,11 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private OWLOntology ontology;
 
   private Map<String, String> mappedProperties;
+
+  public GraphOwlVisitor(Graph graph,
+      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
+    this(new OWLOntologyWalker(Collections.<OWLOntology>emptySet()), graph, mappedProperties);
+  }
 
   @Inject
   public GraphOwlVisitor(OWLOntologyWalker walker, Graph graph,
@@ -219,7 +225,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     }
     return null;
   }
- 
+
   @Override
   public Void visit(OWLSubAnnotationPropertyOfAxiom axiom) {
     long subProperty = getOrCreateNode(getUri(axiom.getSubProperty()));
@@ -403,6 +409,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   long addCardinalityRestriction(OWLObjectCardinalityRestriction desc) {
     long restriction = getOrCreateNode(getUri(desc));
+    graph.addLabel(restriction, OwlLabels.OWL_ANONYMOUS);
     graph.setNodeProperty(restriction, "cardinality", desc.getCardinality());
     long property = getOrCreateNode(getUri(desc.getProperty()));
     graph.createRelationship(restriction, property, OwlRelationships.PROPERTY);
@@ -414,21 +421,21 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLObjectMaxCardinality desc) {
     long restriction = addCardinalityRestriction(desc);
-    graph.setLabel(restriction, OwlLabels.OWL_MAX_CARDINALITY);
+    graph.addLabel(restriction, OwlLabels.OWL_MAX_CARDINALITY);
     return null;
   }
 
   @Override
   public Void visit(OWLObjectMinCardinality desc) {
     long restriction = addCardinalityRestriction(desc);
-    graph.setLabel(restriction, OwlLabels.OWL_MIN_CARDINALITY);
+    graph.addLabel(restriction, OwlLabels.OWL_MIN_CARDINALITY);
     return null;
   }
 
   @Override
   public Void visit(OWLObjectExactCardinality desc) {
     long restriction = addCardinalityRestriction(desc);
-    graph.setLabel(restriction, OwlLabels.OWL_QUALIFIED_CARDINALITY);
+    graph.addLabel(restriction, OwlLabels.OWL_QUALIFIED_CARDINALITY);
     return null;
   }
 
