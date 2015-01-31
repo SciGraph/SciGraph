@@ -20,10 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
@@ -55,23 +53,6 @@ public class GraphTestBase {
   @Before
   public void setUp() throws Exception {
     tx = graphDb.beginTx();
-  }
-
-  /*
-   * @After public void teardown() throws Exception { tx.success(); try { tx.finish(); } catch
-   * (Exception e) { e.printStackTrace(); } tx = null; if (cleanup) { cleanDatabase(); } }
-   */
-
-  void cleanDatabase() {
-    try (Transaction tx = graphDb.beginTx()) {
-      for (Relationship relationship : GlobalGraphOperations.at(graphDb).getAllRelationships()) {
-        relationship.delete();
-      }
-      for (Node node : GlobalGraphOperations.at(graphDb).getAllNodes()) {
-        node.delete();
-      }
-      tx.success();
-    }
   }
 
 }
