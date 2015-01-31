@@ -48,18 +48,16 @@ public class TinkerGraphUtilTest {
     when(node.getLabels()).thenReturn(Collections.<Label>emptySet());
     return node;
   }
-  
+
   @Before
   public void setup() {
     node = mockNode();
     otherNode = mockNode();
-    when(node.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
-    when(node.getLabels()).thenReturn(Collections.<Label>emptySet());
     graph = new TinkerGraph();
   }
 
   @Test
-  public void testIdTranslation() {
+  public void idsAreTranslated() {
     when(node.getId()).thenReturn(1L);
     when(node.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
     Vertex v = TinkerGraphUtil.addNode(graph, node);
@@ -67,7 +65,7 @@ public class TinkerGraphUtilTest {
   }
 
   @Test
-  public void testMultipleIds() {
+  public void addNodeIsIdempotent() {
     when(node.getId()).thenReturn(1L);
     when(node.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
     Vertex v1 = TinkerGraphUtil.addNode(graph, node);
@@ -76,7 +74,7 @@ public class TinkerGraphUtilTest {
   }
 
   @Test
-  public void testPropertyTranslation() {
+  public void propertiesAreTranslated() {
     when(node.getPropertyKeys()).thenReturn(newHashSet("foo", "baz"));
     when(node.getProperty("foo")).thenReturn("bar");
     when(node.getProperty("baz")).thenReturn(true);
@@ -87,15 +85,15 @@ public class TinkerGraphUtilTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLabelTranslation() {
+  public void labelsAreTranslated() {
     Label label = DynamicLabel.label("label");
     when(node.getLabels()).thenReturn(newHashSet(label));
     Vertex v = TinkerGraphUtil.addNode(graph, node);
     assertThat((Iterable<String>)v.getProperty("types"), IsIterableContainingInAnyOrder.containsInAnyOrder("label"));
   }
-  
+
   @Test
-  public void testRelationshipTranslation() {
+  public void relationshipsAreTranslated() {
     when(node.getId()).thenReturn(1L);
     when(otherNode.getId()).thenReturn(2L);
     Vertex u = TinkerGraphUtil.addNode(graph, node);
