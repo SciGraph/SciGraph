@@ -33,7 +33,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -88,6 +87,7 @@ public abstract class OwlVisitorTestBase<T extends Graph> {
   @Before
   public void setup() throws Exception {
     if (builtGraph) {
+      // TODO: UGH - need a better pattern for this
       return;
     }
     graph = createInstance();
@@ -108,12 +108,6 @@ public abstract class OwlVisitorTestBase<T extends Graph> {
     tx = graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;
-  }
-
-  @After
-  public void teardown() {
-    tx.success();
-    //graphDb.shutdown();
   }
 
   Node getNode(String uri) {
