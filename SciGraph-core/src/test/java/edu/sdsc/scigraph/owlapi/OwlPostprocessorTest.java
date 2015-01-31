@@ -43,13 +43,17 @@ public class OwlPostprocessorTest {
   Node parent, child, grandChild, equivalent, equivalentSubclass;
   OwlPostprocessor postprocessor;
 
+  void enableIndexing() {
+    AutoIndexer<Node> nodeIndex = graphDb.index().getNodeAutoIndexer();
+    nodeIndex.startAutoIndexingProperty(CommonProperties.URI);
+    nodeIndex.setEnabled(true);
+  }
+  
   @Before
   public void setup() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     Transaction tx = graphDb.beginTx();
-    AutoIndexer<Node> nodeIndex = graphDb.index().getNodeAutoIndexer();
-    nodeIndex.startAutoIndexingProperty(CommonProperties.URI);
-    nodeIndex.setEnabled(true);
+    enableIndexing();
     parent = graphDb.createNode();
     parent.setProperty(CommonProperties.URI, "http://example.org/a");
     child = graphDb.createNode();

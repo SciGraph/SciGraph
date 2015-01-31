@@ -54,7 +54,6 @@ import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.neo4j.GraphDump;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
@@ -107,7 +106,6 @@ public abstract class OwlVisitorTestBase<T extends Graph> {
     graph.shutdown();
     graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(path.toString());
     tx = graphDb.beginTx();
-    GraphDump.dumpGraph(graphDb);
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;
   }
@@ -277,7 +275,7 @@ public abstract class OwlVisitorTestBase<T extends Graph> {
   public void objectComplementOf() {
     Node parent = getNode(ROOT + "/Parent");
     Node complement = getLabeledOtherNode(parent, OwlRelationships.OPERAND, OwlLabels.OWL_COMPLEMENT_OF);
-    assertThat(complement.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
+    assertThat(complement.getLabels(), hasItem(OwlLabels.OWL_ANONYMOUS));
   }
 
   @Test
@@ -303,7 +301,7 @@ public abstract class OwlVisitorTestBase<T extends Graph> {
     Node hasChild = getNode(ROOT + "/hasChild");
     Node parent = getNode(ROOT + "/Parent");
     Node restriction = getLabeledOtherNode(parent, OwlRelationships.CLASS, OwlLabels.OWL_MIN_CARDINALITY);
-    assertThat(restriction.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
+    assertThat(restriction.getLabels(), hasItem(OwlLabels.OWL_ANONYMOUS));
     assertThat(GraphUtil.getProperty(restriction, "cardinality", Integer.class).get(), is(2));
     assertThat(hasDirectedRelationship(restriction, hasChild, OwlRelationships.PROPERTY), is(true));
     assertThat(hasDirectedRelationship(restriction, parent, OwlRelationships.CLASS), is(true));
@@ -314,7 +312,7 @@ public abstract class OwlVisitorTestBase<T extends Graph> {
     Node hasChild = getNode(ROOT + "/hasChild");
     Node happyPerson = getNode(ROOT + "/HappyPerson");
     Node svf = getLabeledOtherNode(happyPerson, OwlRelationships.FILLER, OwlLabels.OWL_SOME_VALUES_FROM);
-    assertThat(svf.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
+    assertThat(svf.getLabels(), hasItem(OwlLabels.OWL_ANONYMOUS));
     assertThat(hasDirectedRelationship(svf, hasChild, OwlRelationships.PROPERTY), is(true));
     assertThat(hasDirectedRelationship(svf, happyPerson, OwlRelationships.FILLER), is(true));
   }
@@ -324,7 +322,7 @@ public abstract class OwlVisitorTestBase<T extends Graph> {
     Node hasChild = getNode(ROOT + "/hasChild");
     Node happyPerson = getNode(ROOT + "/HappyPerson");
     Node avf = getLabeledOtherNode(happyPerson, OwlRelationships.FILLER, OwlLabels.OWL_ALL_VALUES_FROM);
-    assertThat(avf.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
+    assertThat(avf.getLabels(), hasItem(OwlLabels.OWL_ANONYMOUS));
     assertThat(hasDirectedRelationship(avf, hasChild, OwlRelationships.PROPERTY), is(true));
     assertThat(hasDirectedRelationship(avf, happyPerson, OwlRelationships.FILLER), is(true));
   }

@@ -15,7 +15,9 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Collections.emptyList;
 
 import java.util.Collection;
@@ -276,7 +278,7 @@ public class GraphBatchImpl implements Graph {
   @Override
   public void addLabel(long node, Label label) {
     synchronized (graphLock) {
-      Set<Label> labels = newHashSet(inserter.getNodeLabels(node));
+      Set<Label> labels = newLinkedHashSet(inserter.getNodeLabels(node));
       labels.add(label);
       inserter.setNodeLabels(node, labels.toArray(new Label[labels.size()]));
     }

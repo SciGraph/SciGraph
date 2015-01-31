@@ -220,6 +220,14 @@ public abstract class GraphTestBase<T extends Graph> {
     graph.addLabel(node, LABEL2);
     assertThat(graph.getLabels(node), containsInAnyOrder(LABEL1, LABEL2));
   }
+  
+  @Test
+  public void labelsAreAdded_afterBeingSet() {
+    long node = graph.createNode("foo");
+    graph.setLabel(node, LABEL1);
+    graph.addLabel(node, LABEL2);
+    assertThat(graph.getLabels(node), containsInAnyOrder(LABEL1, LABEL2));
+  }
 
   @Test
   public void pairwiseRelationshipsAreCreated() {
