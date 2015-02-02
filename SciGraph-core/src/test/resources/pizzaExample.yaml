@@ -1,8 +1,10 @@
 ontologyConfiguration:
     graphLocation: target/pizzaGraph
 
-ontologyUrls:
-  - src/test/resources/ontologies/pizza.owl
+ontologies:
+  - url: src/test/resources/ontologies/pizza.owl
+    reasonerConfiguration:
+      factory: org.semanticweb.elk.owlapi.ElkReasonerFactory
 
 categories:
     http://www.co-ode.org/ontologies/pizza/pizza.owl#NamedPizza : pizza

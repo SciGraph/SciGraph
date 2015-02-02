@@ -21,16 +21,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 
 public class OwlOntologyProducer implements Callable<Void>{
@@ -38,15 +37,14 @@ public class OwlOntologyProducer implements Callable<Void>{
   private static final Logger logger = Logger.getLogger(OwlOntologyProducer.class.getName());
 
   private final BlockingQueue<OWLObject> queue;
-  private final BlockingQueue<String> urlQueue;
-  private final static OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
+  private final BlockingQueue<OntologySetup> ontologQueue;
   private final AtomicInteger numProducersShutdown;
 
   @Inject
-  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<String> urlQueue, AtomicInteger numProducersShutdown) {
+  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<OntologySetup> ontologyQueue, AtomicInteger numProducersShutdown) {
     logger.info("Producer starting up...");
     this.queue = queue;
-    this.urlQueue = urlQueue;
+    this.ontologQueue = ontologyQueue;
     this.numProducersShutdown = numProducersShutdown;
   }
 
@@ -54,21 +52,19 @@ public class OwlOntologyProducer implements Callable<Void>{
   public Void call() throws Exception {
     try {
       while (true) {
-        String url = urlQueue.take();
-        if (BatchOwlLoader.POISON_STR == url) {
+        OntologySetup ontologyConfig = ontologQueue.take();
+        if (BatchOwlLoader.POISON_STR == ontologyConfig) {
           break;
         } else {
           OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-          //manager.addIRIMapper(new FileCachingIRIMapper());
-          logger.info("Loading ontology: " + url);
+          logger.info("Loading ontology: " + ontologyConfig);
           try {
-            OWLOntology ont = OwlApiUtils.loadOntology(manager, url);
-            //if ("http://purl.obolibrary.org/obo/upheno/monarch.owl".equals(url)) {
-            // TODO: fix this - move to configuration
-            ReasonerUtil util = new ReasonerUtil(reasonerFactory, manager, ont);
-            util.reason(false, true);
-            //}
-            logger.info("Adding axioms for: " + url);
+            OWLOntology ont = OwlApiUtils.loadOntology(manager, ontologyConfig.url());
+            if (ontologyConfig.getReasonerConfiguration().isPresent()) {
+              ReasonerUtil util = new ReasonerUtil(ontologyConfig.getReasonerConfiguration().get(), manager, ont);
+              util.reason();
+            }
+            logger.info("Adding axioms for: " + ontologyConfig);
             for (OWLOntology ontology: manager.getOntologies()) {
               for (OWLObject object: ontology.getNestedClassExpressions()) {
                 queue.put(object);
@@ -80,9 +76,9 @@ public class OwlOntologyProducer implements Callable<Void>{
                 queue.put(object);
               }
             }
-            logger.info("Finished processing ontology: " + url);
+            logger.info("Finished processing ontology: " + ontologyConfig);
           } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to load ontology: " + url, e);
+            logger.log(Level.WARNING, "Failed to load ontology: " + ontologyConfig, e);
           }
         }
       }

@@ -49,6 +49,7 @@ import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 
@@ -90,8 +91,11 @@ public abstract class OwlTestCase {
     IRI iri = IRI.create(uri);
     OWLOntology ont = manager.loadOntologyFromOntologyDocument(iri);
     if (performInference) {
-      ReasonerUtil util = new ReasonerUtil(new ElkReasonerFactory(), manager, ont);
-      util.reason(false, true);
+      ReasonerConfiguration config = new ReasonerConfiguration();
+      config.setFactory(ElkReasonerFactory.class.getCanonicalName());
+      config.setAddDirectInferredEdges(true);
+      ReasonerUtil util = new ReasonerUtil(config, manager, ont);
+      util.reason();
     }
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 

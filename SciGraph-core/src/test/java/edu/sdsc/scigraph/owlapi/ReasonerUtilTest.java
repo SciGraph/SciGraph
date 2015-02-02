@@ -36,6 +36,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.google.common.io.Resources;
 
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
+
 public class ReasonerUtilTest {
 
   OWLDataFactory dataFactory = OWLManager.getOWLDataFactory();
@@ -49,7 +51,11 @@ public class ReasonerUtilTest {
     IRI iri = IRI.create(uri);
     manager = OWLManager.createOWLOntologyManager();
     ont = manager.loadOntologyFromOntologyDocument(iri);
-    util = new ReasonerUtil(new ElkReasonerFactory(), manager, ont);
+    ReasonerConfiguration config = new ReasonerConfiguration();
+    config.setFactory(ElkReasonerFactory.class.getCanonicalName());
+    config.setAddDirectInferredEdges(true);
+    config.setComputeAllEquivalences(true);
+    util = new ReasonerUtil(config, manager, ont);
   }
 
   @Test
@@ -59,7 +65,7 @@ public class ReasonerUtilTest {
     OWLClass e2 = dataFactory.getOWLClass(IRI.create("http://example.org/e2"));
     OWLClassAxiom fullEquivalence = dataFactory.getOWLEquivalentClassesAxiom(e0, e1, e2);
     assertThat(ont.containsAxiom(fullEquivalence), is(false));
-    util.reason(true, false);
+    util.reason();
     assertThat(ont.containsAxiom(fullEquivalence), is(true));
   }
 
@@ -72,7 +78,7 @@ public class ReasonerUtilTest {
     OWLClassAxiom originalSubclass = dataFactory.getOWLSubClassOfAxiom(dx, root);
     assertThat(ont.containsAxiom(inferrredSubclass), is(false));
     assertThat(ont.containsAxiom(originalSubclass), is(true));
-    util.reason(false, true);
+    util.reason();
     assertThat(ont.containsAxiom(inferrredSubclass), is(true));
     assertThat(ont.containsAxiom(originalSubclass), is(false));
   }
@@ -86,7 +92,6 @@ public class ReasonerUtilTest {
     OWLClassAssertionAxiom a1 = dataFactory.getOWLClassAssertionAxiom(c0, i1);
     OWLClassAssertionAxiom a2 = dataFactory.getOWLClassAssertionAxiom(c1, i1);
     manager.addAxioms(ont, newHashSet(disjoint, a1, a2));
-    util = new ReasonerUtil(new ElkReasonerFactory(), manager, ont);
     assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont), ont), is(false));
   }
 
@@ -95,7 +100,6 @@ public class ReasonerUtilTest {
     OWLAxiom axiom = dataFactory.getOWLSubClassOfAxiom(
         dataFactory.getOWLClass(IRI.generateDocumentIRI()), dataFactory.getOWLNothing());
     manager.addAxiom(ont, axiom);
-    util = new ReasonerUtil(new ElkReasonerFactory(), manager, ont);
     assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont), ont), is(false));
   }
 

@@ -60,13 +60,14 @@ import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 
 public class BatchOwlLoader {
 
   static final Logger logger = Logger.getLogger(BatchOwlLoader.class.getName());
 
-  static final String POISON_STR = "Poison String";
+  static final OntologySetup POISON_STR = new OntologySetup();
 
   private static final int numCores = Runtime.getRuntime().availableProcessors();
   
@@ -82,10 +83,10 @@ public class BatchOwlLoader {
   @Inject
   @Named("owl.mappedProperties") List<MappedProperty> mappedProperties;
 
-  Collection<String> urls;
+  Collection<OntologySetup> urls;
 
   BlockingQueue<OWLObject> queue = new LinkedBlockingQueue<>();
-  BlockingQueue<String> urlQueue = new LinkedBlockingQueue<>();
+  BlockingQueue<OntologySetup> urlQueue = new LinkedBlockingQueue<>();
 
   ExecutorService exec = Executors.newFixedThreadPool(CONSUMER_COUNT + PRODUCER_COUNT);
 
@@ -102,7 +103,7 @@ public class BatchOwlLoader {
     for (int i = 0; i < PRODUCER_COUNT; i++) {
       exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
     }
-    for (String url: urls) {
+    for (OntologySetup url: urls) {
       urlQueue.offer(url);
     }
     for (int i = 0; i < PRODUCER_COUNT; i++) {
@@ -146,7 +147,7 @@ public class BatchOwlLoader {
   public static void load(OwlLoadConfiguration config) throws InterruptedException {
     Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getOntologyConfiguration()));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
-    loader.urls = config.getOntologyUrls();
+    loader.urls = config.getOntologies();
     logger.info("Loading ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
     loader.loadOntology();

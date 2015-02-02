@@ -37,18 +37,28 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
+
 public class ReasonerUtil {
 
   private static final Logger logger = Logger.getLogger(ReasonerUtil.class.getName());
   private final static OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
-  private final OWLReasonerFactory reasonerFactory;
   private final OWLOntologyManager manager;
   private final OWLOntology ont;
+  private final OWLReasoner reasoner;
+  private final ReasonerConfiguration config;
 
   @Inject
-  public ReasonerUtil(OWLReasonerFactory reasonerFactory, OWLOntologyManager manager, OWLOntology ont) {
-    this.reasonerFactory = reasonerFactory;
+  public ReasonerUtil(ReasonerConfiguration reasonerFactory, OWLOntologyManager manager, OWLOntology ont) 
+      throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    //TODO: Move this to a configuration file
+    org.apache.log4j.Logger.getLogger("org.semanticweb.elk").setLevel(org.apache.log4j.Level.FATAL);
+    OWLReasonerFactory factory = (OWLReasonerFactory) Class.forName(reasonerFactory.getFactory()).newInstance();
+    logger.info("Creating reasoner for " + ont);
+    reasoner = factory.createReasoner(ont);
+    logger.info("Completed creating reasoner for " + ont);
+    this.config = reasonerFactory;
     this.manager = manager;
     this.ont = ont;
   }
@@ -124,38 +134,28 @@ public class ReasonerUtil {
     return changes;
   }
 
-  void reason(OWLReasoner reasoner, boolean completeEquivalenceClasses, boolean addDirectInferredSubclasses) {
-    List<OWLOntologyChange> changes = new ArrayList<>();
-
-    for (OWLClass ce: ont.getClassesInSignature(true)) {
-      if (completeEquivalenceClasses) {
-        changes.add(getCompleteEquivalence(reasoner, ce));
-      }
-      if (addDirectInferredSubclasses) {
-        changes.addAll(getDirectInferredEdges(reasoner, ce));
-      }
+  public void reason() {
+    if (config.isRemoveUnsatisfiableClasses()) {
+      removeUnsatisfiableClasses();
     }
-    
-    logger.info("Applying reasoned axioms: " + changes.size());
-    manager.applyChanges(changes);
-    logger.info("Completed applying reasoning changes");
-  }
-
-  public void reason(boolean completeEquivalenceClasses, boolean addDirectInferredSubclasses) {
-    //TODO: Move this to a configuration file
-    org.apache.log4j.Logger.getLogger("org.semanticweb.elk").setLevel(org.apache.log4j.Level.FATAL);
-
-    removeUnsatisfiableClasses();
-
-    logger.info("Creating reasoner for " + ont);
-    OWLReasoner reasoner = reasonerFactory.createReasoner(ont);
-    logger.info("Completed creating reasoner for " + ont);
-
     if (!shouldReason(reasoner, ont)) {
       return;
     }
-    reason(reasoner, completeEquivalenceClasses, addDirectInferredSubclasses);
+
+    List<OWLOntologyChange> changes = new ArrayList<>();
+
+    for (OWLClass ce: ont.getClassesInSignature(true)) {
+      if (config.isComputeAllEquivalences()) {
+        changes.add(getCompleteEquivalence(reasoner, ce));
+      }
+      if (config.isAddDirectInferredEdges()) {
+        changes.addAll(getDirectInferredEdges(reasoner, ce));
+      }
+    }
     reasoner.dispose();
+    logger.info("Applying reasoned axioms: " + changes.size());
+    manager.applyChanges(changes);
+    logger.info("Completed applying reasoning changes");
   }
 
 }
