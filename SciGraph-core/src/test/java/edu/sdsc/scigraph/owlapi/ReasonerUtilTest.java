@@ -15,20 +15,22 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
@@ -76,15 +78,25 @@ public class ReasonerUtilTest {
   }
 
   @Test
-  @Ignore
-  //TODO: Why doesn't this fail?
-  public void doesNotReason_whenOntologyHasSubclassesOfNothing() {
-    OWLClass e0 = dataFactory.getOWLClass(IRI.create("http://example.org/e0"));
-    OWLAxiom axiom = dataFactory.getOWLSubClassOfAxiom(e0, dataFactory.getOWLNothing());
-    AddAxiom change = new AddAxiom(ont, axiom);
-    manager.applyChange(change);
+  public void doesNotReason_whenOntologyIsInconsistent() throws Exception{
+    OWLClass c0 = dataFactory.getOWLClass(IRI.generateDocumentIRI());
+    OWLClass c1 = dataFactory.getOWLClass(IRI.generateDocumentIRI());
+    OWLDisjointClassesAxiom disjoint = dataFactory.getOWLDisjointClassesAxiom(c0, c1);
+    OWLIndividual i1 = dataFactory.getOWLNamedIndividual(IRI.generateDocumentIRI());
+    OWLClassAssertionAxiom a1 = dataFactory.getOWLClassAssertionAxiom(c0, i1);
+    OWLClassAssertionAxiom a2 = dataFactory.getOWLClassAssertionAxiom(c1, i1);
+    manager.addAxioms(ont, newHashSet(disjoint, a1, a2));
     util = new ReasonerUtil(new ElkReasonerFactory(), manager, ont);
     assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont), ont), is(false));
   }
-  
+
+  @Test
+  public void doesNotReason_whenOntologyIsUnsatisfiable() throws Exception {
+    OWLAxiom axiom = dataFactory.getOWLSubClassOfAxiom(
+        dataFactory.getOWLClass(IRI.generateDocumentIRI()), dataFactory.getOWLNothing());
+    manager.addAxiom(ont, axiom);
+    util = new ReasonerUtil(new ElkReasonerFactory(), manager, ont);
+    assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont), ont), is(false));
+  }
+
 }

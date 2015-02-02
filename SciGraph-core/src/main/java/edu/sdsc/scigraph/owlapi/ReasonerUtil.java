@@ -79,8 +79,8 @@ public class ReasonerUtil {
       logger.warning("Not reasoning on " + ont + " because it is inconsistent.");
       return false;
     }
-    Set<OWLClass> nothingSubclasses = reasoner.getSubClasses(factory.getOWLNothing(), true).getFlattened();
-    if (!nothingSubclasses.isEmpty()) {
+    Set<OWLClass> nothingSubclasses = reasoner.getEquivalentClasses(factory.getOWLNothing()).getEntities();
+    if (nothingSubclasses.size() > 1) {
       logger.warning("Not reasoning on " + ont + " because " + nothingSubclasses.size() + " classes are sublasses of nothing");
       return false;
     }
