@@ -145,7 +145,7 @@ public class ReasonerUtil {
     List<OWLOntologyChange> changes = new ArrayList<>();
 
     for (OWLClass ce: ont.getClassesInSignature(true)) {
-      if (config.isComputeAllEquivalences()) {
+      if (config.isAddInferredEquivalences()) {
         changes.add(getCompleteEquivalence(reasoner, ce));
       }
       if (config.isAddDirectInferredEdges()) {

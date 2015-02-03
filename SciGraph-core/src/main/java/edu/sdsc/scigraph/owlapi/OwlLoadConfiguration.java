@@ -95,7 +95,7 @@ public class OwlLoadConfiguration {
     String factory;
     boolean addDirectInferredEdges = false;
     boolean removeUnsatisfiableClasses = false;
-    boolean computeAllEquivalences = false;
+    boolean addInferredEquivalences = false;
 
     public String getFactory() {
       return factory;
@@ -121,12 +121,12 @@ public class OwlLoadConfiguration {
       this.removeUnsatisfiableClasses = removeUnsatisfiableClasses;
     }
 
-    public boolean isComputeAllEquivalences() {
-      return computeAllEquivalences;
+    public boolean isAddInferredEquivalences() {
+      return addInferredEquivalences;
     }
 
-    public void setComputeAllEquivalences(boolean computeAllEquivalences) {
-      this.computeAllEquivalences = computeAllEquivalences;
+    public void setAddInferredEquivalences(boolean addInferredEquivalences) {
+      this.addInferredEquivalences = addInferredEquivalences;
     }
 
   }

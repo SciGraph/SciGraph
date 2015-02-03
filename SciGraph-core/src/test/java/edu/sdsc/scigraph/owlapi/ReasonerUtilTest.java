@@ -54,7 +54,7 @@ public class ReasonerUtilTest {
     ReasonerConfiguration config = new ReasonerConfiguration();
     config.setFactory(ElkReasonerFactory.class.getCanonicalName());
     config.setAddDirectInferredEdges(true);
-    config.setComputeAllEquivalences(true);
+    config.setAddInferredEquivalences(true);
     util = new ReasonerUtil(config, manager, ont);
   }
 
