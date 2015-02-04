@@ -85,12 +85,12 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     bootstrap.addBundle(new ViewBundle());
   }
 
-  void addWriters(JerseyEnvironment environment) throws IOException {
+  void addWriters(JerseyEnvironment environment, Injector i) throws IOException {
     for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.jersey.writers")) {
-      environment.register(classInfo.load());
+      environment.register(i.getInstance(classInfo.load()));
     }
   }
-  
+
   void addMediaTypeMappings(ResourceConfig config) {
     Map<String, MediaType> map = config.getMediaTypeMappings();
     map.put("xml", MediaType.APPLICATION_XML_TYPE);
@@ -106,9 +106,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     map.put("jpeg", CustomMediaTypes.IMAGE_JPEG_TYPE);
     map.put("png", CustomMediaTypes.IMAGE_PNG_TYPE);
   }
-  
-  void configureJersey(JerseyEnvironment environment) throws IOException {
-    addWriters(environment);
+
+  void configureJersey(JerseyEnvironment environment, Injector i) throws IOException {
+    addWriters(environment, i);
     addMediaTypeMappings(environment.getResourceConfig());
   }
 
@@ -158,12 +158,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
   @Override
   public void run(ApplicationConfiguration configuration, Environment environment) throws Exception {
     environment.getApplicationContext().setContextPath("/" + configuration.getApplicationContextPath());
-    configureJersey(environment.jersey());
-    configureSwagger(environment);
-    if (configuration.getApiConfiguration().isPresent()) {
-      configureAuthentication(configuration.getApiConfiguration().get(), environment);
-    }
-    
+
     List<Module> modules = new ArrayList<>();
     modules.add(new Neo4jModule(configuration.getGraphConfiguration()));
     modules.add(new EntityModule());
@@ -171,6 +166,12 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     modules.add(new OpenNlpModule());
     modules.add(new RefineModule(configuration.getServiceMetadata()));
     Injector i = Guice.createInjector(modules);
+
+    configureJersey(environment.jersey(), i);
+    configureSwagger(environment);
+    if (configuration.getApiConfiguration().isPresent()) {
+      configureAuthentication(configuration.getApiConfiguration().get(), environment);
+    }
     
     //Add managed objects
     environment.lifecycle().manage(i.getInstance(Neo4jManager.class));

@@ -73,7 +73,7 @@ public class Neo4jModule extends AbstractModule {
     bind(CurieUtil.class);
     bind(Vocabulary.class).to(VocabularyNeo4jImpl.class).in(Singleton.class);
     bind(new TypeLiteral<ConcurrentMap<String, Long>>(){}).to(IdMap.class).in(Singleton.class);
-    bind(Graph.class).to(GraphBatchImpl.class);
+    //bind(Graph.class).to(GraphBatchImpl.class);
   }
 
   private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
