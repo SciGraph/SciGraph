@@ -30,6 +30,8 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
@@ -53,6 +55,7 @@ class OwlLoaderModule extends AbstractModule {
     }).annotatedWith(Names.named("owl.categories")).toInstance(config.getCategories());
     bind(new TypeLiteral<List<MappedProperty>>() {
     }).annotatedWith(Names.named("owl.mappedProperties")).toInstance(config.getMappedProperties());
+    bind(Graph.class).to(GraphBatchImpl.class);
   }
 
   @Provides
