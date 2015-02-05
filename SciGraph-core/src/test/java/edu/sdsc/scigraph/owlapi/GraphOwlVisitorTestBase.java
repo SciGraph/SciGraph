@@ -56,7 +56,7 @@ import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
-public abstract class OwlVisitorTestBase<T extends Graph> {
+public abstract class GraphOwlVisitorTestBase<T extends Graph> {
 
   static final String ROOT = "http://example.com/owl/families";
   static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
