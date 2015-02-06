@@ -186,22 +186,12 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
       String property = getUri(axiom.getProperty()).toString();
       if (axiom.getValue() instanceof OWLLiteral) {
-        //Optional<Object> literal = getTypedLiteralValue((OWLLiteral) (axiom.getValue()));
-        OWLLiteral owlLiteral = (OWLLiteral) axiom.getValue();
-        if (owlLiteral.hasLang() && !"en".equals(owlLiteral.getLang())) {
-          // TODO: Ignore non-english literals for now
-          return null;
-        }
-        //TODO: Store mixed types at some point?
-        try {
-          graph.addNodeProperty(subject, property, owlLiteral.getLiteral());
-
+        Optional<Object> literal = OwlApiUtils.getTypedLiteralValue((OWLLiteral) (axiom.getValue()));
+        if (literal.isPresent()) {
+          graph.addNodeProperty(subject, property, literal.get());
           if (mappedProperties.containsKey(property)) {
-            graph.addNodeProperty(subject, mappedProperties.get(property), owlLiteral.getLiteral());
+            graph.addNodeProperty(subject, mappedProperties.get(property), literal.get());
           }
-        } catch (ClassCastException e) {
-          logger.warning("Can't store property arrays with mixed types. Ignoring " + property + " with value "
-              + owlLiteral.getLiteral() + " on " + ((IRI) axiom.getSubject()).toURI().toString());
         }
       } else if ((axiom.getValue() instanceof IRI) || (axiom.getValue() instanceof OWLAnonymousIndividual)) {
         long object = 0L;
@@ -273,16 +263,9 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long individual = getOrCreateNode(getUri(axiom.getSubject()));
     OWLDataProperty property = axiom.getProperty().asOWLDataProperty();
     // TODO: fix this Set<OWLDataRange> ranges = property.getRanges(ontology);
+    // Except  without the ontology we can't verify the range...
     String propertyName = property.getIRI().toString();
-    OWLLiteral owlLiteral = axiom.getObject();
-    if (owlLiteral.hasLang() && !"en".equals(owlLiteral.getLang())) {
-      // TODO: Ignore non-english literals for now
-      return null;
-    }
-    Optional<Object> literal = Optional.absent();
-    // If there's no range assume that this property is a string (#28)
-    // Except that without the ontology we can't verify the range...
-    literal = Optional.<Object>of(owlLiteral.getLiteral());
+    Optional<Object> literal = OwlApiUtils.getTypedLiteralValue(axiom.getObject());
 
     if (literal.isPresent()) {
       graph.setNodeProperty(individual, propertyName, literal.get());

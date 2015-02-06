@@ -113,11 +113,12 @@ public abstract class GraphTestBase<T extends Graph> {
     graph.getNodeProperty(node, "bar", Integer.class).get();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void multipleNodePropertyTypes_throwsException() {
     long node = graph.createNode("foo");
     graph.addNodeProperty(node, "bar", "baz");
     graph.addNodeProperty(node, "bar", 1);
+    assertThat(graph.getNodeProperties(node, "bar", String.class), contains("baz", "1"));
   }
 
   @Test

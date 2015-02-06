@@ -224,13 +224,13 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   @Test
   public void dataPropertyAssertions() {
     Node john = getNode(ROOT + "/John");
-    assertThat(GraphUtil.getProperty(john, ROOT + "/hasAge", String.class).get(), is("51"));
+    assertThat(GraphUtil.getProperty(john, ROOT + "/hasAge", Integer.class).get(), is(51));
   }
 
   @Test
   public void mappedDataPropertyAssertion() {
     Node john = getNode(ROOT + "/John");
-    assertThat(GraphUtil.getProperty(john, "isAged", String.class).get(), is("51"));
+    assertThat(GraphUtil.getProperty(john, "isAged", Integer.class).get(), is(51));
   }
 
   @Test

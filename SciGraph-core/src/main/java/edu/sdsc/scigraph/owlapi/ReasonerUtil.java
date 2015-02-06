@@ -15,6 +15,8 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static com.google.common.collect.Iterables.getFirst;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +38,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+
+import com.google.common.collect.Iterables;
 
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
 
@@ -92,6 +96,7 @@ public class ReasonerUtil {
     Set<OWLClass> nothingSubclasses = reasoner.getEquivalentClasses(factory.getOWLNothing()).getEntities();
     if (nothingSubclasses.size() > 1) {
       logger.warning("Not reasoning on " + ont + " because " + nothingSubclasses.size() + " classes are sublasses of nothing");
+      logger.warning("For instance: " + Iterables.getFirst(nothingSubclasses, null).getIRI().toString() + " is a subclass of nothing");
       return false;
     }
     return true;

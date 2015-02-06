@@ -80,7 +80,7 @@ public class OwlApiUtils {
     } else if (literal.isDouble()) {
       literalValue = literal.parseDouble();
     } else {
-      //HACK: Ignore non-english literals for now
+      // TODO: Ignore non-english literals for now
       if (literal.hasLang() && !literal.getLang().equals("en")) {
         return Optional.absent();
       }
