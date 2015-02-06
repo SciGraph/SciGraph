@@ -56,17 +56,17 @@ public class OwlOntologyConsumer implements Callable<Void> {
   public Void call() {
     try {
       while (true) {
-        OWLObject walker = null;
+        OWLObject owlObject = null;
         if (numProducersShutdown.get() < numProducers) {
-          walker = queue.take();
+          owlObject = queue.take();
         } else {
           if (!queue.isEmpty()) {
-            walker = queue.take();
+            owlObject = queue.take();
           } else {
             break;
           }
         }
-        walker.accept(visitor);
+        owlObject.accept(visitor);
       }  
     } catch (InterruptedException consumed) {}
     logger.info("Ontology consumer shutting down...");
