@@ -15,8 +15,6 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static com.google.common.collect.Iterables.getFirst;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -93,10 +91,10 @@ public class ReasonerUtil {
       logger.warning("Not reasoning on " + ont + " because it is inconsistent.");
       return false;
     }
-    Set<OWLClass> nothingSubclasses = reasoner.getEquivalentClasses(factory.getOWLNothing()).getEntities();
-    if (nothingSubclasses.size() > 1) {
-      logger.warning("Not reasoning on " + ont + " because " + nothingSubclasses.size() + " classes are sublasses of nothing");
-      logger.warning("For instance: " + Iterables.getFirst(nothingSubclasses, null).getIRI().toString() + " is a subclass of nothing");
+    Set<OWLClass> nothingEquivalents = reasoner.getEquivalentClasses(factory.getOWLNothing()).getEntities();
+    if (nothingEquivalents.size() > 1) {
+      logger.warning("Not reasoning on " + ont + " because " + nothingEquivalents.size() + " classes are sublasses of nothing");
+      logger.warning("For instance: " + Iterables.getFirst(nothingEquivalents, null).getIRI().toString() + " is a equivalent to owl:nothing");
       return false;
     }
     return true;
