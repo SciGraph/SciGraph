@@ -66,17 +66,28 @@ public class GraphUtil {
 
   public static Object getNewPropertyValue(Object originalValue, Object newValue) {
     Class<?> clazz = checkNotNull(newValue).getClass();
+    boolean reduceToString = false;
     if (null != originalValue && originalValue.getClass().isArray()) {
+      Class<?> originalClazz = Array.get(originalValue, 0).getClass();
+      if (!originalClazz.equals(clazz)) {
+        reduceToString = true;
+        clazz = String.class;
+      }
       Object newArray = Array.newInstance(clazz, Array.getLength(originalValue) + 1);
       for (int i = 0; i < Array.getLength(originalValue); i++) {
-        Array.set(newArray, i, Array.get(originalValue, i));
+        Object val = Array.get(originalValue, i);
+        Array.set(newArray, i, reduceToString ? val.toString() : val);
       }
-      Array.set(newArray, Array.getLength(originalValue), newValue);
+      Array.set(newArray, Array.getLength(originalValue), reduceToString ? newValue.toString() : newValue);
       return newArray;
     } else if (null != originalValue) {
+      if (!clazz.equals(originalValue.getClass())) {
+        reduceToString = true;
+        clazz = String.class;
+      }
       Object newArray = Array.newInstance(clazz, 2);
-      Array.set(newArray, 0, originalValue);
-      Array.set(newArray, 1, newValue);
+      Array.set(newArray, 0, reduceToString ? originalValue.toString() : originalValue);
+      Array.set(newArray, 1, reduceToString ? newValue.toString() : newValue);
       return newArray;
     } else {
       return newValue;
