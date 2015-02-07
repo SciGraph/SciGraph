@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class NodeTransformer implements Function<Node, Concept> {
@@ -39,7 +40,7 @@ public class NodeTransformer implements Function<Node, Concept> {
     try (Transaction tx = n.getGraphDatabase().beginTx()) {
       concept.setId(n.getId());
       concept.setUri((String) n.getProperty(Concept.URI, null));
-      concept.setAnonymous((boolean) n.getProperty(Concept.ANONYMOUS, false));
+      concept.setAnonymous(n.hasLabel(OwlLabels.OWL_ANONYMOUS));
       concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
       concept.setDeprecated(isDeprecated(n));
 

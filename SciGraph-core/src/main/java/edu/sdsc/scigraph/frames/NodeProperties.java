@@ -22,7 +22,6 @@ import java.util.Set;
 public class NodeProperties extends CommonProperties {
 
   public static final String LABEL = "label";
-  public static final String ANONYMOUS = "anonymous";
 
   private Set<String> labels = new HashSet<>();
   private boolean anonymous;

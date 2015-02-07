@@ -42,12 +42,8 @@ import org.neo4j.graphdb.traversal.Uniqueness;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 
-import edu.sdsc.scigraph.frames.NodeProperties;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
-
-/***
- * Used for building the Solr synonym files to support object property entailment.
- */
 public class HierarchyVisitor {
 
   private final GraphDatabaseService graph;
@@ -152,7 +148,7 @@ public class HierarchyVisitor {
         while (iter.hasNext()) {
           PropertyContainer container = iter.next();
           if (container instanceof Node) {
-            if (GraphUtil.getProperty(container, NodeProperties.ANONYMOUS, Boolean.class).or(false)) {
+            if (((Node) container).hasLabel(OwlLabels.OWL_ANONYMOUS)) {
               // Ignore paths with anonymous nodes
             }
             else if (iter.hasNext() &&
