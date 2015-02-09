@@ -34,7 +34,7 @@ import edu.sdsc.scigraph.frames.Concept;
 
 // TODO: Can this be replaced by Concept?
 @XmlRootElement
-public class Entity {
+public final class Entity {
 
   @XmlValue
   private final Set<String> term;
