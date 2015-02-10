@@ -24,8 +24,6 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.sun.jersey.api.client.UniformInterfaceException;
-
 import edu.sdsc.scigraph.services.refine.RefineResults;
 import edu.sdsc.scigraph.services.refine.ServiceMetadata;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
@@ -51,18 +49,18 @@ public class RefineServiceTest {
   @Test
   public void metadataIsReturned_whenNoQueriesArePresent() {
     assertThat(
-        resources.client().resource("/refine/reconcile").get(ServiceMetadata.class), instanceOf(ServiceMetadata.class));
+        resources.client().target("/refine/reconcile").request().get(ServiceMetadata.class), instanceOf(ServiceMetadata.class));
   }
 
   @Test
   public void resultsAreReturned_whenQueriesArePresent() {
     assertThat(
-        resources.client().resource("/refine/reconcile?query=hippocampus").get(RefineResults.class), instanceOf(RefineResults.class));
+        resources.client().target("/refine/reconcile?query=hippocampus").request().get(RefineResults.class), instanceOf(RefineResults.class));
   }
 
-  @Test(expected=UniformInterfaceException.class)
+  @Test(expected=Exception.class)
   public void exceptionIsThrown_whenJsonIsMalformed() {
-      resources.client().resource("/refine/reconcile?query=%5Bbad%20json%5D%5D").get(RefineResults.class);
+      resources.client().target("/refine/reconcile?query=%5Bbad%20json%5D%5D").request().get(RefineResults.class);
   }
 
 }

@@ -32,7 +32,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
-import com.sun.jersey.api.client.UniformInterfaceException;
 
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
@@ -59,14 +58,14 @@ public class VocabularyServiceTest {
     when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
   }
 
-  @Test(expected=UniformInterfaceException.class)
+  @Test(expected=Exception.class)
   public void testUnknownUri() {
-    resources.client().resource("/vocabulary/uri/http%3A%2F%2Fexample.org%2Fnone").accept(MediaType.APPLICATION_XML).get(String.class);
+    resources.client().target("/vocabulary/uri/http%3A%2F%2Fexample.org%2Fnone").request().accept(MediaType.APPLICATION_XML).get(String.class);
   }
 
   @Test
   public void testKnownUriJson() throws Exception {
-    String response = resources.client().resource("/vocabulary/uri/http%3A%2F%2Fexample.org%2Ffoo").accept(MediaType.APPLICATION_JSON).get(String.class);
+    String response = resources.client().target("/vocabulary/uri/http%3A%2F%2Fexample.org%2Ffoo").request().accept(MediaType.APPLICATION_JSON).get(String.class);
     String expected = fixture("fixtures/hippocampus.json");
     assertEquals(expected, response, true);
   }
@@ -74,7 +73,7 @@ public class VocabularyServiceTest {
   @Test
   public void testKnownIdJson() throws Exception {
     when(vocabulary.getConceptFromId(any(Vocabulary.Query.class))).thenReturn(newArrayList(hippocampus));
-    String response = resources.client().resource("/vocabulary/id/foo").accept(MediaType.APPLICATION_JSON).get(String.class);
+    String response = resources.client().target("/vocabulary/id/foo").request().accept(MediaType.APPLICATION_JSON).get(String.class);
     String expected = fixture("fixtures/hippocampusInList.json");
     assertEquals(expected, response, true);
   }

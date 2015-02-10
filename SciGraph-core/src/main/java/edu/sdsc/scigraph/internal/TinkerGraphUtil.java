@@ -28,7 +28,7 @@ import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
-class TinkerGraphUtil {
+public class TinkerGraphUtil {
 
   static void mapProperties(PropertyContainer container, Element element) {
     for (String key: container.getPropertyKeys()) {
@@ -36,7 +36,7 @@ class TinkerGraphUtil {
     }
   }
 
-  static Vertex addNode(TinkerGraph graph, Node node) {
+  public static Vertex addNode(TinkerGraph graph, Node node) {
     Vertex vertex = graph.getVertex(node.getId());
     if (null == vertex) {
       vertex = graph.addVertex(node.getId());
@@ -50,7 +50,7 @@ class TinkerGraphUtil {
     return vertex;
   }
 
-  static Edge addEdge(TinkerGraph graph, Relationship relationship) {
+  public static Edge addEdge(TinkerGraph graph, Relationship relationship) {
     Edge edge = graph.getEdge(relationship.getId());
     if (null == edge) {
       Vertex outVertex = addNode(graph, relationship.getStartNode());
