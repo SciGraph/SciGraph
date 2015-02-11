@@ -61,4 +61,13 @@ public class TinkerGraphUtil {
     }
     return edge;
   }
+
+  public static Element addElement(TinkerGraph graph, PropertyContainer container) {
+    if (container instanceof Node) {
+      return addNode(graph, (Node) container);
+    } else {
+      return addEdge(graph, (Relationship) container);
+    }
+  }
+
 }
