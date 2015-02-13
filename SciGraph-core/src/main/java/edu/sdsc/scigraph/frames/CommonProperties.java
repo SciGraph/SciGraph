@@ -29,6 +29,7 @@ public class CommonProperties {
   public static final String FRAGMENT = "fragment";
   public static final String CONVENIENCE = "convenience";
   public static final String OWL_TYPE = "owlType";
+  public static final String CURIE = "curie";
 
   private long id;
   private String uri;

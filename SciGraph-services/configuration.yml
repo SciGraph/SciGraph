@@ -1,10 +1,10 @@
 server:
-  applicationConnectors:
-  - type: http
+  type: simple
+  applicationContextPath: /scigraph
+  adminContextPath: /admin
+  connector:
+    type: http
     port: 9000
-  adminConnectors:
-  - type: http
-    port: 9001
 #  requestLog:
 #    timeZone: America/Los_Angeles
 #    appenders: []
@@ -16,7 +16,7 @@ server:
 logging:
   level: INFO
 #  loggers:
-#    "http.request": OFF
+#    "http.request": ON
 
 applicationContextPath: scigraph
 
@@ -93,6 +93,10 @@ graphConfiguration:
     http://omia.angis.org.au/OMIA : OMIA
     http://purl.obolibrary.org/obo/OMIABreed_ : OMIABreed
     http://purl.obolibrary.org/obo/OMIAPub_ : OMIAPub
+
+cypherResources:
+  - path: /test
+    query: MATCH (n) RETURN n LIMIT 2
 
 serviceMetadata:
   name: 'SciGraph Reconciliation Service'

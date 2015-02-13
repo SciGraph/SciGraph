@@ -154,7 +154,7 @@ public class GraphService extends BaseResource {
       tx.success();
     }
     GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
 
@@ -195,7 +195,7 @@ public class GraphService extends BaseResource {
       @PathParam("id") String id,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
-    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), null, null, null);
+    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), null, null, callback);
   }
 
   @GET
@@ -218,7 +218,7 @@ public class GraphService extends BaseResource {
       tx.success();
     }
     sort(relationships);
-    return JaxRsUtil.wrapJsonp(request, new GenericEntity<List<String>>(relationships) {}, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
   }
 
 }

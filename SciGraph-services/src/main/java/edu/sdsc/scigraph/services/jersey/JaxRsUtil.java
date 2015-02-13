@@ -70,7 +70,8 @@ public class JaxRsUtil {
    */
   public static Object wrapJsonp(Request request, GenericEntity<?> response, @Nullable String callback) {
     if (JaxRsUtil.isVariant(request, CustomMediaTypes.APPLICATION_JSONP_TYPE) || !isNullOrEmpty(callback)) {
-      callback = Optional.of(callback).or(DEFAULT_JSONP_CALLBACK);
+      callback = Optional.fromNullable(callback).or(DEFAULT_JSONP_CALLBACK);
+      
       return new JSONWrappedObject(format("%s(", callback), ");", response.getEntity());
     } else {
       return Response.ok(response).build();

@@ -15,12 +15,13 @@
  */
 package edu.sdsc.scigraph.services.jersey;
 
-import javax.ws.rs.core.Context;
+import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.ws.rs.core.Request;
 
 public class BaseResource {
 
-  @Context
-  public Request request;
+  @Inject
+  public Provider<Request> request;
 
 }

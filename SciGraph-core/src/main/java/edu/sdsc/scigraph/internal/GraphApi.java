@@ -37,19 +37,26 @@ import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class GraphApi {
 
   private final GraphDatabaseService graphDb;
+  
+  private final CurieUtil curieUtil;
 
   @Inject
-  public GraphApi(GraphDatabaseService graphDb) {
+  public GraphApi(GraphDatabaseService graphDb, CurieUtil curieUtil) {
     this.graphDb = graphDb;
+    this.curieUtil = curieUtil;
   }
 
   /***
@@ -116,6 +123,16 @@ public class GraphApi {
     return result;
   }
 
+  void addCuries(TinkerGraph graph) {
+    for (Vertex vertex: graph.getVertices()) {
+      String uri = (String)vertex.getProperty(CommonProperties.URI);
+      Optional<String> curie = curieUtil.getCurie(uri);
+      if (curie.isPresent()) {
+        vertex.setProperty(CommonProperties.CURIE, curie.get());
+      }
+    }
+  }
+  
   public TinkerGraph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
     TraversalDescription description = graphDb.traversalDescription().depthFirst().evaluator(Evaluators.toDepth(depth));
     for (DirectedRelationshipType type: types) {
@@ -146,6 +163,7 @@ public class GraphApi {
         TinkerGraphUtil.addNode(graph, node);
       }
     }
+    addCuries(graph);
     return graph;
   }
 

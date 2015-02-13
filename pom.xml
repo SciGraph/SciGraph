@@ -51,7 +51,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <dropwizard.version>0.8.0-RC2</dropwizard.version>
-    <guice.version>3.0</guice.version>
+    <guice.version>4.0-beta5</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
   </properties>
 

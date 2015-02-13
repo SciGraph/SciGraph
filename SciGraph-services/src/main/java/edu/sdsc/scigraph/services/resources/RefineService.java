@@ -103,7 +103,7 @@ public class RefineService extends BaseResource {
     try {
       if (isNullOrEmpty(query) && isNullOrEmpty(queries)) {
         GenericEntity<ServiceMetadata> response = new GenericEntity<ServiceMetadata>(metadata){};
-        return JaxRsUtil.wrapJsonp(request, response, callback);
+        return JaxRsUtil.wrapJsonp(request.get(), response, callback);
       } else if (!isNullOrEmpty(queries)) {
         RefineQueries refineQueries = RefineUtil.getQueries(queries);
         Map<String, RefineResults> resultMap = new HashMap<>();
@@ -112,12 +112,12 @@ public class RefineService extends BaseResource {
           resultMap.put(entry.getKey(), results);
         }
         GenericEntity<Map<String, RefineResults>> response = new GenericEntity<Map<String, RefineResults>>(resultMap){};
-        return JaxRsUtil.wrapJsonp(request, response, callback);
+        return JaxRsUtil.wrapJsonp(request.get(), response, callback);
       } else if (!isNullOrEmpty(query)) {
         RefineQuery refineQuery = RefineUtil.getQuery(query);
         RefineResults results = getResults(refineQuery);
         GenericEntity<RefineResults> response = new GenericEntity<RefineResults>(results){};
-        return JaxRsUtil.wrapJsonp(request, response, callback);
+        return JaxRsUtil.wrapJsonp(request.get(), response, callback);
       }
     } catch (IOException e) {
       String badJson = isNullOrEmpty(query) ? queries : query;

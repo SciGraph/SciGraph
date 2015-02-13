@@ -31,11 +31,9 @@ import org.neo4j.cypher.javacompat.ExecutionResult;
 
 import com.codahale.metrics.annotation.Timed;
 
-import edu.sdsc.scigraph.services.jersey.BaseResource;
-
 @Path("/cypher")
 @Produces({ MediaType.TEXT_PLAIN })
-public class CypherService extends BaseResource {
+public class CypherService {
 
   @Inject
   private ExecutionEngine engine;

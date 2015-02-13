@@ -135,7 +135,7 @@ public class VocabularyService extends BaseResource {
     Optional<Concept> concept = vocabulary.getConceptFromUri(uri);
     if (concept.isPresent()) {
       GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(mapper.map(concept.get(), ConceptDTO.class)){};
-      return JaxRsUtil.wrapJsonp(request, response, callback);
+      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     } else {
       throw new WebApplicationException(404);
     }
@@ -168,7 +168,7 @@ public class VocabularyService extends BaseResource {
     } else {
       ConceptWrapper wrapper = new ConceptWrapper(transform(concepts, conceptDtoTransformer));
       GenericEntity<ConceptWrapper> response = new GenericEntity<ConceptWrapper>(wrapper){};
-      return JaxRsUtil.wrapJsonp(request, response, callback);
+      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
   }
 
@@ -249,7 +249,7 @@ public class VocabularyService extends BaseResource {
     completions = completions.subList(0, endIndex);
     CompletionWrapper wrapper = new CompletionWrapper(completions);
     GenericEntity<CompletionWrapper> response = new GenericEntity<CompletionWrapper>(wrapper){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @GET
@@ -289,7 +289,7 @@ public class VocabularyService extends BaseResource {
     } else {
       ConceptWrapper wrapper = new ConceptWrapper(transform(concepts, conceptDtoTransformer));
       GenericEntity<ConceptWrapper> response = new GenericEntity<ConceptWrapper>(wrapper){};
-      return JaxRsUtil.wrapJsonp(request, response, callback);
+      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
   }
 
@@ -329,7 +329,7 @@ public class VocabularyService extends BaseResource {
     } else {
       ConceptWrapper wrapper = new ConceptWrapper(transform(concepts, conceptDtoTransformer));
       GenericEntity<ConceptWrapper> response = new GenericEntity<ConceptWrapper>(wrapper){};
-      return JaxRsUtil.wrapJsonp(request, response, callback);
+      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
   }
 
@@ -350,7 +350,7 @@ public class VocabularyService extends BaseResource {
     List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit.get()));
     SuggestionWrapper wrapper = new SuggestionWrapper(suggestions);
     GenericEntity<SuggestionWrapper> response = new GenericEntity<SuggestionWrapper>(wrapper){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @GET
@@ -365,7 +365,7 @@ public class VocabularyService extends BaseResource {
       @QueryParam("callback") String callback) {
     CategoryWrapper categories = new CategoryWrapper(vocabulary.getAllCategories());
     GenericEntity<CategoryWrapper> response = new GenericEntity<CategoryWrapper>(categories){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @GET
@@ -380,7 +380,7 @@ public class VocabularyService extends BaseResource {
       @QueryParam("callback") String callback) {
     OntologyWrapper ontologies = new OntologyWrapper(vocabulary.getAllCuriePrefixes());
     GenericEntity<OntologyWrapper> response = new GenericEntity<OntologyWrapper>(ontologies){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @XmlRootElement(name="concepts")

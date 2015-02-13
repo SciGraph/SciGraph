@@ -314,7 +314,7 @@ public class AnnotateService extends BaseResource {
       throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
     GenericEntity<List<EntityAnnotation>> response = new GenericEntity<List<EntityAnnotation>>(entities){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @POST
@@ -392,7 +392,7 @@ public class AnnotateService extends BaseResource {
     annotation.content = writer.toString();
 
     GenericEntity<Annotations> response = new GenericEntity<Annotations>(annotation){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
 
@@ -450,7 +450,7 @@ public class AnnotateService extends BaseResource {
     annotation.content = writer.toString();
 
     GenericEntity<Annotations> response = new GenericEntity<Annotations>(annotation){};
-    return JaxRsUtil.wrapJsonp(request, response, "fn"); 
+    return JaxRsUtil.wrapJsonp(request.get(), response, "fn"); 
   }
 
   /***

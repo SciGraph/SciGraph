@@ -25,7 +25,6 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.inject.Inject;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -42,7 +41,6 @@ import com.tinkerpop.blueprints.Vertex;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.services.api.graph.BbopGraph;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,15 +49,9 @@ public class BbopJsGraphWriter implements MessageBodyWriter<Graph> {
 
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
 
-  private final CurieUtil util;
-
-  @Inject
-  BbopJsGraphWriter(CurieUtil util) {
-    this.util = util;
-  }
-
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    System.out.println("checking!");
     return Graph.class.isAssignableFrom(type);
   }
 
@@ -70,8 +62,9 @@ public class BbopJsGraphWriter implements MessageBodyWriter<Graph> {
 
   // TODO: Move these next three methods someplace common
   String getCurieOrFragment(Vertex vertex) {
-    String uri = (String)vertex.getProperty(CommonProperties.URI);
-    return util.getCurie(uri).or((String)vertex.getProperty(CommonProperties.FRAGMENT));
+    String property = vertex.getPropertyKeys().contains(CommonProperties.CURIE) 
+        ? CommonProperties.CURIE : CommonProperties.FRAGMENT; 
+    return (String)vertex.getProperty(property);
   }
 
   static Optional<String> getLabel(Vertex vertex) {

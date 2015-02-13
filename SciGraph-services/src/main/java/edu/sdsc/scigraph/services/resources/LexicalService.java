@@ -73,7 +73,7 @@ public class LexicalService extends BaseResource {
       @QueryParam("callback") String callback) {
     SentenceWrapper sentences = new SentenceWrapper(lexicalLib.extractSentences(text));
     GenericEntity<SentenceWrapper> response = new GenericEntity<SentenceWrapper>(sentences){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   /***
@@ -95,7 +95,7 @@ public class LexicalService extends BaseResource {
       @QueryParam("callback") String callback) {
     final List<PosToken> tokens = lexicalLib.tagPOS(text);
     GenericEntity<List<PosToken>> response = new GenericEntity<List<PosToken>>(tokens){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   /***
@@ -118,7 +118,7 @@ public class LexicalService extends BaseResource {
       @QueryParam("callback") String callback) {
     final List<Token<String>> chunks = lexicalLib.getChunks(text);
     GenericEntity<List<Token<String>>> response = new GenericEntity<List<Token<String>>>(chunks){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   /***
@@ -141,7 +141,7 @@ public class LexicalService extends BaseResource {
       @QueryParam("callback") String callback) {
     final List<Token<String>> chunks = lexicalLib.getEntities(text);
     GenericEntity<List<Token<String>>> response = new GenericEntity<List<Token<String>>>(chunks){};
-    return JaxRsUtil.wrapJsonp(request, response, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @XmlRootElement(name="sentences")

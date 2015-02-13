@@ -15,15 +15,17 @@
  */
 package edu.sdsc.scigraph.services.health;
 
+import static com.google.common.collect.Iterables.size;
+
 import javax.inject.Inject;
 
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.tooling.GlobalGraphOperations;
 
-import com.codahale.metrics.health.HealthCheck;
+import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
 
-public class Neo4jHealthCheck extends HealthCheck {
+public class Neo4jHealthCheck extends NamedHealthCheck {
 
   private final GraphDatabaseService graphDb;
 
@@ -34,17 +36,22 @@ public class Neo4jHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
-    Node node = null;
+    int count = 0;
     try (Transaction tx = graphDb.beginTx()) {
-      node = graphDb.getNodeById(1);
+      count = size(GlobalGraphOperations.at(graphDb).getAllNodes());
       tx.success();
     }
 
-    if (null != node) {
+    if (count > 0) {
       return Result.healthy();
     } else {
-      return Result.unhealthy("Could not find nodes in the graph");
+      return Result.unhealthy("There are no nodes in the graph.");
     }
+  }
+
+  @Override
+  public String getName() {
+    return "Neo4j Health Check";
   }
 
 }

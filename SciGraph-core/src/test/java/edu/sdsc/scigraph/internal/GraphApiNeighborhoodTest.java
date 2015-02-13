@@ -18,6 +18,9 @@ package edu.sdsc.scigraph.internal;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
@@ -35,7 +38,9 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
@@ -45,6 +50,7 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
   Node a, b, c, d, e, f;
   RelationshipType fizz = DynamicRelationshipType.withName("fizz");
   Optional<Predicate<Node>> absent = Optional.absent();
+  CurieUtil curieUtil = mock(CurieUtil.class);
 
   @Before
   public void addNodes() throws Exception {
@@ -58,7 +64,8 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
     c.createRelationshipTo(b, OwlRelationships.RDFS_SUBCLASS_OF);
     d.createRelationshipTo(c, OwlRelationships.RDFS_SUBCLASS_OF);
     e.createRelationshipTo(b, fizz);
-    graphApi = new GraphApi(graphDb);
+    when(curieUtil.getCurie(anyString())).thenReturn(Optional.of("curie"));
+    graphApi = new GraphApi(graphDb, curieUtil);
   }
 
   @Test
@@ -96,6 +103,12 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
     TinkerGraph graph = graphApi.getNeighbors(newHashSet(f), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(1)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(0)));
+  }
+
+  @Test
+  public void curiesAreAdded() {
+    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
+    assertThat((String)graph.getVertex(0).getProperty(CommonProperties.CURIE), is("curie"));
   }
 
   @Test
