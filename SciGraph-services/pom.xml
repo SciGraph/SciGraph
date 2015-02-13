@@ -103,7 +103,7 @@
     <dependency>
       <groupId>com.wordnik</groupId>
       <artifactId>swagger-jaxrs_2.10</artifactId>
-      <version>1.3.7</version>
+      <version>1.3.12</version>
     </dependency>
 
     <dependency>

@@ -129,7 +129,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     ClassReaders.setReader(new DefaultJaxrsApiReader());
     SwaggerConfig config = ConfigFactory.config();
     config.setApiVersion("1.0.1");
-    config.setBasePath("../" + basePath);
+    config.setBasePath("../../" + basePath);
   }
 
   void addWriters(JerseyEnvironment environment) throws Exception {

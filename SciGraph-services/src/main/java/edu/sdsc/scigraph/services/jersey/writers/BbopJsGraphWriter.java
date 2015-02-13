@@ -51,7 +51,6 @@ public class BbopJsGraphWriter implements MessageBodyWriter<Graph> {
 
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    System.out.println("checking!");
     return Graph.class.isAssignableFrom(type);
   }
 
