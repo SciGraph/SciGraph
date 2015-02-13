@@ -26,8 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
-
 import org.glassfish.jersey.message.MessageProperties;
 import org.glassfish.jersey.server.filter.UriConnegFilter;
 
@@ -57,7 +55,6 @@ import edu.sdsc.scigraph.lexical.LexicalLibModule;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.opennlp.OpenNlpModule;
 import edu.sdsc.scigraph.services.configuration.ApplicationConfiguration;
-import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.MediaTypeMappings;
 import edu.sdsc.scigraph.services.jersey.dynamic.CypherResourceConfig;
 import edu.sdsc.scigraph.services.jersey.dynamic.DynamicCypherResourceFactory;

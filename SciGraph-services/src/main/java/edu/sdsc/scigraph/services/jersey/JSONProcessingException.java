@@ -16,22 +16,18 @@
 package edu.sdsc.scigraph.services.jersey;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-//import com.sun.jersey.api.Responses;
+import javax.ws.rs.core.Response.Status;
 
 public class JSONProcessingException extends WebApplicationException {
 
   private static final long serialVersionUID = 1L;
 
   public JSONProcessingException() {
-    // TODO: FIX THIS super(Responses.clientError().build());
+    super(Status.BAD_REQUEST);
   }
 
   public JSONProcessingException(String json) {
-    super();
-    /*  //TODO: FIX THIS super(Response.status(Responses.CLIENT_ERROR).
-        entity("Failed parse JSON: " + json).type("text/plain").build());*/
+    super("Failed parse JSON: " + json, Status.BAD_REQUEST);
   }
 
 }
