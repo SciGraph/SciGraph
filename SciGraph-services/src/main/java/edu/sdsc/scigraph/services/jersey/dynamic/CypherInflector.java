@@ -74,7 +74,7 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
 
   @Override
   public TinkerGraph apply(ContainerRequestContext context) {
-    logger.info("Serving request");
+    logger.fine("Serving dynamic request");
     MultivaluedMap<String, String> params = context.getUriInfo().getQueryParameters();
     Map<String, Object> flatMap = flatten(params);
     try (Transaction tx = graphDb.beginTx()) {

@@ -140,7 +140,6 @@ public class MainApplication extends Application<ApplicationConfiguration> {
 
   @Override
   public void run(ApplicationConfiguration configuration, Environment environment) throws Exception {
-    System.out.println(factory.getInjector());
     environment.jersey().register(new UriConnegFilter(new MediaTypeMappings(), Collections.<String, String>emptyMap()));
     Map<String, Object> props = new HashMap<>();
     props.put(MessageProperties.LEGACY_WORKERS_ORDERING, true);
