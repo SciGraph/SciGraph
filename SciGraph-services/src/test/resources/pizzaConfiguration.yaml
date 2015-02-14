@@ -1,15 +1,13 @@
 server:
-  applicationConnectors:
-  - type: http 
+  type: simple
+  applicationContextPath: /scigraph
+  adminContextPath: /admin
+  connector:
+    type: http
     port: 9000
-  adminConnectors:
-  - type: http
-    port: 9001
 
 logging:
   level: INFO
-  
-applicationContextPath: scigraph
 
 graphConfiguration:
   graphLocation: ../scigraph-core/target/pizzaGraph

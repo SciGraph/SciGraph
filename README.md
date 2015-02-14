@@ -55,7 +55,7 @@ Clone and compile the project:
 Build the graph:
 
     cd SciGraph-core
-    mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.owlapi.BatchOwlLoader" -Dexec.args="-c src/test/resources/pizzaExample.yaml"
+    mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c src/test/resources/pizzaExample.yaml"
 
 Run the service:
 
