@@ -15,15 +15,23 @@
  */
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedMap;
+
+import jersey.repackaged.com.google.common.base.Splitter;
 
 import org.glassfish.jersey.process.Inflector;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
@@ -32,6 +40,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 
+import com.google.common.base.Joiner;
 import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
@@ -40,7 +49,10 @@ import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 final class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph> {
 
   private static final Logger logger = Logger.getLogger(CypherInflector.class.getName());
-  
+
+  private static final String ENTAILMENT_REGEX = "\\:[a-zA-Z0-9_:.|]*!";
+  private static Pattern pattern = Pattern.compile(ENTAILMENT_REGEX);
+
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;
   private final CypherResourceConfig config;
@@ -72,13 +84,51 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     return graph;
   }
 
+  Set<String> getEntailedRelationshipTypes(Set<String> parents) {
+    Set<String> entailedTypes = new HashSet<>();
+    for (String parent: parents) {
+      entailedTypes.add(parent);
+      Map<String, Object> params = new HashMap<>();
+      params.put("fragment", parent);
+      try (Transaction tx = graphDb.beginTx()) {
+        ExecutionResult result = engine.execute(
+            "START parent=node:node_auto_index(fragment={fragment}) " +
+                "MATCH (parent)<-[:subPropertyOf*]-(subProperty) " +
+                "RETURN distinct subProperty.fragment as subProperty", params);
+        for (Map<String, Object> resultMap: result) {
+          entailedTypes.add((String) resultMap.get("subProperty"));
+        }
+      }
+    }
+    return entailedTypes;
+  }
+
+  /***
+   * 
+   * @param cypher
+   * @return
+   */
+  String entailRelationships(String cypher) {
+    Matcher m = pattern.matcher(cypher);
+    StringBuffer buffer = new StringBuffer();
+    while (m.find()) {
+      String group = m.group().substring(1, m.group().length() - 1);
+      Set<String> parentTypes = newHashSet(Splitter.on('|').split(group));
+      String entailedTypes = Joiner.on('|').join(getEntailedRelationshipTypes(parentTypes));
+      m.appendReplacement(buffer, ":" + entailedTypes);
+    }
+    m.appendTail(buffer);
+    return buffer.toString();
+  }
+
   @Override
   public TinkerGraph apply(ContainerRequestContext context) {
     logger.fine("Serving dynamic request");
     MultivaluedMap<String, String> params = context.getUriInfo().getQueryParameters();
     Map<String, Object> flatMap = flatten(params);
     try (Transaction tx = graphDb.beginTx()) {
-      ExecutionResult result = engine.execute(config.getQuery(), flatMap);
+      String query = entailRelationships(config.getQuery());
+      ExecutionResult result = engine.execute(query, flatMap);
       TinkerGraph graph = resultToGraph(result);
       tx.success();
       return graph;

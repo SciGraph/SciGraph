@@ -15,83 +15,88 @@
  */
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.common.collect.Sets.newHashSet;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
 
+import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
-public class CypherInflectorTest {
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
-  GraphDatabaseService graphDb = mock(GraphDatabaseService.class);
-  ExecutionEngine engine = mock(ExecutionEngine.class);
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
+import edu.sdsc.scigraph.util.GraphTestBase;
+
+public class CypherInflectorTest extends GraphTestBase {
+
+  ExecutionEngine engine;
   CypherResourceConfig config = new CypherResourceConfig();
   ContainerRequestContext context = mock(ContainerRequestContext.class);
   UriInfo uriInfo = mock(UriInfo.class);
   Transaction tx = mock(Transaction.class);
 
+  void addRelationship(String parentIri, String childIri, RelationshipType type) {
+    Node parent = createNode(parentIri);
+    Node child = createNode(childIri);
+    child.createRelationshipTo(parent, type);
+  }
+
   @Before
   public void setup() {
+    engine = new ExecutionEngine(graphDb);
+    addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
+    addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
+    addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
     when(context.getUriInfo()).thenReturn(uriInfo);
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
     when(uriInfo.getQueryParameters()).thenReturn(map);
-    when(graphDb.beginTx()).thenReturn(tx);
-  }
-
-  static class MockResult extends ExecutionResult {
-
-    MockResult() {
-      this(null);
-    }
-
-    public MockResult(org.neo4j.cypher.ExecutionResult projection) {
-      super(projection);
-    }
-
-    @Override
-    public ResourceIterator<Map<String, Object>> iterator() {
-      return new ResourceIterator<Map<String,Object>>() {
-
-        @Override
-        public boolean hasNext() {
-          return false;
-        }
-
-        @Override
-        public Map<String, Object> next() {
-          return null;
-        }
-
-        @Override
-        public void remove() {}
-
-        @Override
-        public void close() {}};
-    }
-
   }
 
   @Test
-  @SuppressWarnings(value = {"unchecked"})
-  public void smoke() {
+  public void inflectorAppliesCorrectly() {
     config.setQuery("MATCH (n) RETURN n");
     CypherInflector inflector = new CypherInflector(graphDb, engine, config);
-    ExecutionResult result = new MockResult();
-    when(engine.execute(anyString(), anyMap())).thenReturn(result);
-    inflector.apply(context);
+    TinkerGraph graph = inflector.apply(context);
+    assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
+  }
+
+  @Test
+  public void inflectorAppliesCorrectly_withRelationshipEntailment() {
+    config.setQuery("MATCH (n)-[r:foo!]-(m) RETURN n, r, m");
+    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    TinkerGraph graph = inflector.apply(context);
+    assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
+  }
+
+  @Test
+  public void entailmentRegex() {
+    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    String result = inflector.entailRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
+    assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
+  }
+
+  @Test
+  public void multipleEntailmentRegex() {
+    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    Set<String> types = inflector.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
+    assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "baz"));
   }
 
 }
