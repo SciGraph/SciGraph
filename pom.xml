@@ -26,7 +26,7 @@
   <modules>
     <module>SciGraph-core</module>
     <module>SciGraph-services</module>
-    <module>scigraph-entity</module>
+    <module>SciGraph-entity</module>
   </modules>
 
   <prerequisites>
