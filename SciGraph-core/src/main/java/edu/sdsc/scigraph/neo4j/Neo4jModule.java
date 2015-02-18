@@ -79,7 +79,9 @@ public class Neo4jModule extends AbstractModule {
   private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
       NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
       CommonProperties.FRAGMENT,
-      Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX);
+      Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
+      Concept.ABREVIATION, Concept.ABREVIATION + LuceneUtils.EXACT_SUFFIX,
+      Concept.ACRONYM, Concept.ACRONYM + LuceneUtils.EXACT_SUFFIX);
 
   private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
       "lucene", "analyzer", VocabularyIndexAnalyzer.class.getName());

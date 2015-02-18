@@ -66,7 +66,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   Concept parkinsons;
   Concept als;
   Concept deprecated;
-  
+
   NodeTransformer transformer = new NodeTransformer();
 
   Concept buildConcept(String uri, String label, String... categories) {
@@ -87,6 +87,9 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
       GraphUtil.addProperty(graphDb.getNodeById(hippocampus.getId()), Concept.SYNONYM, "cornu ammonis");
       GraphUtil.addProperty(graphDb.getNodeById(hippocampus.getId()), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "cornu ammonis");
+      GraphUtil.addProperty(graphDb.getNodeById(hippocampus.getId()), Concept.ABREVIATION, "hpcs");
+      GraphUtil.addProperty(graphDb.getNodeById(hippocampus.getId()), Concept.ABREVIATION + LuceneUtils.EXACT_SUFFIX,
+          "hpcs");
       hippocampusStructure = buildConcept("http://example.org/#hippocampusStructure",
           "Hippocampus structure", "baz");
       structureOfHippocampus = buildConcept("http://example.org/#structureOfHippocampus",
@@ -96,6 +99,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
           "foo bar");
       parkinsons = buildConcept("http://example.org/#parkinsons", "Parkinson's Disease", "baz");
       GraphUtil.addProperty(graphDb.getNodeById(parkinsons.getId()), Concept.SYNONYM, "the");
+      GraphUtil.addProperty(graphDb.getNodeById(parkinsons.getId()), Concept.ACRONYM, "PD");
+      GraphUtil.addProperty(graphDb.getNodeById(parkinsons.getId()), Concept.ACRONYM + LuceneUtils.EXACT_SUFFIX, "PD");
       als = buildConcept("http://example.org/#als", "amyotrophic lateral sclerosis");
       GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM, "Lou Gehrig's");
       GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
@@ -103,6 +108,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
       GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM, "motor neuron disease, bulbar");
       GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
           "motor neuron disease, bulbar");
+      GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.ACRONYM, "ALS");
+      GraphUtil.addProperty(graphDb.getNodeById(als.getId()), Concept.ACRONYM + LuceneUtils.EXACT_SUFFIX, "ALS");
       deprecated = buildConcept("http://example.org/#cerebellum2", "Cerebellum", "baz", "foo");
       GraphUtil.addProperty(graphDb.getNodeById(deprecated.getId()), OWLRDFVocabulary.OWL_DEPRECATED.toString(), "true");
       tx.success();
@@ -354,6 +361,42 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     // TODO: Make sure that stopwords don't return...
     Query query = new Vocabulary.Query.Builder("a").build();
     assertThat(vocabulary.getConceptsFromTerm(query), is(empty()));
+  }
+
+  @Test
+  public void abbreviationsAreCompleted() {
+    Query query = new Vocabulary.Query.Builder("hpc").includeAbbreviations(true).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus));
+  }
+
+  @Test
+  public void acronymsAreCompleted() {
+    Query query = new Vocabulary.Query.Builder("al").includeAcronyms(true).build();
+    assertThat(vocabulary.getConceptsFromPrefix(query), contains(als));
+  }
+
+  @Test
+  public void abbreviationsAreSearched() {
+    Query query = new Vocabulary.Query.Builder("hpcs").includeAbbreviations(true).build();
+    assertThat(vocabulary.searchConcepts(query), contains(hippocampus));
+  }
+
+  @Test
+  public void acronymsAreSearched() {
+    Query query = new Vocabulary.Query.Builder("als").includeAcronyms(true).build();
+    assertThat(vocabulary.searchConcepts(query), contains(als));
+  }
+
+  @Test
+  public void abbreviationsAreResolved() {
+    Query query = new Vocabulary.Query.Builder("hpcs").includeAbbreviations(true).build();
+    assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampus));
+  }
+
+  @Test
+  public void acronymsAreResolved() {
+    Query query = new Vocabulary.Query.Builder("als").includeAcronyms(true).build();
+    assertThat(vocabulary.getConceptsFromTerm(query), contains(als));
   }
 
 }

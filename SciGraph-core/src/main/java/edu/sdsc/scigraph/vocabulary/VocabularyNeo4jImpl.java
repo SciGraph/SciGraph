@@ -220,9 +220,20 @@ public class VocabularyNeo4jImpl implements Vocabulary {
             parser.parse(formatQuery("%s%s:%s*", Concept.SYNONYM, LuceneUtils.EXACT_SUFFIX,
                 query.getInput())), Occur.SHOULD);
       }
+      if (query.isIncludeAbbreviations()) {
+        subQuery.add(
+            parser.parse(formatQuery("%s%s:%s*", Concept.ABREVIATION, LuceneUtils.EXACT_SUFFIX,
+                query.getInput())), Occur.SHOULD);
+      }
+      if (query.isIncludeAcronyms()) {
+        subQuery.add(
+            parser.parse(formatQuery("%s%s:%s*", Concept.ACRONYM, LuceneUtils.EXACT_SUFFIX,
+                query.getInput())), Occur.SHOULD);
+      }
+      
       finalQuery.add(subQuery, Occur.MUST);
     } catch (ParseException e) {
-      logger.log(Level.WARNING, "Failed to parser query", e);
+      logger.log(Level.WARNING, "Failed to parse query", e);
     }
     addCommonConstraints(finalQuery, query);
     IndexHits<Node> hits = null;
@@ -239,19 +250,28 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     QueryParser parser = getQueryParser();
     BooleanQuery finalQuery = new BooleanQuery();
     try {
-      if (query.isIncludeSynonyms()) {
+      if (query.isIncludeSynonyms() || query.isIncludeAbbreviations() || query.isIncludeAcronyms()) {
         BooleanQuery subQuery = new BooleanQuery();
         subQuery.add(LuceneUtils.getBoostedQuery(parser, query.getInput(), 10.0f), Occur.SHOULD);
-        subQuery.add(parser.parse(Concept.SYNONYM + ":" + query.getInput()), Occur.SHOULD);
+        if (query.isIncludeSynonyms()) {
+          subQuery.add(parser.parse(Concept.SYNONYM + ":" + query.getInput()), Occur.SHOULD);
+        }
+        if (query.isIncludeAbbreviations()) {
+          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + query.getInput()), Occur.SHOULD);
+        }
+        if (query.isIncludeAcronyms()) {
+          subQuery.add(parser.parse(Concept.ACRONYM + ":" + query.getInput()), Occur.SHOULD);
+        }
         finalQuery.add(subQuery, Occur.MUST);
       } else {
         finalQuery.add(parser.parse(query.getInput()), Occur.MUST);
       }
     } catch (ParseException e) {
-      logger.log(Level.WARNING, "Failed to parser query", e);
+      logger.log(Level.WARNING, "Failed to parse query", e);
     }
     addCommonConstraints(finalQuery, query);
     IndexHits<Node> hits = null;
+    System.out.println(finalQuery);
     try (Transaction tx = graph.beginTx()) {
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
@@ -265,16 +285,24 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
     BooleanQuery finalQuery = new BooleanQuery();
     try {
-      if (query.isIncludeSynonyms()) {
+      if (query.isIncludeSynonyms() || query.isIncludeAbbreviations() || query.isIncludeAcronyms()) {
         BooleanQuery subQuery = new BooleanQuery();
         subQuery.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
-        subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
+        if (query.isIncludeSynonyms()) {
+          subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
+        }
+        if (query.isIncludeAbbreviations()) {
+          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + query.getInput()), Occur.SHOULD);
+        }
+        if (query.isIncludeAcronyms()) {
+          subQuery.add(parser.parse(Concept.ACRONYM + ":" + query.getInput()), Occur.SHOULD);
+        }
         finalQuery.add(subQuery, Occur.MUST);
       } else {
         finalQuery.add(parser.parse(exactQuery), Occur.MUST);
       }
     } catch (ParseException e) {
-      logger.log(Level.WARNING, "Failed to parser query", e);
+      logger.log(Level.WARNING, "Failed to parse query", e);
     }
     addCommonConstraints(finalQuery, query);
     logger.finest(finalQuery.toString());
