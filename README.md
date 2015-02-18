@@ -50,7 +50,7 @@ Make sure you have `git`, `maven`, and `java 7`.
 
 Clone and compile the project:
 
-    git clone https://github.com/SciCrunch/SciGraph; cd SciGraph; mvn compile
+    git clone https://github.com/SciCrunch/SciGraph; cd SciGraph; mvn -DskipTests -DskipITs install
 
 Build the graph:
 
