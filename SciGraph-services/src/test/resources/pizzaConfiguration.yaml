@@ -10,4 +10,4 @@ logging:
   level: INFO
 
 graphConfiguration:
-  graphLocation: ../scigraph-core/target/pizzaGraph
+  graphLocation: ../Scigraph-core/target/pizzaGraph
