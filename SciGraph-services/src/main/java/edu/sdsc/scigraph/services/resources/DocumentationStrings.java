@@ -34,6 +34,12 @@ class DocumentationStrings {
   final static String LONGEST_ENTITY_DOC =
       "Should only the longest entity be returned for an overlapping group";
 
+  final static String SEARCH_SYNONYMS = "Should synonyms be matched";
+
+  final static String SEARCH_ABBREVIATIONS = "Should abbreviations be matched";
+
+  final static String SEARCH_ACRONYMS = "Should acronyms be matched";
+
   final static String INCLUDE_DEPRECATED_CLASSES = "Should deprecated classes be included";
 
   final static String INCLUDE_ABBREV_DOC = "Should abbreviations be included";
@@ -62,7 +68,7 @@ class DocumentationStrings {
       + "OpenRefine reconciliation services</a> "
       + "supporting OpenRefine term resolution backed by a SciGraph instance. It is unlikely that a client will use these services "
       + "directly but would instead point an OpenRefine instance to <em>http://example.org/SciGraph/refine/reconcile<em>";
-  
+
   final static String RECONCILE_QUERY_DOC = "A call to a reconciliation service API for a single query looks like either of these:"
       + "<ul><li>http://foo.com/bar/reconcile?query=...string...</li>"
       + "<li>http://foo.com/bar/reconcile?query={...json object literal...}</li></ul>"

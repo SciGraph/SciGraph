@@ -31,7 +31,14 @@ import edu.sdsc.scigraph.owlapi.OwlRelationships;
 public class NodeTransformer implements Function<Node, Concept> {
 
   static boolean isDeprecated(Node n) {
-    return Boolean.valueOf((String)n.getProperty(OWLRDFVocabulary.OWL_DEPRECATED.toString(), "false"));
+    if (!n.hasProperty(OWLRDFVocabulary.OWL_DEPRECATED.toString())) {
+      return false;
+    }
+    if (n.getProperty(OWLRDFVocabulary.OWL_DEPRECATED.toString()) instanceof Boolean) {
+      return (Boolean) n.getProperty(OWLRDFVocabulary.OWL_DEPRECATED.toString());
+    } else {
+      return Boolean.valueOf((String)n.getProperty(OWLRDFVocabulary.OWL_DEPRECATED.toString(), "false"));
+    }
   }
 
   @Override

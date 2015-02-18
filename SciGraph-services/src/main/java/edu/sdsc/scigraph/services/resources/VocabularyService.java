@@ -208,6 +208,18 @@ public class VocabularyService extends BaseResource {
               .apply(concept)));
         }
       }
+      if (query.isIncludeAbbreviations()) {
+        for (String completion : getMatchingCompletions(query.getInput(), concept.getAbbreviations())) {
+          completions.add(new Completion(completion, "abbreviation", conceptDtoLiteTransformer
+              .apply(concept)));
+        }
+      }
+      if (query.isIncludeAcronyms()) {
+        for (String completion : getMatchingCompletions(query.getInput(), concept.getAcronyms())) {
+          completions.add(new Completion(completion, "acronym", conceptDtoLiteTransformer
+              .apply(concept)));
+        }
+      }
     }
     sort(completions);
     return completions;
@@ -225,8 +237,12 @@ public class VocabularyService extends BaseResource {
       @PathParam("term") String termPrefix,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") IntParam limit,
-      @ApiParam( value = "Should synonyms be matched", required = false )
+      @ApiParam( value = DocumentationStrings.SEARCH_SYNONYMS, required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") BooleanParam searchSynonyms,
+      @ApiParam( value = DocumentationStrings.SEARCH_ABBREVIATIONS, required = false )
+      @QueryParam("searchAbbreviations") @DefaultValue("false") BooleanParam searchAbbreviations,
+      @ApiParam( value = DocumentationStrings.SEARCH_ACRONYMS, required = false )
+      @QueryParam("searchAcronyms") @DefaultValue("false") BooleanParam searchAcronyms,
       @ApiParam( value = DocumentationStrings.INCLUDE_DEPRECATED_CLASSES, required = false )
       @QueryParam("includeDeprecated") @DefaultValue("false") BooleanParam includeDeprecated,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
@@ -240,6 +256,8 @@ public class VocabularyService extends BaseResource {
         prefixes(prefixes).
         includeDeprecated(includeDeprecated.get()).
         includeSynonyms(searchSynonyms.get()).
+        includeAbbreviations(searchAbbreviations.get()).
+        includeAcronyms(searchAcronyms.get()).
         limit(1000);
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
     List<Completion> completions = getCompletions(builder.build(), concepts);
@@ -270,8 +288,12 @@ public class VocabularyService extends BaseResource {
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") IntParam limit,
-      @ApiParam( value = "Should synonyms be matched", required = false )
+      @ApiParam( value = DocumentationStrings.SEARCH_SYNONYMS, required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") BooleanParam searchSynonyms,
+      @ApiParam( value = DocumentationStrings.SEARCH_ABBREVIATIONS, required = false )
+      @QueryParam("searchAbbreviations") @DefaultValue("false") BooleanParam searchAbbreviations,
+      @ApiParam( value = DocumentationStrings.SEARCH_ACRONYMS, required = false )
+      @QueryParam("searchAcronyms") @DefaultValue("false") BooleanParam searchAcronyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
@@ -282,6 +304,8 @@ public class VocabularyService extends BaseResource {
         categories(categories).
         prefixes(prefixes).
         includeSynonyms(searchSynonyms.get()).
+        includeAbbreviations(searchAbbreviations.get()).
+        includeAcronyms(searchAcronyms.get()).
         limit(limit.get());
     List<Concept> concepts = vocabulary.getConceptsFromTerm(builder.build());
     if (concepts.isEmpty()) {
@@ -310,8 +334,12 @@ public class VocabularyService extends BaseResource {
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
       @QueryParam("limit") @DefaultValue("20") IntParam limit,
-      @ApiParam( value = "Should synonyms be matched", required = false )
+      @ApiParam( value = DocumentationStrings.SEARCH_SYNONYMS, required = false )
       @QueryParam("searchSynonyms") @DefaultValue("true") BooleanParam searchSynonyms,
+      @ApiParam( value = DocumentationStrings.SEARCH_ABBREVIATIONS, required = false )
+      @QueryParam("searchAbbreviations") @DefaultValue("false") BooleanParam searchAbbreviations,
+      @ApiParam( value = DocumentationStrings.SEARCH_ACRONYMS, required = false )
+      @QueryParam("searchAcronyms") @DefaultValue("false") BooleanParam searchAcronyms,
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
@@ -322,6 +350,8 @@ public class VocabularyService extends BaseResource {
         categories(categories).
         prefixes(prefixes).
         includeSynonyms(searchSynonyms.get()).
+        includeAbbreviations(searchAbbreviations.get()).
+        includeAcronyms(searchAcronyms.get()).
         limit(limit.get());
     List<Concept> concepts = vocabulary.searchConcepts(builder.build());
     if (concepts.isEmpty()) {

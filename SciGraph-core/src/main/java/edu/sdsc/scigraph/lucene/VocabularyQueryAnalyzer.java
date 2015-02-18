@@ -43,8 +43,10 @@ public final class VocabularyQueryAnalyzer extends Analyzer {
     fieldAnalyzers.put(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
     fieldAnalyzers.put(Concept.SYNONYM, new TermAnalyzer());
     fieldAnalyzers.put(Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
-    fieldAnalyzers.put(Concept.ABREVIATION, new ExactAnalyzer());
-    fieldAnalyzers.put(Concept.ACRONYM, new ExactAnalyzer());
+    fieldAnalyzers.put(Concept.ABREVIATION, new TermAnalyzer());
+    fieldAnalyzers.put(Concept.ABREVIATION + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
+    fieldAnalyzers.put(Concept.ACRONYM, new TermAnalyzer());
+    fieldAnalyzers.put(Concept.ACRONYM + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
     analyzer = new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), fieldAnalyzers);
   }
 
