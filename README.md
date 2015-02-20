@@ -41,7 +41,7 @@ Note that SciGraph is "OWL-centric". If you have, for example, and arbitrary SKO
 Alternatives
 ------------
 * [tinkerpop sail implementation](https://github.com/tinkerpop/blueprints/wiki/Sail-Implementation)
-* [owlapi](http://owlapi.sourceforge.net/)
+* [owlapi](https://owlcs.github.io/owlapi/)
 * [jena tdb](https://jena.apache.org/documentation/tdb/)
 
 Getting Started
