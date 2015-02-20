@@ -91,10 +91,10 @@ public class ReasonerUtil {
       logger.warning("Not reasoning on " + ont + " because it is inconsistent.");
       return false;
     }
-    Set<OWLClass> nothingEquivalents = reasoner.getEquivalentClasses(factory.getOWLNothing()).getEntities();
-    if (nothingEquivalents.size() > 1) {
-      logger.warning("Not reasoning on " + ont + " because " + nothingEquivalents.size() + " classes are sublasses of nothing");
-      logger.warning("For instance: " + Iterables.getFirst(nothingEquivalents, null).getIRI().toString() + " is a equivalent to owl:nothing");
+    Set<OWLClass> unsatisfiableClasses = reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom();
+    if (!unsatisfiableClasses.isEmpty()) {
+      logger.warning("Not reasoning on " + ont + " because " + unsatisfiableClasses.size() + " it is unsatisfiable");
+      logger.warning("For instance: " + Iterables.getFirst(unsatisfiableClasses, null).getIRI().toString() + " is a equivalent to owl:nothing");
       return false;
     }
     return true;
