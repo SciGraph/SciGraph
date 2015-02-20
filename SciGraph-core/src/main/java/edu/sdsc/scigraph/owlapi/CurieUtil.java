@@ -15,11 +15,11 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -28,61 +28,77 @@ import javax.inject.Named;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 
-public class CurieUtil {
+/***
+ * Utilities for resolving CURIEs
+ */
+public final class CurieUtil {
 
   private final Map<String, String> curieMap;
-  private final Multimap<String, String> uriMap;
-  private final Collection<String> prefixes;
+  private final Multimap<String, String> uriMap = HashMultimap.create();
 
   @Inject
   CurieUtil(@Named("neo4j.curieMap") Map<String, String> curieMap) {
     this.curieMap = ImmutableMap.copyOf(curieMap);
-    uriMap = HashMultimap.create();
-    prefixes = new HashSet<>();
     for (Entry<String, String> curie: curieMap.entrySet()) {
       uriMap.put(curie.getValue(), curie.getKey());
-      prefixes.add(curie.getValue());
     }
   }
 
+  /***
+   * @return all of the CURIE prefixes
+   */
   public Collection<String> getPrefixes() {
-    return prefixes;
+    return uriMap.keySet();
   }
 
-  public Collection<String> getAllExpansions(final String curie) {
-    return uriMap.get(curie);
+  /***
+   * Expand a CURIE prefix to the its corresponding IRI prefix(es).
+   * 
+   * @param curiePrefix the CURIE prefix
+   * @return mapped IRI prefix(es)
+   */
+  public Collection<String> getAllExpansions(final String curiePrefix) {
+    return uriMap.get(curiePrefix);
   }
 
-  public Optional<String> getCurie(final String uri) {
-    Preconditions.checkNotNull(uri);
+  /***
+   * Returns the first CURIE found for {@code iri}
+   * 
+   * @param iri 
+   * @return An {@link Optional} CURIE
+   */
+  public Optional<String> getCurie(final String iri) {
+    checkNotNull(iri);
     for (Entry<String, String> entry: curieMap.entrySet()) {
-      if (uri.startsWith(entry.getKey())) {
-        return Optional.of(String.format("%s:%s", entry.getValue(), uri.substring(entry.getKey().length(), uri.length())));
+      if (iri.startsWith(entry.getKey())) {
+        return Optional.of(String.format("%s:%s", entry.getValue(), iri.substring(entry.getKey().length(), iri.length())));
       }
     }
     return Optional.absent();
   }
 
+  /***
+   * Expand a CURIE to an IRI
+   * 
+   * @param curie the CURIE
+   * @return all possible IRIs
+   */
   public Collection<String> getFullUri(final String curie) {
-    Preconditions.checkNotNull(curie);
-    String[] parts = curie.split(":");
-    if (1 == parts.length) {
-      return Collections.emptySet();
-    }
-    String prefix = parts[0];
-    if (uriMap.containsKey(prefix)) {
-      return transform(uriMap.get(prefix), new Function<String, String>() {
-        @Override
-        public String apply(String uriPrefix) {
-          return String.format("%s%s", uriPrefix, curie.substring(curie.indexOf(':') + 1));
-        }
-        
-      });
+    String[] parts = checkNotNull(curie).split(":");
+    if (parts.length > 1) {
+      String prefix = parts[0];
+      if (uriMap.containsKey(prefix)) {
+        return transform(uriMap.get(prefix), new Function<String, String>() {
+          @Override
+          public String apply(String uriPrefix) {
+            return String.format("%s%s", uriPrefix, curie.substring(curie.indexOf(':') + 1));
+          }
+        });
+      }
     }
     return Collections.emptySet();
   }

@@ -83,7 +83,7 @@ public class BatchOwlLoader {
   @Inject
   @Named("owl.mappedProperties") List<MappedProperty> mappedProperties;
 
-  Collection<OntologySetup> urls;
+  Collection<OntologySetup> ontologies;
 
   BlockingQueue<OWLObject> queue = new LinkedBlockingQueue<>();
   BlockingQueue<OntologySetup> urlQueue = new LinkedBlockingQueue<>();
@@ -103,8 +103,8 @@ public class BatchOwlLoader {
     for (int i = 0; i < PRODUCER_COUNT; i++) {
       exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
     }
-    for (OntologySetup url: urls) {
-      urlQueue.offer(url);
+    for (OntologySetup ontology: ontologies) {
+      urlQueue.offer(ontology);
     }
     for (int i = 0; i < PRODUCER_COUNT; i++) {
       urlQueue.offer(POISON_STR);
@@ -147,7 +147,7 @@ public class BatchOwlLoader {
   public static void load(OwlLoadConfiguration config) throws InterruptedException {
     Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getOntologyConfiguration()));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
-    loader.urls = config.getOntologies();
+    loader.ontologies = config.getOntologies();
     logger.info("Loading ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
     loader.loadOntology();
