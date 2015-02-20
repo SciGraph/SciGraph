@@ -32,7 +32,7 @@ import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 
-public class OwlOntologyProducer implements Callable<Void>{
+final class OwlOntologyProducer implements Callable<Void>{
 
   private static final Logger logger = Logger.getLogger(OwlOntologyProducer.class.getName());
 

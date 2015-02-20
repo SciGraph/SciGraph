@@ -31,7 +31,7 @@ import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
-public class OwlOntologyConsumer implements Callable<Void> {
+final class OwlOntologyConsumer implements Callable<Void> {
 
   private static final Logger logger = Logger.getLogger(OwlOntologyConsumer.class.getName());
 
