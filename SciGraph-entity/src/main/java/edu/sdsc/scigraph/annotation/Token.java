@@ -59,17 +59,17 @@ public class Token<T> {
   }
 
   @Override
-  public int hashCode() {
+  public final int hashCode() {
     return Objects.hash(token, range);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (null == obj) {
+  public final boolean equals(Object obj) {
+    if (!(obj instanceof Token)) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
-      return false;
+    if (this == obj) {
+      return true;
     }
     Token<?> other = (Token<?>) obj;
     return Objects.equals(this.token, other.token)
