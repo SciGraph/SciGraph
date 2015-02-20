@@ -23,8 +23,12 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.servlet.DispatcherType;
 
 import org.glassfish.jersey.message.MessageProperties;
 import org.glassfish.jersey.server.filter.UriConnegFilter;
@@ -39,6 +43,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Provides;
 import com.google.inject.Stage;
 import com.wordnik.swagger.config.ConfigFactory;
 import com.wordnik.swagger.config.ScannerFactory;
@@ -56,10 +61,11 @@ import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.opennlp.OpenNlpModule;
 import edu.sdsc.scigraph.services.configuration.ApplicationConfiguration;
 import edu.sdsc.scigraph.services.jersey.MediaTypeMappings;
-import edu.sdsc.scigraph.services.jersey.dynamic.CypherResourceConfig;
 import edu.sdsc.scigraph.services.jersey.dynamic.DynamicCypherResourceFactory;
 import edu.sdsc.scigraph.services.jersey.dynamic.DynamicResourceModule;
+import edu.sdsc.scigraph.services.jersey.dynamic.SwaggerFilter;
 import edu.sdsc.scigraph.services.refine.RefineModule;
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 public class MainApplication extends Application<ApplicationConfiguration> {
 
@@ -105,6 +111,12 @@ public class MainApplication extends Application<ApplicationConfiguration> {
       install(new RefineModule(configuration.getServiceMetadata()));
       install(new DynamicResourceModule());
     }
+    
+    @Provides
+    List<Apis> getApis() {
+      return configuration.getCypherResources();
+    }
+    
 
   }
 
@@ -147,9 +159,11 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     addWriters(environment.jersey());
     //TODO: This path should not be hard coded.
     configureSwagger(environment, "scigraph");
+    environment.servlets().addFilter("Swagger Filter", factory.getInjector().getInstance(SwaggerFilter.class))
+    .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/api-docs/");
 
     DynamicCypherResourceFactory cypherFactory = factory.getInjector().getInstance(DynamicCypherResourceFactory.class);
-    for (CypherResourceConfig config: configuration.getCypherResources()) {
+    for (Apis config: configuration.getCypherResources()) {
       environment.jersey().getResourceConfig().registerResources(cypherFactory.create(config).getBuilder().build());
     }
   }

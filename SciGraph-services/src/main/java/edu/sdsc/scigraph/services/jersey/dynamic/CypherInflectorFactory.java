@@ -15,8 +15,10 @@
  */
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
+
 interface CypherInflectorFactory {
 
-  public CypherInflector create(CypherResourceConfig config);
+  public CypherInflector create(Apis config);
 
 }

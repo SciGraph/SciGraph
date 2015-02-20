@@ -42,12 +42,13 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class CypherInflectorTest extends GraphTestBase {
 
   ExecutionEngine engine;
-  CypherResourceConfig config = new CypherResourceConfig();
+  Apis config = new Apis();
   ContainerRequestContext context = mock(ContainerRequestContext.class);
   UriInfo uriInfo = mock(UriInfo.class);
   Transaction tx = mock(Transaction.class);

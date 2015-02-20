@@ -41,6 +41,8 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
+
 public class DynamicResourceModuleIT {
 
   static GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
@@ -49,7 +51,7 @@ public class DynamicResourceModuleIT {
   static UriInfo uriInfo = mock(UriInfo.class);
 
   Injector i = Guice.createInjector(new TestModule());
-  CypherResourceConfig config = new CypherResourceConfig();
+  Apis config = new Apis();
   
   static class TestModule extends AbstractModule {
 

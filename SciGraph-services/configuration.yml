@@ -97,6 +97,14 @@ graphConfiguration:
 cypherResources:
   - path: /test
     query: MATCH (n) RETURN n LIMIT 2
+    operations:
+      - nickname: test
+        summary: test
+        parameters:
+          - name: test1
+            description: description of param
+            required: true
+            type: string
 
 serviceMetadata:
   name: 'SciGraph Reconciliation Service'

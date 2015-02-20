@@ -45,6 +45,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 final class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph> {
 
@@ -55,10 +56,10 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
 
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;
-  private final CypherResourceConfig config;
+  private final Apis config;
 
   @Inject
-  CypherInflector(GraphDatabaseService graphDb, ExecutionEngine engine, @Assisted CypherResourceConfig config) {
+  CypherInflector(GraphDatabaseService graphDb, ExecutionEngine engine, @Assisted Apis config) {
     this.graphDb = graphDb;
     this.engine = engine;
     this.config = config;

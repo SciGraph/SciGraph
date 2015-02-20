@@ -15,8 +15,10 @@
  */
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
+
 public interface DynamicCypherResourceFactory {
 
-  public DynamicCypherResource create(CypherResourceConfig config);
+  public DynamicCypherResource create(Apis config);
 
 }

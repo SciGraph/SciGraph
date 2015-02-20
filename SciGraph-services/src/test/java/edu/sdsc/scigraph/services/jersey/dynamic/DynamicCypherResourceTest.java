@@ -26,15 +26,17 @@ import org.glassfish.jersey.server.model.ResourceMethod;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
+
 public class DynamicCypherResourceTest {
 
-  CypherResourceConfig config = new CypherResourceConfig();
+  Apis config = new Apis();
   CypherInflectorFactory factory = mock(CypherInflectorFactory.class);
 
   @Before
   public void setup() {
     CypherInflector inflector = new CypherInflector(null, null, null);
-    when(factory.create(any(CypherResourceConfig.class))).thenReturn(inflector);
+    when(factory.create(any(Apis.class))).thenReturn(inflector);
   }
 
   @Test

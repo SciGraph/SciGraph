@@ -27,6 +27,7 @@ import org.glassfish.jersey.server.model.ResourceMethod;
 import com.google.inject.assistedinject.Assisted;
 
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 public class DynamicCypherResource extends ResourceConfig {
 
@@ -35,7 +36,7 @@ public class DynamicCypherResource extends ResourceConfig {
   final Resource.Builder resourceBuilder = Resource.builder();
 
   @Inject
-  DynamicCypherResource(CypherInflectorFactory factory, @Assisted CypherResourceConfig config) {
+  DynamicCypherResource(CypherInflectorFactory factory, @Assisted Apis config) {
     logger.info("Building dynamic resoure at " + config.getPath());
     resourceBuilder.path(config.getPath());
     ResourceMethod.Builder methodBuilder = resourceBuilder.addMethod("GET");

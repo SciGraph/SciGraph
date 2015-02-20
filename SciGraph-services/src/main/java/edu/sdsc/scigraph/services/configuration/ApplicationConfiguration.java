@@ -15,10 +15,10 @@
  */
 package edu.sdsc.scigraph.services.configuration;
 
+import io.dropwizard.Configuration;
+
 import java.util.Collections;
 import java.util.List;
-
-import io.dropwizard.Configuration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -27,8 +27,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
-import edu.sdsc.scigraph.services.jersey.dynamic.CypherResourceConfig;
 import edu.sdsc.scigraph.services.refine.ServiceMetadata;
+import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 public class ApplicationConfiguration extends Configuration {
 
@@ -51,7 +51,7 @@ public class ApplicationConfiguration extends Configuration {
 
   @Valid
   @JsonProperty(required=false)
-  private List<CypherResourceConfig> cypherResources = Collections.emptyList();
+  private List<Apis> cypherResources = Collections.emptyList();
   
   public String getApplicationContextPath() {
     return applicationContextPath;
@@ -69,7 +69,7 @@ public class ApplicationConfiguration extends Configuration {
     return serviceMetadata;
   }
   
-  public List<CypherResourceConfig> getCypherResources() {
+  public List<Apis> getCypherResources() {
     return cypherResources;
   }
 
