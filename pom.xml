@@ -30,7 +30,7 @@
   </modules>
 
   <prerequisites>
-    <maven>2.2.1</maven>
+    <maven>3.0.1</maven>
   </prerequisites>
 
   <repositories>
@@ -50,7 +50,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <dropwizard.version>0.8.0-rc3</dropwizard.version>
+    <dropwizard.version>0.8.0-rc2</dropwizard.version>
     <guice.version>4.0-beta5</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
   </properties>
@@ -60,7 +60,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.2</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
@@ -222,7 +222,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.5.5</version>
+        <version>3.0.0</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
