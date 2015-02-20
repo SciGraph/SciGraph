@@ -36,23 +36,18 @@ import com.google.common.base.Predicate;
 /***
  * Convenience utilities for dealing with Neo4j graphs.
  * 
- * <b>Note:</b> Clients are responsible for managing transactions around these methods.
+ * <b>NOTE:</b> Clients are responsible for managing transactions around these methods.
  */
 public class GraphUtil {
 
   /***
    * Add a property value to a container.
    * 
-   * Abstracts dealing with underlying value arrays for the client. The property may already have a
-   * value. <br />
-   * <b>Note:</b> duplicate values are ignored.
+   * Abstracts dealing with underlying value arrays. The property may already have a value.
    * 
-   * @param container
-   *          The PropertyContainer in question
-   * @param property
-   *          The name of the property
-   * @param value
-   *          The value to append
+   * @param container the {@link PropertyContainer} in question
+   * @param property the name of the property to append
+   * @param value the value to append
    */
   public static void addProperty(PropertyContainer container, String property, Object value) {
     if (container.hasProperty(property)) {
@@ -64,7 +59,7 @@ public class GraphUtil {
     }
   }
 
-  public static Object getNewPropertyValue(Object originalValue, Object newValue) {
+  static Object getNewPropertyValue(Object originalValue, Object newValue) {
     Class<?> clazz = checkNotNull(newValue).getClass();
     boolean reduceToString = false;
     if (null != originalValue && originalValue.getClass().isArray()) {
@@ -95,17 +90,13 @@ public class GraphUtil {
   }
 
   /***
-   * Get a single valued property in a type safe way.
+   * Get a single valued property in a type-safe way.
    * 
-   * @param container
-   *          The PropertyContainer in question
-   * @param property
-   *          The name of the property
-   * @param type
-   *          The type of the property
-   * @return An optional property value
-   * @throws ClassCastException
-   *           if the property types don't match
+   * @param container the {@link PropertyContainer} in question
+   * @param property the name of the property
+   * @param type the expected type of the property
+   * @return an {@link Optional} property value
+   * @throws ClassCastException if {@code type} does not match the actual type in the graph
    */
   static public <T> Optional<T> getProperty(PropertyContainer container, String property,
       Class<T> type) {
@@ -119,15 +110,11 @@ public class GraphUtil {
   /***
    * Get multi-valued properties.
    * 
-   * @param container
-   *          The PropertyContainer in question
-   * @param property
-   *          The name of the property
-   * @param type
-   *          The type of the property
-   * @return An list of property values
-   * @throws ClassCastException
-   *           if the property types don't match
+   * @param container the {@link PropertyContainer} in question
+   * @param property the name of the property
+   * @param type the expected type of the property
+   * @return list of property values (empty if the property does not exist). 
+   * @throws ClassCastException if the {@code type} does not match the actual type in the graph
    */
   static public <T> List<T> getProperties(PropertyContainer container, String property,
       Class<T> type) {
@@ -138,7 +125,7 @@ public class GraphUtil {
     return list;
   }
 
-  static public <T> List<T> getPropertiesAsList(Object value, Class<T> type) {
+  static <T> List<T> getPropertiesAsList(Object value, Class<T> type) {
     List<T> list = new ArrayList<>();
     if (value.getClass().isArray()) {
       List<Object> objects = new ArrayList<>();
@@ -154,7 +141,7 @@ public class GraphUtil {
     return list;
   }
 
-  static public Iterable<Relationship> getRelationships(final Node a, final Node b,
+  public static Iterable<Relationship> getRelationships(final Node a, final Node b,
       RelationshipType type, final boolean directed) {
     checkNotNull(a);
     checkNotNull(b);
@@ -169,7 +156,7 @@ public class GraphUtil {
     });
   }
 
-  static public Iterable<Relationship> getRelationships(final Node a, final Node b,
+  public static Iterable<Relationship> getRelationships(final Node a, final Node b,
       RelationshipType type) {
     return getRelationships(a, b, type, true);
   }
@@ -178,6 +165,17 @@ public class GraphUtil {
     return uri.getPath().replaceFirst(".*/([^/?]+).*", "$1");
   }
 
+  /***
+   * Returns the "fragment" of a URI
+   * 
+   * <p>Due to historical ID spaces the fragment is
+   * the true RFC3987 fragment (foo in http://example.org#foo) if the {@code uri} has one.
+   * If a true fragment is not present then the fragment is the final path element 
+   * (foo in http://example.org/foo)
+   * 
+   * @param uri uri with a fragment
+   * @return the "fragment" of the URI
+   */
   public static String getFragment(URI uri) {
     if (null != uri.getFragment()) {
       return uri.getFragment();
@@ -194,7 +192,7 @@ public class GraphUtil {
    * @param value
    * @return
    */
-  static public boolean ignoreProperty(Object value) {
+  public static boolean ignoreProperty(Object value) {
     if (value instanceof String
         && (CharMatcher.WHITESPACE.matchesAllOf((String) value)
             || StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(((String) value).toLowerCase()))) {

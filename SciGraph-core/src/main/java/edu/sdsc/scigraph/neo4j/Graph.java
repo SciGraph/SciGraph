@@ -23,13 +23,19 @@ import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.base.Optional;
 
+/***
+ * Abstract methods for dealing with an underlying graph.
+ * 
+ * <p><em>NOTE:</em> the ID of nodes and relationships is assumed to be {@link Long}
+ * 
+ */
 public interface Graph {
 
   /***
    * Create a node
    * 
-   * @param id The String ID of the node
-   * @return The Neo4j ID of a newly created node or the ID of an existing node
+   * @param id the string ID of the node
+   * @return the internal ID of a the node
    */
   long createNode(String id);
 
@@ -37,7 +43,7 @@ public interface Graph {
    * Get a node
    * 
    * @param id
-   * @return An optional Neo4j node ID with this ID
+   * @return an {@link Optional} node ID with this ID
    */
   Optional<Long> getNode(String id);
 
@@ -47,7 +53,7 @@ public interface Graph {
    * @param start The ID of the start node 
    * @param end The ID of the end node
    * @param type The type of relationship
-   * @return The Neo4j ID of a newly created relationship or the ID of an existing relationship
+   * @return The ID of a newly created relationship or the ID of an existing relationship
    */
   long createRelationship(long start, long end, RelationshipType type);
 
@@ -57,7 +63,7 @@ public interface Graph {
    * @param start The ID of the start node
    * @param end The ID of the end node
    * @param type The type of relationship
-   * @return An optional Neo4j relationship ID
+   * @return An optional relationship ID
    */
   Optional<Long> getRelationship(long start, long end, RelationshipType type);
 
@@ -66,9 +72,9 @@ public interface Graph {
    * 
    * This assumes that the relationships type is undirected in your domain. 
    * 
-   * @param nodeIds The Neo4j IDs of the nodes
+   * @param nodeIds The IDs of the nodes
    * @param type The type of relationship
-   * @return The Neo4j IDs of the relationships involved
+   * @return The IDs of the relationships involved
    */
   Collection<Long> createRelationshipsPairwise(Collection<Long> nodeIds, RelationshipType type);
 
@@ -77,7 +83,7 @@ public interface Graph {
    * 
    * This will erase a previous value.
    * 
-   * @param node The Neo4j node ID
+   * @param node The node ID
    * @param property The property key
    * @param value The property value
    */
@@ -88,7 +94,7 @@ public interface Graph {
    * 
    * This will append the value to a list
    * 
-   * @param node The Neo4j node ID
+   * @param node The node ID
    * @param property The property key
    * @param value The property value
    */
@@ -97,7 +103,7 @@ public interface Graph {
   /***
    * Get a node property
    * 
-   * @param node The Neo4j node ID
+   * @param node The node ID
    * @param property The property key
    * @param type The expected type of the property value
    * @return An optional single valued value of the property
@@ -107,7 +113,7 @@ public interface Graph {
   /***
    * Get node properties
    * 
-   * @param node The Neo4j node ID
+   * @param node The node ID
    * @param property The property key
    * @param type The expected type of the property values
    * @return A list (possibly empty) with the values of the property
@@ -119,7 +125,7 @@ public interface Graph {
    * 
    * This will erase a previous value.
    * 
-   * @param relationship The Neo4j relationship ID
+   * @param relationship The relationship ID
    * @param property The property key
    * @param value The property value
    */
@@ -130,7 +136,7 @@ public interface Graph {
    * 
    * This will append the value to a list
    * 
-   * @param relationship The Neo4j relationship ID
+   * @param relationship The relationship ID
    * @param property The property key
    * @param value The property value
    */
@@ -139,7 +145,7 @@ public interface Graph {
   /***
    * Get a relationship property
    * 
-   * @param relationship The Neo4j relationship ID
+   * @param relationship The relationship ID
    * @param property The property key
    * @param type The expected type of the property value
    * @return An optional single valued value of the property
@@ -149,7 +155,7 @@ public interface Graph {
   /***
    * Get relationship properties
    * 
-   * @param relationship The Neo4j relationship ID
+   * @param relationship The relationship ID
    * @param property The property key
    * @param type The expected type of the property values
    * @return A list (possibly empty) with the values of the property
@@ -159,7 +165,7 @@ public interface Graph {
   /***
    * Set a label on a node
    * 
-   * @param node The Neo4j node ID
+   * @param node The node ID
    * @param label The label to set
    */
   void setLabel(long node, Label label);
@@ -175,7 +181,7 @@ public interface Graph {
   /***
    * Get the labels of a node
    * 
-   * @param node The Neo4j node ID
+   * @param node The node ID
    * @return the labels
    */
   Collection<Label> getLabels(long node);

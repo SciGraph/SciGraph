@@ -28,6 +28,7 @@ import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
+// TODO: Can dozer do this?
 public class NodeTransformer implements Function<Node, Concept> {
 
   static boolean isDeprecated(Node n) {

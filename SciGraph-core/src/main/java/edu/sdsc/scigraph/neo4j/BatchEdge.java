@@ -18,6 +18,9 @@ package edu.sdsc.scigraph.neo4j;
 import java.io.Serializable;
 import java.util.Objects;
 
+/***
+ * An edge implementation that MapDB can serialize.
+ */
 final class BatchEdge implements Serializable {
 
   private static final long serialVersionUID = 1L;
