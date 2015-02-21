@@ -53,7 +53,7 @@ import com.google.common.primitives.Longs;
  * "Simple, Fast, and Scalable Reachability Oracle"</a>
  *
  */
-public class ReachabilityIndex {
+public final class ReachabilityIndex {
 
   private static final Logger logger = Logger.getLogger(ReachabilityIndex.class.getName());
 

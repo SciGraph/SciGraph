@@ -24,7 +24,7 @@ import org.neo4j.graphdb.traversal.BranchState;
 /***
  * A utility path expander to expand <i>any</i> relationship in a direction
  */
-public class DirectionalPathExpander implements PathExpander<Void> {
+final class DirectionalPathExpander implements PathExpander<Void> {
 
   private final Direction direction;
 

@@ -26,7 +26,7 @@ import org.neo4j.graphdb.traversal.Evaluator;
 
 import com.google.common.base.Predicate;
 
-class ReachabilityEvaluator implements Evaluator {
+final class ReachabilityEvaluator implements Evaluator {
 
   private final InMemoryReachabilityIndex inMemoryIndex;
   private final Direction direction;
