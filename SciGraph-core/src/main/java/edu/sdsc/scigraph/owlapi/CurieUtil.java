@@ -35,7 +35,7 @@ import com.google.common.collect.Multimap;
 /***
  * Utilities for resolving CURIEs
  */
-public final class CurieUtil {
+public class CurieUtil {
 
   private final Map<String, String> curieMap;
   private final Multimap<String, String> uriMap = HashMultimap.create();
