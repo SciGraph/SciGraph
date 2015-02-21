@@ -15,9 +15,7 @@
  */
 package edu.sdsc.scigraph.lucene;
 
-import java.io.IOException;
 import java.io.Reader;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -43,7 +41,7 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
 
   private final Analyzer analyzer;
 
-  public VocabularyIndexAnalyzer() throws IOException, URISyntaxException {
+  static Map<String, Analyzer> getFieldAnalyzers() {
     Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
     fieldAnalyzers.put(NodeProperties.LABEL, new TermAnalyzer());
     fieldAnalyzers.put(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
@@ -53,7 +51,11 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
     fieldAnalyzers.put(Concept.ABREVIATION + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
     fieldAnalyzers.put(Concept.ACRONYM, new TermAnalyzer());
     fieldAnalyzers.put(Concept.ACRONYM + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
-    analyzer = new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), fieldAnalyzers);
+    return fieldAnalyzers;
+  }
+  
+  public VocabularyIndexAnalyzer() {
+    analyzer = new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), getFieldAnalyzers());
   }
 
   final static class TermAnalyzer extends Analyzer {

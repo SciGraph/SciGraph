@@ -16,8 +16,6 @@
 package edu.sdsc.scigraph.lucene;
 
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.ASCIIFoldingFilter;
@@ -30,24 +28,12 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.WhitespaceTokenizer;
 
-import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.NodeProperties;
-
 public final class VocabularyQueryAnalyzer extends Analyzer {
 
   private final Analyzer analyzer;
 
   public VocabularyQueryAnalyzer() {
-    Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
-    fieldAnalyzers.put(NodeProperties.LABEL, new TermAnalyzer());
-    fieldAnalyzers.put(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
-    fieldAnalyzers.put(Concept.SYNONYM, new TermAnalyzer());
-    fieldAnalyzers.put(Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
-    fieldAnalyzers.put(Concept.ABREVIATION, new TermAnalyzer());
-    fieldAnalyzers.put(Concept.ABREVIATION + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
-    fieldAnalyzers.put(Concept.ACRONYM, new TermAnalyzer());
-    fieldAnalyzers.put(Concept.ACRONYM + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
-    analyzer = new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), fieldAnalyzers);
+    analyzer = new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), VocabularyIndexAnalyzer.getFieldAnalyzers());
   }
 
   final static class TermAnalyzer extends Analyzer {
