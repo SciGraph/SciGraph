@@ -93,8 +93,8 @@ public class ReasonerUtil {
     }
     Set<OWLClass> unsatisfiableClasses = reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom();
     if (!unsatisfiableClasses.isEmpty()) {
-      logger.warning("Not reasoning on " + ont + " because " + unsatisfiableClasses.size() + " it is unsatisfiable");
-      logger.warning("For instance: " + Iterables.getFirst(unsatisfiableClasses, null).getIRI().toString() + " is a equivalent to owl:nothing");
+      logger.warning("Not reasoning on " + ont + " because " + unsatisfiableClasses.size() + " classes are unsatisfiable");
+      logger.warning("For instance: " + Iterables.getFirst(unsatisfiableClasses, null).getIRI().toString() + " unsatisfiable");
       return false;
     }
     return true;
