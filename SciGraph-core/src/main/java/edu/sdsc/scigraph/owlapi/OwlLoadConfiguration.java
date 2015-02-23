@@ -90,6 +90,12 @@ public class OwlLoadConfiguration {
     public void setReasonerConfiguration(ReasonerConfiguration reasonerConfiguration) {
       this.reasonerConfiguration = Optional.of(reasonerConfiguration);
     }
+
+    @Override
+    public String toString() {
+      return url;
+    }
+
   }
 
   public static class ReasonerConfiguration {
