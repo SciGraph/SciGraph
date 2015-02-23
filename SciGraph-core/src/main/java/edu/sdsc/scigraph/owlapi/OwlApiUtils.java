@@ -141,7 +141,7 @@ public class OwlApiUtils {
     } else {
       ont = manager.loadOntologyFromOntologyDocument(new File(ontology));
     }
-    logger.info(String.format("Finished reasing ontology: %s", ontology));
+    logger.info(String.format("Finished reading ontology: %s", ontology));
     return ont;
   }
 
