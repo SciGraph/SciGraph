@@ -38,6 +38,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
@@ -87,6 +88,14 @@ public class CypherInflectorTest extends GraphTestBase {
   }
 
   @Test
+  public void pathsAreReturnedCorrectly() {
+    config.setQuery("MATCH (n {fragment:'foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
+    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    TinkerGraph graph = inflector.apply(context);
+    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
+  }
+
+  @Test
   public void entailmentRegex() {
     CypherInflector inflector = new CypherInflector(graphDb, engine, config);
     String result = inflector.entailRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
@@ -98,6 +107,11 @@ public class CypherInflectorTest extends GraphTestBase {
     CypherInflector inflector = new CypherInflector(graphDb, engine, config);
     Set<String> types = inflector.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
     assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "baz"));
+  }
+
+  @Test
+  public void pathInResult() {
+
   }
 
 }
