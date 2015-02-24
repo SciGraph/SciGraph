@@ -40,6 +40,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 
+import scala.collection.convert.Wrappers.SeqWrapper;
+
 import com.google.common.base.Joiner;
 import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
@@ -79,6 +81,15 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
       for (Entry<String, Object> entry: map.entrySet()) {
         if (entry.getValue() instanceof PropertyContainer) {
           TinkerGraphUtil.addElement(graph, (PropertyContainer)entry.getValue());
+        } else if (entry.getValue() instanceof SeqWrapper) {
+          SeqWrapper<?> wrapper = (SeqWrapper<?>)entry.getValue();
+          for (Object thing: wrapper) {
+            if (thing instanceof PropertyContainer) {
+              TinkerGraphUtil.addElement(graph, (PropertyContainer) thing);
+            }
+          }
+        } else {
+          logger.warning("Not converting " + entry.getValue().getClass() + " to tinker graph");
         }
       }
     }
