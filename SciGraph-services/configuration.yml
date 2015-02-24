@@ -60,7 +60,7 @@ applicationContextPath: scigraph
 #    checkConnectionWhileIdle: false
 
 graphConfiguration:
-  graphLocation: /temp/nifGraph
+  graphLocation: /temp/nicoleGraphHold
   curies:
     http://purl.obolibrary.org/obo/DOID_ : DOID
     http://purl.obolibrary.org/obo/ORPHANET_ : ORPHANET
@@ -95,16 +95,34 @@ graphConfiguration:
     http://purl.obolibrary.org/obo/OMIAPub_ : OMIAPub
 
 cypherResources:
-  - path: /test
-    query: MATCH (n) RETURN n LIMIT 2
+  - path: /dynamic/genes_with_phenotype
+    query: |
+            START phenotype = node:node_auto_index(fragment={phenotype_id})
+            MATCH (g:gene)-[r:RO_0002200*]->(phenotype)
+            RETURN g, r, phenotype
     operations:
-      - nickname: test
-        summary: test
+      - nickname: genes_with_phenotype
+        summary: Get genes related to a phenotype
         parameters:
-          - name: test1
-            description: description of param
+          - name: phenotype_id
+            description: The ID of the phenotype
             required: true
             type: string
+            paramType: query
+  - path: /dynamic/phenotypes_with_gene
+    query: |
+            START gene = node:node_auto_index(fragment={gene_id})
+            MATCH (gene)-[r:RO_0002200*]->(phenotype:Phenotype)
+            RETURN gene, r, phenotype
+    operations:
+      - nickname: genes_with_phenotype
+        summary: Get genes related to a phenotype
+        parameters:
+          - name: gene_id
+            description: The ID of the gene
+            required: true
+            type: string
+            paramType: query
 
 serviceMetadata:
   name: 'SciGraph Reconciliation Service'
