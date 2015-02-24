@@ -134,14 +134,17 @@ public class OwlApiUtils {
    * @throws OWLOntologyCreationException
    */
   public static OWLOntology loadOntology(OWLOntologyManager manager, String ontology) throws OWLOntologyCreationException {
-    logger.info(String.format("Reading ontology: %s", ontology));
+    logger.info(String.format("Loading ontology with owlapi: %s", ontology));
+    String origThreadName = Thread.currentThread().getName();
+    Thread.currentThread().setName("read - " + ontology);
     OWLOntology ont;
     if (validator.isValid(ontology)) {
       ont = manager.loadOntology(IRI.create(ontology));
     } else {
       ont = manager.loadOntologyFromOntologyDocument(new File(ontology));
     }
-    logger.info(String.format("Finished reading ontology: %s", ontology));
+    logger.info(String.format("Finished loading ontology with owlapi: %s", ontology));
+    Thread.currentThread().setName(origThreadName);
     return ont;
   }
 
