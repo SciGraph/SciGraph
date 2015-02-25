@@ -57,8 +57,8 @@ import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 @Provider
 public class ImageWriter implements MessageBodyWriter<Graph> {
 
-  private static final Integer DEFAULT_WIDTH = 1024;
-  private static final Integer DEFAULT_HEIGHT = 768;
+  private static final String DEFAULT_WIDTH = "1024";
+  private static final String DEFAULT_HEIGHT = "768";
   private static final String DEFAULT_LAYOUT = "KKLayout";
 
   @Context
@@ -125,8 +125,8 @@ public class ImageWriter implements MessageBodyWriter<Graph> {
   @Override
   public void writeTo(Graph data, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> headers, OutputStream out) throws IOException {
-    Integer width = Optional.fromNullable(Integer.parseInt(request.getParameter("width"))).or(DEFAULT_WIDTH);
-    Integer height = Optional.fromNullable(Integer.parseInt(request.getParameter("height"))).or(DEFAULT_HEIGHT);
+    Integer width = Integer.parseInt(Optional.fromNullable(request.getParameter("width")).or(DEFAULT_WIDTH));
+    Integer height = Integer.parseInt(Optional.fromNullable(request.getParameter("height")).or(DEFAULT_HEIGHT));
     String layoutName = Optional.fromNullable(request.getParameter("layout")).or(DEFAULT_LAYOUT);
 
     GraphJung<Graph> graph = new GraphJung<Graph>(data);
