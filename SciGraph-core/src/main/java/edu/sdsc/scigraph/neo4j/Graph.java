@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.neo4j;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
@@ -116,9 +115,9 @@ public interface Graph {
    * @param node The node ID
    * @param property The property key
    * @param type The expected type of the property values
-   * @return A list (possibly empty) with the values of the property
+   * @return A collection (possibly empty) with the values of the property
    */
-  <T> List<T> getNodeProperties(long node, String property, Class<T> type);
+  <T> Collection<T> getNodeProperties(long node, String property, Class<T> type);
 
   /***
    * Set a relationship property
@@ -158,9 +157,9 @@ public interface Graph {
    * @param relationship The relationship ID
    * @param property The property key
    * @param type The expected type of the property values
-   * @return A list (possibly empty) with the values of the property
+   * @return A collection (possibly empty) with the values of the property
    */
-  <T> List<T> getRelationshipProperties(long relationship, String property, Class<T> type);
+  <T> Collection<T> getRelationshipProperties(long relationship, String property, Class<T> type);
 
   /***
    * Set a label on a node

@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.neo4j;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 
 import org.junit.Before;
@@ -99,7 +100,7 @@ public class GraphUtilTest {
   public void testGetProperties() {
     GraphUtil.addProperty(node, "p", "a");
     GraphUtil.addProperty(node, "p", "b");
-    assertThat(GraphUtil.getProperties(node, "p", String.class), contains("a", "b"));
+    assertThat(GraphUtil.getProperties(node, "p", String.class), containsInAnyOrder("a", "b"));
   }
 
   @Test
@@ -131,8 +132,13 @@ public class GraphUtilTest {
   }
 
   @Test
-  public void newProperties_useListSemantics() {
-    assertThat((String[])GraphUtil.getNewPropertyValue("2", "2"), is(new String[]{"2", "2"}));
+  public void newProperties_useSetSemantics_fromSingleValues() {
+    assertThat((String)GraphUtil.getNewPropertyValue("2", "2"), is("2"));
+  }
+
+  @Test
+  public void newProperties_useSetSemantics_fromMultipleValues() {
+    assertThat((String[])GraphUtil.getNewPropertyValue(new String[]{"1", "2"}, "2"), is(new String[]{"1", "2"}));
   }
 
   @Test

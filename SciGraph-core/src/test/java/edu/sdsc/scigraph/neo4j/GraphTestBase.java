@@ -99,11 +99,11 @@ public abstract class GraphTestBase<T extends Graph> {
   }
 
   @Test
-  public void multiNodeProperty_returnsMultiValuedList() {
+  public void multiNodeProperty_returnsMultiValuedCollection() {
     long node = graph.createNode("foo");
     graph.setNodeProperty(node, "bar", "baz");
     graph.addNodeProperty(node, "bar", "faz");
-    assertThat(graph.getNodeProperties(node, "bar", String.class), contains("baz", "faz"));
+    assertThat(graph.getNodeProperties(node, "bar", String.class), containsInAnyOrder("baz", "faz"));
   }
 
   @Test(expected = ClassCastException.class)
@@ -114,11 +114,11 @@ public abstract class GraphTestBase<T extends Graph> {
   }
 
   @Test
-  public void multipleNodePropertyTypes_throwsException() {
+  public void multipleNodePropertyTypes_convertToString() {
     long node = graph.createNode("foo");
     graph.addNodeProperty(node, "bar", "baz");
     graph.addNodeProperty(node, "bar", 1);
-    assertThat(graph.getNodeProperties(node, "bar", String.class), contains("baz", "1"));
+    assertThat(graph.getNodeProperties(node, "bar", String.class), containsInAnyOrder("baz", "1"));
   }
 
   @Test
@@ -185,12 +185,12 @@ public abstract class GraphTestBase<T extends Graph> {
   }
 
   @Test
-  public void multiRelationshipProperty_returnsMultiValuedList() {
+  public void multiRelationshipProperty_returnsMultiValuedCollection() {
     long node = graph.createNode("foo");
     long relationship = graph.createRelationship(node, node, TYPE);
     graph.setRelationshipProperty(relationship, "bar", "baz");
     graph.addRelationshipProperty(relationship, "bar", "faz");
-    assertThat(graph.getRelationshipProperties(relationship, "bar", String.class), contains("baz", "faz"));
+    assertThat(graph.getRelationshipProperties(relationship, "bar", String.class), containsInAnyOrder("baz", "faz"));
   }
 
   @Test

@@ -16,11 +16,10 @@
 package edu.sdsc.scigraph.neo4j;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -171,15 +170,15 @@ public class GraphTransactionalImpl implements Graph {
   }
 
   @Override
-  public <T> List<T> getNodeProperties(long nodeId, String property, Class<T> type) {
+  public <T> Collection<T> getNodeProperties(long nodeId, String property, Class<T> type) {
     try (Transaction tx = graphDb.beginTx()) {
       Node node = graphDb.getNodeById(nodeId);
-      List<T> list = emptyList();
+      Set<T> set = emptySet();
       if (node.hasProperty(property)) {
-        list = GraphUtil.getPropertiesAsList(node.getProperty(property), type);
+        set = GraphUtil.getPropertiesAsSet(node.getProperty(property), type);
       }
       tx.success();
-      return list;
+      return set;
     }
   }
 
@@ -226,16 +225,16 @@ public class GraphTransactionalImpl implements Graph {
   }
 
   @Override
-  public <T> List<T> getRelationshipProperties(long relationshipId, String property,
+  public <T> Collection<T> getRelationshipProperties(long relationshipId, String property,
       Class<T> type) {
     try (Transaction tx = graphDb.beginTx()) {
       Relationship relationship = graphDb.getRelationshipById(relationshipId);
-      List<T> list = emptyList();
+      Set<T> set = emptySet();
       if (relationship.hasProperty(property)) {
-        list = GraphUtil.getPropertiesAsList(relationship.getProperty(property), type);
+        set = GraphUtil.getPropertiesAsSet(relationship.getProperty(property), type);
       }
       tx.success();
-      return list;
+      return set;
     }
   }
 

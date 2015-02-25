@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -198,13 +197,13 @@ public class GraphBatchImpl implements Graph {
   }
 
   @Override
-  public <T> List<T> getNodeProperties(long node, String property, Class<T> type) {
+  public <T> Collection<T> getNodeProperties(long node, String property, Class<T> type) {
     Map<String, Object> propertyMap;
     synchronized (graphLock) {
       propertyMap = inserter.getNodeProperties(node);
     }
     if (propertyMap.containsKey(property)) {
-      return GraphUtil.getPropertiesAsList(propertyMap.get(property), type);
+      return GraphUtil.getPropertiesAsSet(propertyMap.get(property), type);
     } else {
       return emptyList();
     }
@@ -255,13 +254,13 @@ public class GraphBatchImpl implements Graph {
   }
 
   @Override
-  public <T> List<T> getRelationshipProperties(long relationship, String property, Class<T> type) {
+  public <T> Collection<T> getRelationshipProperties(long relationship, String property, Class<T> type) {
     Map<String, Object> propertyMap;
     synchronized (graphLock) {
       propertyMap = inserter.getRelationshipProperties(relationship);
     }
     if (propertyMap.containsKey(property)) {
-      return GraphUtil.getPropertiesAsList(propertyMap.get(property), type);
+      return GraphUtil.getPropertiesAsSet(propertyMap.get(property), type);
     } else {
       return emptyList();
     }

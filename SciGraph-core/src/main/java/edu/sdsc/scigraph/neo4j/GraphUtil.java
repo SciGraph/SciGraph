@@ -21,7 +21,10 @@ import static com.google.common.collect.Iterables.filter;
 import java.lang.reflect.Array;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.neo4j.graphdb.Node;
@@ -68,22 +71,32 @@ public class GraphUtil {
         reduceToString = true;
         clazz = String.class;
       }
+      newValue = reduceToString ? newValue.toString() : newValue;
       Object newArray = Array.newInstance(clazz, Array.getLength(originalValue) + 1);
       for (int i = 0; i < Array.getLength(originalValue); i++) {
         Object val = Array.get(originalValue, i);
+        if (newValue.equals(val)) {
+          return originalValue;
+        }
         Array.set(newArray, i, reduceToString ? val.toString() : val);
       }
-      Array.set(newArray, Array.getLength(originalValue), reduceToString ? newValue.toString() : newValue);
+      Array.set(newArray, Array.getLength(originalValue), newValue);
       return newArray;
     } else if (null != originalValue) {
       if (!clazz.equals(originalValue.getClass())) {
         reduceToString = true;
         clazz = String.class;
       }
-      Object newArray = Array.newInstance(clazz, 2);
-      Array.set(newArray, 0, reduceToString ? originalValue.toString() : originalValue);
-      Array.set(newArray, 1, reduceToString ? newValue.toString() : newValue);
-      return newArray;
+      originalValue = reduceToString ? originalValue.toString() : originalValue;
+      newValue = reduceToString ? newValue.toString() : newValue;
+      if (!originalValue.equals(newValue)) {
+        Object newArray = Array.newInstance(clazz, 2);
+        Array.set(newArray, 0, originalValue);
+        Array.set(newArray, 1, newValue);
+        return newArray;
+      } else {
+        return originalValue;
+      }
     } else {
       return newValue;
     }
@@ -113,32 +126,32 @@ public class GraphUtil {
    * @param container the {@link PropertyContainer} in question
    * @param property the name of the property
    * @param type the expected type of the property
-   * @return list of property values (empty if the property does not exist). 
+   * @return collection of property values (empty if the property does not exist). 
    * @throws ClassCastException if the {@code type} does not match the actual type in the graph
    */
-  static public <T> List<T> getProperties(PropertyContainer container, String property,
+  static public <T> Collection<T> getProperties(PropertyContainer container, String property,
       Class<T> type) {
     List<T> list = new ArrayList<>();
     if (container.hasProperty(property)) {
-      return getPropertiesAsList(container.getProperty(property), type);
+      return getPropertiesAsSet(container.getProperty(property), type);
     }
     return list;
   }
 
-  static <T> List<T> getPropertiesAsList(Object value, Class<T> type) {
-    List<T> list = new ArrayList<>();
+  static <T> Set<T> getPropertiesAsSet(Object value, Class<T> type) {
+    Set<T> set = new HashSet<>();
     if (value.getClass().isArray()) {
       List<Object> objects = new ArrayList<>();
       for (int i = 0; i < Array.getLength(value); i++) {
         objects.add(Array.get(value, i));
       }
       for (Object o : objects) {
-        list.add(type.cast(o));
+        set.add(type.cast(o));
       }
     } else {
-      list.add(type.cast(value));
+      set.add(type.cast(value));
     }
-    return list;
+    return set;
   }
 
   public static Iterable<Relationship> getRelationships(final Node a, final Node b,
