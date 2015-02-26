@@ -15,8 +15,12 @@
  */
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
+import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +51,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
@@ -73,7 +78,16 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
   Map<String, Object> flatten(MultivaluedMap<String, String> map) {
     Map<String, Object> flatMap = new HashMap<>();
     for (Entry<String, List<String>> entry: map.entrySet()) {
-      flatMap.put(entry.getKey(), entry.getValue().get(0));
+      String value = entry.getValue().get(0);
+      Collection<String> uris = curieUtil.getFullUri(value);
+      if (!uris.isEmpty()) {
+        try {
+          value = GraphUtil.getFragment(new URI(getFirst(uris, null)));
+        } catch (URISyntaxException e) {
+          e.printStackTrace();
+        }
+      }
+      flatMap.put(entry.getKey(), value);
     }
     return flatMap;
   }

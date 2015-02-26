@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.hamcrest.collection.IsIterableWithSize;
+import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
@@ -71,6 +73,7 @@ public class CypherInflectorTest extends GraphTestBase {
     when(context.getUriInfo()).thenReturn(uriInfo);
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
     when(uriInfo.getQueryParameters()).thenReturn(map);
+    when(curieUtil.getFullUri("X:foo")).thenReturn(newHashSet("http://x.org/#foo"));
   }
 
   @Test
@@ -109,6 +112,14 @@ public class CypherInflectorTest extends GraphTestBase {
     CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     Set<String> types = inflector.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
     assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "baz"));
+  }
+
+  @Test
+  public void curiesResolveToFragments() {
+    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
+    MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
+    map.put("test", newArrayList("X:foo"));
+    assertThat(inflector.flatten(map), IsMapContaining.<String, Object>hasEntry("test", "foo"));
   }
 
 }
