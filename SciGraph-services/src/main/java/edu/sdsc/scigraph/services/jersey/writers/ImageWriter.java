@@ -15,13 +15,20 @@
  */
 package edu.sdsc.scigraph.services.jersey.writers;
 
+import static com.google.common.collect.Lists.newArrayList;
+
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +50,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.oupls.jung.GraphJung;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
@@ -76,6 +84,7 @@ public class ImageWriter implements MessageBodyWriter<Graph> {
   }
 
   private static final Transformer<Vertex, String> vertexLabelTransformer = new Transformer<Vertex, String>() {
+    @Override
     public String transform(Vertex vertex) {
       String label = "";
       if (vertex.getPropertyKeys().contains(NodeProperties.LABEL)) {
@@ -96,8 +105,40 @@ public class ImageWriter implements MessageBodyWriter<Graph> {
   };
 
   private static final Transformer<Edge, String> edgeLabelTransformer = new Transformer<Edge, String>() {
+    @Override
     public String transform(Edge edge) {
       return edge.getLabel();
+    }
+  };
+
+  
+  private static final Transformer<Vertex, Paint> vertexColorTransformer = new Transformer<Vertex, Paint>() {
+    
+    List<Color> colors = newArrayList(Color.RED, Color.BLUE, Color.GREEN, Color.GRAY, Color.ORANGE, Color.YELLOW);
+    int index = 0;
+    
+    Map<String, Color> colorMap = new HashMap<>();
+    
+    @Override
+    public Paint transform(Vertex vertex) {
+      if (vertex.getPropertyKeys().contains(Concept.CATEGORY)) {
+        Object categories = vertex.getProperty(Concept.CATEGORY);
+        if (categories.getClass().isArray()) {
+          return Color.WHITE;
+        } else {
+          String category = (String) categories;
+          if (!colorMap.containsKey(category)) {
+            if (index > colors.size()) {
+              return Color.WHITE;
+            } else {
+              colorMap.put(category, colors.get(index++));
+            }
+          }
+          return colorMap.get(category);
+        }
+      } else {
+        return Color.WHITE;
+      }
     }
   };
 
@@ -148,6 +189,7 @@ public class ImageWriter implements MessageBodyWriter<Graph> {
     viz.setPreferredSize(new Dimension(width, height));
     viz.getRenderContext().setEdgeLabelTransformer(edgeLabelTransformer);
     viz.getRenderContext().setVertexLabelTransformer(vertexLabelTransformer);
+    viz.getRenderContext().setVertexFillPaintTransformer(vertexColorTransformer);
 
     BufferedImage bi = renderImage(viz);
     String imageType = null;
