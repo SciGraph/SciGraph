@@ -127,6 +127,7 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
         for (Map<String, Object> resultMap: result) {
           entailedTypes.add((String) resultMap.get("subProperty"));
         }
+        tx.success();
       }
     }
     return entailedTypes;
