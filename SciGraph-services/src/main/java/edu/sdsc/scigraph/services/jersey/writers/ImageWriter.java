@@ -43,6 +43,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.oupls.jung.GraphJung;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.uci.ics.jung.algorithms.layout.AbstractLayout;
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
@@ -76,10 +77,20 @@ public class ImageWriter implements MessageBodyWriter<Graph> {
 
   private static final Transformer<Vertex, String> vertexLabelTransformer = new Transformer<Vertex, String>() {
     public String transform(Vertex vertex) {
+      String label = "";
+      if (vertex.getPropertyKeys().contains(NodeProperties.LABEL)) {
+        Object labels = vertex.getProperty(NodeProperties.LABEL);
+        if (labels.getClass().isArray()) {
+          label = " (" + ((String[])labels)[0] + ")";
+        } else {
+          label = " (" + vertex.getProperty(NodeProperties.LABEL) + ")";
+        }
+      }
+
       if (vertex.getPropertyKeys().contains(CommonProperties.FRAGMENT)) {
-        return (String) vertex.getProperty(CommonProperties.FRAGMENT);
+        return (String) vertex.getProperty(CommonProperties.FRAGMENT) + label;
       } else {
-        return (String) vertex.getProperty(CommonProperties.URI);
+        return (String) vertex.getProperty(CommonProperties.URI) + label;
       }
     }
   };
