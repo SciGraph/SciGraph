@@ -42,6 +42,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -53,6 +54,7 @@ public class CypherInflectorTest extends GraphTestBase {
   ContainerRequestContext context = mock(ContainerRequestContext.class);
   UriInfo uriInfo = mock(UriInfo.class);
   Transaction tx = mock(Transaction.class);
+  CurieUtil curieUtil = mock(CurieUtil.class);
 
   void addRelationship(String parentIri, String childIri, RelationshipType type) {
     Node parent = createNode(parentIri);
@@ -74,7 +76,7 @@ public class CypherInflectorTest extends GraphTestBase {
   @Test
   public void inflectorAppliesCorrectly() {
     config.setQuery("MATCH (n) RETURN n");
-    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     TinkerGraph graph = inflector.apply(context);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
   }
@@ -82,7 +84,7 @@ public class CypherInflectorTest extends GraphTestBase {
   @Test
   public void inflectorAppliesCorrectly_withRelationshipEntailment() {
     config.setQuery("MATCH (n)-[r:foo!]-(m) RETURN n, r, m");
-    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     TinkerGraph graph = inflector.apply(context);
     assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
   }
@@ -90,28 +92,23 @@ public class CypherInflectorTest extends GraphTestBase {
   @Test
   public void pathsAreReturnedCorrectly() {
     config.setQuery("MATCH (n {fragment:'foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
-    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     TinkerGraph graph = inflector.apply(context);
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
   }
 
   @Test
   public void entailmentRegex() {
-    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     String result = inflector.entailRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
     assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
   }
 
   @Test
   public void multipleEntailmentRegex() {
-    CypherInflector inflector = new CypherInflector(graphDb, engine, config);
+    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     Set<String> types = inflector.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
     assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "baz"));
-  }
-
-  @Test
-  public void pathInResult() {
-
   }
 
 }

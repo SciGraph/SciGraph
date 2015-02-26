@@ -47,6 +47,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
+import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 final class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph> {
@@ -59,15 +60,17 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
   private final GraphDatabaseService graphDb;
   private final ExecutionEngine engine;
   private final Apis config;
+  private final CurieUtil curieUtil;
 
   @Inject
-  CypherInflector(GraphDatabaseService graphDb, ExecutionEngine engine, @Assisted Apis config) {
+  CypherInflector(GraphDatabaseService graphDb, ExecutionEngine engine, CurieUtil curieUtil, @Assisted Apis config) {
     this.graphDb = graphDb;
     this.engine = engine;
     this.config = config;
+    this.curieUtil = curieUtil;
   }
 
-  static Map<String, Object> flatten(MultivaluedMap<String, String> map) {
+  Map<String, Object> flatten(MultivaluedMap<String, String> map) {
     Map<String, Object> flatMap = new HashMap<>();
     for (Entry<String, List<String>> entry: map.entrySet()) {
       flatMap.put(entry.getKey(), entry.getValue().get(0));
