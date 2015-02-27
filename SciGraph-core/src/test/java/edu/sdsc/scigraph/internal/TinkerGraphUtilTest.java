@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.internal;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -81,6 +82,16 @@ public class TinkerGraphUtilTest {
     Vertex v = TinkerGraphUtil.addNode(graph, node);
     assertThat(v.getProperty("foo"), is((Object)"bar"));
     assertThat(v.getProperty("baz"), is((Object)true));
+  }
+
+  @Test
+  public void arrayProperties_areMappedToLists() {
+    when(node.getPropertyKeys()).thenReturn(newHashSet("foo", "bar"));
+    when(node.getProperty("foo")).thenReturn(new String[]{"elt1", "elt2"});
+    when(node.getProperty("bar")).thenReturn(new int[]{1,2});
+    Vertex v = TinkerGraphUtil.addNode(graph, node);
+    assertThat(v.getProperty("foo"), is((Object)newArrayList("elt1", "elt2")));
+    assertThat(v.getProperty("bar"), is((Object)newArrayList(1, 2)));
   }
 
   @SuppressWarnings("unchecked")

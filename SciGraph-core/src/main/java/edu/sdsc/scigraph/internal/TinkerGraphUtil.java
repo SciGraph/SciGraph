@@ -15,7 +15,10 @@
  */
 package edu.sdsc.scigraph.internal;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.neo4j.graphdb.Label;
@@ -35,7 +38,15 @@ public final class TinkerGraphUtil {
 
   static void mapProperties(PropertyContainer container, Element element) {
     for (String key: container.getPropertyKeys()) {
-      element.setProperty(key, container.getProperty(key));
+      Object property = container.getProperty(key);
+      if (property.getClass().isArray()) {
+        List<Object> propertyList = new ArrayList<>();
+        for (int i = 0; i < Array.getLength(property); i++) {
+          propertyList.add(Array.get(property, i));
+        }
+        property = propertyList;
+      }
+      element.setProperty(key, property);
     }
   }
 
