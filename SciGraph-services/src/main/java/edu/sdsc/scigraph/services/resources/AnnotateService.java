@@ -81,7 +81,7 @@ public class AnnotateService extends BaseResource {
   private EntityProcessor processor;
 
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces("text/plain; charset=utf-8")
   @ApiOperation(value = "Annotate text", response = String.class,
   notes="This service is designed to annotate shorter fragments of text. Use the POST version if your content is too long.")
   @Timed
