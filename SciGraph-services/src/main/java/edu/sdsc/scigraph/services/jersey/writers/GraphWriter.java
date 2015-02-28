@@ -15,32 +15,24 @@
  */
 package edu.sdsc.scigraph.services.jersey.writers;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.Provider;
+import javax.ws.rs.ext.MessageBodyWriter;
 
 import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
-import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 
-import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
-
-@Produces(CustomMediaTypes.APPLICATION_GRAPHSON)
-@Provider
-public class GraphsonWriter extends GraphWriter {
+public abstract class GraphWriter implements MessageBodyWriter<Graph> {
 
   @Override
-  public void writeTo(Graph data, Class<?> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, Object> headers, OutputStream out) throws IOException {
-    GraphSONWriter.outputGraph(data, out, GraphSONMode.COMPACT);
-    out.flush();
+  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    return Graph.class.isAssignableFrom(type);
+  }
+
+  @Override
+  public long getSize(Graph data, Class<?> type, Type genericType, Annotation annotations[], MediaType mediaType) {
+    return -1;
   }
 
 }
-

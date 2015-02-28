@@ -38,7 +38,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.collections15.Transformer;
@@ -64,7 +63,7 @@ import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 
 @Produces({CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
 @Provider
-public class ImageWriter implements MessageBodyWriter<Graph> {
+public class ImageWriter extends GraphWriter {
 
   private static final String DEFAULT_WIDTH = "1024";
   private static final String DEFAULT_HEIGHT = "768";
@@ -72,16 +71,6 @@ public class ImageWriter implements MessageBodyWriter<Graph> {
 
   @Context
   HttpServletRequest request;
-
-  @Override
-  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return Graph.class.isAssignableFrom(type);
-  }
-
-  @Override
-  public long getSize(Graph data, Class<?> type, Type genericType, Annotation annotations[], MediaType mediaType) {
-    return -1;
-  }
 
   private static final Transformer<Vertex, String> vertexLabelTransformer = new Transformer<Vertex, String>() {
     @Override

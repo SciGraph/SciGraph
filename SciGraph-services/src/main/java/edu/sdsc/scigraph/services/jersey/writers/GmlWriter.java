@@ -23,7 +23,6 @@ import java.lang.reflect.Type;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import com.tinkerpop.blueprints.Graph;
@@ -33,17 +32,7 @@ import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 
 @Produces(CustomMediaTypes.TEXT_GML)
 @Provider
-public class GmlWriter implements MessageBodyWriter<Graph> {
-
-  @Override
-  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return Graph.class.isAssignableFrom(type);
-  }
-
-  @Override
-  public long getSize(Graph data, Class<?> type, Type genericType, Annotation annotations[], MediaType mediaType) {
-    return -1;
-  }
+public class GmlWriter extends GraphWriter {
 
   @Override
   public void writeTo(Graph data, Class<?> type, Type genericType, Annotation[] annotations,

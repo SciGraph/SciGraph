@@ -243,7 +243,7 @@ public class AnnotateService extends BaseResource {
       @Override
       public void write(OutputStream os) throws IOException,
       WebApplicationException {
-        Writer writer = new BufferedWriter(new OutputStreamWriter(os));
+        Writer writer = new BufferedWriter(new OutputStreamWriter(os, Charsets.UTF_8));
 
         EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content)).writeTo(writer);
         configBuilder.includeCategories(includeCategories);

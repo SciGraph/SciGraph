@@ -28,7 +28,6 @@ import java.util.HashSet;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,19 +44,9 @@ import edu.sdsc.scigraph.services.api.graph.BbopGraph;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
-public class BbopJsGraphWriter implements MessageBodyWriter<Graph> {
+public class BbopJsGraphWriter extends GraphWriter {
 
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
-
-  @Override
-  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return Graph.class.isAssignableFrom(type);
-  }
-
-  @Override
-  public long getSize(Graph data, Class<?> type, Type genericType, Annotation annotations[], MediaType mediaType) {
-    return -1;
-  }
 
   // TODO: Move these next three methods someplace common
   String getCurieOrFragment(Vertex vertex) {

@@ -20,6 +20,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
@@ -37,6 +40,8 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
@@ -60,6 +65,7 @@ public class DynamicResourceModuleIT {
       install(new DynamicResourceModule());
       bind(GraphDatabaseService.class).toInstance(graphDb);
       bind(ExecutionEngine.class).toInstance(new ExecutionEngine(graphDb));
+      bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(Names.named("neo4j.curieMap")).toInstance(new HashMap<String, String>());
     }
 
   }
