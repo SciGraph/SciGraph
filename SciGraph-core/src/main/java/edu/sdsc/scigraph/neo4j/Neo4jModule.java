@@ -76,6 +76,7 @@ public class Neo4jModule extends AbstractModule {
     //bind(Graph.class).to(GraphBatchImpl.class);
   }
 
+  // TODO: Get this from the configuration file
   private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
       NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
       CommonProperties.FRAGMENT,
