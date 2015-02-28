@@ -19,6 +19,6 @@ import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 interface CypherInflectorFactory {
 
-  public CypherInflector create(Apis config);
+  CypherInflector create(Apis config);
 
 }

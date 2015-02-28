@@ -476,6 +476,11 @@ public class AnnotateService extends BaseResource {
       return delegate;
     }*/
 
+    @Override
+    public boolean equals(Object obj) {
+      return delegate.equals(obj);
+    }
+
     @JsonProperty
     String getContent() {
       return content;

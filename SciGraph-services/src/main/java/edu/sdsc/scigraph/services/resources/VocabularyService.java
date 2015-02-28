@@ -24,7 +24,6 @@ import io.dropwizard.jersey.params.IntParam;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -262,7 +261,7 @@ public class VocabularyService extends BaseResource {
     List<Concept> concepts = vocabulary.getConceptsFromPrefix(builder.build());
     List<Completion> completions = getCompletions(builder.build(), concepts);
     // TODO: Move completions to scigraph-core for #51
-    Collections.sort(completions);
+    sort(completions);
     int endIndex = limit.get() > completions.size() ? completions.size() : limit.get();
     completions = completions.subList(0, endIndex);
     CompletionWrapper wrapper = new CompletionWrapper(completions);
