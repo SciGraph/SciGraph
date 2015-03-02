@@ -15,8 +15,9 @@ Have a look at [how SciGraph translates some simple ontologies](https://github.c
 Goals:
 * OWL 2 Support
 * Provide a simple, usable, Neo4j representation
-* Efficient loading
+* Efficient, parallel ontology ingestion
 * Provide basic "vocabulary" support
+* Stay domain agnostic
 
 Non-goals:
 * Create ontologies based on the graph
@@ -24,19 +25,18 @@ Non-goals:
 
 What's Included?
 ----------------
-SciGraph can be used in a number of ways. After the graph is generated
-(depending on the index configuration) it could be used in an application with
-no SciGraph dependency.
+SciGraph can be used in a number of ways. After the graph is generated it could be used in an application with no SciGraph dependency.
 
 It could be used in an application with the
-`scigraph-core` dependency which adds some convenience methods and includes "vocabulary" support. "Vocabulary" support includes searching a Lucene index
-for ontology classes in the graph, auto-complete functionality, OpenRefine resolution services, and CURIE to
-class resolution. Additional support for identifying these vocabulary entities
-in text can be found in the `scigraph-entity` module.
+`scigraph-core` dependency which adds some convenience methods and includes "vocabulary" support. "Vocabulary" support resolves 
+labels to graph nodes, auto-complete functionality, OpenRefine resolution services, and CURIE to
+IRI resolution. Additional support for identifying these vocabulary entities
+in free text can be found in the `scigraph-entity` module.
 
-SciGraph can also be used as a stand-alone DropWizard web service (via `scigraph-services`).
+SciGraph can also be used as a stand-alone DropWizard web service (via `scigraph-services`). SciGraph services support adding custom Cypher
+queries during application configuration to keep the code base domain agnostic.
 
-Note that SciGraph is "OWL-centric". If you have, for example, and arbitrary SKOS ontology that doesn't assert skos:Concept as an owl:Class these skos:Concepts will not be visible to the owlapi and not visible in the resulting Neo4j graph.
+Note that SciGraph is "OWL-centric". If you have, for example, and arbitrary SKOS ontology that doesn't assert skos:Concept as an owl:Class these skos:Concepts will not be visible to the owlapi and not loaded in the resulting Neo4j graph.
 
 Alternatives
 ------------
@@ -57,7 +57,7 @@ Build the graph:
     cd SciGraph-core
     mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c src/test/resources/pizzaExample.yaml"
 
-Run the service:
+Run the services:
 
 	cd ../SciGraph-services
     mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
