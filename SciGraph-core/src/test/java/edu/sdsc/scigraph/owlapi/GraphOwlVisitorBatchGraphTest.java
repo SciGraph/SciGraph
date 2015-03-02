@@ -29,7 +29,7 @@ public class GraphOwlVisitorBatchGraphTest extends GraphOwlVisitorTestBase<Graph
 
   @Override
   protected GraphBatchImpl createInstance() throws Exception {
-    BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
+    BatchInserter inserter = BatchInserters.inserter(path);
     return new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet("fragment"),
             newHashSet("fragment"), new IdMap(), new RelationshipMap());
   }

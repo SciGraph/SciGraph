@@ -28,13 +28,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -61,9 +61,12 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   static final String ROOT = "http://example.com/owl/families";
   static final String OTHER_ROOT = "http://example.org/otherOntologies/families";
 
+  @ClassRule
+  public static TemporaryFolder folder = new TemporaryFolder();
+  
   private T graph;
 
-  static Path path;
+  static String path;
 
   static boolean builtGraph = false;
 
@@ -72,7 +75,8 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
 
   static {
     try {
-      path = Files.createTempDirectory("SciGraph-OwlVisitorTest");
+      folder.create();
+      path = folder.newFolder().getAbsolutePath();
     } catch (IOException e) {
       e.printStackTrace();
     }
