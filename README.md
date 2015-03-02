@@ -63,22 +63,23 @@ Run the service:
     mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
 
 Check out some of the REST endpoints:
-<dl>
-<dt>http://localhost:9000/scigraph/vocabulary/autocomplete/Sp</dt>
-<dd>Get autocomplete options for a prefix</dd>
-<dt>http://localhost:9000/scigraph/vocabulary/search/Shrimp</dt>
-<dd>Find a class based on an "exactish" term match
-(try changing the term to "shrimps")</dd>
-<dt>http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping</dt>
-<dd>Get the graph neighborhood or a class</dd>
-</dl>
+
+ - [Get autocomplete options for a prefix](http://localhost:9000/scigraph/vocabulary/autocomplete/Sp)
+
+ - [Find a class based on an "exactish" term match](http://localhost:9000/scigraph/vocabulary/search/Shrimps)
+
+ - [Get the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping)
+ 
+ - [Visualize the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping.png)
+ 
+ - [Visualize a custom, domain specific Cypher query](http://localhost:9000/scigraph/dynamic/toppings.png?pizza_id=FourSeasons)
 
 Also browse the [generated REST documentation](http://localhost:9000/scigraph/docs/)
 to see some of the other resources.
 
-
+-------
 <img src="http://github.nfsdb.org/images/yklogo.png" />
 -------
-Many thanks to YourKit for granting an Open Source license.
+Thanks to YourKit for providing an Open Source license.
 
 YourKit supports open source projects with its full-featured Java Profiler.YourKit, LLC is the creator of <a href="http://www.yourkit.com/java/profiler/index.jsp">YourKit Java Profiler</a> and <a href="http://www.yourkit.com/.net/profiler/index.jsp">YourKit .NET Profiler</a>, innovative and intelligent tools for profiling Java and .NET applications.
