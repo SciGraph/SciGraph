@@ -22,6 +22,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -146,7 +147,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
 
   void addWriters(JerseyEnvironment environment) throws Exception {
     for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.jersey.writers")) {
-      environment.register(classInfo.load().newInstance());
+      if (!Modifier.isAbstract(classInfo.load().getModifiers())) {
+        environment.register(classInfo.load().newInstance());
+      }
     }
   }
 
