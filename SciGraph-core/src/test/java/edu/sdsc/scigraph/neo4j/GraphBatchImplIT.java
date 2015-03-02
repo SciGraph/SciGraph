@@ -24,12 +24,11 @@ import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -48,9 +47,12 @@ import edu.sdsc.scigraph.lucene.LuceneUtils;
 
 public class GraphBatchImplIT {
 
+  @Rule
+  public TemporaryFolder folder = new TemporaryFolder();
+
   static RelationshipType TYPE = DynamicRelationshipType.withName("foo");
-  
-  Path path;
+
+  String path;
   GraphBatchImpl graph;
   GraphDatabaseService graphDb;
   ReadableIndex<Node> nodeIndex;
@@ -58,18 +60,12 @@ public class GraphBatchImplIT {
 
   @Before
   public void setup() throws IOException {
-    path = Files.createTempDirectory("SciGraph-BatchTest");
-    BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
+    path = folder.newFolder().getAbsolutePath();
+    BatchInserter inserter = BatchInserters.inserter(path);
     graph =
         new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
     foo = graph.createNode("http://example.org/foo");
-  }
-
-  @After
-  public void teardown() throws IOException {
-    // TODO: Why does this fail on Windows?
-    // FileUtils.deleteDirectory(path.toFile());
   }
 
   GraphDatabaseService getGraphDB() {

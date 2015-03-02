@@ -17,13 +17,13 @@ package edu.sdsc.scigraph.owlapi.cases;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -43,8 +43,8 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
 
-import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
@@ -63,7 +63,10 @@ import edu.sdsc.scigraph.owlapi.ReasonerUtil;
  */
 public abstract class OwlTestCase {
 
-  Path path;
+  @Rule
+  public TemporaryFolder folder = new TemporaryFolder();
+  
+  String path;
   GraphDatabaseService graphDb;
   ReadableIndex<Node> nodeIndex;
   
@@ -79,9 +82,9 @@ public abstract class OwlTestCase {
 
   @Before
   public void loadOwl() throws Exception {
-    path = Files.createTempDirectory("SciGraph-OwlTest");
+    path = folder.newFolder().getAbsolutePath();
 
-    BatchInserter inserter = BatchInserters.inserter(path.toFile().getAbsolutePath());
+    BatchInserter inserter = BatchInserters.inserter(path);
     DB maker = DBMaker.newMemoryDB().make();
     Graph batchGraph = new GraphBatchImpl(inserter, "uri", Collections.<String> emptySet(),
         Collections.<String> emptySet(), new IdMap(maker), new RelationshipMap(maker));

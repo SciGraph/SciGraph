@@ -22,13 +22,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -45,17 +43,15 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
  */
 public class Neo4jIndexingTest {
 
-  Path path;
+  @Rule
+  public TemporaryFolder folder = new TemporaryFolder();
+  
+  String path;
   GraphDatabaseService graphDb;
 
   @Before
   public void setup() throws IOException {
-    path = Files.createTempDirectory("Neo4j-Indexing-Test");
-  }
-
-  @After
-  public void tearDown() throws IOException {
-    FileUtils.deleteDirectory(path.toFile());
+    path = folder.newFolder().getAbsolutePath();
   }
 
   GraphDatabaseService getGraphDb() {

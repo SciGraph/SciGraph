@@ -20,13 +20,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -45,31 +44,28 @@ public class GraphBatchImplMultipleLoadTest {
 
   private static final RelationshipType TYPE = DynamicRelationshipType.withName("type");
 
-  Path path;
+  @Rule
+  public TemporaryFolder folder = new TemporaryFolder();
+  
+  String path;
   GraphDatabaseService graphDb;
   ReadableIndex<Node> nodeIndex;
   DB maker;
 
   @Before
   public void setup() throws IOException {
-    path = Files.createTempDirectory("SciGraph-BatchTest");
+    path = folder.newFolder().getAbsolutePath();
     maker = DBMaker.newMemoryDB().make();
   }
 
-  @After
-  public void teardown() throws IOException {
-    // TODO: Why does this fail on Windows?
-    // FileUtils.deleteDirectory(path.toFile());
-  }
-
   Graph getBatchGraph() {
-    BatchInserter inserter = BatchInserters.inserter(path.toString());
+    BatchInserter inserter = BatchInserters.inserter(path);
     return new GraphBatchImpl(inserter, "uri", Collections.<String>emptySet(), Collections.<String>emptySet(),
         new IdMap(maker), new RelationshipMap(maker));
   }
 
   GraphDatabaseService getGraphDB() {
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path);
     return graphDb;
   }
 
