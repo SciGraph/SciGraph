@@ -33,7 +33,6 @@ import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -70,7 +69,9 @@ public class GraphApi {
     Set<Node> entailment = new HashSet<>();
     for (Path path : graphDb.traversalDescription().depthFirst()
         .relationships(type, direction)
-        .evaluator(Evaluators.fromDepth(0)).evaluator(Evaluators.all()).traverse(parent)) {
+        .evaluator(Evaluators.fromDepth(0))
+        .evaluator(Evaluators.all())
+        .traverse(parent)) {
       entailment.add(path.endNode());
     }
     return entailment;
@@ -105,22 +106,6 @@ public class GraphApi {
     return false;
   }
 
-  /**
-   * Get all the self loops in the Neo4j graph.
-   * 
-   * @return A set of self loop edges. An empty set will be returned if no self loops are found in
-   *         in the graph.
-   */
-  public Set<Relationship> getSelfLoops() {
-    Set<Relationship> result = new HashSet<Relationship>();
-
-    for (Relationship n : GlobalGraphOperations.at(graphDb).getAllRelationships()) {
-      if (n.getStartNode().equals(n.getEndNode())) {
-        result.add(n);
-      }
-    }
-    return result;
-  }
 
   void addCuries(TinkerGraph graph) {
     for (Vertex vertex: graph.getVertices()) {

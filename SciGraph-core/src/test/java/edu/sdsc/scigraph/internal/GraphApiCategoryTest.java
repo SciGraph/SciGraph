@@ -16,15 +16,12 @@
 package edu.sdsc.scigraph.internal;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 
 import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
@@ -55,17 +52,6 @@ public class GraphApiCategoryTest extends GraphTestBase {
   @Test
   public void testUnconnectedClass() {
     assertThat(graphApi.classIsInCategory(b, c), is(false));
-  }
-
-  /***
-   * TODO: Move this to a GraphApiTest class
-   */
-  @Test
-  public void testSelfLoop() {
-    assertThat(graphApi.getSelfLoops(), is(empty()));
-    Node t = graphDb.createNode();
-    Relationship relationship = t.createRelationshipTo(t, OwlRelationships.RDFS_SUBCLASS_OF);
-    assertThat(graphApi.getSelfLoops(), contains(relationship));
   }
 
 }
