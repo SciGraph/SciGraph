@@ -58,20 +58,21 @@ public class GraphApi {
   }
 
   /***
-   * TODO: Add a boolean for equivalent classes
-   * 
    * @param parent
-   * @param type
-   * @param direction
-   * @return
+   * @param relationship
+   * @param traverseEquivalentEdges
+   * @return the entailment
    */
-  public Collection<Node> getEntailment(Node parent, RelationshipType type, Direction direction) {
+  public Collection<Node> getEntailment(Node parent, DirectedRelationshipType relationship, boolean traverseEquivalentEdges) {
     Set<Node> entailment = new HashSet<>();
-    for (Path path : graphDb.traversalDescription().depthFirst()
-        .relationships(type, direction)
+    TraversalDescription description = graphDb.traversalDescription().depthFirst()
+        .relationships(relationship.getType(), relationship.getDirection())
         .evaluator(Evaluators.fromDepth(0))
-        .evaluator(Evaluators.all())
-        .traverse(parent)) {
+        .evaluator(Evaluators.all());
+    if (traverseEquivalentEdges) {
+      description = description.relationships(OwlRelationships.OWL_EQUIVALENT_CLASS);
+    }
+    for (Path path : description.traverse(parent)) {
       entailment.add(path.endNode());
     }
     return entailment;
