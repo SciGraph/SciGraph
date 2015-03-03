@@ -60,7 +60,7 @@ applicationContextPath: scigraph
 #    checkConnectionWhileIdle: false
 
 graphConfiguration:
-  graphLocation: /temp/nicoleGraphHold
+  graphLocation: /temp/rosieGraph
   curies:
     http://purl.obolibrary.org/obo/DOID_ : DOID
     http://purl.obolibrary.org/obo/ORPHANET_ : ORPHANET
@@ -73,11 +73,11 @@ graphConfiguration:
     http://purl.obolibrary.org/obo/ECO_ : ECO
     http://purl.obolibrary.org/obo/RO_ : RO
     http://purl.obolibrary.org/obo/BFO_ : BFO
-    http://monarch-initiative.org/data/MGI_ : MGI
+#    http://monarch-initiative.org/data/MGI_ : MGI
     http://semanticscience.org/resource/SIO_ : SIO
     http://purl.obolibrary.org/obo/Ensembl_ : ENSEMBL
     http://purl.obolibrary.org/obo/ENSEMBL_ : ENSEMBL
-    http://purl.obolibrary.org/obo/MGI_ : MGI
+#    http://purl.obolibrary.org/obo/MGI_ : MGI
     http://purl.obolibrary.org/obo/ZFIN_ : ZFIN
     http://purl.obolibrary.org/obo/UniProtKB_ : UNIPROT
     http://purl.obolibrary.org/obo/MESH_ : MESH
@@ -99,7 +99,7 @@ cypherResources:
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
             MATCH (g:gene)-[r:RO_0002200*]->(phenotype)
-            RETURN g, r, phenotype
+            RETURN distinct g, r, phenotype
     operations:
       - nickname: genes_with_phenotype
         summary: Get genes related to a phenotype
@@ -113,7 +113,7 @@ cypherResources:
     query: |
             START gene = node:node_auto_index(fragment={gene_id})
             MATCH (gene)-[r:RO_0002200*]->(phenotype:Phenotype)
-            RETURN gene, r, phenotype
+            RETURN distinct gene, r, phenotype
     operations:
       - nickname: genes_with_phenotype
         summary: Get genes related to a phenotype
@@ -123,6 +123,50 @@ cypherResources:
             required: true
             type: string
             paramType: query
+  - path: /dynamic/genotypes_from_gene
+    query: |
+            START genotypeClass = node:node_auto_index(fragment='GENO_0000000'),
+                  gene = node:node_auto_index(fragment={gene_id})
+                  MATCH (gene)<-[geno:GENO_0000408]-(variantLocus)<-[part:BFO_0000051!*]-(genotype)-[:type]->(genotypeClass)
+                  RETURN distinct gene, geno, variantLocus, part, genotype
+    operations:
+      - nickname: genotypes_from_gene
+        summary: Get genotypes for a gene
+        parameters:
+          - name: gene_id
+            description: The ID of the gene
+            required: true
+            type: string
+            paramType: query
+  - path: /dynamic/phenotypes_from_disease
+    query: |
+            START disease = node:node_auto_index(fragment={disease_id})
+            MATCH (disease)<-[s1:subClassOf*0..]-(d)-[r:RO_0002200]->(p)-[s2:subClassOf*1..]->(phenotype:Phenotype)
+            RETURN distinct disease, s1, d, r, p, s2, phenotype
+    operations:
+      - nickname: phenotypes_from_disease
+        summary: Get phenotype for a disease
+        parameters:
+          - name: disease_id
+            description: The ID of the disease
+            required: true
+            type: string
+            paramType: query
+  - path: /dynamic/diseases_from_phenotype
+    query: |
+            START phenotype = node:node_auto_index(fragment={phenotype_id})
+            MATCH (disease:disease)<-[s1:subClassOf*0..]-(d)-[r:RO_0002200]->(p)-[s2:subClassOf*0..]->(phenotype:Phenotype)
+            RETURN distinct disease, s1, d, r, p, s2, phenotype
+    operations:
+      - nickname: diseases_from_phenotype
+        summary: Get diseases for a phenotype
+        parameters:
+          - name: phenotype_id
+            description: The ID of the phenotype
+            required: true
+            type: string
+            paramType: query
+
 
 serviceMetadata:
   name: 'SciGraph Reconciliation Service'
