@@ -56,29 +56,12 @@ final class OwlOntologyProducer implements Callable<Void>{
         if (BatchOwlLoader.POISON_STR == ontologyConfig) {
           break;
         } else {
-          OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
           logger.info("Loading ontology: " + ontologyConfig);
-          try {
-            OWLOntology ont = OwlApiUtils.loadOntology(manager, ontologyConfig.url());
-            if (ontologyConfig.getReasonerConfiguration().isPresent()) {
-              ReasonerUtil util = new ReasonerUtil(ontologyConfig.getReasonerConfiguration().get(), manager, ont);
-              util.reason();
-            }
-            logger.info("Adding axioms for: " + ontologyConfig);
-            for (OWLOntology ontology: manager.getOntologies()) {
-              for (OWLObject object: ontology.getNestedClassExpressions()) {
-                queue.put(object);
-              }
-              for (OWLObject object: ontology.getSignature(true)) {
-                queue.put(object);
-              }
-              for (OWLObject object: ontology.getAxioms()) {
-                queue.put(object);
-              }
-            }
-            logger.info("Finished processing ontology: " + ontologyConfig);
-          } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to load ontology: " + ontologyConfig, e);
+          
+          if (ontologyConfig.url().endsWith(".ttl") && !ontologyConfig.getReasonerConfiguration().isPresent()) {
+            
+          } else {
+            
           }
         }
       }
