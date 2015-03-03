@@ -122,10 +122,4 @@ public abstract class OwlTestCase {
     writer.emit(new File("target/owl_cases/" + getTestName() + ".dot"), walker);
   }
 
-  @After
-  public void tearDownAfterClass() throws Exception {
-    // TODO: Why does this fail on Windows
-    //FileUtils.deleteDirectory(path.toFile());
-  }
-
 }
