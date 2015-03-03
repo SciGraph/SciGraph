@@ -89,7 +89,7 @@ public class GraphService extends BaseResource {
 
   @GET
   @Path("/neighbors")
-  @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
+  @ApiOperation(value = "Get neighbors", response = TinkerGraph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
@@ -160,7 +160,7 @@ public class GraphService extends BaseResource {
 
   @GET
   @Path("/neighbors/{id}")
-  @ApiOperation(value = "Get neighbors", response = ConceptDTO.class)
+  @ApiOperation(value = "Get neighbors", response = TinkerGraph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
@@ -184,7 +184,7 @@ public class GraphService extends BaseResource {
 
   @GET
   @Path("/{id}")
-  @ApiOperation(value = "Get all properties of a node", response = ConceptDTO.class)
+  @ApiOperation(value = "Get all properties of a node", response = TinkerGraph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
