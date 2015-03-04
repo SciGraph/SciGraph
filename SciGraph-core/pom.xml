@@ -120,7 +120,7 @@
     <dependency>
       <groupId>org.semanticweb.elk</groupId>
       <artifactId>elk-owlapi</artifactId>
-      <version>0.4.1</version>
+      <version>0.4.2</version>
     </dependency>
     <dependency>
       <groupId>org.mapdb</groupId>
@@ -142,6 +142,26 @@
           </goals>
         </execution>
       </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+
+        </configuration>
+        <executions>
+          <execution>
+            <id>assemble-all</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <!-- <plugins> <plugin> <groupId>org.jvnet.jaxb2.maven2</groupId> <artifactId>maven-jaxb2-plugin</artifactId> 

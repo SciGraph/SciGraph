@@ -50,7 +50,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <dropwizard.version>0.8.0-rc2</dropwizard.version>
+    <dropwizard.version>0.8.0-rc5</dropwizard.version>
     <guice.version>4.0-beta5</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
   </properties>
@@ -70,10 +70,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.18</version>
-        <configuration>
-          <reuseForks>false</reuseForks>
-          <forkCount>1</forkCount>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
