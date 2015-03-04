@@ -21,16 +21,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.google.inject.Inject;
 
-import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
-import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 
 final class OwlOntologyProducer implements Callable<Void>{
 
@@ -57,12 +52,13 @@ final class OwlOntologyProducer implements Callable<Void>{
           break;
         } else {
           logger.info("Loading ontology: " + ontologyConfig);
-          
+          Producer producer = null;
           if (ontologyConfig.url().endsWith(".ttl") && !ontologyConfig.getReasonerConfiguration().isPresent()) {
-            
+            producer = new TtlProducer(queue);
           } else {
-            
+            producer = new OwlApiProducer(ontologyConfig, queue);
           }
+          producer.produce();
         }
       }
     } catch (Exception e) { 
