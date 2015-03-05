@@ -40,7 +40,7 @@ import edu.sdsc.scigraph.neo4j.GraphUtil;
 public class OwlPostprocessorTest {
 
   GraphDatabaseService graphDb;
-  Node parent, child, grandChild, equivalent, equivalentSubclass;
+  Node parent, child, grandChild, equivalent, equivalentSubclass, instance;
   OwlPostprocessor postprocessor;
 
   void enableIndexing() {
@@ -48,7 +48,7 @@ public class OwlPostprocessorTest {
     nodeIndex.startAutoIndexingProperty(CommonProperties.URI);
     nodeIndex.setEnabled(true);
   }
-  
+
   @Before
   public void setup() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
@@ -64,36 +64,49 @@ public class OwlPostprocessorTest {
     equivalentSubclass = graphDb.createNode();
     equivalentSubclass.createRelationshipTo(equivalent, OwlRelationships.RDFS_SUBCLASS_OF);
     equivalent.createRelationshipTo(child, OwlRelationships.OWL_EQUIVALENT_CLASS);
+    instance = graphDb.createNode();
+    instance.createRelationshipTo(grandChild, OwlRelationships.RDF_TYPE);
     tx.success();
     postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
-  }
-
-  @Test
-  public void testCategories() {
     Map<String, String> categoryMap = new HashMap<>();
     categoryMap.put("http://example.org/a", "foo");
     postprocessor.processCategories(categoryMap);
+  }
 
-    assertThat("parent category should be set",
-        GraphUtil.getProperty(parent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat("child category should be set",
-        GraphUtil.getProperty(child, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat("grandchild category should be set",
-        GraphUtil.getProperty(grandChild, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat("equivalent category should be set",
-        GraphUtil.getProperty(equivalent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat("equivalent subclass category should be set",
-        GraphUtil.getProperty(equivalentSubclass, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat("parent label should be set",
-        parent.hasLabel(DynamicLabel.label("foo")), is(true));
-    assertThat("child label should be set",
-        child.hasLabel(DynamicLabel.label("foo")), is(true));
-    assertThat("grandchild label should be set",
-        grandChild.hasLabel(DynamicLabel.label("foo")), is(true));
-    assertThat("equivalent label should be set",
-        equivalent.hasLabel(DynamicLabel.label("foo")), is(true));
-    assertThat("equivalent label category should be set",
-        equivalentSubclass.hasLabel(DynamicLabel.label("foo")), is(true));
+  @Test
+  public void parentCategory_isSet() {
+    assertThat(GraphUtil.getProperty(parent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat(parent.hasLabel(DynamicLabel.label("foo")), is(true));
+  }
+
+  @Test
+  public void childCategory_isSet() {
+    assertThat(GraphUtil.getProperty(child, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat(child.hasLabel(DynamicLabel.label("foo")), is(true));
+  }
+
+  @Test
+  public void grandChildCategory_isSet() {
+    assertThat(GraphUtil.getProperty(grandChild, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat(grandChild.hasLabel(DynamicLabel.label("foo")), is(true));
+  }
+
+  @Test
+  public void equivalentCategory_isSet() {
+    assertThat(GraphUtil.getProperty(equivalent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat(equivalent.hasLabel(DynamicLabel.label("foo")), is(true));
+  }
+
+  @Test
+  public void equivalentSubclassCategory_isSet() {
+    assertThat(GraphUtil.getProperty(equivalentSubclass, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat(equivalentSubclass.hasLabel(DynamicLabel.label("foo")), is(true));
+  }
+
+  @Test
+  public void instanceCategory_isSet() {
+    assertThat(GraphUtil.getProperty(instance, Concept.CATEGORY, String.class), is(Optional.of("foo")));
+    assertThat(instance.hasLabel(DynamicLabel.label("foo")), is(true));
   }
 
 }

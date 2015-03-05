@@ -55,7 +55,6 @@ public class OwlPostprocessor {
     this.categoryMap = categoryMap;
     this.nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     engine = new ExecutionEngine(graphDb);
-
   }
 
   public void postprocess() {
@@ -96,6 +95,7 @@ public class OwlPostprocessor {
   void processCategory(Node root, RelationshipType type, Direction direction, String category) {
     for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL)
         .depthFirst().relationships(type, direction)
+        .relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
         .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).traverse(root)) {
       Node end = position.endNode();
       if (!GraphUtil.getProperties(end, Concept.CATEGORY, String.class).contains(category)) {
