@@ -54,8 +54,6 @@ public class ReasonerUtil {
   @Inject
   public ReasonerUtil(ReasonerConfiguration reasonerFactory, OWLOntologyManager manager, OWLOntology ont) 
       throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-    //TODO: Move this to a configuration file
-    org.apache.log4j.Logger.getLogger("org.semanticweb.elk").setLevel(org.apache.log4j.Level.FATAL);
     OWLReasonerFactory factory = (OWLReasonerFactory) Class.forName(reasonerFactory.getFactory()).newInstance();
     logger.info("Creating reasoner for " + ont);
     reasoner = factory.createReasoner(ont);
