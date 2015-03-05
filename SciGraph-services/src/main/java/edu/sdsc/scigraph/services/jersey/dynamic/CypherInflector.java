@@ -37,6 +37,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import jersey.repackaged.com.google.common.base.Splitter;
 
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.glassfish.jersey.process.Inflector;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
@@ -151,13 +152,19 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     return buffer.toString();
   }
 
+  public String substituteRelationships(String query, Map<String, Object> valueMap) {
+    StrSubstitutor substitutor = new StrSubstitutor(valueMap);
+    return substitutor.replace(query);
+  }
+
   @Override
   public TinkerGraph apply(ContainerRequestContext context) {
     logger.fine("Serving dynamic request");
     MultivaluedMap<String, String> params = context.getUriInfo().getQueryParameters();
     Map<String, Object> flatMap = flatten(params);
+    String query = substituteRelationships(config.getQuery(), flatMap);
     try (Transaction tx = graphDb.beginTx()) {
-      String query = entailRelationships(config.getQuery());
+      query = entailRelationships(query);
       ExecutionResult result = engine.execute(query, flatMap);
       TinkerGraph graph = resultToGraph(result);
       tx.success();

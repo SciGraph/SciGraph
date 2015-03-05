@@ -24,6 +24,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -57,6 +59,7 @@ public class CypherInflectorTest extends GraphTestBase {
   UriInfo uriInfo = mock(UriInfo.class);
   Transaction tx = mock(Transaction.class);
   CurieUtil curieUtil = mock(CurieUtil.class);
+  CypherInflector inflector;
 
   void addRelationship(String parentIri, String childIri, RelationshipType type) {
     Node parent = createNode(parentIri);
@@ -72,14 +75,15 @@ public class CypherInflectorTest extends GraphTestBase {
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
     when(context.getUriInfo()).thenReturn(uriInfo);
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
+    map.put("rel_id", newArrayList("fizz"));
     when(uriInfo.getQueryParameters()).thenReturn(map);
     when(curieUtil.getFullUri("X:foo")).thenReturn(newHashSet("http://x.org/#foo"));
+    inflector = new CypherInflector(graphDb, engine, curieUtil, config);
   }
 
   @Test
   public void inflectorAppliesCorrectly() {
     config.setQuery("MATCH (n) RETURN n");
-    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     TinkerGraph graph = inflector.apply(context);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
   }
@@ -87,7 +91,13 @@ public class CypherInflectorTest extends GraphTestBase {
   @Test
   public void inflectorAppliesCorrectly_withRelationshipEntailment() {
     config.setQuery("MATCH (n)-[r:foo!]-(m) RETURN n, r, m");
-    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
+    TinkerGraph graph = inflector.apply(context);
+    assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
+  }
+  
+  @Test
+  public void inflectorAppliesCorrectly_withVariableRelationship() {
+    config.setQuery("MATCH (n)-[r:${rel_id}]-(m) RETURN n, r, m");
     TinkerGraph graph = inflector.apply(context);
     assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
   }
@@ -95,31 +105,36 @@ public class CypherInflectorTest extends GraphTestBase {
   @Test
   public void pathsAreReturnedCorrectly() {
     config.setQuery("MATCH (n {fragment:'foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
-    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     TinkerGraph graph = inflector.apply(context);
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
   }
 
   @Test
   public void entailmentRegex() {
-    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     String result = inflector.entailRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
     assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
   }
 
   @Test
   public void multipleEntailmentRegex() {
-    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     Set<String> types = inflector.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
     assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "baz"));
   }
 
   @Test
   public void curiesResolveToFragments() {
-    CypherInflector inflector = new CypherInflector(graphDb, engine, curieUtil, config);
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
     map.put("test", newArrayList("X:foo"));
     assertThat(inflector.flatten(map), IsMapContaining.<String, Object>hasEntry("test", "foo"));
+  }
+
+  @Test
+  public void substituteRelationship() {
+    Map<String, Object> valueMap = new HashMap<>();
+    valueMap.put("node_id", "HP_123");
+    valueMap.put("rel_id", "RO_123");
+    String actual = inflector.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
+    assertThat(actual, is("({node_id}-[:RO_123!]-(end)"));
   }
 
 }
