@@ -271,7 +271,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }
     addCommonConstraints(finalQuery, query);
     IndexHits<Node> hits = null;
-    System.out.println(finalQuery);
     try (Transaction tx = graph.beginTx()) {
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();

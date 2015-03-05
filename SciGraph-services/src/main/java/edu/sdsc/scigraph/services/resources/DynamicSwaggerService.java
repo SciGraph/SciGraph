@@ -39,7 +39,6 @@ public class DynamicSwaggerService {
   @Inject
   public DynamicSwaggerService(List<Apis> apis) {
     this.apis = apis;
-    System.out.println(apis);
   }
 
   @GET
