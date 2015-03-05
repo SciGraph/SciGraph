@@ -92,7 +92,7 @@ public class ReasonerUtilTest {
     OWLClassAssertionAxiom a1 = dataFactory.getOWLClassAssertionAxiom(c0, i1);
     OWLClassAssertionAxiom a2 = dataFactory.getOWLClassAssertionAxiom(c1, i1);
     manager.addAxioms(ont, newHashSet(disjoint, a1, a2));
-    assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont), ont), is(false));
+    assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont)), is(false));
   }
 
   @Test
@@ -100,7 +100,7 @@ public class ReasonerUtilTest {
     OWLAxiom axiom = dataFactory.getOWLSubClassOfAxiom(
         dataFactory.getOWLClass(IRI.generateDocumentIRI()), dataFactory.getOWLNothing());
     manager.addAxiom(ont, axiom);
-    assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont), ont), is(false));
+    assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont)), is(false));
   }
 
 }

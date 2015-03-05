@@ -16,6 +16,8 @@
 package edu.sdsc.scigraph.owlapi;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -63,33 +65,41 @@ public class ReasonerUtil {
     this.ont = ont;
   }
 
-  int removeAxioms(AxiomType<?> type) {
-    int count = 0;
+  OWLReasoner getReasoner() {
+    return reasoner;
+  }
+  
+  Collection<OWLOntologyChange> removeAxioms(AxiomType<?> type) {
+    Collection<OWLOntologyChange> removals = new HashSet<>();
     for (OWLOntology importedOnt: ont.getImportsClosure()) {
       Set<? extends OWLAxiom> axioms = importedOnt.getAxioms(type);
-      List<OWLOntologyChange> removals= manager.removeAxioms(importedOnt, axioms);
-      count += removals.size();
+      removals.addAll(manager.removeAxioms(importedOnt, axioms));
     }
-    return count;
+    return removals;
   }
 
   /***
    * Remove all axioms that would generate extra unsatisfiable classes for the reasoner
    */
-  void removeUnsatisfiableClasses() {
-    int removalCount = 0;
-    removalCount += removeAxioms(AxiomType.DISJOINT_CLASSES);
-    removalCount += removeAxioms(AxiomType.DATA_PROPERTY_DOMAIN);
-    removalCount += removeAxioms(AxiomType.DATA_PROPERTY_RANGE);
-    logger.info("Removed " + removalCount + " axioms to prevent unsatisfiable classes");
+  Collection<OWLOntologyChange> removeUnsatisfiableClasses() {
+    Collection<OWLOntologyChange> removals = new HashSet<>();
+    removals.addAll(removeAxioms(AxiomType.DISJOINT_CLASSES));
+    removals.addAll(removeAxioms(AxiomType.DATA_PROPERTY_DOMAIN));
+    removals.addAll(removeAxioms(AxiomType.DATA_PROPERTY_RANGE));
+    logger.info("Removed " + removals.size() + " axioms to prevent unsatisfiable classes");
+    return removals;
   }
 
-  boolean shouldReason(OWLReasoner reasoner, OWLOntology ont) {
+  static Collection<OWLClass> getUnsatisfiableClasses(OWLReasoner reasoner) {
+    return reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom();
+  }
+
+  boolean shouldReason(OWLReasoner reasoner) {
     if (!reasoner.isConsistent()) {
       logger.warning("Not reasoning on " + ont + " because it is inconsistent.");
       return false;
     }
-    Set<OWLClass> unsatisfiableClasses = reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom();
+    Collection<OWLClass> unsatisfiableClasses = getUnsatisfiableClasses(reasoner);
     if (!unsatisfiableClasses.isEmpty()) {
       logger.warning("Not reasoning on " + ont + " because " + unsatisfiableClasses.size() + " classes are unsatisfiable");
       logger.warning("For instance: " + Iterables.getFirst(unsatisfiableClasses, null).getIRI().toString() + " unsatisfiable");
@@ -139,7 +149,7 @@ public class ReasonerUtil {
     if (config.isRemoveUnsatisfiableClasses()) {
       removeUnsatisfiableClasses();
     }
-    if (!shouldReason(reasoner, ont)) {
+    if (!shouldReason(reasoner)) {
       return;
     }
 
