@@ -18,8 +18,6 @@ package edu.sdsc.scigraph.services.jersey.dynamic;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,11 +80,7 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
       String value = entry.getValue().get(0);
       Collection<String> uris = curieUtil.getFullUri(value);
       if (!uris.isEmpty()) {
-        try {
-          value = GraphUtil.getFragment(new URI(getFirst(uris, null)));
-        } catch (URISyntaxException e) {
-          e.printStackTrace();
-        }
+        value = GraphUtil.getFragment(getFirst(uris, null));
       }
       flatMap.put(entry.getKey(), value);
     }

@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
@@ -42,6 +43,8 @@ import com.google.common.base.Predicate;
  * <b>NOTE:</b> Clients are responsible for managing transactions around these methods.
  */
 public class GraphUtil {
+
+  private static final UrlValidator validator = UrlValidator.getInstance();
 
   /***
    * Add a property value to a container.
@@ -179,23 +182,34 @@ public class GraphUtil {
   }
 
   /***
-   * Returns the "fragment" of a URI
+   * Returns the "fragment" of an IRI
    * 
    * <p>Due to historical ID spaces the fragment is
    * the true RFC3987 fragment (foo in http://example.org#foo) if the {@code uri} has one.
    * If a true fragment is not present then the fragment is the final path element 
    * (foo in http://example.org/foo)
    * 
-   * @param uri uri with a fragment
-   * @return the "fragment" of the URI
+   * @param iri uri with a fragment
+   * @return the "fragment" of the IRI
    */
-  public static String getFragment(URI uri) {
-    if (null != uri.getFragment()) {
-      return uri.getFragment();
-    } else if (uri.toString().startsWith("mailto:")) {
-      return uri.toString().substring("mailto:".length());
+  public static String getFragment(String iri) {
+    if (validator.isValid(checkNotNull(iri))) {
+      try {
+        URI uri = new URI(iri);
+        if (null != uri.getFragment()) {
+          return uri.getFragment();
+        } else if (iri.startsWith("mailto:")) {
+          return iri.substring("mailto:".length());
+        } else {
+          return getLastPathFragment(uri);
+        }
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    } else if (iri.startsWith("_:")) {
+      return iri;
     } else {
-      return getLastPathFragment(uri);
+      throw new RuntimeException();
     }
   }
 

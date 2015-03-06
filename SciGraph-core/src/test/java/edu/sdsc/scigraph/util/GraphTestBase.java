@@ -39,7 +39,7 @@ public class GraphTestBase {
   protected Node createNode(String uri) {
     long node = graph.createNode(uri);
     graph.setNodeProperty(node, "uri", uri);
-    graph.setNodeProperty(node, "fragment", OwlApiUtils.getURI(uri).getFragment());
+    graph.setNodeProperty(node, "fragment", OwlApiUtils.getIri(uri).getFragment());
     return graphDb.getNodeById(node);
   }
   

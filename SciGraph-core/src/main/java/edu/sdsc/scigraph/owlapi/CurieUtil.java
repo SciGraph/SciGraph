@@ -38,13 +38,13 @@ import com.google.common.collect.Multimap;
 public class CurieUtil {
 
   private final Map<String, String> curieMap;
-  private final Multimap<String, String> uriMap = HashMultimap.create();
+  private final Multimap<String, String> iriMap = HashMultimap.create();
 
   @Inject
   CurieUtil(@Named("neo4j.curieMap") Map<String, String> curieMap) {
     this.curieMap = ImmutableMap.copyOf(curieMap);
     for (Entry<String, String> curie: curieMap.entrySet()) {
-      uriMap.put(curie.getValue(), curie.getKey());
+      iriMap.put(curie.getValue(), curie.getKey());
     }
   }
 
@@ -52,7 +52,7 @@ public class CurieUtil {
    * @return all of the CURIE prefixes
    */
   public Collection<String> getPrefixes() {
-    return uriMap.keySet();
+    return iriMap.keySet();
   }
 
   /***
@@ -62,7 +62,7 @@ public class CurieUtil {
    * @return mapped IRI prefix(es)
    */
   public Collection<String> getAllExpansions(final String curiePrefix) {
-    return uriMap.get(curiePrefix);
+    return iriMap.get(curiePrefix);
   }
 
   /***
@@ -91,11 +91,11 @@ public class CurieUtil {
     String[] parts = checkNotNull(curie).split(":");
     if (parts.length > 1) {
       String prefix = parts[0];
-      if (uriMap.containsKey(prefix)) {
-        return transform(uriMap.get(prefix), new Function<String, String>() {
+      if (iriMap.containsKey(prefix)) {
+        return transform(iriMap.get(prefix), new Function<String, String>() {
           @Override
-          public String apply(String uriPrefix) {
-            return String.format("%s%s", uriPrefix, curie.substring(curie.indexOf(':') + 1));
+          public String apply(String iriPrefix) {
+            return String.format("%s%s", iriPrefix, curie.substring(curie.indexOf(':') + 1));
           }
         });
       }

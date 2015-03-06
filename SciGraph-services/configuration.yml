@@ -62,37 +62,31 @@ applicationContextPath: scigraph
 graphConfiguration:
   graphLocation: /temp/rosieGraph
   curies:
-    http://purl.obolibrary.org/obo/DOID_ : DOID
-    http://purl.obolibrary.org/obo/ORPHANET_ : ORPHANET
-    http://purl.obolibrary.org/obo/OMIM_ : OMIM
-    http://www.ncbi.nlm.nih.gov/pubmed/ : PMID
-    http://purl.obolibrary.org/obo/HP_ : HP
-    http://purl.obolibrary.org/obo/MP_ : MP
-    http://purl.obolibrary.org/obo/ZP_ : ZP
-    http://purl.obolibrary.org/obo/GENO_ : GENO
-    http://purl.obolibrary.org/obo/ECO_ : ECO
-    http://purl.obolibrary.org/obo/RO_ : RO
-    http://purl.obolibrary.org/obo/BFO_ : BFO
-#    http://monarch-initiative.org/data/MGI_ : MGI
-    http://semanticscience.org/resource/SIO_ : SIO
-    http://purl.obolibrary.org/obo/Ensembl_ : ENSEMBL
-    http://purl.obolibrary.org/obo/ENSEMBL_ : ENSEMBL
-#    http://purl.obolibrary.org/obo/MGI_ : MGI
-    http://purl.obolibrary.org/obo/ZFIN_ : ZFIN
-    http://purl.obolibrary.org/obo/UniProtKB_ : UNIPROT
-    http://purl.obolibrary.org/obo/MESH_ : MESH
-    http://purl.obolibrary.org/obo/MeSH_ : MESH
-    http://purl.obolibrary.org/obo/UMLS_ : UMLS
-    http://purl.obolibrary.org/obo/UMLS_CUI : UMLS
-    http://purl.obolibrary.org/obo/WB_ : WB
-    http://purl.obolibrary.org/obo/WormBase_ : WB
-    http://purl.obolibrary.org/obo/FB_ : FB
-    http://purl.obolibrary.org/obo/FlyBase_ : FB
-    http://purl.obolibrary.org/obo/RGD_ : RGD
-    http://purl.obolibrary.org/obo/MONARCH_ : MONARCH
-    http://omia.angis.org.au/OMIA : OMIA
-    http://purl.obolibrary.org/obo/OMIABreed_ : OMIABreed
-    http://purl.obolibrary.org/obo/OMIAPub_ : OMIAPub
+    http://purl.obolibrary.org/obo/CL_0000000 : cell
+    http://purl.obolibrary.org/obo/UBERON_0001062 : anatomical entity
+    http://purl.obolibrary.org/obo/UBERON_0000468 : multi-cellular organism
+    http://purl.obolibrary.org/obo/PATO_0000001 : quality
+    http://purl.obolibrary.org/obo/GO_0005623 : cell
+    http://purl.obolibrary.org/obo/DOID_4 : disease
+    http://purl.obolibrary.org/obo/PATO_0000003 : assay
+    http://purl.obolibrary.org/obo/PATO_0000006 : process
+    http://purl.obolibrary.org/obo/PATO_0000011 : age
+    http://purl.obolibrary.org/obo/CHEBI_23367 : molecular entity
+    http://purl.obolibrary.org/obo/CHEBI_23888 : drug
+    http://purl.obolibrary.org/obo/UPHENO_0001001 : Phenotype
+    http://purl.obolibrary.org/obo/GO_0008150 : biological process
+    http://purl.obolibrary.org/obo/GO_0005575 : cellular component
+    http://purl.obolibrary.org/obo/SO_0000704 : gene
+    http://purl.obolibrary.org/obo/GENO_0000000 : genotype
+    http://purl.obolibrary.org/obo/GENO_0000000 : intrinsic genotype
+    http://purl.obolibrary.org/obo/GENO_0000524 : genotype
+    http://purl.obolibrary.org/obo/GENO_0000524 : extrinsic genotype
+    http://purl.obolibrary.org/obo/GENO_0000525 : genotype
+    http://purl.obolibrary.org/obo/GENO_0000525 : effective genotype
+    http://purl.obolibrary.org/obo/GENO_0000002 : variant locus
+    http://purl.obolibrary.org/obo/SO_0001059 : sequence alteration
+    http://purl.obolibrary.org/obo/SO_0000110 : sequence feature
+    http://purl.obolibrary.org/obo/ECO_0000000 : evidence
 
 cypherResources:
   - path: /dynamic/genes_with_phenotype
@@ -163,6 +157,25 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype
+            required: true
+            type: string
+            paramType: query
+  - path: /dynamic/homologs
+    query: |
+            START gene = node:node_auto_index(fragment={gene_id})
+            MATCH (gene)-[e:equivalentClass*0..2]-(ge:gene)-[homology:${homolog_id}!]-(homolog)
+            RETURN distinct gene, e, ge, homology, homolog
+    operations:
+      - nickname: homologs
+        summary: Get homologs for a gene
+        parameters:
+          - name: gene_id
+            description: The ID of the gene
+            required: true
+            type: string
+            paramType: query
+          - name: homolog_id
+            description: The homolog relationship
             required: true
             type: string
             paramType: query

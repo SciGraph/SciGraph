@@ -35,7 +35,7 @@ public class TestEquivalentToIntersectionOf extends OwlTestCase {
 
   @Test
   public void testEquivalentToIntersectionOf() {
-    Node anonymousClass = getNode("http://ontology.neuinfo.org/anon/-574176990");
+    Node anonymousClass = getNode("_:-574176990");
     Node fillerClass = getNode("http://example.org/fillerClass");
 
     RelationshipType p = DynamicRelationshipType.withName("p");

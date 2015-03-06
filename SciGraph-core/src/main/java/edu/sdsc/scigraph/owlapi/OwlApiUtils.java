@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.coode.owlapi.obo12.parser.OBO12ParserFactory;
 import org.coode.owlapi.oboformat.OBOFormatParserFactory;
-import org.neo4j.helpers.collection.Iterables;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLParserFactory;
 import org.semanticweb.owlapi.io.OWLParserFactoryRegistry;
@@ -46,21 +45,18 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
 
 public class OwlApiUtils {
 
   private static final Logger logger = Logger.getLogger(OwlApiUtils.class.getName());
 
-  private static final String ANONYMOUS_NODE_PREFIX = "http://ontology.neuinfo.org/anon/";
-
   private static final UrlValidator validator = UrlValidator.getInstance();
 
-  public static URI getURI(String uri) {
+  public static URI getIri(String iri) {
     try {
-      return new URI(checkNotNull(uri));
+      return new URI(checkNotNull(iri));
     } catch (URISyntaxException e) {
-      checkState(false, "URIs passed to this method should always be valid: " + uri);
+      checkState(false, "IRIs passed to this method should always be valid: " + iri);
       return null;
     }
   }
@@ -89,38 +85,36 @@ public class OwlApiUtils {
     return Optional.of(literalValue);
   }
 
-  public static URI getUri(OWLDeclarationAxiom expression) {
-    return expression.getEntity().getIRI().toURI();
+  public static String getIri(OWLDeclarationAxiom expression) {
+    return expression.getEntity().getIRI().toString();
   }
 
-  public static URI getUri(OWLClassExpression expression) {
+  public static String getIri(OWLClassExpression expression) {
     if (expression.isAnonymous()) {
-      return getURI(ANONYMOUS_NODE_PREFIX + expression.hashCode());
+      return "_:" + expression.hashCode();
     } else {
-      return expression.asOWLClass().getIRI().toURI();
+      return expression.asOWLClass().getIRI().toString();
     }
   }
 
-  public static URI getUri(OWLObjectPropertyExpression property) {
+  public static String getIri(OWLObjectPropertyExpression property) {
     if (property.isAnonymous()) {
-      return getURI(ANONYMOUS_NODE_PREFIX + property.hashCode());
+      return "_:" + property.hashCode();
     } else {
-      return property.asOWLObjectProperty().getIRI().toURI();
+      return property.asOWLObjectProperty().getIRI().toString();
     }
   }
 
-  public static URI getUri(OWLIndividual individual) {
+  public static String getIri(OWLIndividual individual) {
     if (individual.isAnonymous()) {
-      String id = ((OWLAnonymousIndividual)individual).getID().getID();
-      String trueId = Iterables.last(Splitter.on("_:").split(id));
-      return getURI(ANONYMOUS_NODE_PREFIX + trueId);
+      return ((OWLAnonymousIndividual)individual).getID().getID();
     } else {
-      return individual.asOWLNamedIndividual().getIRI().toURI();
+      return individual.asOWLNamedIndividual().getIRI().toString();
     }
   }
 
-  public static URI getUri(OWLAnnotationProperty property) {
-    return property.asOWLAnnotationProperty().getIRI().toURI();
+  public static String getIri(OWLAnnotationProperty property) {
+    return property.asOWLAnnotationProperty().getIRI().toString();
   }
 
   public static String getFragment(OWLRDFVocabulary vocab) {

@@ -167,7 +167,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
 
   @Test
   public void anonymousClassesAreCreated() {
-    Node complement = getNode("http://ontology.neuinfo.org/anon/-1761792206");
+    Node complement = getNode("_:-1761792206");
     assertThat(complement.getLabels(), hasItem(OwlLabels.OWL_ANONYMOUS));
   }
 

@@ -17,29 +17,22 @@ package edu.sdsc.scigraph.owlapi;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 
 public class OwlApiUtilsTest {
 
-  OWLDataFactory factory;
-
-  @Before
-  public void setup() {
-    factory = OWLManager.getOWLDataFactory();
-  }
+  static OWLDataFactory factory = OWLManager.getOWLDataFactory();
 
   @Test
   public void testGetBooleanTypedLiteral() {
@@ -73,14 +66,11 @@ public class OwlApiUtilsTest {
   }
 
   @Test
-  public void getUri() throws URISyntaxException {
-    OWLClassExpression expression = mock(OWLClassExpression.class, Mockito.RETURNS_DEEP_STUBS);
-    when(expression.isAnonymous()).thenReturn(false);
-    when(expression.asOWLClass().getIRI().toURI()).thenReturn(new URI("http://example.org/Thing"));
-    assertThat(new URI("http://example.org/Thing"), is(OwlApiUtils.getUri(expression)));
-    when(expression.isAnonymous()).thenReturn(true);
-    assertThat(new URI("http://ontology.neuinfo.org/anon/" + expression.hashCode()),
-        is(OwlApiUtils.getUri(expression)));
+  public void getIris() throws URISyntaxException {
+    OWLClass clazz = factory.getOWLClass(IRI.create("http://example.org/Thing"));
+    assertThat(OwlApiUtils.getIri((OWLClassExpression)clazz), is("http://example.org/Thing"));
+    OWLObjectIntersectionOf expression = factory.getOWLObjectIntersectionOf(clazz);
+    assertThat(OwlApiUtils.getIri(expression), is("_:" + expression.hashCode()));
   }
 
 }
