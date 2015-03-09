@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
@@ -54,15 +53,16 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
-import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
@@ -98,13 +98,13 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @QueryParam("id") Set<String> ids,
       @ApiParam(value = "How far to traverse neighbors", required = false)
-      @QueryParam("depth") @DefaultValue("1") final IntParam depth,
+      @QueryParam("depth") @DefaultValue("1") IntParam depth,
       @ApiParam(value = "Traverse blank nodes", required = false)
-      @QueryParam("blankNodes") @DefaultValue("false") final BooleanParam traverseBlankNodes,
+      @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse", required = false)
-      @QueryParam("relationshipType") final String relationshipType,
+      @QueryParam("relationshipType") Optional<String> relationshipType,
       @ApiParam(value = "Which direction to traverse: in, out, both (default). Only used if relationshipType is specified.", required = false)
-      @QueryParam("direction") @DefaultValue("both") final String direction,
+      @QueryParam("direction") @DefaultValue("both") String direction,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
     Set<Concept> roots = new HashSet<>();
@@ -118,8 +118,8 @@ public class GraphService extends BaseResource {
       roots.add(concept);
     }
     Set<DirectedRelationshipType> types = new HashSet<>();
-    if (!isNullOrEmpty(relationshipType)) {
-      RelationshipType type = DynamicRelationshipType.withName(relationshipType);
+    if (relationshipType.isPresent()) {
+      RelationshipType type = DynamicRelationshipType.withName(relationshipType.get());
       Direction dir = Direction.BOTH;
       switch (direction) {
         case "in" : dir = Direction.INCOMING;
@@ -144,8 +144,7 @@ public class GraphService extends BaseResource {
         Predicate<Node> predicate = new Predicate<Node>() {
           @Override
           public boolean apply(Node node) {
-            //TODO: This should be done with properties...
-            return !((String)node.getProperty(CommonProperties.URI)).startsWith("http://ontology.neuinfo.org/anon/");
+            return !(Iterables.contains(node.getLabels(), OwlLabels.OWL_ANONYMOUS));
           }};
           nodePredicate = Optional.of(predicate);
       }
@@ -169,13 +168,13 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,
       @ApiParam(value = "How far to traverse neighbors", required = false)
-      @QueryParam("depth") @DefaultValue("1") final IntParam depth,
+      @QueryParam("depth") @DefaultValue("1") IntParam depth,
       @ApiParam(value = "Traverse blank nodes", required = false)
-      @QueryParam("blankNodes") @DefaultValue("false") final BooleanParam traverseBlankNodes,
+      @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse", required = false)
-      @QueryParam("relationshipType") final String relationshipType,
+      @QueryParam("relationshipType") Optional<String> relationshipType,
       @ApiParam(value = "Which direction to traverse: in, out, both (default). Only used if relationshipType is specified.", required = false)
-      @QueryParam("direction") @DefaultValue("both") final String direction,
+      @QueryParam("direction") @DefaultValue("both") String direction,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
     return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes, relationshipType, direction, callback);
