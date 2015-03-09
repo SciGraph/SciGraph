@@ -160,6 +160,7 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     MultivaluedMap<String, String> params = context.getUriInfo().getQueryParameters();
     Map<String, Object> flatMap = flatten(params);
     String query = substituteRelationships(config.getQuery(), flatMap);
+    logger.info("Running dynamic cypher query: " + query + " \nfrom\n " + flatMap);
     try (Transaction tx = graphDb.beginTx()) {
       query = entailRelationships(query);
       ExecutionResult result = engine.execute(query, flatMap);
