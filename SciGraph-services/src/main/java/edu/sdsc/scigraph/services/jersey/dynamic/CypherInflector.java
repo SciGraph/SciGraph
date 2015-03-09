@@ -91,6 +91,9 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     TinkerGraph graph = new TinkerGraph();
     for (Map<String, Object> map: result) {
       for (Entry<String, Object> entry: map.entrySet()) {
+        if (null == entry.getValue()) {
+          continue;
+        }
         if (entry.getValue() instanceof PropertyContainer) {
           TinkerGraphUtil.addElement(graph, (PropertyContainer)entry.getValue());
         } else if (entry.getValue() instanceof SeqWrapper) {
