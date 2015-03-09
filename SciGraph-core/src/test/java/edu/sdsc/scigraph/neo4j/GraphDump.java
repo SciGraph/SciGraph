@@ -22,6 +22,11 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.collect.Iterables;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Element;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 public class GraphDump {
 
@@ -30,9 +35,9 @@ public class GraphDump {
       System.out.println(key + ": " + container.getProperty(key));
     }
   }
-  
-  public static void dumpNode(Node node) {
-    System.out.println(String.format("%d (%s)", node.getId(), Iterables.toString(node.getLabels())));
+
+  public static void dumpNode(Vertex node) {
+    System.out.println(String.format("%s", node.getId()));
     dumpProperties(node);
   }
 
@@ -44,6 +49,34 @@ public class GraphDump {
     dumpProperties(relationship);
   }
 
+  public static void dumpGraph(TinkerGraph graphDb) {
+    for (Vertex node: graphDb.getVertices()) {
+      dumpNode(node);
+    }
+    for (Edge relationship: graphDb.getEdges()) {
+      dumpRelationship(relationship);
+    }
+  }
+
+  public static void dumpProperties(Element container) {
+    for (String key: container.getPropertyKeys()) {
+      System.out.println(key + ": " + container.getProperty(key));
+    }
+  }
+
+  public static void dumpNode(Node node) {
+    System.out.println(String.format("%d (%s)", node.getId(), Iterables.toString(node.getLabels())));
+    dumpProperties(node);
+  }
+
+  public static void dumpRelationship(Edge relationship) {
+    System.out.println(String.format("%s [%s->%s] (%s)", 
+        relationship.getId(), relationship.getVertex(Direction.OUT).getId(),
+        relationship.getVertex(Direction.IN).getId(),
+        relationship.getLabel()));
+    dumpProperties(relationship);
+  }
+
   public static void dumpGraph(GraphDatabaseService graphDb) {
     for (Node node: GlobalGraphOperations.at(graphDb).getAllNodes()) {
       dumpNode(node);
@@ -52,5 +85,6 @@ public class GraphDump {
       dumpRelationship(relationship);
     }
   }
+
 
 }

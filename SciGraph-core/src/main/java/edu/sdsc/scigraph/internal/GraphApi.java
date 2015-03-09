@@ -33,6 +33,7 @@ import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
+import org.neo4j.graphdb.traversal.Uniqueness;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -48,7 +49,7 @@ import edu.sdsc.scigraph.owlapi.OwlRelationships;
 public class GraphApi {
 
   private final GraphDatabaseService graphDb;
-  
+
   private final CurieUtil curieUtil;
 
   @Inject
@@ -78,7 +79,7 @@ public class GraphApi {
     return entailment;
   }
 
-  
+
   public boolean classIsInCategory(Node candidate, Node parentConcept) {
     return classIsInCategory(candidate, parentConcept, OwlRelationships.RDFS_SUBCLASS_OF);
   }
@@ -117,9 +118,12 @@ public class GraphApi {
       }
     }
   }
-  
+
   public TinkerGraph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
-    TraversalDescription description = graphDb.traversalDescription().depthFirst().evaluator(Evaluators.toDepth(depth));
+    TraversalDescription description = graphDb.traversalDescription()
+        .depthFirst()
+        .evaluator(Evaluators.toDepth(depth))
+        .uniqueness(Uniqueness.NODE_PATH);
     for (DirectedRelationshipType type: types) {
       description = description.relationships(type.getType(), type.getDirection());
     }
