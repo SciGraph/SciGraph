@@ -30,6 +30,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
+import jersey.repackaged.com.google.common.collect.Iterables;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Direction;
@@ -61,6 +63,8 @@ public class BbopJsGraphWriter extends GraphWriter {
       Object value = vertex.getProperty(NodeProperties.LABEL);
       if (value.getClass().isArray()) {
         label = Optional.of((String)Array.get(value, 0));
+      } else if (value instanceof Iterable) {
+        label = Optional.of((String)Iterables.getFirst((Iterable<?>)value, null));
       } else {
         label = Optional.of((String) value);
       }
