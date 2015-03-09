@@ -38,6 +38,7 @@ import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.InjectorFactory;
 import ru.vyarus.dropwizard.guice.module.support.ConfigurationAwareModule;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.inject.AbstractModule;
@@ -124,7 +125,14 @@ public class MainApplication extends Application<ApplicationConfiguration> {
   @Override
   public void initialize(Bootstrap<ApplicationConfiguration> bootstrap) {
     bootstrap.addBundle(new AssetsBundle("/swagger/", "/docs", "index.html"));
-    bootstrap.addBundle(new ViewBundle());
+    bootstrap.addBundle(new ViewBundle<ApplicationConfiguration>() {
+      @Override
+      public ImmutableMap<String, ImmutableMap<String, String>> getViewConfiguration(
+          ApplicationConfiguration configuration) {
+        return ImmutableMap.<String, ImmutableMap<String, String>>of();
+      }
+      
+    });
     bootstrap.addBundle(GuiceBundle.builder()
         .enableAutoConfig("edu.sdsc.scigraph.services")
         .injectorFactory(factory).modules(new MetaModule()).build());
