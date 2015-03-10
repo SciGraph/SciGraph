@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Before;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import edu.sdsc.scigraph.neo4j.Graph;
@@ -33,8 +32,6 @@ public class GraphTestBase {
 
   protected GraphDatabaseService graphDb;
   protected Graph graph;
-  Transaction tx;
-  protected static boolean cleanup = true;
 
   protected Node createNode(String uri) {
     long node = graph.createNode(uri);
@@ -42,7 +39,7 @@ public class GraphTestBase {
     graph.setNodeProperty(node, "fragment", OwlApiUtils.getIri(uri).getFragment());
     return graphDb.getNodeById(node);
   }
-  
+
   @Before
   public void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
@@ -52,7 +49,7 @@ public class GraphTestBase {
 
   @Before
   public void setUp() throws Exception {
-    tx = graphDb.beginTx();
+    graphDb.beginTx();
   }
 
 }
