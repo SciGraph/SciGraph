@@ -15,13 +15,13 @@
  */
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
+import static com.google.common.base.Joiner.on;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -31,10 +31,10 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.MultivaluedMap;
 
 import jersey.repackaged.com.google.common.base.Splitter;
 
+import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.glassfish.jersey.process.Inflector;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
@@ -46,12 +46,16 @@ import org.neo4j.graphdb.Transaction;
 import scala.collection.convert.Wrappers.SeqWrapper;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
+import edu.sdsc.scigraph.services.jersey.MultivaluedMapUtils;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 final class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph> {
@@ -74,17 +78,41 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     this.curieUtil = curieUtil;
   }
 
-  Map<String, Object> flatten(MultivaluedMap<String, String> map) {
+  @Override
+  public TinkerGraph apply(ContainerRequestContext context) {
+    logger.fine("Serving dynamic request");
+    Multimap<String, String> paramMap = MultivaluedMapUtils.merge(context.getUriInfo());
+    paramMap = resolveCuries(paramMap);
+    String query = substituteRelationships(config.getQuery(), paramMap);
+    Map<String, Object> flatMap = flattenMap(paramMap);
+    try (Transaction tx = graphDb.beginTx()) {
+      query = entailRelationships(query);
+      ExecutionResult result = engine.execute(query, flatMap);
+      TinkerGraph graph = resultToGraph(result);
+      tx.success();
+      return graph;
+    }
+  }
+
+  Map<String, Object> flattenMap(Multimap<String, String> paramMap) {
     Map<String, Object> flatMap = new HashMap<>();
-    for (Entry<String, List<String>> entry: map.entrySet()) {
-      String value = entry.getValue().get(0);
-      Collection<String> uris = curieUtil.getFullUri(value);
-      if (!uris.isEmpty()) {
-        value = GraphUtil.getFragment(getFirst(uris, null));
-      }
-      flatMap.put(entry.getKey(), value);
+    for (Entry<String, Collection<String>> entry: paramMap.asMap().entrySet()) {
+      flatMap.put(entry.getKey(), getFirst(entry.getValue(), null));
     }
     return flatMap;
+  }
+
+  Multimap<String, String> resolveCuries(Multimap<String, String> paramMap) {
+    Multimap<String, String> map = ArrayListMultimap.create();
+    for (Entry<String, String> entry: paramMap.entries()) {
+      Optional<String> iri = curieUtil.getIri(entry.getValue());
+      if (iri.isPresent()) {
+        map.put(entry.getKey(), GraphUtil.getFragment(iri.get()));
+      } else {
+        map.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return map;
   }
 
   static TinkerGraph resultToGraph(ExecutionResult result) {
@@ -131,11 +159,6 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     return entailedTypes;
   }
 
-  /***
-   * 
-   * @param cypher
-   * @return
-   */
   String entailRelationships(String cypher) {
     Matcher m = pattern.matcher(cypher);
     StringBuffer buffer = new StringBuffer();
@@ -149,24 +172,14 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     return buffer.toString();
   }
 
-  public String substituteRelationships(String query, Map<String, Object> valueMap) {
-    StrSubstitutor substitutor = new StrSubstitutor(valueMap);
+  String substituteRelationships(String query, final Multimap<String, String> valueMap) {
+    StrSubstitutor substitutor = new StrSubstitutor(new StrLookup<String>() {
+      @Override
+      public String lookup(String key) {
+        return on('|').join(valueMap.get(key));
+      }
+    });
     return substitutor.replace(query);
-  }
-
-  @Override
-  public TinkerGraph apply(ContainerRequestContext context) {
-    logger.fine("Serving dynamic request");
-    MultivaluedMap<String, String> params = context.getUriInfo().getQueryParameters();
-    Map<String, Object> flatMap = flatten(params);
-    String query = substituteRelationships(config.getQuery(), flatMap);
-    try (Transaction tx = graphDb.beginTx()) {
-      query = entailRelationships(query);
-      ExecutionResult result = engine.execute(query, flatMap);
-      TinkerGraph graph = resultToGraph(result);
-      tx.success();
-      return graph;
-    }
   }
 
 }

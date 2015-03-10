@@ -112,7 +112,7 @@ public class ImageWriter extends GraphWriter {
     public Paint transform(Vertex vertex) {
       if (vertex.getPropertyKeys().contains(Concept.CATEGORY)) {
         Object categories = vertex.getProperty(Concept.CATEGORY);
-        if (categories.getClass().isArray()) {
+        if (categories.getClass().isArray() || categories instanceof Iterable) {
           return Color.WHITE;
         } else {
           String category = (String) categories;

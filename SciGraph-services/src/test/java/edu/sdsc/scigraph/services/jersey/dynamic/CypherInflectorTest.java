@@ -21,11 +21,11 @@ import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -42,6 +42,10 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
@@ -77,7 +81,11 @@ public class CypherInflectorTest extends GraphTestBase {
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
     map.put("rel_id", newArrayList("fizz"));
     when(uriInfo.getQueryParameters()).thenReturn(map);
-    when(curieUtil.getFullUri("X:foo")).thenReturn(newHashSet("http://x.org/#foo"));
+    map = new MultivaluedHashMap<>();
+    map.put("pathParam", newArrayList("pathValue"));
+    when(uriInfo.getPathParameters()).thenReturn(map);
+    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getIri("X:foo")).thenReturn(Optional.of("http://x.org/#foo"));
     inflector = new CypherInflector(graphDb, engine, curieUtil, config);
   }
 
@@ -94,7 +102,7 @@ public class CypherInflectorTest extends GraphTestBase {
     TinkerGraph graph = inflector.apply(context);
     assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
   }
-  
+
   @Test
   public void inflectorAppliesCorrectly_withVariableRelationship() {
     config.setQuery("MATCH (n)-[r:${rel_id}]-(m) RETURN n, r, m");
@@ -123,18 +131,19 @@ public class CypherInflectorTest extends GraphTestBase {
 
   @Test
   public void curiesResolveToFragments() {
-    MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
-    map.put("test", newArrayList("X:foo"));
-    assertThat(inflector.flatten(map), IsMapContaining.<String, Object>hasEntry("test", "foo"));
+    Multimap<String, String> map = ArrayListMultimap.create();
+    map.put("test", "X:foo");
+    assertThat(inflector.resolveCuries(map).asMap(), IsMapContaining.<String, Collection<String>>hasEntry("test", newArrayList("foo")));
   }
 
   @Test
   public void substituteRelationship() {
-    Map<String, Object> valueMap = new HashMap<>();
+    Multimap<String, String> valueMap = HashMultimap.create();
     valueMap.put("node_id", "HP_123");
-    valueMap.put("rel_id", "RO_123");
+    valueMap.put("rel_id", "RO_1");
+    valueMap.put("rel_id", "RO_2");
     String actual = inflector.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
-    assertThat(actual, is("({node_id}-[:RO_123!]-(end)"));
+    assertThat(actual, is("({node_id}-[:RO_2|RO_1!]-(end)"));
   }
 
 }

@@ -62,34 +62,111 @@ applicationContextPath: scigraph
 graphConfiguration:
   graphLocation: /temp/rosieGraph
   curies:
-    http://purl.obolibrary.org/obo/CL_0000000 : cell
-    http://purl.obolibrary.org/obo/UBERON_0001062 : anatomical entity
-    http://purl.obolibrary.org/obo/UBERON_0000468 : multi-cellular organism
-    http://purl.obolibrary.org/obo/PATO_0000001 : quality
-    http://purl.obolibrary.org/obo/GO_0005623 : cell
-    http://purl.obolibrary.org/obo/DOID_4 : disease
-    http://purl.obolibrary.org/obo/PATO_0000003 : assay
-    http://purl.obolibrary.org/obo/PATO_0000006 : process
-    http://purl.obolibrary.org/obo/PATO_0000011 : age
-    http://purl.obolibrary.org/obo/CHEBI_23367 : molecular entity
-    http://purl.obolibrary.org/obo/CHEBI_23888 : drug
-    http://purl.obolibrary.org/obo/UPHENO_0001001 : Phenotype
-    http://purl.obolibrary.org/obo/GO_0008150 : biological process
-    http://purl.obolibrary.org/obo/GO_0005575 : cellular component
-    http://purl.obolibrary.org/obo/SO_0000704 : gene
-    http://purl.obolibrary.org/obo/GENO_0000000 : genotype
-    http://purl.obolibrary.org/obo/GENO_0000000 : intrinsic genotype
-    http://purl.obolibrary.org/obo/GENO_0000524 : genotype
-    http://purl.obolibrary.org/obo/GENO_0000524 : extrinsic genotype
-    http://purl.obolibrary.org/obo/GENO_0000525 : genotype
-    http://purl.obolibrary.org/obo/GENO_0000525 : effective genotype
-    http://purl.obolibrary.org/obo/GENO_0000002 : variant locus
-    http://purl.obolibrary.org/obo/SO_0001059 : sequence alteration
-    http://purl.obolibrary.org/obo/SO_0000110 : sequence feature
-    http://purl.obolibrary.org/obo/ECO_0000000 : evidence
+    # base
+    '': 'http://www.monarchinitiative.org/'
+    'MONARCH': 'http://www.monarchinitiative.org/MONARCH_'
+
+
+    # ontologies
+    'HP': 'http://purl.obolibrary.org/obo/HP_'
+    'ECO': 'http://purl.obolibrary.org/obo/ECO_'
+    'RO': 'http://purl.obolibrary.org/obo/RO_'
+    'GENO': 'http://purl.obolibrary.org/obo/GENO_'
+    'OBO': 'http://purl.obolibrary.org/obo/'
+    'OIO': 'http://www.geneontology.org/formats/oboInOwl#'
+    'IAO': 'http://purl.obolibrary.org/obo/IAO_'
+    'OMIM' : 'http://purl.obolibrary.org/obo/OMIM_'
+    'DECIPHER' : 'http://purl.obolibrary.org/obo/DECIPHER_'
+    'ORPHANET' : 'http://purl.obolibrary.org/obo/ORPHANET_'
+    'faldo' : 'http://biohackathon.org/resource/faldo#'
+    'SO' : 'http://purl.obolibrary.org/obo/SO_'
+    'OMIM' : 'http://purl.obolibrary.org/obo/OMIM_'
+    'DATA' : 'http://purl.obolibrary.org/DATA_'
+    'MP': 'http://purl.obolibrary.org/obo/MP_'
+    'MA': 'http://purl.obolibrary.org/obo/MA_'
+    'ZP': 'http://purl.obolibrary.org/obo/ZP_'
+    'ZFA': 'http://purl.obolibrary.org/obo/ZFA_'
+    'ZFS': 'http://purl.obolibrary.org/obo/ZFS_'
+    'BFO': 'http://purl.obolibrary.org/obo/BFO_'
+    'DOID': 'http://purl.obolibrary.org/obo/DOID_'
+    'MESH': 'http://purl.obolibrary.org/obo/MESH_'
+    'RO': 'http://purl.obolibrary.org/obo/RO_'
+    'PATO': 'http://purl.obolibrary.org/obo/PATO_'
+    'PR': 'http://purl.obolibrary.org/obo/pr_' #FIXME: believe this is correct, but need confirmation.
+    'UMLS' : 'http://purl.obolibrary.org/obo/UMLS_'
+    'PW' : 'http://purl.obolibrary.org/obo/PW_'
+    'CL' : 'http://purl.obolibrary.org/obo/CL_'
+    'CLO' : 'http://purl.obolibrary.org/obo/CLO_'
+    'GO' : 'http://purl.obolibrary.org/obo/GO_'
+    'SIO' : 'http://semanticscience.org/resource/SIO_'
+    'EFO' : 'http://www.ebi.ac.uk/efo/EFO_'
+    'UBERON' : 'http://purl.obolibrary.org/obo/UBERON_'
+    'SNOMED' : 'http://purl.obolibrary.org/obo/SNOMED_'
+
+
+    # publication/reference sources
+    'PMID': 'http://www.ncbi.nlm.nih.gov/pubmed/'
+    'PMCID' : 'http://www.ncbi.nlm.nih.gov/pmc/'
+    'ISBN-10': 'http://www.monarchinitiative.org/ISBN10_'
+    'ISBN-13': 'http://www.monarchinitiative.org/ISBN13_'
+    'ISBN-15': 'http://www.monarchinitiative.org/ISBN15_'
+    'ISBN': 'http://www.monarchinitiative.org/ISBN_'
+    'DOI' : 'http://dx.doi.org/'
+    'J' : 'http://www.informatics.jax.org/reference/J:'
+
+    # other
+    'Annotation': 'http://www.w3.org/ns/oa#Annotation'
+    'HPO' : 'http://human-phenotype-ontology.org/'  #to be used for persons, though they don't resolve with this
+    'NCBITaxon' : 'http://www.ncbi.nlm.nih.gov/taxonomy/'
+    'PANTHER' : 'http://www.pantherdb.org/panther/family.do?clsAccession='   #protein/orthologous families
+    'dbSNP' : 'http://identifiers.org/dbSNP:'  #FIXME
+    'dbSNPIndividual' : 'http://www.ncbi.nlm.nih.gov/SNP/snp_ind.cgi?ind_id='  #FIXME
+    'DrugBank' : 'http://www.drugbank.ca/drugs/'
+    'GeneReviews' : 'http://www.ncbi.nlm.nih.gov/books/'
+    'KEGG' : 'http://www.kegg.jp/dbget-bin/www_bget?path:map'
+    'REACT' : 'http://www.reactome.org/content/detail/REACT_'
+    'JAX' : 'http://jaxmice.jax.org/strain/'
+    'EOM' : 'http://purl.obolibrary.org/obo/EOM_'
+    'Coriell' : 'https://catalog.coriell.org/0/Sections/Search/Sample_Detail.aspx?Ref='
+    'CoriellCollection' : 'https://catalog.coriell.org/1/'
+    'CoriellFamily' : 'https://catalog.coriell.org/0/Sections/BrowseCatalog/FamilyTypeSubDetail.aspx?fam='
+    'UCSC' : 'ftp://hgdownload.cse.ucsc.edu/goldenPath/'
+    'NCBIGenome' : 'http://www.ncbi.nlm.nih.gov/genome/?term='
+    'ClinVar' : 'http://www.ncbi.nlm.nih.gov/clinvar/'
+    'ClinVarVariant' : 'http://www.ncbi.nlm.nih.gov/clinvar/variation/'
+    'MedGen' : 'http://www.ncbi.nlm.nih.gov/medgen/'
+    'dbVAR' : 'http://www.ncbi.nlm.nih.gov/dbvar/'
+    'dbSNP' : 'http://www.ncbi.nlm.nih.gov/SNP/'
+
+    # genes
+    'NCBIGene' : 'http://www.ncbi.nlm.nih.gov/gene/'
+    'HGNC' : 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=HGNC:'
+    'HPRD' : 'http://www.hprd.org/protein/'
+    'ENSEMBL' : 'http://identifiers.org/ENSEMBL:'
+    'miRBase' : 'http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc='
+    'MGI': 'http://www.informatics.jax.org/accession/MGI:'  #Note this will work for marker(gene), allele, and references, but not genotype
+    'BIOGRID' : 'http://thebiogrid.org/'
+    'RGD' : 'http://rgd.mcw.edu/rgdweb/report/gene/main.html?id='
+    'ZFIN' : 'http://zfin.org/'
+    'dictyBase' : 'http://dictybase.org/gene/'
+    'TAIR' : 'http://identifiers.org/TAIR:'
+    'FlyBase' : 'http://identifiers.org/FB:'
+    'PomBase' : 'http://identifiers.org/PomBase:'
+    'WormBase' : 'http://identifiers.org/WormBase:'
+    'SGD' : 'http://identifiers.org/SGD:'
+    'RefSeq' : 'http://www.ncbi.nlm.nih.gov/refseq/?term='
+    'IMPC' : 'http://www.mousephenotype.org/data/genes/'  #FIXME
+
+
+    # proteins
+    'UniProtKB' : 'http://identifiers.org/UniProt:'
+    'SwissProt' : 'http://identifiers.org/SwissProt:'
+    'TrEMBL' : 'http://www.uniprot.org/uniprot/'
+    'PDB' : 'http://identifiers.org/PDB:'
+    'EC' : 'http://identifiers.org/EC:'  #FIXME: Enzyme Commission numbers. Any preferred url that can resolve this?
 
 cypherResources:
-  - path: /dynamic/genes_with_phenotype
+  - path: /dynamic/phenotypes/{phenotype_id}/genes
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
             MATCH (g:gene)-[r:RO_0002200*]->(phenotype)
@@ -99,40 +176,49 @@ cypherResources:
         summary: Get genes related to a phenotype
         parameters:
           - name: phenotype_id
-            description: The ID of the phenotype
+            description: The ID of the phenotype # try HP_0000528
             required: true
             type: string
-            paramType: query
-  - path: /dynamic/phenotypes_with_gene
+            paramType: path
+  - path: /dynamic/genes/{gene_id}/phenotypes
     query: |
-            START gene = node:node_auto_index(fragment={gene_id})
-            MATCH (gene)-[r:RO_0002200*]->(phenotype:Phenotype)
-            RETURN distinct gene, r, phenotype
+            START gene = node:node_auto_index(fragment={gene_id}),
+            hasPhenotype = node:node_auto_index(fragment='RO_0002200')
+            MATCH (gene)-[equiv1:equivalentClass*0..1]-(ge:gene)-[hp1:RO_0002200]->(disease)-[equiv2:equivalentClass*0..1]-(de)-[hp2:RO_0002200]->(phenotype:Phenotype),
+            (ge)<-[s1:hasSubject]-(a1)-[o1:hasObject]->(disease),
+            (de)<-[s2:hasSubject]-(a2)-[o2:hasObject]->(phenotype)
+            OPTIONAL MATCH (a1)-[se1:source]->(sn1)
+            OPTIONAL MATCH (a1)-[ev1:evidence]->(en1)
+            OPTIONAL MATCH (a2)-[se2:source]->(sn2)
+            OPTIONAL MATCH (a2)-[ev2:evidence]->(en2)
+            WHERE (a1)-[:hasPredicate]->(hasPhenotype)
+            AND (a1)-[:hasPredicate]->(hasPhenotype)
+            RETURN DISTINCT gene, equiv1, ge, hp1, disease, equiv2, de, hp2, phenotype, s1, a1, o1, s2, a2, o2, se1, sn1, ev1, en1, se2, sn2, ev2, en2
     operations:
-      - nickname: genes_with_phenotype
-        summary: Get genes related to a phenotype
+      - nickname: phenotypes_with_gene
+        summary: Get phenotypes related to a gene with evidence
         parameters:
           - name: gene_id
-            description: The ID of the gene
+            description: The ID of the gene # NCBIGene:6469
             required: true
             type: string
-            paramType: query
-  - path: /dynamic/genotypes_from_gene
+            paramType: path
+  - path: /dynamic/genes/{gene_id}/genotypes
     query: |
             START genotypeClass = node:node_auto_index(fragment='GENO_0000000'),
                   gene = node:node_auto_index(fragment={gene_id})
-                  MATCH (gene)<-[geno:GENO_0000408]-(variantLocus)<-[part:BFO_0000051!*]-(genotype)-[:type]->(genotypeClass)
-                  RETURN distinct gene, geno, variantLocus, part, genotype
+                  MATCH (gene)-[equiv:equivalentClass*0..1]-(ge:gene)<-[geno:GENO_0000408]-(variantLocus)<-[part:BFO_0000051!*]-(genotype)-[:type]->(genotypeClass)
+                  RETURN distinct gene, equiv, ge, geno, variantLocus, part, genotype
     operations:
       - nickname: genotypes_from_gene
         summary: Get genotypes for a gene
         parameters:
           - name: gene_id
-            description: The ID of the gene
+            description: The ID of the gene # MGI:3583900
             required: true
             type: string
-            paramType: query
-  - path: /dynamic/phenotypes_from_disease
+            paramType: path
+  - path: /dynamic/diseases/{disease_id}/phenotypes
     query: |
             START disease = node:node_auto_index(fragment={disease_id})
             MATCH (disease)<-[s1:subClassOf*0..]-(d)-[r:RO_0002200]->(p)-[s2:subClassOf*1..]->(phenotype:Phenotype)
@@ -142,11 +228,11 @@ cypherResources:
         summary: Get phenotype for a disease
         parameters:
           - name: disease_id
-            description: The ID of the disease
+            description: The ID of the disease # DOID_2490
             required: true
             type: string
-            paramType: query
-  - path: /dynamic/diseases_from_phenotype
+            paramType: path
+  - path: /dynamic/phenotypes/{phenotype_id}/diseases
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
             MATCH (disease:disease)<-[s1:subClassOf*0..]-(d)-[r:RO_0002200]->(p)-[s2:subClassOf*0..]->(phenotype:Phenotype)
@@ -156,11 +242,11 @@ cypherResources:
         summary: Get diseases for a phenotype
         parameters:
           - name: phenotype_id
-            description: The ID of the phenotype
+            description: The ID of the phenotype # HP_0000963
             required: true
             type: string
-            paramType: query
-  - path: /dynamic/homologs
+            paramType: path
+  - path: /dynamic/genes/{gene_id}/homologs
     query: |
             START gene = node:node_auto_index(fragment={gene_id})
             MATCH (gene)-[e:equivalentClass*0..2]-(ge:gene)-[homology:${homolog_id}!]-(homolog)
@@ -170,16 +256,44 @@ cypherResources:
         summary: Get homologs for a gene
         parameters:
           - name: gene_id
-            description: The ID of the gene
+            description: The ID of the gene # NCBIGene:6469
             required: true
             type: string
-            paramType: query
+            paramType: path
           - name: homolog_id
-            description: The homolog relationship
+            description: The homolog relationship # RO_HOM0000017
             required: true
             type: string
             paramType: query
 
+  - path: /dynamic/evidence/{subject_id}/{object_id}
+    query: |
+            START subject = node:node_auto_index(fragment={subject_id}),
+            object = node:node_auto_index(fragment={object_id}),
+            evidenceCode = node:node_auto_index(fragment={evidence_code})
+            MATCH (subject)-[equiv1:equivalentClass*0..1]-(se)<-[s1:subClassOf*]-(actualSubject)<-[hs:hasSubject]-(annotation)-[ho:hasObject]->(actualObject)-[s2:subClassOf*]->(object),
+            (annotation)-[evi:evidence]->(actualCode)-[s3:subClassOf*]->(evidenceCode)
+            OPTIONAL MATCH (annotation)-[srce:source]->(sn)
+            RETURN DISTINCT subject, equiv1, se, s1, actualSubject, hs, annotation, ho, actualObject, s2, object, evi, actualCode, s3, evidenceCode, srce, sn
+    operations:
+      - nickname: evidence
+        summary: Get evidence for a pair of ids
+        parameters:
+          - name: subject_id
+            description: The subject of the evidence # DOID_2490
+            required: true
+            type: string
+            paramType: path
+          - name: object_id
+            description: The object of the evidence # HP_0002060
+            required: true
+            type: string
+            paramType: path
+          - name: evidence_code
+            description: The type of evidence to include # ECO_0000501
+            required: true
+            type: string
+            paramType: query
 
 serviceMetadata:
   name: 'SciGraph Reconciliation Service'

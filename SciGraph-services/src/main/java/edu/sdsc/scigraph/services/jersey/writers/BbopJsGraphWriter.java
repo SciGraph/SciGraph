@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.services.jersey.writers;
 
+import static com.google.common.collect.Lists.newArrayList;
 import io.dropwizard.jackson.Jackson;
 
 import java.io.IOException;
@@ -80,6 +81,8 @@ public class BbopJsGraphWriter extends GraphWriter {
         for (int i = 0; i < Array.getLength(value); i++) {
           categories.add((String)Array.get(value, i));
         }
+      } else if (categories instanceof Iterable) {
+        categories.addAll(newArrayList(categories)); 
       } else {
         categories.add((String) value);
       }

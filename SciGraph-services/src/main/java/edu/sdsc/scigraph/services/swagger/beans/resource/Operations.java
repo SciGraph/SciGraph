@@ -15,9 +15,13 @@
  */
 package edu.sdsc.scigraph.services.swagger.beans.resource;
 
+import static com.google.common.collect.Collections2.filter;
+
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Predicate;
 
 public class Operations {
   private String method = "GET";
@@ -57,6 +61,15 @@ public class Operations {
   @JsonProperty
   public List<Parameters> getParameters() {
     return this.parameters;
+  }
+
+  public Collection<Parameters> getParametersOfType(final String type) {
+    return filter(parameters, new Predicate<Parameters>() {
+      @Override
+      public boolean apply(Parameters parameter) {
+        return type.equals(parameter.getType());
+      }
+    });
   }
 
   public void setParameters(List<Parameters> parameters) {
