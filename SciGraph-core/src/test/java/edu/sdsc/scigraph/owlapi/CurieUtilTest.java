@@ -16,8 +16,6 @@
 package edu.sdsc.scigraph.owlapi;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
 
@@ -36,9 +34,9 @@ public class CurieUtilTest {
   @Before
   public void setup() {
     Map<String, String> map = new HashMap<>();
-    map.put("http://example.org/a_", "A");
-    map.put("http://example.org/A_", "A");
-    map.put("http://example.org/B_", "B");
+    map.put("", "http://x.org/");
+    map.put("A", "http://x.org/a_");
+    map.put("B", "http://x.org/B_");
     util = new CurieUtil(map);
   }
 
@@ -48,38 +46,33 @@ public class CurieUtilTest {
   }
 
   @Test
-  public void multipleExpansions() {
-    assertThat(util.getAllExpansions("A"), hasItems("http://example.org/a_", "http://example.org/A_"));
+  public void expansion() {
+    assertThat(util.getExpansion("A"), is("http://x.org/a_"));
   }
 
   @Test
-  public void multipleUris_whenThereAreMultipleMappings() {
-    assertThat(util.getFullUri("A:foo"), containsInAnyOrder("http://example.org/a_foo", "http://example.org/A_foo"));
+  public void absentIri_whenMappingIsNotPresent() {
+    assertThat(util.getIri("NONE:foo").isPresent(), is(false));
   }
 
   @Test
-  public void emptyUris_whenMappingIsNotPresent() {
-    assertThat(util.getFullUri("NONE:foo"), is(empty()));
+  public void fullIri_whenInputHasNoPrefix() {
+    assertThat(util.getIri(":foo").get(), is("http://x.org/foo"));
   }
 
   @Test
-  public void emptyUris_whenInputHasNoPrefix() {
-    assertThat(util.getFullUri(":foo"), is(empty()));
+  public void currie_whenShortMappingIsPresent() {
+    assertThat(util.getCurie("http://x.org/foo"), is(Optional.of(":foo")));
   }
 
   @Test
-  public void emptyUris_whenNotValidCurie() {
-    assertThat(util.getFullUri("A"), is(empty()));
-  }
-
-  @Test
-  public void currie_whenMappingIsPresent() {
-    assertThat(util.getCurie("http://example.org/a_foo"), is(Optional.of("A:foo")));
+  public void currie_whenLongMappingIsPresent() {
+    assertThat(util.getCurie("http://x.org/a_foo"), is(Optional.of("A:foo")));
   }
 
   @Test
   public void noCurrie_whenMappingIsNotPresent() {
-    assertThat(util.getCurie("http://example.org/none"), is(Optional.<String>absent()));
+    assertThat(util.getCurie("http://none.org/none"), is(Optional.<String>absent()));
   }
 
 }

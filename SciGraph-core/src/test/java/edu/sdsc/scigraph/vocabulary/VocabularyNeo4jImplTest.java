@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
 import org.junit.Before;
@@ -117,10 +116,10 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
     CurieUtil curieUtil = mock(CurieUtil.class);
     when(curieUtil.getPrefixes()).thenReturn(newHashSet("H", "S"));
-    when(curieUtil.getAllExpansions("H")).thenReturn(newHashSet("http://example.org/#h"));
-    when(curieUtil.getAllExpansions("S")).thenReturn(newHashSet("http://example.org/#s"));
-    when(curieUtil.getFullUri(anyString())).thenReturn(Collections.<String>emptySet());
-    when(curieUtil.getFullUri("HP:0008")).thenReturn(newHashSet("http://example.org/#hippocampus"));
+    when(curieUtil.getExpansion("H")).thenReturn("http://example.org/#h");
+    when(curieUtil.getExpansion("S")).thenReturn("http://example.org/#s");
+    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getIri("HP:0008")).thenReturn(Optional.of("http://example.org/#hippocampus"));
     vocabulary = new VocabularyNeo4jImpl(graphDb, null, curieUtil, new NodeTransformer());
   }
 

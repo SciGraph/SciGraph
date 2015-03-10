@@ -135,10 +135,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
 
     BooleanQuery prefixQueries = new BooleanQuery();
     for (String curie : query.getPrefixes()) {
-      for (String prefix : curieUtil.getAllExpansions(curie)) {
-        prefixQueries.add(new WildcardQuery(new Term(CommonProperties.URI, prefix + "*")),
-            Occur.SHOULD);
-      }
+      String prefix = curieUtil.getExpansion(curie);
+      prefixQueries.add(new WildcardQuery(new Term(CommonProperties.URI, prefix + "*")), Occur.SHOULD);
     }
     if (!query.getPrefixes().isEmpty()) {
       indexQuery.add(new BooleanClause(prefixQueries, Occur.MUST));
@@ -179,13 +177,13 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   public Collection<Concept> getConceptFromId(Query query) {
     QueryParser parser = getQueryParser();
     String idQuery = StringUtils.strip(query.getInput(), "\"");
-    Collection<String> fullUris = curieUtil.getFullUri(idQuery);
+    Optional<String> fullUri = curieUtil.getIri(idQuery);
     idQuery = QueryParser.escape(idQuery);
 
     String queryString = format("%s:%s", CommonProperties.FRAGMENT, idQuery);
-    for (String fullUri: fullUris) {
+    if (fullUri.isPresent()) {
       queryString +=
-          String.format(" %s:%s", CommonProperties.URI, QueryParser.escape(fullUri));
+          String.format(" %s:%s", CommonProperties.URI, QueryParser.escape(fullUri.get()));
     }
     IndexHits<Node> hits;
     try (Transaction tx = graph.beginTx()) {
@@ -207,9 +205,9 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       BooleanQuery subQuery = new BooleanQuery();
       subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL,
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
-      Collection<String> fullUris = curieUtil.getFullUri(query.getInput());
-      for (String fullUri: fullUris) {
-        subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri))),
+      Optional<String> fullUri = curieUtil.getIri(query.getInput());
+      if (fullUri.isPresent()) {
+        subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri.get()))),
             Occur.SHOULD);
       }
       subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
