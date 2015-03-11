@@ -45,7 +45,6 @@ import org.neo4j.graphdb.Transaction;
 
 import scala.collection.convert.Wrappers.SeqWrapper;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -165,7 +164,7 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     while (m.find()) {
       String group = m.group().substring(1, m.group().length() - 1);
       Set<String> parentTypes = newHashSet(Splitter.on('|').split(group));
-      String entailedTypes = Joiner.on('|').join(getEntailedRelationshipTypes(parentTypes));
+      String entailedTypes = on('|').join(getEntailedRelationshipTypes(parentTypes));
       m.appendReplacement(buffer, ":" + entailedTypes);
     }
     m.appendTail(buffer);

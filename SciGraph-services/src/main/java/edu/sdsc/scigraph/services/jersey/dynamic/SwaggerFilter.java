@@ -58,7 +58,7 @@ public class SwaggerFilter implements Filter {
 
   static boolean isGzip(ServletRequest request) {
     String encoding = ((HttpServletRequest) request).getHeader("Accept-Encoding");
-    return (null != encoding && encoding.contains("gzip"));
+    return null != encoding && encoding.contains("gzip");
   }
   
   @Override

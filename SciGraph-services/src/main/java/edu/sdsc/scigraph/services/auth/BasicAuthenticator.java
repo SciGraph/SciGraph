@@ -15,6 +15,9 @@
  */
 package edu.sdsc.scigraph.services.auth;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
@@ -30,6 +33,8 @@ import io.dropwizard.auth.basic.BasicCredentials;
 
 public class BasicAuthenticator implements Authenticator<BasicCredentials, Subject> {
 
+  private static final Logger logger = Logger.getLogger(BasicAuthenticator.class.getName());
+  
   @Override
   public Optional<Subject> authenticate(BasicCredentials credentials) throws AuthenticationException {
     Subject subject = SecurityUtils.getSubject();
@@ -37,7 +42,9 @@ public class BasicAuthenticator implements Authenticator<BasicCredentials, Subje
       subject.login(new UsernamePasswordToken(credentials.getUsername(), credentials.getPassword(), false));
       return Optional.of(subject);
     } catch (UnknownAccountException | IncorrectCredentialsException | LockedAccountException e) {
+      logger.log(Level.WARNING, e.getMessage(), e);
     } catch (org.apache.shiro.authc.AuthenticationException ae) {
+      logger.log(Level.WARNING, ae.getMessage(), ae);
     }
     return Optional.absent();
   }

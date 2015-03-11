@@ -19,6 +19,6 @@ import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 public interface DynamicCypherResourceFactory {
 
-  public DynamicCypherResource create(Apis config);
+  DynamicCypherResource create(Apis config);
 
 }

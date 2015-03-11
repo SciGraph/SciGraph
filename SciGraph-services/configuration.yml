@@ -180,6 +180,21 @@ cypherResources:
             required: true
             type: string
             paramType: path
+  - path: /dynamic/phenotypes/{phenotype_id}/genes/targets
+    query: |
+            START phenotype = node:node_auto_index(fragment={phenotype_id})
+            MATCH (g:gene)-[r:RO_0002200*]->(phenotype)
+            RETURN distinct g
+    operations:
+      - nickname: genes_with_phenotype
+        summary: Get genes related to a phenotype
+        parameters:
+          - name: phenotype_id
+            description: The ID of the phenotype # try HP_0000528
+            required: true
+            type: string
+            paramType: path
+
   - path: /dynamic/genes/{gene_id}/phenotypes
     query: |
             START gene = node:node_auto_index(fragment={gene_id}),
@@ -203,12 +218,36 @@ cypherResources:
             required: true
             type: string
             paramType: path
+  - path: /dynamic/genes/{gene_id}/phenotypes/targets
+    query: |
+            START gene = node:node_auto_index(fragment={gene_id}),
+            hasPhenotype = node:node_auto_index(fragment='RO_0002200')
+            MATCH (gene)-[equiv1:equivalentClass*0..1]-(ge:gene)-[hp1:RO_0002200]->(disease)-[equiv2:equivalentClass*0..1]-(de)-[hp2:RO_0002200]->(phenotype:Phenotype),
+            (ge)<-[s1:hasSubject]-(a1)-[o1:hasObject]->(disease),
+            (de)<-[s2:hasSubject]-(a2)-[o2:hasObject]->(phenotype)
+            OPTIONAL MATCH (a1)-[se1:source]->(sn1)
+            OPTIONAL MATCH (a1)-[ev1:evidence]->(en1)
+            OPTIONAL MATCH (a2)-[se2:source]->(sn2)
+            OPTIONAL MATCH (a2)-[ev2:evidence]->(en2)
+            WHERE (a1)-[:hasPredicate]->(hasPhenotype)
+            AND (a1)-[:hasPredicate]->(hasPhenotype)
+            RETURN DISTINCT phenotype
+    operations:
+      - nickname: phenotypes_with_gene
+        summary: Get phenotypes related to a gene with evidence
+        parameters:
+          - name: gene_id
+            description: The ID of the gene # NCBIGene:6469
+            required: true
+            type: string
+            paramType: path
+
   - path: /dynamic/genes/{gene_id}/genotypes
     query: |
             START genotypeClass = node:node_auto_index(fragment='GENO_0000000'),
                   gene = node:node_auto_index(fragment={gene_id})
-                  MATCH (gene)-[equiv:equivalentClass*0..1]-(ge:gene)<-[geno:GENO_0000408]-(variantLocus)<-[part:BFO_0000051!*]-(genotype)-[:type]->(genotypeClass)
-                  RETURN distinct gene, equiv, ge, geno, variantLocus, part, genotype
+                  MATCH (ge:gene)<-[geno:GENO_0000408]-(variantLocus)<-[part:BFO_0000051!*]-(genotype)-[:type]->(genotypeClass)
+                  RETURN distinct ge, geno, variantLocus, part, genotype
     operations:
       - nickname: genotypes_from_gene
         summary: Get genotypes for a gene
@@ -218,6 +257,22 @@ cypherResources:
             required: true
             type: string
             paramType: path
+  - path: /dynamic/genes/{gene_id}/genotypes/targets
+    query: |
+            START genotypeClass = node:node_auto_index(fragment='GENO_0000000'),
+                  gene = node:node_auto_index(fragment={gene_id})
+                  MATCH (ge:gene)<-[geno:GENO_0000408]-(variantLocus)<-[part:BFO_0000051!*]-(genotype)-[:type]->(genotypeClass)
+                  RETURN genotype
+    operations:
+      - nickname: genotypes_from_gene
+        summary: Get genotypes for a gene
+        parameters:
+          - name: gene_id
+            description: The ID of the gene # MGI:3583900
+            required: true
+            type: string
+            paramType: path
+
   - path: /dynamic/diseases/{disease_id}/phenotypes
     query: |
             START disease = node:node_auto_index(fragment={disease_id})
@@ -232,6 +287,21 @@ cypherResources:
             required: true
             type: string
             paramType: path
+  - path: /dynamic/diseases/{disease_id}/phenotypes/targets
+    query: |
+            START disease = node:node_auto_index(fragment={disease_id})
+            MATCH (disease)<-[s1:subClassOf*0..]-(d)-[r:RO_0002200]->(p)-[s2:subClassOf*1..]->(phenotype:Phenotype)
+            RETURN distinct phenotype
+    operations:
+      - nickname: phenotypes_from_disease
+        summary: Get phenotype for a disease
+        parameters:
+          - name: disease_id
+            description: The ID of the disease # DOID_2490
+            required: true
+            type: string
+            paramType: path
+
   - path: /dynamic/phenotypes/{phenotype_id}/diseases
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
@@ -246,11 +316,46 @@ cypherResources:
             required: true
             type: string
             paramType: path
+  - path: /dynamic/phenotypes/{phenotype_id}/diseases/targets
+    query: |
+            START phenotype = node:node_auto_index(fragment={phenotype_id})
+            MATCH (disease:disease)<-[s1:subClassOf*0..]-(d)-[r:RO_0002200]->(p)-[s2:subClassOf*0..]->(phenotype:Phenotype)
+            RETURN distinct disease
+    operations:
+      - nickname: diseases_from_phenotype
+        summary: Get diseases for a phenotype
+        parameters:
+          - name: phenotype_id
+            description: The ID of the phenotype # HP_0000963
+            required: true
+            type: string
+            paramType: path
+
+
   - path: /dynamic/genes/{gene_id}/homologs
     query: |
             START gene = node:node_auto_index(fragment={gene_id})
             MATCH (gene)-[e:equivalentClass*0..2]-(ge:gene)-[homology:${homolog_id}!]-(homolog)
             RETURN distinct gene, e, ge, homology, homolog
+    operations:
+      - nickname: homologs
+        summary: Get homologs for a gene
+        parameters:
+          - name: gene_id
+            description: The ID of the gene # NCBIGene:6469
+            required: true
+            type: string
+            paramType: path
+          - name: homolog_id
+            description: The homolog relationship # RO_HOM0000017
+            required: true
+            type: string
+            paramType: query
+  - path: /dynamic/genes/{gene_id}/homologs/targets
+    query: |
+            START gene = node:node_auto_index(fragment={gene_id})
+            MATCH (gene)-[e:equivalentClass*0..2]-(ge:gene)-[homology:${homolog_id}!]-(homolog)
+            RETURN distinct homolog
     operations:
       - nickname: homologs
         summary: Get homologs for a gene

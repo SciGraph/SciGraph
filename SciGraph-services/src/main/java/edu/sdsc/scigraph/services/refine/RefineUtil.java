@@ -37,8 +37,8 @@ public class RefineUtil {
   }
 
   private static boolean isProbableJSON(String text) {
-    return (text.startsWith("[") && text.endsWith("]")) ||
-        (text.startsWith("{") && text.endsWith("}"));
+    return text.startsWith("[") && text.endsWith("]") ||
+           text.startsWith("{") && text.endsWith("}");
   }
 
   public static RefineQuery getQuery(String query) throws IOException {
