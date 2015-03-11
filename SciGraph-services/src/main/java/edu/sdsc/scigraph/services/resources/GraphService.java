@@ -193,7 +193,7 @@ public class GraphService extends BaseResource {
       @PathParam("id") String id,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
-    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), null, null, callback);
+    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>absent(), null, callback);
   }
 
   @GET
