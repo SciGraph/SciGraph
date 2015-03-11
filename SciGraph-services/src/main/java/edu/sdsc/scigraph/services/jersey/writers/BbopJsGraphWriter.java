@@ -81,8 +81,8 @@ public class BbopJsGraphWriter extends GraphWriter {
         for (int i = 0; i < Array.getLength(value); i++) {
           categories.add((String)Array.get(value, i));
         }
-      } else if (categories instanceof Iterable) {
-        categories.addAll(newArrayList(categories)); 
+      } else if (value instanceof Iterable) {
+        categories.addAll(newArrayList((Iterable<String>)value)); 
       } else {
         categories.add((String) value);
       }
