@@ -29,6 +29,7 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class OwlApiUtilsTest {
 
@@ -71,6 +72,17 @@ public class OwlApiUtilsTest {
     assertThat(OwlApiUtils.getIri((OWLClassExpression)clazz), is("http://example.org/Thing"));
     OWLObjectIntersectionOf expression = factory.getOWLObjectIntersectionOf(clazz);
     assertThat(OwlApiUtils.getIri(expression), is("_:" + expression.hashCode()));
+  }
+
+  @Test
+  public void loadOntology() throws Exception {
+    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    OwlApiUtils.loadOntology(manager, "src/test/resources/ontologies/pizza.owl");
+  }
+
+  @Test
+  public void smoke_silenceOboParser() throws Exception {
+    OwlApiUtils.silenceOboParser();
   }
 
 }
