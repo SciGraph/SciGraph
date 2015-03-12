@@ -85,6 +85,7 @@ public class CypherInflectorTest extends GraphTestBase {
     map.put("pathParam", newArrayList("pathValue"));
     when(uriInfo.getPathParameters()).thenReturn(map);
     when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
     when(curieUtil.getIri("X:foo")).thenReturn(Optional.of("http://x.org/#foo"));
     inflector = new CypherInflector(graphDb, engine, curieUtil, config);
   }
