@@ -22,15 +22,15 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-public class ByteArrayResponseWrapper extends HttpServletResponseWrapper {
+class ByteArrayResponseWrapper extends HttpServletResponseWrapper {
 
-  private ByteArrayOutputStream baos = new ByteArrayOutputStream();
+  private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-  public ByteArrayResponseWrapper(HttpServletResponse response) {
+  ByteArrayResponseWrapper(HttpServletResponse response) {
     super(response);
   }
 
-  public byte[] getBytes() {
+  byte[] getBytes() {
     return baos.toByteArray();
   }
 
