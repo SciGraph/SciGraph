@@ -61,6 +61,7 @@ import edu.sdsc.scigraph.annotation.EntityModule;
 import edu.sdsc.scigraph.lexical.LexicalLibModule;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.opennlp.OpenNlpModule;
+import edu.sdsc.scigraph.owlapi.CurieModule;
 import edu.sdsc.scigraph.services.configuration.ApplicationConfiguration;
 import edu.sdsc.scigraph.services.jersey.MediaTypeMappings;
 import edu.sdsc.scigraph.services.jersey.dynamic.DynamicCypherResourceFactory;
@@ -112,13 +113,14 @@ public class MainApplication extends Application<ApplicationConfiguration> {
       install(new OpenNlpModule());
       install(new RefineModule(configuration.getServiceMetadata()));
       install(new DynamicResourceModule());
+      install(new CurieModule());
     }
-    
+
     @Provides
     List<Apis> getApis() {
       return configuration.getCypherResources();
     }
-    
+
 
   }
 
@@ -131,7 +133,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
           ApplicationConfiguration configuration) {
         return ImmutableMap.<String, ImmutableMap<String, String>>of();
       }
-      
+
     });
     bootstrap.addBundle(GuiceBundle.builder()
         .enableAutoConfig("edu.sdsc.scigraph.services")

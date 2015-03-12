@@ -17,13 +17,11 @@ package edu.sdsc.scigraph.internal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 
-import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
@@ -31,7 +29,6 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 public class GraphApiCategoryTest extends GraphTestBase {
 
   GraphApi graphApi;
-  CurieUtil curieUtil = mock(CurieUtil.class);
   
   Node a, b, c;
 
@@ -41,7 +38,7 @@ public class GraphApiCategoryTest extends GraphTestBase {
     b = graphDb.createNode(OwlLabels.OWL_CLASS);
     c = graphDb.createNode(OwlLabels.OWL_CLASS);
     a.createRelationshipTo(b, OwlRelationships.RDFS_SUBCLASS_OF);
-    this.graphApi = new GraphApi(graphDb, curieUtil);
+    this.graphApi = new GraphApi(graphDb);
   }
 
   @Test

@@ -17,9 +17,6 @@ package edu.sdsc.scigraph.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 
@@ -28,10 +25,7 @@ import org.junit.Test;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 
-import com.google.common.base.Optional;
-
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
@@ -39,7 +33,6 @@ public class GraphApiTest extends GraphTestBase {
 
   GraphApi graphApi;
   Node a, b, c;
-  CurieUtil curieUtil = mock(CurieUtil.class);
 
   @Before
   public void addNodes() throws Exception {
@@ -48,8 +41,7 @@ public class GraphApiTest extends GraphTestBase {
     c = graphDb.createNode();
     b.createRelationshipTo(a, OwlRelationships.RDFS_SUBCLASS_OF);
     c.createRelationshipTo(b, OwlRelationships.OWL_EQUIVALENT_CLASS);
-    when(curieUtil.getCurie(anyString())).thenReturn(Optional.of("curie"));
-    graphApi = new GraphApi(graphDb, curieUtil);
+    graphApi = new GraphApi(graphDb);
   }
 
   @Test
