@@ -49,8 +49,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.assistedinject.Assisted;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
@@ -77,6 +79,17 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
     this.curieUtil = curieUtil;
   }
 
+  // TODO: Remove this code duplication
+  void addCuries(TinkerGraph graph) {
+    for (Vertex vertex: graph.getVertices()) {
+      String uri = (String)vertex.getProperty(CommonProperties.URI);
+      Optional<String> curie = curieUtil.getCurie(uri);
+      if (curie.isPresent()) {
+        vertex.setProperty(CommonProperties.CURIE, curie.get());
+      }
+    }
+  }
+
   @Override
   public TinkerGraph apply(ContainerRequestContext context) {
     logger.fine("Serving dynamic request");
@@ -88,6 +101,7 @@ final class CypherInflector implements Inflector<ContainerRequestContext, Tinker
       query = entailRelationships(query);
       ExecutionResult result = engine.execute(query, flatMap);
       TinkerGraph graph = resultToGraph(result);
+      addCuries(graph);
       tx.success();
       return graph;
     }
