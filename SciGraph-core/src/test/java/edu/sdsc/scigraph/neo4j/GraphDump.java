@@ -26,7 +26,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 public class GraphDump {
 
@@ -49,7 +48,7 @@ public class GraphDump {
     dumpProperties(relationship);
   }
 
-  public static void dumpGraph(TinkerGraph graphDb) {
+  public static void dumpGraph(com.tinkerpop.blueprints.Graph graphDb) {
     for (Vertex node: graphDb.getVertices()) {
       dumpNode(node);
     }

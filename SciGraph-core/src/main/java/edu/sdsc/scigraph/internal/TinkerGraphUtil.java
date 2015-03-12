@@ -26,8 +26,10 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
@@ -36,7 +38,7 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
  */
 public final class TinkerGraphUtil {
 
-  static void mapProperties(PropertyContainer container, Element element) {
+  static void copyProperties(PropertyContainer container, Element element) {
     for (String key: container.getPropertyKeys()) {
       Object property = container.getProperty(key);
       if (property.getClass().isArray()) {
@@ -50,11 +52,11 @@ public final class TinkerGraphUtil {
     }
   }
 
-  static Vertex addNode(TinkerGraph graph, Node node) {
+  static Vertex addNode(Graph graph, Node node) {
     Vertex vertex = graph.getVertex(node.getId());
     if (null == vertex) {
       vertex = graph.addVertex(node.getId());
-      mapProperties(node, vertex);
+      copyProperties(node, vertex);
       Set<String> labels = new HashSet<>();
       for (Label label: node.getLabels()) {
         labels.add(label.name());
@@ -64,24 +66,84 @@ public final class TinkerGraphUtil {
     return vertex;
   }
 
-  static Edge addEdge(TinkerGraph graph, Relationship relationship) {
+  static Edge addEdge(Graph graph, Relationship relationship) {
     Edge edge = graph.getEdge(relationship.getId());
     if (null == edge) {
       Vertex outVertex = addNode(graph, relationship.getStartNode());
       Vertex inVertex = addNode(graph, relationship.getEndNode());
       String label = relationship.getType().name();
       edge = graph.addEdge(relationship.getId(), outVertex, inVertex, label);
-      mapProperties(relationship, edge);
+      copyProperties(relationship, edge);
     }
     return edge;
   }
 
-  public static Element addElement(TinkerGraph graph, PropertyContainer container) {
+  public static Element addElement(Graph graph, PropertyContainer container) {
     if (container instanceof Node) {
       return addNode(graph, (Node) container);
     } else {
       return addEdge(graph, (Relationship) container);
     }
+  }
+
+  static void copyProperties(Element source, Element target) {
+    for (String key: source.getPropertyKeys()) {
+      Object property = source.getProperty(key);
+      if (property.getClass().isArray()) {
+        List<Object> propertyList = new ArrayList<>();
+        for (int i = 0; i < Array.getLength(property); i++) {
+          propertyList.add(Array.get(property, i));
+        }
+        property = propertyList;
+      }
+      target.setProperty(key, property);
+    }
+  }
+
+  static Vertex addNode(Graph graph, Vertex node) {
+    Vertex vertex = graph.getVertex(node.getId());
+    if (null == vertex) {
+      vertex = graph.addVertex(node.getId());
+      copyProperties(node, vertex);
+    }
+    return vertex;
+  }
+
+  static Edge addEdge(Graph graph, Edge edge) {
+    Edge newEdge = graph.getEdge(edge.getId());
+    if (null == newEdge) {
+      Vertex outVertex = addNode(graph, edge.getVertex(Direction.OUT));
+      Vertex inVertex = addNode(graph, edge.getVertex(Direction.IN));
+      String label = edge.getLabel();
+      newEdge = graph.addEdge(edge.getId(), outVertex, inVertex, label);
+      copyProperties(edge, edge);
+    }
+    return newEdge;
+  }
+
+
+  public static Element addElement(Graph graph, Element element) {
+    if (element instanceof Vertex) {
+      return addNode(graph, (Vertex) element);
+    } else {
+      return addEdge(graph, (Edge) element);
+    }
+  }
+
+  static void addGraph(Graph graph, Graph addition) {
+    for (Vertex vertex: addition.getVertices()) {
+      addElement(graph, vertex);
+    }
+    for (Edge edge: addition.getEdges()) {
+      addElement(graph, edge);
+    }
+  }
+
+  public static Graph combineGraphs(Graph graph1, Graph graph2) {
+    Graph graph = new TinkerGraph();
+    addGraph(graph, graph1);
+    addGraph(graph, graph2);
+    return graph;
   }
 
 }

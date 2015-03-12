@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.internal;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,8 +36,11 @@ import org.neo4j.graphdb.Relationship;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+
+import edu.sdsc.scigraph.neo4j.GraphDump;
 
 public class TinkerGraphUtilTest {
 
@@ -122,6 +126,21 @@ public class TinkerGraphUtilTest {
     assertThat((String)edge.getProperty("bar"), is("baz"));
     Edge edge2 = TinkerGraphUtil.addEdge(graph, relationship);
     assertThat(edge, is(edge2));
+  }
+
+  @Test
+  public void graphsAreMerged() {
+    TinkerGraph graph1 = new TinkerGraph();
+    Vertex g1v1 = graph1.addVertex(0);
+    Vertex g1v2 = graph1.addVertex(1);
+    Edge g1e1 = graph1.addEdge(0, g1v1, g1v2, "test");
+    TinkerGraph graph2 = new TinkerGraph();
+    Vertex g2v1 = graph2.addVertex(1);
+    Vertex g2v2 = graph2.addVertex(2);
+    Edge g2e1 = graph1.addEdge(1, g2v1, g2v2, "test2");
+    Graph graph = TinkerGraphUtil.combineGraphs(graph1, graph2);
+    assertThat(graph.getVertices(), containsInAnyOrder(g1v1, g1v2, g2v2));
+    assertThat(graph.getEdges(), containsInAnyOrder(g1e1, g2e1));
   }
 
 }
