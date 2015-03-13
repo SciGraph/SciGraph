@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Collections.emptyList;
@@ -23,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -304,11 +306,13 @@ public class GraphBatchImpl implements Graph {
 
   void index() {
     logger.info("Starting indexing");
-    for (long id: idMap.values()) {
+    List<Long> ids = newArrayList(idMap.values());
+    //TODO: Evaluate the performance of using a BTreeMap instead of sorting here.
+    Collections.sort(ids);
+    for (long id: ids) {
       Map<String, Object> properties = inserter.getNodeProperties(id);
       Map<String, Object> indexProperties = collectIndexProperties(properties);
       if (!indexProperties.isEmpty()) {
-        //logger.info("Indexing " + indexProperties);
         nodeIndex.add(id, indexProperties);
       }
     }
