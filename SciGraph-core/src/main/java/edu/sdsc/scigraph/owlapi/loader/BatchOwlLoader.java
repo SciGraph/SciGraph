@@ -70,7 +70,7 @@ public class BatchOwlLoader {
   static final OntologySetup POISON_STR = new OntologySetup();
 
   private static final int numCores = Runtime.getRuntime().availableProcessors();
-  
+
   static final int CONSUMER_COUNT = numCores / 2;
   static final int PRODUCER_COUNT = numCores / 2;
 
@@ -79,7 +79,7 @@ public class BatchOwlLoader {
 
   @Inject
   Graph graph;
-  
+
   @Inject
   @Named("owl.mappedProperties") List<MappedProperty> mappedProperties;
 
@@ -97,17 +97,19 @@ public class BatchOwlLoader {
 
   void loadOntology() throws InterruptedException {
     AtomicInteger numProducersShutdown = new AtomicInteger();
-    for (int i = 0; i < CONSUMER_COUNT; i++) {
-      exec.submit(new OwlOntologyConsumer(queue, graph, PRODUCER_COUNT, mappedProperties, numProducersShutdown));
-    }
-    for (int i = 0; i < PRODUCER_COUNT; i++) {
-      exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
-    }
-    for (OntologySetup ontology: ontologies) {
-      urlQueue.offer(ontology);
-    }
-    for (int i = 0; i < PRODUCER_COUNT; i++) {
-      urlQueue.offer(POISON_STR);
+    if (!ontologies.isEmpty()) {
+      for (int i = 0; i < CONSUMER_COUNT; i++) {
+        exec.submit(new OwlOntologyConsumer(queue, graph, PRODUCER_COUNT, mappedProperties, numProducersShutdown));
+      }
+      for (int i = 0; i < PRODUCER_COUNT; i++) {
+        exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
+      }
+      for (OntologySetup ontology: ontologies) {
+        urlQueue.offer(ontology);
+      }
+      for (int i = 0; i < PRODUCER_COUNT; i++) {
+        urlQueue.offer(POISON_STR);
+      }
     }
     exec.shutdown();
     exec.awaitTermination(10, TimeUnit.DAYS);
