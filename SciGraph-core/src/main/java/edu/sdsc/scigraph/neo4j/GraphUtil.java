@@ -203,7 +203,7 @@ public class GraphUtil {
       return iri.substring("mailto:".length());
     } else {
       logger.warning("Failed to find a fragment for IRI: " + iri);
-      throw new RuntimeException("Failed to find a fragment for IRI: " + iri);
+      throw new IllegalArgumentException("Failed to find a fragment for IRI: " + iri);
     }
   }
 

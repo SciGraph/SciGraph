@@ -40,7 +40,7 @@ final class OwlOntologyConsumer implements Callable<Void> {
   private final int numProducers;
   private final GraphOwlVisitor visitor;
   private final AtomicInteger numProducersShutdown;
-  
+
   private long objectCount = 0;
 
   // TODO: Switch this to assisted inject
@@ -59,23 +59,20 @@ final class OwlOntologyConsumer implements Callable<Void> {
   public Void call() {
     try {
       while (true) {
-        OWLObject owlObject = null;
-        if (numProducersShutdown.get() < numProducers) {
-          owlObject = queue.take();
-        } else {
-          if (!queue.isEmpty()) {
-            owlObject = queue.take();
-          } else {
-            break;
+        if (numProducersShutdown.get() < numProducers || !queue.isEmpty()) {
+          OWLObject owlObject = queue.take();
+          try {
+            owlObject.accept(visitor);
+          } catch (RuntimeException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
           }
+          objectCount++;
+        } else {
+          break;
         }
-        owlObject.accept(visitor);
-        objectCount++;
-      }  
+      }
     } catch (InterruptedException consumed) {
       logger.log(Level.WARNING, consumed.getMessage(), consumed);
-    } catch (Exception e) {
-      logger.log(Level.WARNING, e.getMessage(), e);
     }
     logger.info("Ontology consumer shutting after processing " + objectCount + " objects...");
     return null;
