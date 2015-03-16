@@ -24,9 +24,9 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
-import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 
 public class GraphTestBase {
 
@@ -36,7 +36,7 @@ public class GraphTestBase {
   protected Node createNode(String uri) {
     long node = graph.createNode(uri);
     graph.setNodeProperty(node, "uri", uri);
-    graph.setNodeProperty(node, "fragment", OwlApiUtils.getIri(uri).getFragment());
+    graph.setNodeProperty(node, "fragment", GraphUtil.getFragment(uri));
     return graphDb.getNodeById(node);
   }
 

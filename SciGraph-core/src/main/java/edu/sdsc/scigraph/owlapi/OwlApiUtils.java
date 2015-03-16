@@ -15,12 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -51,15 +46,6 @@ public class OwlApiUtils {
   private static final Logger logger = Logger.getLogger(OwlApiUtils.class.getName());
 
   private static final UrlValidator validator = UrlValidator.getInstance();
-
-  public static URI getIri(String iri) {
-    try {
-      return new URI(checkNotNull(iri));
-    } catch (URISyntaxException e) {
-      checkState(false, "IRIs passed to this method should always be valid: " + iri);
-      return null;
-    }
-  }
 
   /*** 
    * @param literal An OWLLiteral
