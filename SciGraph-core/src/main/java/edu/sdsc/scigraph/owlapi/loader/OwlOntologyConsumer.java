@@ -32,7 +32,7 @@ import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 
-final class OwlOntologyConsumer implements Callable<Void> {
+final class OwlOntologyConsumer implements Callable<Long> {
 
   private static final Logger logger = Logger.getLogger(OwlOntologyConsumer.class.getName());
 
@@ -40,8 +40,6 @@ final class OwlOntologyConsumer implements Callable<Void> {
   private final int numProducers;
   private final GraphOwlVisitor visitor;
   private final AtomicInteger numProducersShutdown;
-
-  private long objectCount = 0;
 
   // TODO: Switch this to assisted inject
   @Inject
@@ -56,11 +54,15 @@ final class OwlOntologyConsumer implements Callable<Void> {
   }
 
   @Override
-  public Void call() {
+  public Long call() {
+    long objectCount = 0;
     try {
       while (true) {
         if (numProducersShutdown.get() < numProducers || !queue.isEmpty()) {
           OWLObject owlObject = queue.take();
+          if (0 == queue.size() % 100_000) {
+            logger.info("Currently " + queue.size() + " objects remaining in the queue");
+          }
           try {
             owlObject.accept(visitor);
           } catch (RuntimeException e) {
@@ -75,7 +77,7 @@ final class OwlOntologyConsumer implements Callable<Void> {
       logger.log(Level.WARNING, consumed.getMessage(), consumed);
     }
     logger.info("Ontology consumer shutting after processing " + objectCount + " objects...");
-    return null;
+    return objectCount;
   }
 
 }
