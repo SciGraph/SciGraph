@@ -61,22 +61,32 @@ final class OwlOntologyProducer implements Callable<Void>{
           try {
             OWLOntology ont = OwlApiUtils.loadOntology(manager, ontologyConfig.url());
             if (ontologyConfig.getReasonerConfiguration().isPresent()) {
+              String origThreadName = Thread.currentThread().getName();
+              Thread.currentThread().setName("reasoning - " + ontologyConfig);
               ReasonerUtil util = new ReasonerUtil(ontologyConfig.getReasonerConfiguration().get(), manager, ont);
               util.reason();
+              Thread.currentThread().setName(origThreadName);
             }
-            logger.info("Adding axioms for: " + ontologyConfig);
+            String origThreadName = Thread.currentThread().getName();
+            Thread.currentThread().setName("queueing axioms - " + ontologyConfig);
+            logger.info("Queueing axioms for: " + ontologyConfig);
+            long objectCount = 0;
             for (OWLOntology ontology: manager.getOntologies()) {
               for (OWLObject object: ontology.getNestedClassExpressions()) {
                 queue.put(object);
+                objectCount++;
               }
               for (OWLObject object: ontology.getSignature(true)) {
                 queue.put(object);
+                objectCount++;
               }
               for (OWLObject object: ontology.getAxioms()) {
                 queue.put(object);
+                objectCount++;
               }
             }
-            logger.info("Finished processing ontology: " + ontologyConfig);
+            Thread.currentThread().setName(origThreadName);
+            logger.info("Finished queueing " + objectCount + " axioms for: " + ontologyConfig);
           } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to load ontology: " + ontologyConfig, e);
           }
@@ -87,6 +97,7 @@ final class OwlOntologyProducer implements Callable<Void>{
     }
     finally {
       numProducersShutdown.incrementAndGet();
+      notifyAll();
     }
 
     logger.info("Producer shutting down...");

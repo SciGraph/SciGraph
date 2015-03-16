@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -39,6 +40,8 @@ final class OwlOntologyConsumer implements Callable<Void> {
   private final int numProducers;
   private final GraphOwlVisitor visitor;
   private final AtomicInteger numProducersShutdown;
+  
+  private long objectCount = 0;
 
   // TODO: Switch this to assisted inject
   @Inject
@@ -67,9 +70,14 @@ final class OwlOntologyConsumer implements Callable<Void> {
           }
         }
         owlObject.accept(visitor);
+        objectCount++;
       }  
-    } catch (InterruptedException consumed) {}
-    logger.info("Ontology consumer shutting down...");
+    } catch (InterruptedException consumed) {
+      logger.log(Level.WARNING, consumed.getMessage(), consumed);
+    } catch (Exception e) {
+      logger.log(Level.WARNING, e.getMessage(), e);
+    }
+    logger.info("Ontology consumer shutting after processing " + objectCount + " objects...");
     return null;
   }
 
