@@ -82,7 +82,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private final Graph graph;
 
-  private OWLOntology ontology;
+  private Optional<OWLOntology> ontology = Optional.absent();
 
   private Map<String, String> mappedProperties;
 
@@ -111,7 +111,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLOntology ontology) {
     logger.info("Walking ontology: " + ontology.getOntologyID());
-    this.ontology = ontology;
+    this.ontology = Optional.of(ontology);
     return null;
   }
 
@@ -166,10 +166,12 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     } else if (axiom.getEntity() instanceof OWLObjectProperty) {
       if (!graph.getLabels(node).contains(OwlLabels.OWL_OBJECT_PROPERTY)) {
         graph.addLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
-        OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
-        graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology));
-        graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology));
-        graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology));
+        if (ontology.isPresent()) {
+          OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
+          graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology.get()));
+          graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology.get()));
+          graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology.get()));
+        }
       }
     } else if (axiom.getEntity() instanceof OWLDataProperty) {
       graph.setLabel(node, OwlLabels.OWL_DATA_PROPERTY);
