@@ -151,4 +151,30 @@ public class GraphUtilTest {
     assertThat((String[])GraphUtil.getNewPropertyValue(new int[]{1, 2}, "3"), is(new String[]{"1", "2", "3"}));
   }
 
+  @Test
+  public void properFragment() {
+    assertThat(GraphUtil.getFragment("http://x.org/#fragment"), is("fragment"));
+  }
+
+  @Test
+  public void pathFragment() {
+    assertThat(GraphUtil.getFragment("http://x.org/fragment"), is("fragment"));
+  }
+
+  @Test
+  public void doubleSlashFragment() {
+    assertThat(GraphUtil.getFragment("http://x.org//fragment"), is("fragment"));
+  }
+
+  @Test
+  public void mailtoFragment() {
+    assertThat(GraphUtil.getFragment("mailto:x@x.org"), is("x@x.org"));
+  }
+
+  @Test
+  public void anonymousFragments() {
+    assertThat(GraphUtil.getFragment("_:foo"), is("_:foo"));
+  }
+
+
 }

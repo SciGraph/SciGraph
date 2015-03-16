@@ -19,12 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.filter;
 
 import java.lang.reflect.Array;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.lucene.analysis.StopAnalyzer;
@@ -44,7 +44,9 @@ import com.google.common.base.Predicate;
  */
 public class GraphUtil {
 
-  private static final UrlValidator validator = UrlValidator.getInstance();
+  private static final Logger logger = Logger.getLogger(GraphUtil.class.getName());
+  
+  private static final UrlValidator validator = new UrlValidator(UrlValidator.ALLOW_2_SLASHES);
 
   /***
    * Add a property value to a container.
@@ -177,10 +179,6 @@ public class GraphUtil {
     return getRelationships(a, b, type, true);
   }
 
-  static String getLastPathFragment(URI uri) {
-    return uri.getPath().replaceFirst(".*/([^/?]+).*", "$1");
-  }
-
   /***
    * Returns the "fragment" of an IRI
    * 
@@ -194,22 +192,18 @@ public class GraphUtil {
    */
   public static String getFragment(String iri) {
     if (validator.isValid(checkNotNull(iri))) {
-      try {
-        URI uri = new URI(iri);
-        if (null != uri.getFragment()) {
-          return uri.getFragment();
-        } else if (iri.startsWith("mailto:")) {
-          return iri.substring("mailto:".length());
-        } else {
-          return getLastPathFragment(uri);
-        }
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+      if (iri.contains("#")) {
+        return iri.substring(iri.lastIndexOf('#') + 1);
+      } else {
+        return iri.replaceFirst(".*/([^/?]+).*", "$1");
       }
     } else if (iri.startsWith("_:")) {
       return iri;
+    } else if (iri.startsWith("mailto:")) {
+      return iri.substring("mailto:".length());
     } else {
-      throw new RuntimeException();
+      logger.warning("Failed to find a fragment for IRI: " + iri);
+      throw new RuntimeException("Failed to find a fragment for IRI: " + iri);
     }
   }
 
