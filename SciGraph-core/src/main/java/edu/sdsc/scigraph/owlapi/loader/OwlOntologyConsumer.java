@@ -22,8 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.inject.Named;
-
 import org.semanticweb.owlapi.model.OWLObject;
 
 import com.google.inject.Inject;
@@ -31,6 +29,9 @@ import com.google.inject.Inject;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
 
 final class OwlOntologyConsumer implements Callable<Long> {
 
@@ -41,11 +42,10 @@ final class OwlOntologyConsumer implements Callable<Long> {
   private final GraphOwlVisitor visitor;
   private final AtomicInteger numProducersShutdown;
 
-  // TODO: Switch this to assisted inject
   @Inject
-  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, Graph graph, int numProducers,
-      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties,
-      AtomicInteger numProducersShutdown) {
+  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, Graph graph, @IndicatesNumberOfProducerThreads int numProducers,
+      @IndicatesMappedProperties List<MappedProperty> mappedProperties,
+      @IndicatesNumberOfShutdownProducers AtomicInteger numProducersShutdown) {
     logger.info("Ontology consumer starting up...");
     this.queue = queue;
     this.numProducers = numProducers;

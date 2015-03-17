@@ -19,19 +19,15 @@ import static com.google.common.collect.Iterables.size;
 import static java.lang.String.format;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
-import javax.inject.Named;
+import javax.inject.Provider;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -44,16 +40,12 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Stopwatch;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
@@ -62,17 +54,23 @@ import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
 
 public class BatchOwlLoader {
 
-  static final Logger logger = Logger.getLogger(BatchOwlLoader.class.getName());
+  private static final Logger logger = Logger.getLogger(BatchOwlLoader.class.getName());
 
   static final OntologySetup POISON_STR = new OntologySetup();
 
-  private static final int numCores = Runtime.getRuntime().availableProcessors();
+  @Inject
+  @IndicatesNumberOfConsumerThreads
+  int numConsumers;
 
-  static final int CONSUMER_COUNT = numCores / 2;
-  static final int PRODUCER_COUNT = numCores / 2;
+  @Inject
+  @IndicatesNumberOfProducerThreads
+  int numProducers;
 
   @Inject
   PostpostprocessorProvider postprocessorProvider;
@@ -81,33 +79,45 @@ public class BatchOwlLoader {
   Graph graph;
 
   @Inject
-  @Named("owl.mappedProperties") List<MappedProperty> mappedProperties;
+  @IndicatesMappedProperties 
+  List<MappedProperty> mappedProperties;
+
+  @Inject
+  Provider<OwlOntologyConsumer> consumerProvider;
+
+  @Inject
+  Provider<OwlOntologyProducer> producerProvider;
 
   Collection<OntologySetup> ontologies;
 
-  BlockingQueue<OWLObject> queue = new LinkedBlockingQueue<>();
-  BlockingQueue<OntologySetup> urlQueue = new LinkedBlockingQueue<>();
+  @Inject
+  BlockingQueue<OWLObject> queue;
 
-  ExecutorService exec = Executors.newFixedThreadPool(CONSUMER_COUNT + PRODUCER_COUNT);
-
+  @Inject
+  BlockingQueue<OntologySetup> urlQueue;
+  
+  @Inject
+  ExecutorService exec; 
+  
   static {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
     OwlApiUtils.silenceOboParser();
   }
 
   void loadOntology() throws InterruptedException {
-    AtomicInteger numProducersShutdown = new AtomicInteger();
     if (!ontologies.isEmpty()) {
-      for (int i = 0; i < CONSUMER_COUNT; i++) {
-        exec.submit(new OwlOntologyConsumer(queue, graph, PRODUCER_COUNT, mappedProperties, numProducersShutdown));
+      for (int i = 0; i < numConsumers; i++) {
+        //exec.submit(new OwlOntologyConsumer(queue, graph, PRODUCER_COUNT, mappedProperties, numProducersShutdown));
+        exec.submit(consumerProvider.get());
       }
-      for (int i = 0; i < PRODUCER_COUNT; i++) {
-        exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
+      for (int i = 0; i < numProducers; i++) {
+        //exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
+        exec.submit(producerProvider.get());
       }
       for (OntologySetup ontology: ontologies) {
         urlQueue.offer(ontology);
       }
-      for (int i = 0; i < PRODUCER_COUNT; i++) {
+      for (int i = 0; i < numProducers; i++) {
         urlQueue.offer(POISON_STR);
       }
     }
@@ -165,8 +175,7 @@ public class BatchOwlLoader {
     return options;
   }
 
-  public static void main(String[] args) throws OWLOntologyCreationException, JsonParseException,
-  JsonMappingException, IOException, InterruptedException {
+  public static void main(String[] args) throws Exception {
     CommandLineParser parser = new PosixParser();
     CommandLine cmd = null;
     try {
@@ -174,7 +183,7 @@ public class BatchOwlLoader {
     } catch (ParseException e) {
       System.err.println(e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp("OwlLoader", getOptions());
+      formatter.printHelp(BatchOwlLoader.class.getSimpleName(), getOptions());
       System.exit(-1);
     }
 

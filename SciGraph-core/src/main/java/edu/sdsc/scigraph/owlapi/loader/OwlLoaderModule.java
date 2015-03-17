@@ -18,24 +18,42 @@ package edu.sdsc.scigraph.owlapi.loader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import javax.inject.Singleton;
 
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
+import org.semanticweb.owlapi.model.OWLObject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 
 class OwlLoaderModule extends AbstractModule {
+
+  private static final Logger logger = Logger.getLogger(OwlLoaderModule.class.getName());
 
   OwlLoadConfiguration config;
 
@@ -46,22 +64,32 @@ class OwlLoaderModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(OwlLoadConfiguration.class).toInstance(config);
-    bindConstant().annotatedWith(Names.named("uniqueProperty")).to(CommonProperties.URI);
-    bind(new TypeLiteral<Set<String>>() {
-    }).annotatedWith(Names.named("indexedProperties")).toInstance(config.getIndexedNodeProperties());
-    bind(new TypeLiteral<Set<String>>() {
-    }).annotatedWith(Names.named("exactProperties")).toInstance(config.getExactNodeProperties());
-    bind(new TypeLiteral<Map<String, String>>() {
-    }).annotatedWith(Names.named("owl.categories")).toInstance(config.getCategories());
-    bind(new TypeLiteral<List<MappedProperty>>() {
-    }).annotatedWith(Names.named("owl.mappedProperties")).toInstance(config.getMappedProperties());
-    bind(Graph.class).to(GraphBatchImpl.class);
+    bindConstant().annotatedWith(IndicatesUniqueProperty.class).to(CommonProperties.URI);
+    bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesIndexedProperties.class).toInstance(config.getIndexedNodeProperties());
+    bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesExactIndexedProperties.class).toInstance(config.getExactNodeProperties());
+    bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesMappedCategories.class).toInstance(config.getCategories());
+    bind(new TypeLiteral<List<MappedProperty>>() {}).annotatedWith(IndicatesMappedProperties.class).toInstance(config.getMappedProperties());
+    bind(Graph.class).to(GraphBatchImpl.class).in(Scopes.SINGLETON);
+
+    bind(new TypeLiteral<BlockingQueue<OWLObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLObject>>(){}).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<BlockingQueue<OntologySetup>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OntologySetup>>(){}).in(Scopes.SINGLETON);
+
+    bind(Integer.class).annotatedWith(IndicatesNumberOfConsumerThreads.class).toInstance(config.getConsumerThreadCount());
+    bind(Integer.class).annotatedWith(IndicatesNumberOfProducerThreads.class).toInstance(config.getProducerThreadCount());
+
+    bind(AtomicInteger.class).annotatedWith(IndicatesNumberOfShutdownProducers.class).to(AtomicInteger.class).in(Scopes.SINGLETON);
+  }
+
+  @Provides
+  @Singleton
+  ExecutorService provideExecutorService(@IndicatesNumberOfConsumerThreads int consumers, @IndicatesNumberOfProducerThreads int producers) {
+    return Executors.newFixedThreadPool(consumers + producers);
   }
 
   @Provides
   @Singleton
   BatchInserter getInserter() {
-    BatchOwlLoader.logger.info("Getting BatchInserter");
+    logger.info("Getting BatchInserter");
     return BatchInserters.inserter(config.getOntologyConfiguration().getGraphLocation(), config.getNeo4jConfig());
   }
 

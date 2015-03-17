@@ -33,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.concurrent.ThreadSafe;
-import javax.inject.Named;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
@@ -50,6 +49,9 @@ import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 
 @ThreadSafe
 public class GraphBatchImpl implements Graph {
@@ -74,9 +76,9 @@ public class GraphBatchImpl implements Graph {
   private final RelationshipMap relationshipMap;
 
   @Inject
-  public GraphBatchImpl(BatchInserter inserter, @Named("uniqueProperty") String uniqueProperty,
-      @Named("indexedProperties") Set<String> indexedProperties,
-      @Named("exactProperties") Set<String> exactIndexedProperties,
+  public GraphBatchImpl(BatchInserter inserter, @IndicatesUniqueProperty String uniqueProperty,
+      @IndicatesIndexedProperties Set<String> indexedProperties,
+      @IndicatesExactIndexedProperties Set<String> exactIndexedProperties,
       ConcurrentMap<String, Long> idMap, RelationshipMap relationshioMap) {
     this.inserter = inserter;
     this.idMap = idMap;

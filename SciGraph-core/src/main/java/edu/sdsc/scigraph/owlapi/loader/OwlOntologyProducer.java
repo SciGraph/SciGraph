@@ -31,6 +31,7 @@ import com.google.inject.Inject;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
 import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
 
 final class OwlOntologyProducer implements Callable<Void>{
 
@@ -41,11 +42,45 @@ final class OwlOntologyProducer implements Callable<Void>{
   private final AtomicInteger numProducersShutdown;
 
   @Inject
-  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<OntologySetup> ontologyQueue, AtomicInteger numProducersShutdown) {
+  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<OntologySetup> ontologyQueue, 
+      @IndicatesNumberOfShutdownProducers AtomicInteger numProducersShutdown) {
     logger.info("Producer starting up...");
     this.queue = queue;
     this.ontologQueue = ontologyQueue;
     this.numProducersShutdown = numProducersShutdown;
+  }
+
+  public void reason(OWLOntologyManager manager, OWLOntology ont, OntologySetup config) throws Exception {
+    if (config.getReasonerConfiguration().isPresent()) {
+      String origThreadName = Thread.currentThread().getName();
+      Thread.currentThread().setName("reasoning - " + config);
+      ReasonerUtil util = new ReasonerUtil(config.getReasonerConfiguration().get(), manager, ont);
+      util.reason();
+      Thread.currentThread().setName(origThreadName);
+    }
+  }
+
+  public void queueObjects(OWLOntologyManager manager, OntologySetup ontologyConfig) throws InterruptedException {
+    String origThreadName = Thread.currentThread().getName();
+    Thread.currentThread().setName("queueing axioms - " + ontologyConfig);
+    logger.info("Queueing axioms for: " + ontologyConfig);
+    long objectCount = 0;
+    for (OWLOntology ontology: manager.getOntologies()) {
+      for (OWLObject object: ontology.getNestedClassExpressions()) {
+        queue.put(object);
+        objectCount++;
+      }
+      for (OWLObject object: ontology.getSignature(true)) {
+        queue.put(object);
+        objectCount++;
+      }
+      for (OWLObject object: ontology.getAxioms()) {
+        queue.put(object);
+        objectCount++;
+      }
+    }
+    Thread.currentThread().setName(origThreadName);
+    logger.info("Finished queueing " + objectCount + " axioms for: " + ontologyConfig);
   }
 
   @Override
@@ -60,44 +95,18 @@ final class OwlOntologyProducer implements Callable<Void>{
           logger.info("Loading ontology: " + ontologyConfig);
           try {
             OWLOntology ont = OwlApiUtils.loadOntology(manager, ontologyConfig.url());
-            if (ontologyConfig.getReasonerConfiguration().isPresent()) {
-              String origThreadName = Thread.currentThread().getName();
-              Thread.currentThread().setName("reasoning - " + ontologyConfig);
-              ReasonerUtil util = new ReasonerUtil(ontologyConfig.getReasonerConfiguration().get(), manager, ont);
-              util.reason();
-              Thread.currentThread().setName(origThreadName);
-            }
-            String origThreadName = Thread.currentThread().getName();
-            Thread.currentThread().setName("queueing axioms - " + ontologyConfig);
-            logger.info("Queueing axioms for: " + ontologyConfig);
-            long objectCount = 0;
-            for (OWLOntology ontology: manager.getOntologies()) {
-              for (OWLObject object: ontology.getNestedClassExpressions()) {
-                queue.put(object);
-                objectCount++;
-              }
-              for (OWLObject object: ontology.getSignature(true)) {
-                queue.put(object);
-                objectCount++;
-              }
-              for (OWLObject object: ontology.getAxioms()) {
-                queue.put(object);
-                objectCount++;
-              }
-            }
-            Thread.currentThread().setName(origThreadName);
-            logger.info("Finished queueing " + objectCount + " axioms for: " + ontologyConfig);
+            reason(manager, ont, ontologyConfig);
+            queueObjects(manager, ontologyConfig);
           } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to load ontology: " + ontologyConfig, e);
           }
         }
       }
-    } catch (Exception e) { 
-      logger.log(Level.WARNING, "Failed to load ontology", e);
+    } catch (InterruptedException e) { 
+      logger.log(Level.WARNING, e.getMessage(), e);
     }
     finally {
       numProducersShutdown.incrementAndGet();
-      notifyAll();
     }
 
     logger.info("Producer shutting down...");
