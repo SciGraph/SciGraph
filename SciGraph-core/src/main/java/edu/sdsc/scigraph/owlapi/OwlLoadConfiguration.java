@@ -37,6 +37,9 @@ public class OwlLoadConfiguration {
   private Set<String> exactNodeProperties = new HashSet<>();
   private Map<String, String> neo4jConfig = new HashMap<>();
 
+  private int producerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
+  private int consumerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
+  
   public OntologyConfiguration getOntologyConfiguration() {
     return ontologyConfiguration;
   }
@@ -67,6 +70,22 @@ public class OwlLoadConfiguration {
 
   public Map<String, String> getNeo4jConfig() {
     return neo4jConfig;
+  }
+
+  public int getProducerThreadCount() {
+    return producerThreadCount;
+  }
+
+  public void setProducerThreadCount(int producerThreadCount) {
+    this.producerThreadCount = producerThreadCount;
+  }
+
+  public int getConsumerThreadCount() {
+    return consumerThreadCount;
+  }
+
+  public void setConsumerThreadCount(int consumerThreadCount) {
+    this.consumerThreadCount = consumerThreadCount;
   }
 
   public static class OntologySetup {
