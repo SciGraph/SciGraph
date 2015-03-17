@@ -83,6 +83,7 @@ public class DynamicResourceModuleIT {
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
     map.put("foo", newArrayList("bar"));
     when(uriInfo.getQueryParameters()).thenReturn(map);
+    when(uriInfo.getPathParameters()).thenReturn(new MultivaluedHashMap<String, String>());
   }
 
   @Test
