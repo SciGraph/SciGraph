@@ -169,8 +169,8 @@ cypherResources:
   - path: /dynamic/phenotypes/{phenotype_id}/genes
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
-            MATCH (g:gene)-[r:RO_0002200*]->(phenotype)
-            RETURN distinct g, r, phenotype
+            MATCH (g:gene)-[equiv:equivalentClass*0..2]-(ge)-[r:RO_0002200*]->(phenotype)
+            RETURN distinct g, equiv, ge, r, phenotype
     operations:
       - nickname: genes_with_phenotype
         summary: Get genes related to a phenotype
@@ -183,7 +183,7 @@ cypherResources:
   - path: /dynamic/phenotypes/{phenotype_id}/genes/targets
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
-            MATCH (g:gene)-[r:RO_0002200*]->(phenotype)
+            MATCH (g:gene)-[equiv:equivalentClass*0..2]-(ge)-[r:RO_0002200*]->(phenotype)
             RETURN distinct g
     operations:
       - nickname: genes_with_phenotype
@@ -191,6 +191,71 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype # try HP_0000528
+            required: true
+            type: string
+            paramType: path
+
+  - path: /dynamic/features/{feature_id}/phenotypes
+    query: |
+            START feature = node:node_auto_index(fragment={feature_id})
+            MATCH (genotype)-[parts:BFO_0000051!*0..]->(fe)-[equiv:equivalentClass*0..2]-(feature),
+                  (genotype)-[hasP:RO_0002200]->(phenotype)
+            RETURN DISTINCT genotype,parts,fe,equiv,feature,hasP,phenotype
+    operations:
+      - nickname: features_with_phenotypes
+        summary: Get phenotypes for a feature
+        parameters:
+          - name: feature_id
+            description: The ID of the feature # try MGI:2172552
+            required: true
+            type: string
+            paramType: path
+  - path: /dynamic/features/{feature_id}/phenotypes/targets
+    query: |
+            START feature = node:node_auto_index(fragment={feature_id})
+            MATCH (genotype)-[parts:BFO_0000051!*0..]->(fe)-[equiv:equivalentClass*0..2]-(feature),
+                  (genotype)-[hasP:RO_0002200]->(phenotype)
+            RETURN DISTINCT phenotype
+    operations:
+      - nickname: features_with_phenotypes
+        summary: Get phenotypes for a feature
+        parameters:
+          - name: feature_id
+            description: The ID of the feature # try MGI:2172552
+            required: true
+            type: string
+            paramType: path
+
+  - path: /dynamic/phenotypes/{phenotype_id}/features
+    query: |
+            START phenotype = node:node_auto_index(fragment={phenotype_id}),
+                  featureClass = node:node_auto_index(fragment='SO_0000110')
+            MATCH (actualType)-[:subClassOf*0..]->(featureClass)
+            WITH actualType, phenotype
+            MATCH (genotype)-[parts:BFO_0000051!*0..]->(fe)-[equiv:equivalentClass*0..2]-(feature)-[type:type]->(actualType),
+                  (genotype)-[hasP:RO_0002200]->(phenotype)
+            RETURN DISTINCT genotype,parts,fe,equiv,feature,hasP,phenotype,type,actualType
+    operations:
+      - nickname: f1
+        summary: Get features for a phenotype
+        parameters:
+          - name: phenotype_id
+            description: The ID of the phenotype # try MP:0008384
+            required: true
+            type: string
+            paramType: path
+  - path: /dynamic/phenotypes/{phenotype_id}/features/targets
+    query: |
+            START phenotype = node:node_auto_index(fragment={phenotype_id})
+            MATCH (genotype)-[parts:BFO_0000051!*0..]->(fe)-[equiv:equivalentClass*0..2]-(feature),
+                  (genotype)-[hasP:RO_0002200]->(phenotype)
+            RETURN DISTINCT feature
+    operations:
+      - nickname: features_with_phenotypes
+        summary: Get features for a phenotype
+        parameters:
+          - name: phenotype_id
+            description: The ID of the phenotype # try MP:0008384
             required: true
             type: string
             paramType: path
