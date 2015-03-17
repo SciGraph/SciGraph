@@ -1,0 +1,458 @@
+<?xml version='1.0'?>
+<!--
+
+    Copyright (C) 2014 The SciGraph authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<!-- XML schema for XGMML 1.0 -->
+<!-- Authors: John Punin and Mukkai Krishnamoorthy -->
+<!-- Computer Science Department -->
+<!-- Rensselaer Polytechnic Institute -->
+<!-- xgmml.xsd,v 1.0 06/27/2001 -->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+        targetNamespace="http://www.cs.rpi.edu/XGMML" 
+        xmlns:xml="http://www.w3.org/XML/1998/namespace"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        xmlns="http://www.cs.rpi.edu/XGMML" 
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        version="xgmml 1.0">
+
+<!-- get access to the xml: attribute groups for xml:lang -->
+<xsd:import namespace="http://www.w3.org/XML/1998/namespace" 
+        schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+<!-- get access to the xlink: attribute groups for xlink:type (simple) -->
+<xsd:import namespace="http://www.w3.org/1999/xlink" 
+        schemaLocation="xlinks-2001.xsd"/>
+
+<!-- Boolean type -->
+<xsd:simpleType name="boolean.type">
+ <xsd:restriction base="xsd:nonNegativeInteger">
+          <xsd:enumeration value="0"/>
+          <xsd:enumeration value="1"/>
+ </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Positive number type -->
+<xsd:simpleType name="number.type">
+  <xsd:restriction base="xsd:nonNegativeInteger"/>
+</xsd:simpleType>
+
+<!-- ID type -->
+<xsd:simpleType name="id.type">
+  <xsd:restriction base="number.type"/>
+</xsd:simpleType>
+
+
+<!-- String type -->
+<xsd:simpleType name="string.type">
+  <xsd:restriction base="xsd:string"/>
+</xsd:simpleType>
+
+<!-- URI type -->
+<xsd:simpleType name="uri.type">
+  <xsd:restriction base="xsd:anyURI"/>
+</xsd:simpleType>
+
+<!-- Anchor type -->
+<xsd:simpleType name="anchor.type">
+  <xsd:restriction base="xsd:NMTOKEN">
+          <xsd:enumeration value="c"/>
+          <xsd:enumeration value="n"/>
+          <xsd:enumeration value="ne"/>
+          <xsd:enumeration value="e"/>
+          <xsd:enumeration value="se"/>
+          <xsd:enumeration value="s"/>
+          <xsd:enumeration value="sw"/>
+          <xsd:enumeration value="w"/>
+          <xsd:enumeration value="nw"/>
+  </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Graphics Type  -->
+<xsd:simpleType name="type-graphics.type">
+  <xsd:restriction base="xsd:NMTOKEN">
+
+<!-- Type of Graphics (GML types) type-graphics-gml.type -->
+          <xsd:enumeration value="arc"/>
+          <xsd:enumeration value="bitmap"/>
+          <xsd:enumeration value="image"/>
+          <xsd:enumeration value="line"/>
+          <xsd:enumeration value="oval"/>
+          <xsd:enumeration value="polygon"/>
+          <xsd:enumeration value="rectangle"/>
+          <xsd:enumeration value="text"/>
+
+<!-- Type of Graphics (New types) type-graphics-app.type -->
+          <xsd:enumeration value="box"/>
+          <xsd:enumeration value="circle"/>
+          <xsd:enumeration value="ver_ellipsis"/>
+          <xsd:enumeration value="hor_ellipsis"/>
+          <xsd:enumeration value="rhombus"/>
+          <xsd:enumeration value="triangle"/>
+          <xsd:enumeration value="pentagon"/>
+          <xsd:enumeration value="hexagon"/>
+          <xsd:enumeration value="octagon"/>
+   </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Line types -->
+<!-- Arrow type -->
+<xsd:simpleType name="arrow.type">
+  <xsd:restriction base="xsd:NMTOKEN">
+          <xsd:enumeration value="none"/>
+          <xsd:enumeration value="first"/>
+          <xsd:enumeration value="last"/>
+          <xsd:enumeration value="both"/>
+  </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Capstyle type -->
+<xsd:simpleType name="capstyle.type">
+   <xsd:restriction base="xsd:NMTOKEN">
+          <xsd:enumeration value="butt"/>
+          <xsd:enumeration value="projecting"/>
+          <xsd:enumeration value="round"/>
+   </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Joinstyle type -->
+<xsd:simpleType name="joinstyle.type"> 
+   <xsd:restriction base="xsd:NMTOKEN">
+          <xsd:enumeration value="bevel"/>
+          <xsd:enumeration value="miter"/>
+          <xsd:enumeration value="round"/>
+   </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Arc style  type -->
+<xsd:simpleType name="arcstyle.type"> 
+   <xsd:restriction base="xsd:NMTOKEN">
+          <xsd:enumeration value="pieslice"/>
+          <xsd:enumeration value="chord"/>
+          <xsd:enumeration value="arc"/>
+   </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Text types -->
+<!-- Text justification type -->
+<xsd:simpleType name="justify.type">
+   <xsd:restriction base="xsd:NMTOKEN">
+          <xsd:enumeration value="left"/>
+          <xsd:enumeration value="right"/>
+          <xsd:enumeration value="center"/>
+   </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Font type -->
+<xsd:simpleType name="font.type">
+  <xsd:restriction base="xsd:string"/>
+</xsd:simpleType>
+
+<!-- Color type -->
+<xsd:simpleType name="color.type"> 
+   <xsd:restriction base="xsd:string"/>
+</xsd:simpleType>
+
+<!-- Angle type -->
+<!-- Number followed by unit identifier (deg, grad or rad)  -->
+<xsd:simpleType name="angle.type">
+   <xsd:restriction base="xsd:string">
+          <xsd:pattern value="(\+|-)?\d*(deg|grad|rad)?"/>
+   </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Object type -->
+<xsd:simpleType name="object.type"> 
+   <xsd:restriction base="xsd:NMTOKEN">
+          <xsd:enumeration value="list"/>
+          <xsd:enumeration value="string"/>
+          <xsd:enumeration value="real"/>
+          <xsd:enumeration value="integer"/>
+   </xsd:restriction>
+</xsd:simpleType>
+
+<!-- Global Attributes -->
+<xsd:attributeGroup name="global-atts">
+                <xsd:attribute name="id" type="number.type"/>
+                <xsd:attribute name="name" type="string.type"/>
+                <xsd:attribute name="label" type="string.type"/>
+                <xsd:attribute name="labelanchor" type="string.type"/>
+</xsd:attributeGroup>
+
+<!-- Standard XML Attributes -->
+<xsd:attributeGroup name="xml-atts">
+                <xsd:attribute ref="xml:lang"/>
+                <xsd:attribute ref="xml:space"/>
+</xsd:attributeGroup>
+
+<!-- Safe Graph Attributes -->
+<xsd:attributeGroup name="graph-atts-safe">
+                <xsd:attribute name="directed" type="boolean.type" 
+                           default="0"/>
+</xsd:attributeGroup>
+
+<!-- Unsafe Graph Attributes (GML) -->
+<xsd:attributeGroup name="graph-atts-gml-unsafe">
+                <xsd:attribute name="Vendor" type="string.type"/>
+</xsd:attributeGroup>
+
+<!-- Unsafe Graph Attributes (new attributes) (Graphics attributes) -->
+<xsd:attributeGroup name="graph-atts-app-unsafe-gr">
+                <xsd:attribute name="Scale" type="xsd:integer"/>
+                <xsd:attribute name="Layout" type="string.type"/>
+                <xsd:attribute name="Graphic" type="boolean.type"/>
+</xsd:attributeGroup>
+
+<!-- Unsafe Graph Attributes (new attributes) (Structural attributes) -->
+<xsd:attributeGroup name="graph-atts-app-unsafe-ngr">
+                <xsd:attribute name="Rootnode" type="number.type"/>
+</xsd:attributeGroup>
+
+<!-- Simple Graph (Structural graph) -->
+<xsd:complexType name="simpleGraph">
+   <xsd:sequence>
+      <xsd:element ref="att" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
+            <xsd:element ref="node"/>
+            <xsd:element ref="edge"/>
+      </xsd:choice>
+   </xsd:sequence>
+      <xsd:attributeGroup ref="global-atts"/>
+      <xsd:attributeGroup ref="xml-atts"/>
+      <xsd:attributeGroup ref="xlink:simpleLink"/>
+      <xsd:attributeGroup ref="graph-atts-safe"/>
+      <xsd:attributeGroup ref="graph-atts-gml-unsafe"/>
+      <xsd:attributeGroup ref="graph-atts-app-unsafe-ngr"/>
+</xsd:complexType>
+
+<!-- Graphical Graph "is a" Simple Graph -->
+<xsd:complexType name="graphicGraph">
+   <xsd:complexContent>
+     <xsd:extension base="simpleGraph"> 
+       <xsd:attributeGroup ref="graph-atts-app-unsafe-gr"/>
+     </xsd:extension>
+   </xsd:complexContent>
+</xsd:complexType>
+
+<!-- Graph Element -->
+<xsd:element name="graph" type="graphicGraph"/>
+
+<!-- Safe Node Attributes (GML) -->
+<xsd:attributeGroup name="node-atts-gml-safe">
+                <xsd:attribute name="edgeanchor" type="string.type"/>
+</xsd:attributeGroup>
+
+<!-- Safe Node Attributes (new attributes) -->
+<xsd:attributeGroup name="node-atts-app-safe">
+                <xsd:attribute name="weight" type="string.type"/>
+</xsd:attributeGroup>
+
+<!-- Simple Node (Structural Node) -->
+<xsd:complexType name="simpleNode">
+   <xsd:sequence>
+      <xsd:element ref="att" minOccurs="0" maxOccurs="unbounded"/>
+   </xsd:sequence>
+      <xsd:attributeGroup ref="global-atts"/>
+      <xsd:attributeGroup ref="xlink:simpleLink"/>
+      <xsd:attributeGroup ref="node-atts-app-safe"/>
+</xsd:complexType>
+
+<!-- Graphical Node "is a" Simple Node -->
+<xsd:complexType name="graphicNode"> 
+  <xsd:complexContent>
+    <xsd:extension base="simpleNode">
+       <xsd:sequence>
+          <xsd:element ref="graphics" minOccurs="0"/>
+       </xsd:sequence>
+      <xsd:attributeGroup ref="node-atts-gml-safe"/>
+    </xsd:extension>
+  </xsd:complexContent>
+</xsd:complexType>
+
+<!-- Node Element -->
+<xsd:element name="node" type="graphicNode"/>
+
+<!-- Safe Edge Attributes (GML) -->
+<xsd:attributeGroup name="edge-atts-gml-safe">
+    <xsd:attribute name="source" type="number.type" use="required"/>
+    <xsd:attribute name="target" type="number.type" use="required"/>
+</xsd:attributeGroup>
+
+<!-- Safe Edge Attributes (new attributes) -->
+<xsd:attributeGroup name="edge-atts-app-safe">
+                <xsd:attribute name="weight" type="string.type"/>
+</xsd:attributeGroup>
+
+<!-- Simple Edge (Structural Edge) -->
+<xsd:complexType name="simpleEdge">
+   <xsd:sequence>
+      <xsd:element ref="att" minOccurs="0" maxOccurs="unbounded"/>
+   </xsd:sequence>
+      <xsd:attributeGroup ref="global-atts"/>
+      <xsd:attributeGroup ref="xlink:simpleLink"/>
+      <xsd:attributeGroup ref="edge-atts-gml-safe"/>
+      <xsd:attributeGroup ref="edge-atts-app-safe"/>
+</xsd:complexType>
+
+<!-- Graphical Edge "is a" Simple Edge -->
+<xsd:complexType name="graphicEdge">
+   <xsd:complexContent>  
+     <xsd:extension base="simpleEdge">
+       <xsd:sequence>
+         <xsd:element ref="graphics" minOccurs="0"/>
+       </xsd:sequence>
+     </xsd:extension>
+   </xsd:complexContent>
+</xsd:complexType>
+
+<!-- Edge Element -->
+<xsd:element name="edge" type="graphicEdge"/>
+
+<!-- Graphics Type  -->
+<xsd:attributeGroup name="graphics-type-att">
+                <xsd:attribute name="type" type="type-graphics.type"/>
+</xsd:attributeGroup>
+
+<!-- Point Attributes (x,y,z)  -->
+<xsd:attributeGroup name="point-atts">
+                <xsd:attribute name="x" type="xsd:double"/>
+                <xsd:attribute name="y" type="xsd:double"/>
+                <xsd:attribute name="z" type="xsd:double"/>
+</xsd:attributeGroup>
+
+<!-- Dimension Attributes (width,height,depth)  -->
+<xsd:attributeGroup name="dimension-atts">
+                <xsd:attribute name="w" type="xsd:double"/>
+                <xsd:attribute name="h" type="xsd:double"/>
+                <xsd:attribute name="d" type="xsd:double"/>
+</xsd:attributeGroup>
+
+<!-- External Attributes (Image and Bitmap)  -->
+<xsd:attributeGroup name="external-atts">
+                <xsd:attribute name="image" type="uri.type"/>
+                <xsd:attribute name="bitmap" type="uri.type"/>
+</xsd:attributeGroup>
+
+<!-- Line Attributes -->
+<xsd:attributeGroup name="line-atts">
+                <xsd:attribute name="width" type="number.type"/>
+                <xsd:attribute name="arrow" type="arrow.type"/>
+                <xsd:attribute name="capstyle" type="capstyle.type"/>
+                <xsd:attribute name="joinstyle" type="joinstyle.type"/>
+                <xsd:attribute name="smooth" type="boolean.type"/>
+                <xsd:attribute name="splinesteps" type="number.type"/>
+</xsd:attributeGroup>
+
+<!-- Text Attributes -->
+<xsd:attributeGroup name="text-atts">
+                <xsd:attribute name="justify" type="justify.type"/>
+                <xsd:attribute name="font" type="font.type"/>
+</xsd:attributeGroup>
+
+<!-- Bitmap Attributes -->
+<xsd:attributeGroup name="bitmap-atts">
+                <xsd:attribute name="background" type="color.type"/>
+                <xsd:attribute name="foreground" type="color.type"/>
+</xsd:attributeGroup>
+
+<!-- Arc Attributes -->
+<xsd:attributeGroup name="arc-atts">
+                <xsd:attribute name="extent" type="xsd:integer"/>
+                <xsd:attribute name="start" type="xsd:integer"/>
+                <xsd:attribute name="style" type="arcstyle.type"/>
+</xsd:attributeGroup>
+
+<!-- Graphical Object Attributes -->
+<xsd:attributeGroup name="object-atts">
+                <xsd:attribute name="stipple" type="string.type"/>
+                <xsd:attribute name="visible" type="boolean.type"/>
+                <xsd:attribute name="fill" type="color.type"/>
+                <xsd:attribute name="outline" type="color.type"/>
+                <xsd:attribute name="anchor" type="anchor.type"/>
+</xsd:attributeGroup>
+
+<!-- Graphics Element -->
+<xsd:element name="graphics">
+  <xsd:complexType>
+     <xsd:sequence>
+         <xsd:choice minOccurs="0" maxOccurs="1">
+            <xsd:element ref="Line"/>
+            <xsd:element ref="center"/>
+         </xsd:choice>
+         <xsd:element ref="att" minOccurs="0" maxOccurs="unbounded"/>
+     </xsd:sequence>
+         <xsd:attributeGroup ref="graphics-type-att"/>
+         <xsd:attributeGroup ref="point-atts"/>
+         <xsd:attributeGroup ref="dimension-atts"/>
+         <xsd:attributeGroup ref="external-atts"/>
+         <xsd:attributeGroup ref="line-atts"/>
+         <xsd:attributeGroup ref="text-atts"/>
+         <xsd:attributeGroup ref="bitmap-atts"/>
+         <xsd:attributeGroup ref="arc-atts"/>
+         <xsd:attributeGroup ref="object-atts"/>
+     </xsd:complexType>
+</xsd:element>
+
+<!-- Center Point Element -->
+<xsd:element name="center">
+   <xsd:complexType>
+         <xsd:attributeGroup ref="point-atts"/>
+  </xsd:complexType>
+</xsd:element>
+
+<!-- Line Element -->
+<xsd:element name="Line">
+   <xsd:complexType>
+      <xsd:sequence>
+           <xsd:element ref="point" minOccurs="2" maxOccurs="unbounded"/>
+      </xsd:sequence>
+   </xsd:complexType>
+</xsd:element>
+
+<!-- Point Element -->
+<xsd:element name="point">
+   <xsd:complexType> 
+         <xsd:attributeGroup ref="point-atts"/>
+  </xsd:complexType>
+</xsd:element>
+
+<!-- Value Attribute -->
+<xsd:attributeGroup name="attribute-value">
+                <xsd:attribute name="value" type="string.type"/>
+</xsd:attributeGroup>
+
+<!-- Type Attribute -->
+<xsd:attributeGroup name="attribute-type">
+                <xsd:attribute name="type" type="object.type"/>
+</xsd:attributeGroup>
+
+<!-- Att Element -->
+<xsd:element name="att">
+     <xsd:complexType mixed="true">
+       <xsd:sequence>
+         <xsd:element ref="att" minOccurs="0" maxOccurs="unbounded"/>
+         <xsd:element ref="graph" minOccurs="0" maxOccurs="unbounded"/>
+       </xsd:sequence>
+         <xsd:attributeGroup ref="global-atts"/>
+         <xsd:attributeGroup ref="attribute-value"/>
+         <xsd:attributeGroup ref="attribute-type"/>
+     </xsd:complexType>
+</xsd:element>
+
+</xsd:schema>
