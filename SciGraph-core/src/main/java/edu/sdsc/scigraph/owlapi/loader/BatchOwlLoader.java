@@ -157,7 +157,7 @@ public class BatchOwlLoader {
   }
 
   public static void load(OwlLoadConfiguration config) throws InterruptedException {
-    Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getOntologyConfiguration()));
+    Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getGraphConfiguration()));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
     loader.ontologies = config.getOntologies();
     logger.info("Loading ontologies...");

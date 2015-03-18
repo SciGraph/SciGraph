@@ -29,7 +29,7 @@ import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 
 public class OwlLoadConfiguration {
 
-  private Neo4jConfiguration ontologyConfiguration;
+  private Neo4jConfiguration graphConfiguration;
   private List<OntologySetup> ontologies = new ArrayList<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
@@ -39,12 +39,12 @@ public class OwlLoadConfiguration {
   private int producerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
   private int consumerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
   
-  public Neo4jConfiguration getOntologyConfiguration() {
-    return ontologyConfiguration;
+  public Neo4jConfiguration getGraphConfiguration() {
+    return graphConfiguration;
   }
 
-  public void setOntologyConfiguration(Neo4jConfiguration ontologyConfiguration) {
-    this.ontologyConfiguration = ontologyConfiguration;
+  public void setGraphConfiguration(Neo4jConfiguration ontologyConfiguration) {
+    this.graphConfiguration = ontologyConfiguration;
   }
 
   public List<OntologySetup> getOntologies() {
