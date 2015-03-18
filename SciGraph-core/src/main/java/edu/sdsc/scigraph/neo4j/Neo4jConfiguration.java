@@ -22,7 +22,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OntologyConfiguration {
+public class Neo4jConfiguration {
 
   @NotEmpty
   @JsonProperty

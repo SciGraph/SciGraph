@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 
-import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
+import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 import edu.sdsc.scigraph.services.refine.ServiceMetadata;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
@@ -39,7 +39,7 @@ public class ApplicationConfiguration extends Configuration {
   @Valid
   @NotNull
   @JsonProperty
-  private OntologyConfiguration graphConfiguration = new OntologyConfiguration();
+  private Neo4jConfiguration graphConfiguration = new Neo4jConfiguration();
 
   @Valid
   @JsonProperty(required=false)
@@ -57,7 +57,7 @@ public class ApplicationConfiguration extends Configuration {
     return applicationContextPath;
   }
 
-  public OntologyConfiguration getGraphConfiguration() {
+  public Neo4jConfiguration getGraphConfiguration() {
     return graphConfiguration;
   }
 

@@ -61,7 +61,7 @@ public class Neo4jModule extends AbstractModule {
 
   private Map<String, String> curieMap = new HashMap<>();
 
-  public Neo4jModule(OntologyConfiguration configuration) {
+  public Neo4jModule(Neo4jConfiguration configuration) {
     this.graphLocation = Optional.of(configuration.getGraphLocation());
     this.curieMap = configuration.getCuries();
   }

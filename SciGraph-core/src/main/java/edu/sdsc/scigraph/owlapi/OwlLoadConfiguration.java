@@ -25,11 +25,11 @@ import java.util.Set;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
-import edu.sdsc.scigraph.neo4j.OntologyConfiguration;
+import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 
 public class OwlLoadConfiguration {
 
-  private OntologyConfiguration ontologyConfiguration;
+  private Neo4jConfiguration ontologyConfiguration;
   private List<OntologySetup> ontologies = new ArrayList<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
@@ -40,11 +40,11 @@ public class OwlLoadConfiguration {
   private int producerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
   private int consumerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
   
-  public OntologyConfiguration getOntologyConfiguration() {
+  public Neo4jConfiguration getOntologyConfiguration() {
     return ontologyConfiguration;
   }
 
-  public void setOntologyConfiguration(OntologyConfiguration ontologyConfiguration) {
+  public void setOntologyConfiguration(Neo4jConfiguration ontologyConfiguration) {
     this.ontologyConfiguration = ontologyConfiguration;
   }
 
