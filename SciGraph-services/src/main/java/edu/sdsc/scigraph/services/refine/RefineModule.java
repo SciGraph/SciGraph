@@ -20,17 +20,19 @@ import com.google.inject.AbstractModule;
 
 public class RefineModule extends AbstractModule {
 
+  private static final String DEFAULT_SERVICE_NAME = "SciGraph Reconciliation Service";
+  private static final String ID_SPACE = "http://example.org";
+  
   private final ServiceMetadata metadata;
 
   public RefineModule(Optional<ServiceMetadata> metadata) {
     if (metadata.isPresent()) {
       this.metadata = metadata.get();
     } else {
-      // TODO: Can this be moved to configuration?
       this.metadata = new ServiceMetadata();
-      this.metadata.setName("SciGraph Reconciliation Service");
-      this.metadata.setIdentifierSpace("http://example.org");
-      this.metadata.setSchemaSpace("http://example.org");
+      this.metadata.setName(DEFAULT_SERVICE_NAME);
+      this.metadata.setIdentifierSpace(ID_SPACE);
+      this.metadata.setSchemaSpace(ID_SPACE);
     }
   }
 
