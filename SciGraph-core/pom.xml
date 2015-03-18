@@ -27,7 +27,6 @@
 
   <properties>
     <lucene.version>3.6.2</lucene.version>
-    <neo4j.version>2.1.7</neo4j.version>
     <openrdf.version>2.7.6</openrdf.version>
   </properties>
 

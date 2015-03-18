@@ -53,6 +53,7 @@
     <dropwizard.version>0.8.0</dropwizard.version>
     <guice.version>4.0-beta5</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
+    <neo4j.version>2.1.7</neo4j.version>
   </properties>
 
   <build>
@@ -211,7 +212,7 @@
     <dependency>
      <groupId>org.neo4j</groupId>
      <artifactId>neo4j-kernel</artifactId>
-     <version>2.1.7</version>
+     <version>${neo4j.version}</version>
      <type>test-jar</type>
      <scope>test</scope>
     </dependency>
