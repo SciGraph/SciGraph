@@ -35,7 +35,6 @@ public class OwlLoadConfiguration {
   private List<MappedProperty> mappedProperties = new ArrayList<>();
   private Set<String> indexedNodeProperties = new HashSet<>();
   private Set<String> exactNodeProperties = new HashSet<>();
-  private Map<String, String> neo4jConfig = new HashMap<>();
 
   private int producerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
   private int consumerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
@@ -66,10 +65,6 @@ public class OwlLoadConfiguration {
 
   public Set<String> getExactNodeProperties() {
     return exactNodeProperties;
-  }
-
-  public Map<String, String> getNeo4jConfig() {
-    return neo4jConfig;
   }
 
   public int getProducerThreadCount() {

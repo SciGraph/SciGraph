@@ -30,6 +30,8 @@ public class Neo4jConfiguration {
 
   private Map<String, String> curies = new HashMap<>();
 
+  private Map<String, String> neo4jConfig = new HashMap<>();
+
   public String getGraphLocation() {
     return graphLocation;
   }
@@ -40,6 +42,10 @@ public class Neo4jConfiguration {
 
   public Map<String, String> getCuries() {
     return curies;
+  }
+
+  public Map<String, String> getNeo4jConfig() {
+    return neo4jConfig;
   }
 
 }

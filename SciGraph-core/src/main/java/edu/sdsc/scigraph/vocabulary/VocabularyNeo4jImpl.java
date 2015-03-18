@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.KeywordAnalyzer;
@@ -74,6 +73,7 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyQueryAnalyzer;
 import edu.sdsc.scigraph.neo4j.NodeTransformer;
+import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
 import edu.sdsc.scigraph.owlapi.CurieUtil;
 
 public class VocabularyNeo4jImpl implements Vocabulary {
@@ -87,7 +87,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   private final NodeTransformer transformer;
   
   @Inject
-  public VocabularyNeo4jImpl(GraphDatabaseService graph, @Nullable @Named("neo4j.location") String neo4jLocation,
+  public VocabularyNeo4jImpl(GraphDatabaseService graph, @Nullable @IndicatesNeo4jGraphLocation String neo4jLocation,
       CurieUtil curieUtil, NodeTransformer transformer) throws IOException {
     this.graph = graph;
     engine = new ExecutionEngine(graph);

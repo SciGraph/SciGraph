@@ -41,11 +41,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.neo4j.bindings.IndicatesCurieMapping;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
 public class DynamicResourceModuleIT {
@@ -65,7 +65,7 @@ public class DynamicResourceModuleIT {
       install(new DynamicResourceModule());
       bind(GraphDatabaseService.class).toInstance(graphDb);
       bind(ExecutionEngine.class).toInstance(new ExecutionEngine(graphDb));
-      bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(Names.named("neo4j.curieMap")).toInstance(new HashMap<String, String>());
+      bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(IndicatesCurieMapping.class).toInstance(new HashMap<String, String>());
     }
 
   }

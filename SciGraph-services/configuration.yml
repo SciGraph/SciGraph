@@ -61,6 +61,17 @@ applicationContextPath: scigraph
 
 graphConfiguration:
   graphLocation: /temp/rosieGraph
+
+  neo4jConfig:
+    use_memory_mapped_buffers : true
+    dump_configuration : true
+    neostore.nodestore.db.mapped_memory : 1G
+    neostore.relationshipstore.db.mapped_memory : 4G
+    neostore.propertystore.db.mapped_memory : 500M
+    neostore.propertystore.db.strings.mapped_memory : 500M
+    neostore.propertystore.db.arrays.mapped_memory : 500M
+    #cache_type: none
+
   curies:
     # base
     '': 'http://www.monarchinitiative.org/'

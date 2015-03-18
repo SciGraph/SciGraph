@@ -21,10 +21,11 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableBiMap;
+
+import edu.sdsc.scigraph.neo4j.bindings.IndicatesCurieMapping;
 
 /***
  * Utilities for resolving CURIEs
@@ -34,7 +35,7 @@ public class CurieUtil {
   private final ImmutableBiMap<String, String> curieMap;
 
   @Inject
-  CurieUtil(@Named("neo4j.curieMap") Map<String, String> curieMap) {
+  CurieUtil(@IndicatesCurieMapping Map<String, String> curieMap) {
     this.curieMap = ImmutableBiMap.copyOf(curieMap);
   }
 

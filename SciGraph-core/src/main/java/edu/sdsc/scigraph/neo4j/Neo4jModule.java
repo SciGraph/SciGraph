@@ -20,12 +20,10 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.mapdb.DB;
@@ -34,46 +32,39 @@ import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.graphdb.index.AutoIndexer;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.MapUtil;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
+import edu.sdsc.scigraph.neo4j.bindings.IndicatesCurieMapping;
+import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 import edu.sdsc.scigraph.vocabulary.VocabularyNeo4jImpl;
 
 public class Neo4jModule extends AbstractModule {
 
-  private Optional<String> graphLocation = Optional.absent();
-
-  private Map<String, String> curieMap = new HashMap<>();
+  private final Neo4jConfiguration configuration;
 
   public Neo4jModule(Neo4jConfiguration configuration) {
-    this.graphLocation = Optional.of(configuration.getGraphLocation());
-    this.curieMap = configuration.getCuries();
+    this.configuration = configuration;
   }
 
   @Override
   protected void configure() {
-    bind(String.class).annotatedWith(Names.named("neo4j.location")).toInstance(graphLocation.get());
-    bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(Names.named("neo4j.curieMap")).toInstance(curieMap);
-    bind(CurieUtil.class);
+    bind(String.class).annotatedWith(IndicatesNeo4jGraphLocation.class).toInstance(configuration.getGraphLocation());
+    bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(IndicatesCurieMapping.class).toInstance(configuration.getCuries());
     bind(Vocabulary.class).to(VocabularyNeo4jImpl.class).in(Singleton.class);
     bind(new TypeLiteral<ConcurrentMap<String, Long>>(){}).to(IdMap.class).in(Singleton.class);
-    //bind(Graph.class).to(GraphBatchImpl.class);
   }
 
   // TODO: Get this from the configuration file
@@ -104,22 +95,19 @@ public class Neo4jModule extends AbstractModule {
 
   @Provides
   @Singleton
-  DB getMaker(@Named("neo4j.location") String neo4jLocation) {
-    File dbLocation = new File(neo4jLocation, "SciGraphIdMap");
+  DB getMaker() {
+    File dbLocation = new File(configuration.getGraphLocation(), "SciGraphIdMap");
     return DBMaker.newFileDB(dbLocation).closeOnJvmShutdown().transactionDisable().mmapFileEnable().make();
   }
 
+  @SuppressWarnings("deprecation")
   @Provides
   @Singleton
-  GraphDatabaseService getGraphDatabaseService(@Named("neo4j.location") String neo4jLocation) throws IOException {
+  GraphDatabaseService getGraphDatabaseService() throws IOException {
     try {
       final GraphDatabaseService graphDb = new GraphDatabaseFactory()
-      .newEmbeddedDatabaseBuilder(neo4jLocation)
-      .setConfig(GraphDatabaseSettings.nodestore_mapped_memory_size, "500M")
-      .setConfig(GraphDatabaseSettings.relationshipstore_mapped_memory_size, "500M")
-      .setConfig(GraphDatabaseSettings.nodestore_propertystore_mapped_memory_size, "500M")
-      .setConfig(GraphDatabaseSettings.strings_mapped_memory_size, "500M")
-      .setConfig(GraphDatabaseSettings.arrays_mapped_memory_size, "500M")
+      .newEmbeddedDatabaseBuilder(configuration.getGraphLocation())
+      .setConfig(configuration.getNeo4jConfig())
       .newGraphDatabase();
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override
@@ -130,7 +118,7 @@ public class Neo4jModule extends AbstractModule {
       return graphDb;
     } catch (Exception e) {
       if (Throwables.getRootCause(e).getMessage().contains("lock file")) {
-        throw new IOException(format("The graph at \"%s\" is locked by another process", neo4jLocation));
+        throw new IOException(format("The graph at \"%s\" is locked by another process", configuration.getGraphLocation()));
       }
       throw e;
     }
@@ -141,6 +129,5 @@ public class Neo4jModule extends AbstractModule {
   ExecutionEngine getExecutionEngine(GraphDatabaseService graphDb) {
     return new ExecutionEngine(graphDb);
   }
-
 
 }
