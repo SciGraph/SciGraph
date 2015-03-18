@@ -22,7 +22,6 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 
@@ -44,7 +43,7 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
 
   Concept cell;
   Concept onCell;
-  
+
   NodeTransformer transformer = new NodeTransformer();
 
   Concept buildConcept(String uri, String label, String... categories) {
@@ -59,19 +58,15 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
 
   @Before
   public void setupGraph() throws IOException {
-    cell = buildConcept("http://example.org/#birnlex5", "Cell", "BL:5");
-    onCell = buildConcept("http://example.org/#birnlex6", "Something on cell", "HP:0008");
-    onCell.addSynonym("on cell");
+    cell = buildConcept("http://x.org/#birnlex5", "Cell cell", "BL:5");
+    onCell = buildConcept("http://x.org/#birnlex6", "Something on cell", "HP:0008");
     vocabulary = new VocabularyNeo4jImpl(graphDb, null, mock(CurieUtil.class), new NodeTransformer());
   }
 
-  // TODO: fix this
   @Test
-  @Ignore
   public void testGetConceptsFromTerm() {
-    Query query = new Vocabulary.Query.Builder("Cell").build();
-    System.out.println(vocabulary.getConceptsFromTerm(query));
-    assertThat(vocabulary.getConceptsFromTerm(query), contains(cell, onCell));
+    Query query = new Vocabulary.Query.Builder("cell").build();
+    assertThat(vocabulary.searchConcepts(query), contains(cell, onCell));
   }
 
 }
