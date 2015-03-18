@@ -177,9 +177,6 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype # try HP_0000528
-            required: true
-            type: string
-            paramType: path
   - path: /dynamic/phenotypes/{phenotype_id}/genes/targets
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
@@ -191,9 +188,6 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype # try HP_0000528
-            required: true
-            type: string
-            paramType: path
 
   - path: /dynamic/features/{feature_id}/phenotypes
     query: |
@@ -207,9 +201,6 @@ cypherResources:
         parameters:
           - name: feature_id
             description: The ID of the feature # try MGI:2172552
-            required: true
-            type: string
-            paramType: path
   - path: /dynamic/features/{feature_id}/phenotypes/targets
     query: |
             START feature = node:node_auto_index(fragment={feature_id})
@@ -222,9 +213,6 @@ cypherResources:
         parameters:
           - name: feature_id
             description: The ID of the feature # try MGI:2172552
-            required: true
-            type: string
-            paramType: path
 
   - path: /dynamic/phenotypes/{phenotype_id}/features
     query: |
@@ -241,9 +229,6 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype # try MP:0008384
-            required: true
-            type: string
-            paramType: path
   - path: /dynamic/phenotypes/{phenotype_id}/features/targets
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
@@ -256,9 +241,7 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype # try MP:0008384
-            required: true
-            type: string
-            paramType: path
+
 
   - path: /dynamic/genes/{gene_id}/phenotypes
     query: |
@@ -280,9 +263,6 @@ cypherResources:
         parameters:
           - name: gene_id
             description: The ID of the gene # NCBIGene:6469
-            required: true
-            type: string
-            paramType: path
   - path: /dynamic/genes/{gene_id}/phenotypes/targets
     query: |
             START gene = node:node_auto_index(fragment={gene_id}),
@@ -303,9 +283,6 @@ cypherResources:
         parameters:
           - name: gene_id
             description: The ID of the gene # NCBIGene:6469
-            required: true
-            type: string
-            paramType: path
 
   - path: /dynamic/genes/{gene_id}/genotypes
     query: |
@@ -319,9 +296,6 @@ cypherResources:
         parameters:
           - name: gene_id
             description: The ID of the gene # MGI:3583900
-            required: true
-            type: string
-            paramType: path
   - path: /dynamic/genes/{gene_id}/genotypes/targets
     query: |
             START genotypeClass = node:node_auto_index(fragment='GENO_0000000'),
@@ -334,9 +308,6 @@ cypherResources:
         parameters:
           - name: gene_id
             description: The ID of the gene # MGI:3583900
-            required: true
-            type: string
-            paramType: path
 
   - path: /dynamic/diseases/{disease_id}/phenotypes
     query: |
@@ -349,9 +320,6 @@ cypherResources:
         parameters:
           - name: disease_id
             description: The ID of the disease # DOID_2490
-            required: true
-            type: string
-            paramType: path
   - path: /dynamic/diseases/{disease_id}/phenotypes/targets
     query: |
             START disease = node:node_auto_index(fragment={disease_id})
@@ -363,9 +331,6 @@ cypherResources:
         parameters:
           - name: disease_id
             description: The ID of the disease # DOID_2490
-            required: true
-            type: string
-            paramType: path
 
   - path: /dynamic/phenotypes/{phenotype_id}/diseases
     query: |
@@ -378,9 +343,6 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype # HP_0000963
-            required: true
-            type: string
-            paramType: path
   - path: /dynamic/phenotypes/{phenotype_id}/diseases/targets
     query: |
             START phenotype = node:node_auto_index(fragment={phenotype_id})
@@ -392,10 +354,6 @@ cypherResources:
         parameters:
           - name: phenotype_id
             description: The ID of the phenotype # HP_0000963
-            required: true
-            type: string
-            paramType: path
-
 
   - path: /dynamic/genes/{gene_id}/homologs
     query: |
@@ -408,13 +366,8 @@ cypherResources:
         parameters:
           - name: gene_id
             description: The ID of the gene # NCBIGene:6469
-            required: true
-            type: string
-            paramType: path
           - name: homolog_id
             description: The homolog relationship # RO_HOM0000017
-            required: true
-            type: string
             paramType: query
   - path: /dynamic/genes/{gene_id}/homologs/targets
     query: |
@@ -427,13 +380,8 @@ cypherResources:
         parameters:
           - name: gene_id
             description: The ID of the gene # NCBIGene:6469
-            required: true
-            type: string
-            paramType: path
           - name: homolog_id
             description: The homolog relationship # RO_HOM0000017
-            required: true
-            type: string
             paramType: query
 
   - path: /dynamic/evidence/{subject_id}/{object_id}
@@ -451,18 +399,10 @@ cypherResources:
         parameters:
           - name: subject_id
             description: The subject of the evidence # DOID_2490
-            required: true
-            type: string
-            paramType: path
           - name: object_id
             description: The object of the evidence # HP_0002060
-            required: true
-            type: string
-            paramType: path
           - name: evidence_code
             description: The type of evidence to include # ECO_0000501
-            required: true
-            type: string
             paramType: query
 
 serviceMetadata:

@@ -16,12 +16,12 @@
 package edu.sdsc.scigraph.services.swagger.beans.resource;
 
 public class Parameters {
-  private boolean allowMultiple;
+  private boolean allowMultiple = false;
   private String description;
   private String name;
-  private String paramType;
-  private boolean required;
-  private String type;
+  private String paramType = "path";
+  private boolean required = true;
+  private String type = "string";
 
   public boolean getAllowMultiple() {
     return this.allowMultiple;
