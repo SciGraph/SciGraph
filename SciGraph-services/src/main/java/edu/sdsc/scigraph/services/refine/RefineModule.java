@@ -22,7 +22,7 @@ public class RefineModule extends AbstractModule {
 
   private static final String DEFAULT_SERVICE_NAME = "SciGraph Reconciliation Service";
   private static final String ID_SPACE = "http://example.org";
-  
+
   private final ServiceMetadata metadata;
 
   public RefineModule(Optional<ServiceMetadata> metadata) {
