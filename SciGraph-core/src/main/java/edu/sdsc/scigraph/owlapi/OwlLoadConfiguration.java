@@ -17,10 +17,8 @@ package edu.sdsc.scigraph.owlapi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
@@ -33,8 +31,6 @@ public class OwlLoadConfiguration {
   private List<OntologySetup> ontologies = new ArrayList<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
-  private Set<String> indexedNodeProperties = new HashSet<>();
-  private Set<String> exactNodeProperties = new HashSet<>();
 
   private int producerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
   private int consumerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
@@ -57,14 +53,6 @@ public class OwlLoadConfiguration {
 
   public List<MappedProperty> getMappedProperties() {
     return mappedProperties;
-  }
-
-  public Set<String> getIndexedNodeProperties() {
-    return indexedNodeProperties;
-  }
-
-  public Set<String> getExactNodeProperties() {
-    return exactNodeProperties;
   }
 
   public int getProducerThreadCount() {

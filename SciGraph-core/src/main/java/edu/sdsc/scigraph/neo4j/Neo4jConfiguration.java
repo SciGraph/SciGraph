@@ -16,7 +16,9 @@
 package edu.sdsc.scigraph.neo4j;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -29,8 +31,10 @@ public class Neo4jConfiguration {
   private String graphLocation;
 
   private Map<String, String> curies = new HashMap<>();
-
   private Map<String, String> neo4jConfig = new HashMap<>();
+
+  private Set<String> indexedNodeProperties = new HashSet<>();
+  private Set<String> exactNodeProperties = new HashSet<>();
 
   public String getGraphLocation() {
     return graphLocation;
@@ -46,6 +50,14 @@ public class Neo4jConfiguration {
 
   public Map<String, String> getNeo4jConfig() {
     return neo4jConfig;
+  }
+
+  public Set<String> getIndexedNodeProperties() {
+    return indexedNodeProperties;
+  }
+
+  public Set<String> getExactNodeProperties() {
+    return exactNodeProperties;
   }
 
 }

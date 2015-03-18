@@ -15,6 +15,8 @@
  */
 package edu.sdsc.scigraph.util;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
@@ -22,9 +24,13 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 
@@ -43,7 +49,19 @@ public class GraphTestBase {
   @Before
   public void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    Neo4jModule.setupAutoIndexing(graphDb);
+    Neo4jConfiguration config = new Neo4jConfiguration();
+    config.getExactNodeProperties().addAll(newHashSet(
+        NodeProperties.LABEL,
+        Concept.SYNONYM,
+        Concept.ABREVIATION,
+        Concept.ACRONYM));
+    config.getIndexedNodeProperties().addAll(newHashSet(
+        NodeProperties.LABEL,
+        CommonProperties.FRAGMENT,
+        Concept.CATEGORY, Concept.SYNONYM,
+        Concept.ABREVIATION,
+        Concept.ACRONYM));
+    Neo4jModule.setupAutoIndexing(graphDb, config);
     graph = new GraphTransactionalImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
   }
 

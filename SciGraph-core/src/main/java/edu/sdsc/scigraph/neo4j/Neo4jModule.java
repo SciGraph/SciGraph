@@ -15,11 +15,13 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -36,14 +38,13 @@ import org.neo4j.graphdb.index.AutoIndexer;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.MapUtil;
 
+import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyIndexAnalyzer;
 import edu.sdsc.scigraph.neo4j.bindings.IndicatesCurieMapping;
@@ -67,28 +68,28 @@ public class Neo4jModule extends AbstractModule {
     bind(new TypeLiteral<ConcurrentMap<String, Long>>(){}).to(IdMap.class).in(Singleton.class);
   }
 
-  // TODO: Get this from the configuration file
-  private static final Set<String> NODE_PROPERTIES_TO_INDEX = newHashSet(CommonProperties.URI,
-      NodeProperties.LABEL, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX,
-      CommonProperties.FRAGMENT,
-      Concept.CATEGORY, Concept.SYNONYM, Concept.SYNONYM + LuceneUtils.EXACT_SUFFIX,
-      Concept.ABREVIATION, Concept.ABREVIATION + LuceneUtils.EXACT_SUFFIX,
-      Concept.ACRONYM, Concept.ACRONYM + LuceneUtils.EXACT_SUFFIX);
-
   private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
       "lucene", "analyzer", VocabularyIndexAnalyzer.class.getName());
 
-  private static void setupIndex(AutoIndexer<?> index, Set<String> properties) {
+  private static void setupIndex(AutoIndexer<?> index, Collection<String> properties) {
     for (String property : properties) {
       index.startAutoIndexingProperty(property);
     }
     index.setEnabled(true);
   }
 
-  public static void setupAutoIndexing(GraphDatabaseService graphDb) {
+  public static void setupAutoIndexing(GraphDatabaseService graphDb, Neo4jConfiguration config) {
     try (Transaction tx = graphDb.beginTx()) {
       graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
-      setupIndex(graphDb.index().getNodeAutoIndexer(), NODE_PROPERTIES_TO_INDEX);
+      Set<String> indexProperties = newHashSet(CommonProperties.URI);
+      indexProperties.addAll(config.getIndexedNodeProperties());
+      indexProperties.addAll(transform(config.getExactNodeProperties(), new Function<String, String>() {
+        @Override
+        public String apply(String index) {
+          return index + LuceneUtils.EXACT_SUFFIX;
+        }
+      }));
+      setupIndex(graphDb.index().getNodeAutoIndexer(), indexProperties);
       tx.success();
     }
   }
@@ -114,7 +115,7 @@ public class Neo4jModule extends AbstractModule {
         public void run() { graphDb.shutdown(); }
       });
 
-      setupAutoIndexing(graphDb);
+      setupAutoIndexing(graphDb, configuration);
       return graphDb;
     } catch (Exception e) {
       if (Throwables.getRootCause(e).getMessage().contains("lock file")) {
