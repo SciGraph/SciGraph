@@ -62,7 +62,7 @@ public class Neo4jModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(String.class).annotatedWith(IndicatesNeo4jGraphLocation.class).toInstance(configuration.getGraphLocation());
+    bind(String.class).annotatedWith(IndicatesNeo4jGraphLocation.class).toInstance(configuration.getLocation());
     bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(IndicatesCurieMapping.class).toInstance(configuration.getCuries());
     bind(Vocabulary.class).to(VocabularyNeo4jImpl.class).in(Singleton.class);
     bind(new TypeLiteral<ConcurrentMap<String, Long>>(){}).to(IdMap.class).in(Singleton.class);
@@ -97,7 +97,7 @@ public class Neo4jModule extends AbstractModule {
   @Provides
   @Singleton
   DB getMaker() {
-    File dbLocation = new File(configuration.getGraphLocation(), "SciGraphIdMap");
+    File dbLocation = new File(configuration.getLocation(), "SciGraphIdMap");
     return DBMaker.newFileDB(dbLocation).closeOnJvmShutdown().transactionDisable().mmapFileEnable().make();
   }
 
@@ -107,7 +107,7 @@ public class Neo4jModule extends AbstractModule {
   GraphDatabaseService getGraphDatabaseService() throws IOException {
     try {
       final GraphDatabaseService graphDb = new GraphDatabaseFactory()
-      .newEmbeddedDatabaseBuilder(configuration.getGraphLocation())
+      .newEmbeddedDatabaseBuilder(configuration.getLocation())
       .setConfig(configuration.getNeo4jConfig())
       .newGraphDatabase();
       Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -119,7 +119,7 @@ public class Neo4jModule extends AbstractModule {
       return graphDb;
     } catch (Exception e) {
       if (Throwables.getRootCause(e).getMessage().contains("lock file")) {
-        throw new IOException(format("The graph at \"%s\" is locked by another process", configuration.getGraphLocation()));
+        throw new IOException(format("The graph at \"%s\" is locked by another process", configuration.getLocation()));
       }
       throw e;
     }

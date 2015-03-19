@@ -28,7 +28,7 @@ public class Neo4jConfiguration {
 
   @NotEmpty
   @JsonProperty
-  private String graphLocation;
+  private String location;
 
   private Map<String, String> curies = new HashMap<>();
   private Map<String, String> neo4jConfig = new HashMap<>();
@@ -36,12 +36,12 @@ public class Neo4jConfiguration {
   private Set<String> indexedNodeProperties = new HashSet<>();
   private Set<String> exactNodeProperties = new HashSet<>();
 
-  public String getGraphLocation() {
-    return graphLocation;
+  public String getLocation() {
+    return location;
   }
 
-  public void setGraphLocation(String graphLocation) {
-    this.graphLocation = graphLocation;
+  public void setLocation(String location) {
+    this.location = location;
   }
 
   public Map<String, String> getCuries() {

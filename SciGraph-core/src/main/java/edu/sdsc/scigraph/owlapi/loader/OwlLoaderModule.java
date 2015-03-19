@@ -89,7 +89,7 @@ class OwlLoaderModule extends AbstractModule {
   @Singleton
   BatchInserter getInserter() {
     logger.info("Getting BatchInserter");
-    return BatchInserters.inserter(config.getGraphConfiguration().getGraphLocation(), config.getGraphConfiguration().getNeo4jConfig());
+    return BatchInserters.inserter(config.getGraphConfiguration().getLocation(), config.getGraphConfiguration().getNeo4jConfig());
   }
 
 }

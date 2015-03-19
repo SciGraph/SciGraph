@@ -41,6 +41,7 @@ public class GraphTransactionalImpl implements Graph {
   private final RelationshipMap relationshipMap;
   private final GraphDatabaseService graphDb;
 
+  //TODO: This constructor and class should not be public
   @Inject
   public GraphTransactionalImpl(GraphDatabaseService graphDb,
       ConcurrentMap<String, Long> idMap, RelationshipMap relationshipMap) {

@@ -29,7 +29,7 @@ final class BatchEdge implements Serializable {
   private final Long end;
   private final String type;
 
-  public BatchEdge(long start, long end, String type) {
+  BatchEdge(long start, long end, String type) {
     this.start = start;
     this.end = end;
     this.type = type;

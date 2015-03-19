@@ -75,6 +75,7 @@ public class GraphBatchImpl implements Graph {
   private final ConcurrentMap<String, Long> idMap;
   private final RelationshipMap relationshipMap;
 
+  // TODO: this constructor and class should not be public
   @Inject
   public GraphBatchImpl(BatchInserter inserter, @IndicatesUniqueProperty String uniqueProperty,
       @IndicatesIndexedProperties Set<String> indexedProperties,
