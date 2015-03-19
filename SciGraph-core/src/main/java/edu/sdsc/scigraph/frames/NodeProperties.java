@@ -26,6 +26,10 @@ public class NodeProperties extends CommonProperties {
   private Set<String> labels = new HashSet<>();
   private boolean anonymous;
 
+  public NodeProperties(long id) {
+    super(id);
+  }
+
   public void addLabel(String label) {
     labels.add(label);
   }

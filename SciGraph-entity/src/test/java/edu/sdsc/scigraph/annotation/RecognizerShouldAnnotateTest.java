@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.annotation;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.is;
@@ -33,14 +32,14 @@ import edu.sdsc.scigraph.frames.Concept;
 public class RecognizerShouldAnnotateTest {
 
   EntityFormatConfiguration config = mock(EntityFormatConfiguration.class);
-  Concept concept = mock(Concept.class);
+  Concept concept = new Concept(1L);
   EntityRecognizer recognizer;
 
   @Before
   public void setUp() throws Exception {
     recognizer = new EntityRecognizer(null);
-    when(concept.getLabels()).thenReturn(newArrayList("Label"));
-    when(concept.getCategories()).thenReturn(Collections.<String> emptySet());
+    concept.setUri("http://x.org/1");
+    concept.getLabels().add("Label");
     when(config.getExcludeCategories()).thenReturn(Collections.<String> emptySet());
   }
 
@@ -53,42 +52,42 @@ public class RecognizerShouldAnnotateTest {
   @Test
   public void testExcludedCategory() {
     when(config.getExcludeCategories()).thenReturn(singleton("foo"));
-    when(concept.getCategories()).thenReturn(singleton("foo"));
+    concept.getCategories().add("foo");
     assertThat(recognizer.shouldAnnotate(concept, config), is(false));
   }
 
   @Test
   public void testExcludedCategories() {
     when(config.getExcludeCategories()).thenReturn(newHashSet("foo", "bar"));
-    when(concept.getCategories()).thenReturn(newHashSet("foo", "baz"));
+    concept.getCategories().addAll(newHashSet("foo", "baz"));
     assertThat(recognizer.shouldAnnotate(concept, config), is(false));
   }
 
   @Test
   public void testInclusion() {
     when(config.getIncludeCategories()).thenReturn(singleton("foo"));
-    when(concept.getCategories()).thenReturn(newHashSet("foo", "baz"));
+    concept.getCategories().addAll(newHashSet("foo", "baz"));
     assertThat(recognizer.shouldAnnotate(concept, config), is(true));
   }
 
   @Test
   public void testNotListedInclusion() {
     when(config.getIncludeCategories()).thenReturn(singleton("foo"));
-    when(concept.getCategories()).thenReturn(newHashSet("faz", "baz"));
+    concept.getCategories().addAll(newHashSet("faz", "baz"));
     assertThat(recognizer.shouldAnnotate(concept, config), is(false));
   }
 
   @Test
   public void testNumericExclusion() {
     when(config.isIncludeNumbers()).thenReturn(false);
-    when(concept.getLabels()).thenReturn(newArrayList("123"));
+    concept.getLabels().add("123");
     assertThat(recognizer.shouldAnnotate(concept, config), is(false));
   }
 
   @Test
   public void testNumericInclusion() {
     when(config.isIncludeNumbers()).thenReturn(true);
-    when(concept.getLabels()).thenReturn(newArrayList("123"));
+    concept.getLabels().add("123");
     assertThat(recognizer.shouldAnnotate(concept, config), is(true));
   }
 

@@ -17,6 +17,9 @@ package edu.sdsc.scigraph.frames;
 
 public class EdgeProperties extends CommonProperties {
 
+  public EdgeProperties(long id) {
+    super(id);
+  }
   public static final String TRANSITIVE = "transitive";
   public static final String REFLEXIVE = "reflexive";
   public static final String SYMMETRIC = "symmetric";

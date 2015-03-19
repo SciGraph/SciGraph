@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.annotation;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
@@ -24,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,14 +34,15 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 public class EntityRecognizerTest {
 
   EntityFormatConfiguration config = mock(EntityFormatConfiguration.class);
-  Concept concept = mock(Concept.class);
+  Concept concept;
   EntityRecognizer recognizer;
 
   @Before
   public void setUp() throws Exception {
     Vocabulary vocabulary = mock(Vocabulary.class);
-    when(concept.getLabels()).thenReturn(newArrayList("foo"));
-    when(concept.getCategories()).thenReturn(Collections.<String> emptySet());
+    concept = new Concept(1L);
+    concept.getLabels().add("foo");
+    concept.setUri("http://x.org/1");
     when(vocabulary.getConceptsFromTerm(any(Query.class))).thenReturn(singletonList(concept));
     recognizer = new EntityRecognizer(vocabulary);
   }

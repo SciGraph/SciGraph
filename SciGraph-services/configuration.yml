@@ -13,10 +13,8 @@ server:
 #  type: simple
 #  applicationContextPath: /graphdemo
 
-logging:
-  level: INFO
-#  loggers:
-#    "http.request": ON
+#logging:
+#  level: INFO
 
 applicationContextPath: scigraph
 
@@ -60,7 +58,7 @@ applicationContextPath: scigraph
 #    checkConnectionWhileIdle: false
 
 graphConfiguration:
-  graphLocation: /temp/rosieGraph
+  location: /temp/monarchGraph
 
   neo4jConfig:
     use_memory_mapped_buffers : true

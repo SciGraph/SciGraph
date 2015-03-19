@@ -41,7 +41,7 @@ public class VocabularyServiceTest {
 
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
 
-  private final Concept hippocampus = mock(Concept.class);
+  private final Concept hippocampus = new Concept(1L);
   
   private static final CurieUtil curieUtil = mock(CurieUtil.class);
 
@@ -54,7 +54,7 @@ public class VocabularyServiceTest {
   public void setup() {
     when(vocabulary.getConceptFromUri("http://example.org/none")).thenReturn(Optional.<Concept>absent());
     when(vocabulary.getConceptFromUri("http://example.org/foo")).thenReturn(Optional.of(hippocampus));
-    when(hippocampus.getLabels()).thenReturn(newArrayList("Hippocampus"));
+    hippocampus.getLabels().add("Hippocampus");
     when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
   }
 

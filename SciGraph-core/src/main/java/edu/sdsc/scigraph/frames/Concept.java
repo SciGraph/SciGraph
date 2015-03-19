@@ -38,6 +38,10 @@ public class Concept extends NodeProperties {
 
   private Set<String> equivalentClasses = new HashSet<>();
 
+  public Concept(long id) {
+    super(id);
+  }
+
   public boolean isDeprecated() {
     return deprecated;
   }
@@ -88,20 +92,6 @@ public class Concept extends NodeProperties {
 
   public Set<String> getEquivalentClasses() {
     return equivalentClasses;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof Concept) {
-      return ((Concept) obj).getId() == getId();
-    } else {
-      return false;
-    }
-  }
-
-  @Override
-  public int hashCode() {
-    return Long.valueOf(getId()).hashCode();
   }
 
   @Override

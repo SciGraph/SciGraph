@@ -44,9 +44,8 @@ public class NodeTransformer implements Function<Node, Concept> {
 
   @Override
   public Concept apply(Node n) {
-    Concept concept = new Concept();
     try (Transaction tx = n.getGraphDatabase().beginTx()) {
-      concept.setId(n.getId());
+      Concept concept = new Concept(n.getId());
       concept.setUri((String) n.getProperty(Concept.URI, null));
       concept.setAnonymous(n.hasLabel(OwlLabels.OWL_ANONYMOUS));
       concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
@@ -80,9 +79,8 @@ public class NodeTransformer implements Function<Node, Concept> {
       }
 
       tx.success();
+      return concept;
     }
-
-    return concept;
   }
 
 }

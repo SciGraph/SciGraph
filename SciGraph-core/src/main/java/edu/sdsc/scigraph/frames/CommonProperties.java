@@ -31,12 +31,12 @@ public class CommonProperties {
   public static final String OWL_TYPE = "owlType";
   public static final String CURIE = "curie";
 
-  private long id;
+  private final long id;
   private String uri;
   private String fragment;
   private Set<String> types = new HashSet<>();
 
-  public void setId(long id) {
+  public CommonProperties(long id) {
     this.id = id;
   }
 
@@ -66,6 +66,20 @@ public class CommonProperties {
 
   public Collection<String> getTypes() {
     return types;
+  }
+
+  @Override
+  final public boolean equals(Object obj) {
+    if (obj instanceof CommonProperties) {
+      return ((CommonProperties) obj).getId() == getId();
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  final public int hashCode() {
+    return Long.valueOf(getId()).hashCode();
   }
 
 }

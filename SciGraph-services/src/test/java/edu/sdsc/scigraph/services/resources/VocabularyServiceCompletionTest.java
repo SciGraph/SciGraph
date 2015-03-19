@@ -18,8 +18,6 @@ package edu.sdsc.scigraph.services.resources;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -32,13 +30,12 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
 public class VocabularyServiceCompletionTest {
 
-  Concept result;
+  Concept result = new Concept(1L);
 
   @Before
   public void setup() {
-    result = mock(Concept.class);
-    when(result.getLabels()).thenReturn(newArrayList("Hippocampus"));
-    when(result.getSynonyms()).thenReturn(newArrayList("Amon's horn", "Hippocampal region"));
+    result.getLabels().add("Hippocampus");
+    result.getSynonyms().addAll(newArrayList("Amon's horn", "Hippocampal region"));
   }
 
   @Test
