@@ -35,18 +35,13 @@ import org.glassfish.jersey.message.MessageProperties;
 import org.glassfish.jersey.server.filter.UriConnegFilter;
 
 import ru.vyarus.dropwizard.guice.GuiceBundle;
-import ru.vyarus.dropwizard.guice.injector.InjectorFactory;
 import ru.vyarus.dropwizard.guice.module.support.ConfigurationAwareModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.google.inject.Stage;
 import com.wordnik.swagger.config.ConfigFactory;
 import com.wordnik.swagger.config.ScannerFactory;
 import com.wordnik.swagger.config.SwaggerConfig;
@@ -78,24 +73,6 @@ public class MainApplication extends Application<ApplicationConfiguration> {
 
   TransparentInjectorFactory factory = new TransparentInjectorFactory();
 
-  /*** 
-   * This allows access to the injector from {@link #configureSwagger(Environment, String)} 
-   */
-  private static class TransparentInjectorFactory implements InjectorFactory {
-
-    Injector i;
-
-    @Override
-    public Injector createInjector(Stage stage, Iterable<? extends Module> modules) {
-      i = Guice.createInjector(modules);
-      return i;
-    }
-
-    Injector getInjector() {
-      return i;
-    }
-  }
-
   static class MetaModule extends AbstractModule implements ConfigurationAwareModule<ApplicationConfiguration> {
 
     ApplicationConfiguration configuration;
@@ -120,7 +97,6 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     List<Apis> getApis() {
       return configuration.getCypherResources();
     }
-
 
   }
 
