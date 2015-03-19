@@ -74,7 +74,7 @@ import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.lucene.VocabularyQueryAnalyzer;
 import edu.sdsc.scigraph.neo4j.NodeTransformer;
 import edu.sdsc.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 
 public class VocabularyNeo4jImpl implements Vocabulary {
 

@@ -30,7 +30,7 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.NodeTransformer;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.util.GraphTestBase;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.owlapi;
+package edu.sdsc.scigraph.owlapi.curies;
 
 import javax.inject.Inject;
 

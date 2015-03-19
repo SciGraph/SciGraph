@@ -40,9 +40,9 @@ import com.google.common.base.Predicate;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
-import edu.sdsc.scigraph.owlapi.AddCurries;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
+import edu.sdsc.scigraph.owlapi.curies.AddCurries;
 
 public class GraphApi {
 

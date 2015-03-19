@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.owlapi;
+package edu.sdsc.scigraph.owlapi.curies;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItems;
@@ -26,6 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
+
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 
 public class CurieUtilTest {
 

@@ -50,8 +50,8 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
-import edu.sdsc.scigraph.owlapi.CurieUtil;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 import edu.sdsc.scigraph.util.GraphTestBase;
 

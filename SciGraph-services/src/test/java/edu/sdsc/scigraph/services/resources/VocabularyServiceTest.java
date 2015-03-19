@@ -34,7 +34,7 @@ import org.junit.Test;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 public class VocabularyServiceTest {

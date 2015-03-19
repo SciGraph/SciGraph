@@ -53,8 +53,8 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.owlapi.AddCurries;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
+import edu.sdsc.scigraph.owlapi.curies.AddCurries;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.services.jersey.MultivaluedMapUtils;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 

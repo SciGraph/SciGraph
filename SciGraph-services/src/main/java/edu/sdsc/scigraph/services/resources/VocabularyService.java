@@ -60,7 +60,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.lucene.ExactAnalyzer;
 import edu.sdsc.scigraph.lucene.LuceneUtils;
-import edu.sdsc.scigraph.owlapi.CurieUtil;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTO;
 import edu.sdsc.scigraph.services.api.graph.ConceptDTOLite;
 import edu.sdsc.scigraph.services.api.vocabulary.Completion;
