@@ -41,6 +41,9 @@ public class CustomMediaTypes {
   public final static String APPLICATION_GRAPHSON = "application/graphson";
   public final static MediaType APPLICATION_GRAPHSON_TYPE = new MediaType("application", "graphson");
 
+  public final static String APPLICATION_XGMML = "application/xgmml";
+  public final static MediaType APPLICATION_XGMML_TYPE = new MediaType("application", "xgmml");
+  
   public final static String TEXT_GML = "text/gml";
   public final static MediaType TEXT_GML_TYPE = new MediaType("text", "gml");
 

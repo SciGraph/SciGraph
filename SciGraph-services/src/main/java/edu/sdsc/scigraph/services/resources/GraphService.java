@@ -93,7 +93,7 @@ public class GraphService extends BaseResource {
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
-    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+    CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNeighborsFromMultipleRoots(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @QueryParam("id") Set<String> ids,
@@ -155,7 +155,6 @@ public class GraphService extends BaseResource {
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
-
   @GET
   @Path("/neighbors/{id}")
   @ApiOperation(value = "Get neighbors", response = TinkerGraph.class)
@@ -163,7 +162,7 @@ public class GraphService extends BaseResource {
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
-    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+    CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNeighbors(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,
@@ -187,7 +186,7 @@ public class GraphService extends BaseResource {
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
-    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+    CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNode(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,

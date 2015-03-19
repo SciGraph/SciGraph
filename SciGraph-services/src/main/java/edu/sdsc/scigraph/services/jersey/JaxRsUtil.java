@@ -44,6 +44,7 @@ public class JaxRsUtil {
           CustomMediaTypes.APPLICATION_RIS_TYPE,
           CustomMediaTypes.APPLICATION_GRAPHML_TYPE,
           CustomMediaTypes.APPLICATION_GRAPHSON_TYPE,
+          CustomMediaTypes.APPLICATION_XGMML_TYPE,
           CustomMediaTypes.TEXT_GML_TYPE,
           CustomMediaTypes.IMAGE_JPEG_TYPE,
           CustomMediaTypes.IMAGE_PNG_TYPE).add().build();

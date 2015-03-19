@@ -42,7 +42,7 @@ public class DynamicCypherResource extends ResourceConfig {
     ResourceMethod.Builder methodBuilder = resourceBuilder.addMethod("GET");
     methodBuilder.produces(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_XML_TYPE,
         CustomMediaTypes.APPLICATION_GRAPHML_TYPE, CustomMediaTypes.APPLICATION_GRAPHSON_TYPE, CustomMediaTypes.TEXT_GML_TYPE,
-        CustomMediaTypes.IMAGE_JPEG_TYPE, CustomMediaTypes.IMAGE_PNG_TYPE)
+        CustomMediaTypes.APPLICATION_XGMML_TYPE, CustomMediaTypes.IMAGE_JPEG_TYPE, CustomMediaTypes.IMAGE_PNG_TYPE)
     .handledBy(factory.create(config));
   }
 

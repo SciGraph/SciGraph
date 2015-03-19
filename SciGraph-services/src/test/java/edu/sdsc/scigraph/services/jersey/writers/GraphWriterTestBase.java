@@ -52,6 +52,7 @@ public abstract class GraphWriterTestBase {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     writer.writeTo(graph, Graph.class, null, null, null, null, os);
     String output = new String(os.toByteArray(), Charsets.UTF_8);
+    System.out.println(output);
     assertThat(output, is(notNullValue()));
   }
 
