@@ -36,7 +36,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.google.common.io.Resources;
 
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.ReasonerConfiguration;
 
 public class ReasonerUtilTest {
 

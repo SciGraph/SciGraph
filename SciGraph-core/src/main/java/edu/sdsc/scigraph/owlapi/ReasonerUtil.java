@@ -41,7 +41,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import com.google.common.collect.Iterables;
 
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.ReasonerConfiguration;
 
 public class ReasonerUtil {
 

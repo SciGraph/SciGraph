@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitor;
 
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 public class OwlOntologyConsumerTest {
 

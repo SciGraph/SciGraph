@@ -54,7 +54,7 @@ import com.google.common.io.Resources;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 public abstract class GraphOwlVisitorTestBase<T extends Graph> {
 

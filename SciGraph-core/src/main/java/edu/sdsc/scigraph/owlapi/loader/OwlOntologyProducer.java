@@ -29,8 +29,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
 
 final class OwlOntologyProducer implements Callable<Void>{

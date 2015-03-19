@@ -27,7 +27,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.ReasonerConfiguration;
 
 public class SatisfiabilityChecker {
 

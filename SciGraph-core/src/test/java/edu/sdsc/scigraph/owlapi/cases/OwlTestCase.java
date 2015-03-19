@@ -47,8 +47,8 @@ import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.ReasonerConfiguration;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.ReasonerConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 

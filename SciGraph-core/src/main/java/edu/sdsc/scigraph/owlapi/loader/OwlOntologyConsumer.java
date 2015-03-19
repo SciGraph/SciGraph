@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
-import edu.sdsc.scigraph.owlapi.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
