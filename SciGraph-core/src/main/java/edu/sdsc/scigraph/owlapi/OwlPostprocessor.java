@@ -79,7 +79,8 @@ public class OwlPostprocessor {
         for (Relationship r : svf.getRelationships(OwlRelationships.FILLER)) {
           Node object = r.getEndNode();
           String relationshipName =
-              GraphUtil.getProperty(property, CommonProperties.FRAGMENT, String.class).get();
+              GraphUtil.getProperty(property, CommonProperties.FRAGMENT, String.class)
+              .or(GraphUtil.getProperty(property, CommonProperties.URI, String.class).get());
           RelationshipType type = DynamicRelationshipType.withName(relationshipName);
           String propertyUri =
               GraphUtil.getProperty(property, CommonProperties.URI, String.class).get();
