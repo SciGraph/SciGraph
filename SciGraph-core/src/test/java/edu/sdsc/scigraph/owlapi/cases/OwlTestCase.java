@@ -64,11 +64,11 @@ public abstract class OwlTestCase {
 
   @Rule
   public TemporaryFolder folder = new TemporaryFolder();
-  
+
   String path;
   GraphDatabaseService graphDb;
   ReadableIndex<Node> nodeIndex;
-  
+
   boolean performInference = false;
 
   String getTestName() {
@@ -105,12 +105,13 @@ public abstract class OwlTestCase {
     walker.walkStructure(visitor);
     batchGraph.shutdown();
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
+    graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
 
     OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
     postprocessor.processSomeValuesFrom();
 
-    graphDb.beginTx();
+
     drawGraph();
   }
 
