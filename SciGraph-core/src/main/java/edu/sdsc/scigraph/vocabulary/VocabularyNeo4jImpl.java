@@ -251,14 +251,15 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       if (query.isIncludeSynonyms() || query.isIncludeAbbreviations() || query.isIncludeAcronyms()) {
         BooleanQuery subQuery = new BooleanQuery();
         subQuery.add(LuceneUtils.getBoostedQuery(parser, query.getInput(), 10.0f), Occur.SHOULD);
+        String escapedQuery = QueryParser.escape(query.getInput());
         if (query.isIncludeSynonyms()) {
-          subQuery.add(parser.parse(Concept.SYNONYM + ":" + query.getInput()), Occur.SHOULD);
+          subQuery.add(parser.parse(Concept.SYNONYM + ":" + escapedQuery), Occur.SHOULD);
         }
         if (query.isIncludeAbbreviations()) {
-          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + query.getInput()), Occur.SHOULD);
+          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + escapedQuery), Occur.SHOULD);
         }
         if (query.isIncludeAcronyms()) {
-          subQuery.add(parser.parse(Concept.ACRONYM + ":" + query.getInput()), Occur.SHOULD);
+          subQuery.add(parser.parse(Concept.ACRONYM + ":" + escapedQuery), Occur.SHOULD);
         }
         finalQuery.add(subQuery, Occur.MUST);
       } else {
@@ -289,10 +290,10 @@ public class VocabularyNeo4jImpl implements Vocabulary {
           subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
         }
         if (query.isIncludeAbbreviations()) {
-          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + query.getInput()), Occur.SHOULD);
+          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + exactQuery), Occur.SHOULD);
         }
         if (query.isIncludeAcronyms()) {
-          subQuery.add(parser.parse(Concept.ACRONYM + ":" + query.getInput()), Occur.SHOULD);
+          subQuery.add(parser.parse(Concept.ACRONYM + ":" + exactQuery), Occur.SHOULD);
         }
         finalQuery.add(subQuery, Occur.MUST);
       } else {

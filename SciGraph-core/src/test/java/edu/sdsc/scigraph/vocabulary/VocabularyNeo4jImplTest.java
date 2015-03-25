@@ -398,4 +398,12 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     assertThat(vocabulary.getConceptsFromTerm(query), contains(als));
   }
 
+  @Test
+  public void specialCharactersAreEscaped() {
+    Query query = new Vocabulary.Query.Builder("HP:0008").includeSynonyms(true).categories(newHashSet("foo")).build();
+    assertThat(vocabulary.getConceptsFromTerm(query), is(empty()));
+    query = new Vocabulary.Query.Builder("HP:0008").includeSynonyms(true).categories(newHashSet("foo")).build();
+    assertThat(vocabulary.searchConcepts(query), is(empty()));
+  }
+
 }
