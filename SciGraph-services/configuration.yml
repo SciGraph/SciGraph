@@ -86,7 +86,7 @@ graphConfiguration:
     'IAO': 'http://purl.obolibrary.org/obo/IAO_'
     'OMIM' : 'http://purl.obolibrary.org/obo/OMIM_'
     'DECIPHER' : 'http://purl.obolibrary.org/obo/DECIPHER_'
-    'ORPHANET' : 'http://purl.obolibrary.org/obo/ORPHANET_'
+    'Orphanet' : 'http://www.orpha.net/ORDO/Orphanet_'
     'faldo' : 'http://biohackathon.org/resource/faldo#'
     'SO' : 'http://purl.obolibrary.org/obo/SO_'
     'OMIM' : 'http://purl.obolibrary.org/obo/OMIM_'
@@ -111,6 +111,8 @@ graphConfiguration:
     'EFO' : 'http://www.ebi.ac.uk/efo/EFO_'
     'UBERON' : 'http://purl.obolibrary.org/obo/UBERON_'
     'SNOMED' : 'http://purl.obolibrary.org/obo/SNOMED_'
+    'ERO' : 'http://purl.obolibrary.org/obo/ERO_'
+    'NCBITaxon' : 'http://purl.obolibrary.org/obo/NCBITaxon_'
 
 
     # publication/reference sources
@@ -126,7 +128,6 @@ graphConfiguration:
     # other
     'Annotation': 'http://www.w3.org/ns/oa#Annotation'
     'HPO' : 'http://human-phenotype-ontology.org/'  #to be used for persons, though they don't resolve with this
-    'NCBITaxon' : 'http://www.ncbi.nlm.nih.gov/taxonomy/'
     'PANTHER' : 'http://www.pantherdb.org/panther/family.do?clsAccession='   #protein/orthologous families
     'dbSNP' : 'http://identifiers.org/dbSNP:'  #FIXME
     'dbSNPIndividual' : 'http://www.ncbi.nlm.nih.gov/SNP/snp_ind.cgi?ind_id='  #FIXME
@@ -139,6 +140,7 @@ graphConfiguration:
     'Coriell' : 'https://catalog.coriell.org/0/Sections/Search/Sample_Detail.aspx?Ref='
     'CoriellCollection' : 'https://catalog.coriell.org/1/'
     'CoriellFamily' : 'https://catalog.coriell.org/0/Sections/BrowseCatalog/FamilyTypeSubDetail.aspx?fam='
+    'CoriellIndividual' : 'https://catalog.coriell.org/Search?q='
     'UCSC' : 'ftp://hgdownload.cse.ucsc.edu/goldenPath/'
     'NCBIGenome' : 'http://www.ncbi.nlm.nih.gov/genome/?term='
     'ClinVar' : 'http://www.ncbi.nlm.nih.gov/clinvar/'
