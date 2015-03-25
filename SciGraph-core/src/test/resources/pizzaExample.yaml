@@ -1,8 +1,14 @@
-ontologyConfiguration:
+graphConfiguration:
     # The location of the graph.
     # If this location does not exist it will be created.
     # Loading will append content to existing graphs.
-    graphLocation: target/pizzaGraph
+    location: target/pizzaGraph
+    indexedNodeProperties:
+      - label
+      - fragment
+    exactNodeProperties:
+      - label
+      - synonym
 
 # A list of ontologies to import.
 ontologies:
@@ -29,11 +35,3 @@ mappedProperties:
   - name: comment
     properties:
     - http://www.w3.org/2000/01/rdf-schema#comment
-
-indexedNodeProperties:
-  - label
-  - fragment
-
-exactNodeProperties:
-  - label
-  - synonym

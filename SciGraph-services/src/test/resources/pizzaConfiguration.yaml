@@ -10,7 +10,13 @@ logging:
   level: INFO
 
 graphConfiguration:
-  graphLocation: ../SciGraph-core/target/pizzaGraph
+  location: ../SciGraph-core/target/pizzaGraph
+  indexedNodeProperties:
+    - label
+    - fragment
+  exactNodeProperties:
+    - label
+    - synonym
 
 cypherResources:
   - path: /dynamic/toppings
