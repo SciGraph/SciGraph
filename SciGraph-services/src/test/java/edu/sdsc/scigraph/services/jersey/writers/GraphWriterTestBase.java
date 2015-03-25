@@ -41,8 +41,10 @@ public abstract class GraphWriterTestBase {
   @Before
   public void setup() {
     Vertex v = graph.addVertex(0);
+    Vertex w = graph.addVertex(1);
     v.setProperty("list", newArrayList("elt1", "elt2"));
     v.setProperty("array", new String[]{"elt1", "elt2"});
+    v.addEdge("edge", w);
   }
 
   abstract MessageBodyWriter<Graph> getWriter();
@@ -52,7 +54,6 @@ public abstract class GraphWriterTestBase {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     writer.writeTo(graph, Graph.class, null, null, null, null, os);
     String output = new String(os.toByteArray(), Charsets.UTF_8);
-    System.out.println(output);
     assertThat(output, is(notNullValue()));
   }
 
