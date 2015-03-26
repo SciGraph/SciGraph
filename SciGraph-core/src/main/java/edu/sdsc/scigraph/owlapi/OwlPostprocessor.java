@@ -94,9 +94,8 @@ public class OwlPostprocessor {
     }
   }
 
-  void processCategory(Node root, RelationshipType type, Direction direction, String category) {
-    logger.info("Processing category: " + category);
-    int count = 0;
+  long processCategory(Node root, RelationshipType type, Direction direction, String category) {
+    long count = 0;
     int batchSize = 10_000;
     Label label = DynamicLabel.label(category);
     Transaction tx = graphDb.beginTx();
@@ -116,6 +115,7 @@ public class OwlPostprocessor {
     }
     tx.success();
     tx.close();
+    return count;
   }
 
   public void processCategories(Map<String, String> categories) {
@@ -129,8 +129,10 @@ public class OwlPostprocessor {
       if (null == root) {
         logger.warning("Failed to locate " + category.getKey() + " while processing categories");
       } else {
-        processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
+        logger.info("Processing category: " + category);
+        long count = processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
             category.getValue());
+        logger.info("Processsed " + count + " nodes for " + category);
       }
     }
   }
