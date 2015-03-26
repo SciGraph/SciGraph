@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.services.swagger.beans.resource;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Collections2.filter;
 
 import java.util.Collection;
@@ -42,7 +43,13 @@ public class Operations {
 
   @JsonProperty
   public String getNickname() {
-    return this.nickname;
+    if (!isNullOrEmpty(nickname)) {
+      return nickname;
+    } else if (!isNullOrEmpty(summary)) {
+      return summary.toLowerCase().replaceAll("\\s+", "_");
+    } else {
+      return "nickname";
+    }
   }
 
   public void setNickname(String nickname) {
