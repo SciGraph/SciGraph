@@ -32,9 +32,9 @@ public class OwlLoadConfiguration {
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
 
-  private int producerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
-  private int consumerThreadCount = Runtime.getRuntime().availableProcessors() / 2;
-  
+  private int producerThreadCount = Runtime.getRuntime().availableProcessors() == 1 ? 1 : Runtime.getRuntime().availableProcessors() / 2;
+  private int consumerThreadCount = Runtime.getRuntime().availableProcessors() == 1 ? 1 : Runtime.getRuntime().availableProcessors() / 2;
+
   public Neo4jConfiguration getGraphConfiguration() {
     return graphConfiguration;
   }
