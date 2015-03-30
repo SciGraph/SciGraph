@@ -50,17 +50,18 @@ public class ReasonerUtil {
 
   private final OWLOntologyManager manager;
   private final OWLOntology ont;
-  private final OWLReasoner reasoner;
+  private OWLReasoner reasoner;
   private final ReasonerConfiguration config;
+  private final OWLReasonerFactory reasonerFactory;
 
   @Inject
-  public ReasonerUtil(ReasonerConfiguration reasonerFactory, OWLOntologyManager manager, OWLOntology ont) 
+  public ReasonerUtil(ReasonerConfiguration reasonerConfig, OWLOntologyManager manager, OWLOntology ont) 
       throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-    OWLReasonerFactory factory = (OWLReasonerFactory) Class.forName(reasonerFactory.getFactory()).newInstance();
+    reasonerFactory = (OWLReasonerFactory) Class.forName(reasonerConfig.getFactory()).newInstance();
     logger.info("Creating reasoner for " + ont);
-    reasoner = factory.createReasoner(ont);
+    reasoner = reasonerFactory.createReasoner(ont);
     logger.info("Completed creating reasoner for " + ont);
-    this.config = reasonerFactory;
+    this.config = reasonerConfig;
     this.manager = manager;
     this.ont = ont;
   }
@@ -68,7 +69,7 @@ public class ReasonerUtil {
   OWLReasoner getReasoner() {
     return reasoner;
   }
-  
+
   Collection<OWLOntologyChange> removeAxioms(AxiomType<?> type) {
     Collection<OWLOntologyChange> removals = new HashSet<>();
     for (OWLOntology importedOnt: ont.getImportsClosure()) {
@@ -86,20 +87,23 @@ public class ReasonerUtil {
     removals.addAll(removeAxioms(AxiomType.DISJOINT_CLASSES));
     removals.addAll(removeAxioms(AxiomType.DATA_PROPERTY_DOMAIN));
     removals.addAll(removeAxioms(AxiomType.DATA_PROPERTY_RANGE));
+    if (removals.size() > 0) {
+      reasoner.flush();
+    }
     logger.info("Removed " + removals.size() + " axioms to prevent unsatisfiable classes");
     return removals;
   }
 
-  static Collection<OWLClass> getUnsatisfiableClasses(OWLReasoner reasoner) {
+  Collection<OWLClass> getUnsatisfiableClasses() {
     return reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom();
   }
 
-  boolean shouldReason(OWLReasoner reasoner) {
+  boolean shouldReason() {
     if (!reasoner.isConsistent()) {
       logger.warning("Not reasoning on " + ont + " because it is inconsistent.");
       return false;
     }
-    Collection<OWLClass> unsatisfiableClasses = getUnsatisfiableClasses(reasoner);
+    Collection<OWLClass> unsatisfiableClasses = getUnsatisfiableClasses();
     if (!unsatisfiableClasses.isEmpty()) {
       logger.warning("Not reasoning on " + ont + " because " + unsatisfiableClasses.size() + " classes are unsatisfiable");
       logger.warning("For instance: " + Iterables.getFirst(unsatisfiableClasses, null).getIRI().toString() + " unsatisfiable");
@@ -108,14 +112,14 @@ public class ReasonerUtil {
     return true;
   }
 
-  AddAxiom getCompleteEquivalence(OWLReasoner reasoner, OWLClass ce) {
+  AddAxiom getCompleteEquivalence(OWLClass ce) {
     Set<OWLClass> equivalentClasses = reasoner.getEquivalentClasses(ce).getEntities();
     OWLEquivalentClassesAxiom equivalentAxiom = factory.getOWLEquivalentClassesAxiom(equivalentClasses);
     return new AddAxiom(ont, equivalentAxiom);
   }
 
   //Ticket #42
-  List<OWLOntologyChange> getDirectInferredEdges(OWLReasoner reasoner, OWLClass ce) {
+  List<OWLOntologyChange> getDirectInferredEdges(OWLClass ce) {
     List<OWLOntologyChange> changes = new ArrayList<>();
     //find direct inferred superclasses, D
     Set<OWLClass> directSuperclasses = reasoner.getSuperClasses(ce, true).getFlattened();
@@ -145,28 +149,33 @@ public class ReasonerUtil {
     return changes;
   }
 
-  public void reason() {
+  void flush() {
+    reasoner.flush();
+  }
+
+  public boolean reason() {
     if (config.isRemoveUnsatisfiableClasses()) {
       removeUnsatisfiableClasses();
     }
-    if (!shouldReason(reasoner)) {
-      return;
+    if (!shouldReason()) {
+      return false;
     }
 
     List<OWLOntologyChange> changes = new ArrayList<>();
 
     for (OWLClass ce: ont.getClassesInSignature(true)) {
       if (config.isAddInferredEquivalences()) {
-        changes.add(getCompleteEquivalence(reasoner, ce));
+        changes.add(getCompleteEquivalence(ce));
       }
       if (config.isAddDirectInferredEdges()) {
-        changes.addAll(getDirectInferredEdges(reasoner, ce));
+        changes.addAll(getDirectInferredEdges(ce));
       }
     }
     reasoner.dispose();
     logger.info("Applying reasoned axioms: " + changes.size());
     manager.applyChanges(changes);
     logger.info("Completed applying reasoning changes");
+    return true;
   }
 
 }

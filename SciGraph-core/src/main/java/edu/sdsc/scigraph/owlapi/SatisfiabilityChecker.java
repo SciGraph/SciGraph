@@ -51,7 +51,7 @@ public class SatisfiabilityChecker {
       logger.severe("Ontology is inconsistent");
       System.exit(1);
     }
-    Collection<OWLClass> unsatisfiableClasses = ReasonerUtil.getUnsatisfiableClasses(reasoner);
+    Collection<OWLClass> unsatisfiableClasses = util.getUnsatisfiableClasses();
     if (!unsatisfiableClasses.isEmpty()) {
       logger.severe("Ontology is unsatisfiable");
        for (OWLClass unsatisfiableClass: unsatisfiableClasses) {

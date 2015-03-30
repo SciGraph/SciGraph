@@ -43,6 +43,7 @@ public class ReasonerUtilTest {
   OWLDataFactory dataFactory = OWLManager.getOWLDataFactory();
   OWLOntologyManager manager;
   OWLOntology ont;
+  OWLOntology unsatImport;
   ReasonerUtil util;
 
   @Before
@@ -65,6 +66,7 @@ public class ReasonerUtilTest {
     OWLClass e2 = dataFactory.getOWLClass(IRI.create("http://example.org/e2"));
     OWLClassAxiom fullEquivalence = dataFactory.getOWLEquivalentClassesAxiom(e0, e1, e2);
     assertThat(ont.containsAxiom(fullEquivalence), is(false));
+    util.removeUnsatisfiableClasses();
     util.reason();
     assertThat(ont.containsAxiom(fullEquivalence), is(true));
   }
@@ -78,6 +80,7 @@ public class ReasonerUtilTest {
     OWLClassAxiom originalSubclass = dataFactory.getOWLSubClassOfAxiom(dx, root);
     assertThat(ont.containsAxiom(inferrredSubclass), is(false));
     assertThat(ont.containsAxiom(originalSubclass), is(true));
+    util.removeUnsatisfiableClasses();
     util.reason();
     assertThat(ont.containsAxiom(inferrredSubclass), is(true));
     assertThat(ont.containsAxiom(originalSubclass), is(false));
@@ -92,7 +95,8 @@ public class ReasonerUtilTest {
     OWLClassAssertionAxiom a1 = dataFactory.getOWLClassAssertionAxiom(c0, i1);
     OWLClassAssertionAxiom a2 = dataFactory.getOWLClassAssertionAxiom(c1, i1);
     manager.addAxioms(ont, newHashSet(disjoint, a1, a2));
-    assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont)), is(false));
+    util.flush();
+    assertThat(util.shouldReason(), is(false));
   }
 
   @Test
@@ -100,7 +104,8 @@ public class ReasonerUtilTest {
     OWLAxiom axiom = dataFactory.getOWLSubClassOfAxiom(
         dataFactory.getOWLClass(IRI.generateDocumentIRI()), dataFactory.getOWLNothing());
     manager.addAxiom(ont, axiom);
-    assertThat(util.shouldReason(new ElkReasonerFactory().createReasoner(ont)), is(false));
+    util.flush();
+    assertThat(util.shouldReason(), is(false));
   }
 
 }

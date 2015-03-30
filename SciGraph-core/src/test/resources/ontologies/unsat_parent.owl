@@ -1,0 +1,4 @@
+Prefix(:=<http://example.org/>)
+Ontology(:UnsatParent
+Import( <http://x.org/unsat.owl> )
+)

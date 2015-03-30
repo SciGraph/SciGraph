@@ -1,0 +1,11 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:Unsat
+
+# primitive hierarchy
+SubClassOf(:b :a)
+SubClassOf(:b :c)
+
+DisjointClasses(:a :c)
+
+)
