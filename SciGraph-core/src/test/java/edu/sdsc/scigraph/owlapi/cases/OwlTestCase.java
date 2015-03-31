@@ -28,6 +28,7 @@ import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
@@ -65,6 +66,8 @@ public abstract class OwlTestCase {
 
   @Rule
   public TemporaryFolder folder = new TemporaryFolder();
+
+  Transaction tx;
 
   String path;
   GraphDatabaseService graphDb;
@@ -106,7 +109,7 @@ public abstract class OwlTestCase {
     walker.walkStructure(visitor);
     batchGraph.shutdown();
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
-    graphDb.beginTx();
+    tx = graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
 
     OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
@@ -117,6 +120,7 @@ public abstract class OwlTestCase {
 
   @After
   public void tearDown() throws Exception {
+    tx.failure();
     graphDb.shutdown();
   }
 
