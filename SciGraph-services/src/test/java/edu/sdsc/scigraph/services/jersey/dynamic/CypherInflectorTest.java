@@ -36,7 +36,6 @@ import org.hamcrest.collection.IsIterableWithSize;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -57,7 +56,6 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class CypherInflectorTest extends GraphTestBase {
 
-  ExecutionEngine engine;
   Apis config = new Apis();
   ContainerRequestContext context = mock(ContainerRequestContext.class);
   UriInfo uriInfo = mock(UriInfo.class);
@@ -73,7 +71,6 @@ public class CypherInflectorTest extends GraphTestBase {
 
   @Before
   public void setup() {
-    engine = new ExecutionEngine(graphDb);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
@@ -87,7 +84,7 @@ public class CypherInflectorTest extends GraphTestBase {
     when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
     when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
     when(curieUtil.getIri("X:foo")).thenReturn(Optional.of("http://x.org/#foo"));
-    inflector = new CypherInflector(graphDb, engine, curieUtil, config);
+    inflector = new CypherInflector(graphDb, curieUtil, config);
   }
 
   @Test

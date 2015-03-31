@@ -35,7 +35,7 @@ public class DynamicCypherResourceTest {
 
   @Before
   public void setup() {
-    CypherInflector inflector = new CypherInflector(null, null, null, null);
+    CypherInflector inflector = new CypherInflector(null, null, null);
     when(factory.create(any(Apis.class))).thenReturn(inflector);
   }
 
