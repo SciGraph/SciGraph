@@ -37,9 +37,10 @@ import jersey.repackaged.com.google.common.base.Splitter;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.glassfish.jersey.process.Inflector;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.PropertyContainer;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 import scala.collection.convert.Wrappers.SeqWrapper;
@@ -65,12 +66,14 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
   private static Pattern pattern = Pattern.compile(ENTAILMENT_REGEX);
 
   private final GraphDatabaseService graphDb;
+  private final ExecutionEngine engine;
   private final Apis config;
   private final CurieUtil curieUtil;
 
   @Inject
-  CypherInflector(GraphDatabaseService graphDb, CurieUtil curieUtil, @Assisted Apis config) {
+  CypherInflector(GraphDatabaseService graphDb, ExecutionEngine engine, CurieUtil curieUtil, @Assisted Apis config) {
     this.graphDb = graphDb;
+    this.engine = engine;
     this.config = config;
     this.curieUtil = curieUtil;
   }
@@ -85,7 +88,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
     Map<String, Object> flatMap = flattenMap(paramMap);
     try (Transaction tx = graphDb.beginTx()) {
       query = entailRelationships(query);
-      Result result = graphDb.execute(query, flatMap);
+      ExecutionResult result = engine.execute(query, flatMap);
       TinkerGraph graph = resultToGraph(result);
       tx.success();
       return graph;
@@ -113,10 +116,9 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
     return map;
   }
 
-  static TinkerGraph resultToGraph(Result result) {
+  static TinkerGraph resultToGraph(ExecutionResult result) {
     TinkerGraph graph = new TinkerGraph();
-    while (result.hasNext()) {
-      Map<String, Object> map =  result.next();
+    for (Map<String, Object> map: result) {
       for (Entry<String, Object> entry: map.entrySet()) {
         if (null == entry.getValue()) {
           continue;
@@ -135,7 +137,6 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
         }
       }
     }
-    result.close();
     return graph;
   }
 
@@ -146,15 +147,13 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
       Map<String, Object> params = new HashMap<>();
       params.put("fragment", parent);
       try (Transaction tx = graphDb.beginTx()) {
-        Result result = graphDb.execute(
+        ExecutionResult result = engine.execute(
             "START parent=node:node_auto_index(fragment={fragment}) " +
                 "MATCH (parent)<-[:subPropertyOf*]-(subProperty) " +
                 "RETURN distinct subProperty.fragment as subProperty", params);
-        while (result.hasNext()) {
-          Map<String, Object> resultMap = result.next();
+        for (Map<String, Object> resultMap: result) {
           entailedTypes.add((String) resultMap.get("subProperty"));
         }
-        result.close();
         tx.success();
       }
     }

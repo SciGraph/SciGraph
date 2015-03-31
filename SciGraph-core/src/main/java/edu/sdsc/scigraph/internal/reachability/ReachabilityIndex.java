@@ -16,8 +16,8 @@
 package edu.sdsc.scigraph.internal.reachability;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Iterables.size;
-import static com.google.common.collect.Iterators.*;
 import static java.lang.String.format;
 
 import java.util.AbstractMap;
@@ -39,7 +39,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
@@ -79,7 +78,8 @@ public final class ReachabilityIndex {
   public ReachabilityIndex(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
     try (Transaction tx = graphDb.beginTx()) {
-      ResourceIterator<Node> nodes = graphDb.findNodes(REACHABILITY_METADATA);
+      Iterable<Node> nodes = GlobalGraphOperations.at(graphDb).getAllNodesWithLabel(
+          REACHABILITY_METADATA);
       metaDataNode = getOnlyElement(nodes, graphDb.createNode(REACHABILITY_METADATA));
       tx.success();
     }

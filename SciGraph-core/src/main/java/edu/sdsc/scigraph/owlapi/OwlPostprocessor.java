@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Named;
 
+import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -44,6 +45,7 @@ public class OwlPostprocessor {
   private static final Logger logger = Logger.getLogger(OwlPostprocessor.class.getName());
 
   private final GraphDatabaseService graphDb;
+  private final ExecutionEngine engine;
   private final ReadableIndex<Node> nodeIndex;
 
   private final Map<String, String> categoryMap;
@@ -53,6 +55,7 @@ public class OwlPostprocessor {
     this.graphDb = graphDb;
     this.categoryMap = categoryMap;
     this.nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
+    engine = new ExecutionEngine(graphDb);
   }
 
   public void postprocess() {
@@ -64,9 +67,9 @@ public class OwlPostprocessor {
     logger.info("Processing someValuesFrom classes");
     try (Transaction tx = graphDb.beginTx()) {
       ResourceIterator<Map<String, Object>> results =
-          graphDb.execute(
+          engine.execute(
               "MATCH (n)-[relationship]->(svf:someValuesFrom)-[:property]->(p) "
-                  + "RETURN n, relationship, svf, p");
+                  + "RETURN n, relationship, svf, p").iterator();
       while (results.hasNext()) {
         Map<String, Object> result = results.next();
         Node subject = (Node) result.get("n");
