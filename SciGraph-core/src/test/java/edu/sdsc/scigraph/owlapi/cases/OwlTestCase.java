@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
@@ -111,8 +112,12 @@ public abstract class OwlTestCase {
     OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
     postprocessor.processSomeValuesFrom();
 
-
     drawGraph();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    graphDb.shutdown();
   }
 
   void drawGraph() throws IOException {
