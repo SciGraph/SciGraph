@@ -19,9 +19,13 @@ import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
@@ -36,8 +40,11 @@ import edu.sdsc.scigraph.neo4j.RelationshipMap;
 
 public class GraphTestBase {
 
-  protected GraphDatabaseService graphDb;
-  protected Graph graph;
+  protected static GraphDatabaseService graphDb;
+  static Graph graph;
+  static ConcurrentHashMap<String, Long> idMap = new ConcurrentHashMap<>();
+
+  Transaction tx;
 
   protected Node createNode(String uri) {
     long node = graph.createNode(uri);
@@ -46,8 +53,8 @@ public class GraphTestBase {
     return graphDb.getNodeById(node);
   }
 
-  @Before
-  public void setupDb() {
+  @BeforeClass
+  public static void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
     Neo4jConfiguration config = new Neo4jConfiguration();
     config.getExactNodeProperties().addAll(newHashSet(
@@ -62,12 +69,24 @@ public class GraphTestBase {
         Concept.ABREVIATION,
         Concept.ACRONYM));
     Neo4jModule.setupAutoIndexing(graphDb, config);
-    graph = new GraphTransactionalImpl(graphDb, new ConcurrentHashMap<String, Long>(), new RelationshipMap());
+    graph = new GraphTransactionalImpl(graphDb, idMap, new RelationshipMap());
+  }
+
+  @AfterClass
+  public static void shutdown() {
+    graphDb.shutdown();
   }
 
   @Before
-  public void setUp() throws Exception {
-    graphDb.beginTx();
+  public void startTransaction() {
+    tx = graphDb.beginTx();
+  }
+
+  @After
+  public void failTransaction() {
+    idMap.clear();
+    tx.failure();
+    tx.close();
   }
 
 }
