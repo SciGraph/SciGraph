@@ -20,19 +20,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.ReadableIndex;
-import org.neo4j.unsafe.batchinsert.BatchInserter;
-import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
@@ -45,14 +35,15 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
+import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
 import edu.sdsc.scigraph.neo4j.IdMap;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
-import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
-import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.ReasonerConfiguration;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
+import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.ReasonerConfiguration;
+import edu.sdsc.scigraph.util.GraphTestBase;
 
 /***
  * An abstract test case for testing simple OWL axiom combinations.
@@ -62,15 +53,8 @@ import edu.sdsc.scigraph.owlapi.ReasonerUtil;
  * (where x matches the name of the test class). In addition to running the unit tests, GraphViz dot
  * files will be produced for each OWL file in target/owl_cases.
  */
-public abstract class OwlTestCase {
+public abstract class OwlTestCase extends GraphTestBase {
 
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
-
-  Transaction tx;
-
-  String path;
-  GraphDatabaseService graphDb;
   ReadableIndex<Node> nodeIndex;
 
   boolean performInference = false;
@@ -85,12 +69,7 @@ public abstract class OwlTestCase {
 
   @Before
   public void loadOwl() throws Exception {
-    path = folder.newFolder().getAbsolutePath();
-
-    BatchInserter inserter = BatchInserters.inserter(path);
-    DB maker = DBMaker.newMemoryDB().make();
-    Graph batchGraph = new GraphBatchImpl(inserter, "uri", Collections.<String> emptySet(),
-        Collections.<String> emptySet(), new IdMap(maker), new RelationshipMap(maker));
+    Graph batchGraph = new GraphTransactionalImpl(graphDb, new IdMap(), new RelationshipMap()); 
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     String uri = Resources.getResource("ontologies/cases/" + getTestName() + ".owl").toURI()
         .toString();
@@ -107,21 +86,12 @@ public abstract class OwlTestCase {
 
     GraphOwlVisitor visitor = new GraphOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
     walker.walkStructure(visitor);
-    batchGraph.shutdown();
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
-    tx = graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
 
     OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
     postprocessor.processSomeValuesFrom();
 
     drawGraph();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    tx.failure();
-    graphDb.shutdown();
   }
 
   void drawGraph() throws IOException {
