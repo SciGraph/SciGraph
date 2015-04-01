@@ -162,6 +162,11 @@ public class GraphUtilTest {
   }
 
   @Test
+  public void queryFragment() {
+    assertThat(GraphUtil.getFragment("http://www.ncbi.nlm.nih.gov/SNP/snp_ind.cgi?ind_id=17729"), is("snp_ind.cgi?ind_id=17729"));
+  }
+
+  @Test
   public void doubleSlashFragment() {
     assertThat(GraphUtil.getFragment("http://x.org//fragment"), is("fragment"));
   }

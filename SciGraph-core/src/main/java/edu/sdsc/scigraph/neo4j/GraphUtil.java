@@ -195,7 +195,7 @@ public class GraphUtil {
       if (iri.contains("#")) {
         return iri.substring(iri.lastIndexOf('#') + 1);
       } else {
-        return iri.replaceFirst(".*/([^/?]+).*", "$1");
+        return iri.replaceFirst(".*/(.*)", "$1");
       }
     } else if (iri.startsWith("_:")) {
       return iri;
