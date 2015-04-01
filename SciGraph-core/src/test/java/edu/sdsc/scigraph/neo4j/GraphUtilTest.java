@@ -157,13 +157,18 @@ public class GraphUtilTest {
   }
 
   @Test
-  public void pathFragment() {
+  public void singlePathFragment() {
     assertThat(GraphUtil.getFragment("http://x.org/fragment"), is("fragment"));
   }
 
   @Test
+  public void multiplePathFragment() {
+    assertThat(GraphUtil.getFragment("http://x.org/fragment/fragment"), is("fragment"));
+  }
+
+  @Test
   public void queryFragment() {
-    assertThat(GraphUtil.getFragment("http://www.ncbi.nlm.nih.gov/SNP/snp_ind.cgi?ind_id=17729"), is("snp_ind.cgi?ind_id=17729"));
+    assertThat(GraphUtil.getFragment("http://x.org/fragment/fragment.cgi?id=10"), is("fragment.cgi?id=10"));
   }
 
   @Test
