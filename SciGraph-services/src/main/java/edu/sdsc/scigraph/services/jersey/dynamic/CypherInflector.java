@@ -51,6 +51,7 @@ import com.google.common.collect.Multimap;
 import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.internal.GraphAspect;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.curies.AddCurries;
@@ -69,13 +70,16 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
   private final ExecutionEngine engine;
   private final Apis config;
   private final CurieUtil curieUtil;
+  private final Map<String, GraphAspect> aspectMap;
 
   @Inject
-  CypherInflector(GraphDatabaseService graphDb, ExecutionEngine engine, CurieUtil curieUtil, @Assisted Apis config) {
+  CypherInflector(GraphDatabaseService graphDb, ExecutionEngine engine, CurieUtil curieUtil,
+      @Assisted Apis config, Map<String, GraphAspect> aspectMap) {
     this.graphDb = graphDb;
     this.engine = engine;
     this.config = config;
     this.curieUtil = curieUtil;
+    this.aspectMap = aspectMap;
   }
 
   @AddCurries
@@ -87,9 +91,21 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
     String query = substituteRelationships(config.getQuery(), paramMap);
     Map<String, Object> flatMap = flattenMap(paramMap);
     try (Transaction tx = graphDb.beginTx()) {
+      long start = System.currentTimeMillis();
       query = entailRelationships(query);
+      logger.fine((System.currentTimeMillis() - start) + " to entail relationships" );
+      start = System.currentTimeMillis();
       ExecutionResult result = engine.execute(query, flatMap);
+      logger.fine((System.currentTimeMillis() - start) + " to execute query" );
+      start = System.currentTimeMillis();
       TinkerGraph graph = resultToGraph(result);
+      logger.fine((System.currentTimeMillis() - start) + " to convert to graph" );
+      start = System.currentTimeMillis();
+      for (String key: aspectMap.keySet()) {
+        if (flatMap.containsKey(key) && "true".equals(flatMap.get(key))) {
+          aspectMap.get(key).invoke(graph);
+        }
+      }
       tx.success();
       return graph;
     }
@@ -119,21 +135,19 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
   static TinkerGraph resultToGraph(ExecutionResult result) {
     TinkerGraph graph = new TinkerGraph();
     for (Map<String, Object> map: result) {
-      for (Entry<String, Object> entry: map.entrySet()) {
-        if (null == entry.getValue()) {
+      for (Object value: map.values()) {
+        if (null == value) {
           continue;
-        }
-        if (entry.getValue() instanceof PropertyContainer) {
-          TinkerGraphUtil.addElement(graph, (PropertyContainer)entry.getValue());
-        } else if (entry.getValue() instanceof SeqWrapper) {
-          SeqWrapper<?> wrapper = (SeqWrapper<?>)entry.getValue();
-          for (Object thing: wrapper) {
+        } else if (value instanceof PropertyContainer) {
+          TinkerGraphUtil.addElement(graph, (PropertyContainer)value);
+        } else if (value instanceof SeqWrapper) {
+          for (Object thing: (SeqWrapper<?>)value) {
             if (thing instanceof PropertyContainer) {
               TinkerGraphUtil.addElement(graph, (PropertyContainer) thing);
             }
           }
         } else {
-          logger.warning("Not converting " + entry.getValue().getClass() + " to tinker graph");
+          logger.warning("Not converting " + value.getClass() + " to tinker graph");
         }
       }
     }

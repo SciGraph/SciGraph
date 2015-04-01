@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Set;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -50,6 +51,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.internal.GraphAspect;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
@@ -87,7 +89,7 @@ public class CypherInflectorTest extends GraphTestBase {
     when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
     when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
     when(curieUtil.getIri("X:foo")).thenReturn(Optional.of("http://x.org/#foo"));
-    inflector = new CypherInflector(graphDb, engine, curieUtil, config);
+    inflector = new CypherInflector(graphDb, engine, curieUtil, config, new HashMap<String, GraphAspect>());
   }
 
   @Test

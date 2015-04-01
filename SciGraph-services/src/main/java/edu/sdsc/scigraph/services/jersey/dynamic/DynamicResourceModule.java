@@ -15,8 +15,15 @@
  */
 package edu.sdsc.scigraph.services.jersey.dynamic;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+
+import edu.sdsc.scigraph.internal.EvidenceAspect;
+import edu.sdsc.scigraph.internal.GraphAspect;
 
 public class DynamicResourceModule extends AbstractModule {
 
@@ -28,6 +35,13 @@ public class DynamicResourceModule extends AbstractModule {
     install(new FactoryModuleBuilder()
     .implement(DynamicCypherResource.class, DynamicCypherResource.class)
     .build(DynamicCypherResourceFactory.class));
+  }
+
+  @Provides
+  Map<String, GraphAspect> getAspectMap(EvidenceAspect evidenceAspect) {
+    Map<String, GraphAspect> aspectMap = new HashMap<>();
+    aspectMap.put("evidence", evidenceAspect);
+    return aspectMap;
   }
 
 }
