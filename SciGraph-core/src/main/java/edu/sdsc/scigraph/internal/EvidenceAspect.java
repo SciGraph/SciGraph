@@ -38,6 +38,9 @@ public class EvidenceAspect implements GraphAspect {
 
   static final RelationshipType HAS_SUBJECT = DynamicRelationshipType.withName("hasSubject");
   static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("hasObject");
+  static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("evidence");
+  static final RelationshipType SOURCE = DynamicRelationshipType.withName("source");
+  
   
   private final GraphDatabaseService graphDb; 
 
@@ -65,6 +68,12 @@ public class EvidenceAspect implements GraphAspect {
             if (nodeIds.contains(object.getId())) {
               TinkerGraphUtil.addEdge(graph, hasSubject);
               TinkerGraphUtil.addEdge(graph, hasObject);
+              for (Relationship evidence: annotation.getRelationships(EVIDENCE, Direction.OUTGOING)) {
+                TinkerGraphUtil.addEdge(graph, evidence);
+              }
+              for (Relationship source: annotation.getRelationships(SOURCE, Direction.OUTGOING)) {
+                TinkerGraphUtil.addEdge(graph, source);
+              }
             }
           }
         }

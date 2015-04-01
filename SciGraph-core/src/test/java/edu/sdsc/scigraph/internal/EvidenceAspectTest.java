@@ -31,7 +31,7 @@ import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class EvidenceAspectTest extends GraphTestBase {
 
-  Node subject1, object1, object2, object3, annotation, annotation2;
+  Node subject1, object1, object2, object3, annotation, annotation2, source, evidence;
   Graph graph = new TinkerGraph();
   EvidenceAspect aspect;
 
@@ -42,10 +42,14 @@ public class EvidenceAspectTest extends GraphTestBase {
     object2 = createNode("http://x.org/c");
     object3 = createNode("http://x.org/d");
     annotation = createNode("http://x.org/e");
-    annotation2 = createNode("http://x.org/d");
+    annotation2 = createNode("http://x.org/f");
+    source = createNode("http://x.org/g");
+    evidence = createNode("http://x.org/h");
     annotation.createRelationshipTo(subject1, EvidenceAspect.HAS_SUBJECT);
     annotation.createRelationshipTo(object1, EvidenceAspect.HAS_OBJECT);
     annotation.createRelationshipTo(object2, EvidenceAspect.HAS_OBJECT);
+    annotation.createRelationshipTo(source, EvidenceAspect.SOURCE);
+    annotation.createRelationshipTo(evidence, EvidenceAspect.EVIDENCE);
     annotation2.createRelationshipTo(subject1, EvidenceAspect.HAS_SUBJECT);
     annotation2.createRelationshipTo(object3, EvidenceAspect.HAS_OBJECT);
 
@@ -60,8 +64,8 @@ public class EvidenceAspectTest extends GraphTestBase {
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(3));
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(0));
     aspect.invoke(graph);
-    assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(4));
-    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(3));
+    assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
+    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(5));
   }
 
 
