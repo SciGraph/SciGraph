@@ -39,8 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Optional;
@@ -66,12 +64,6 @@ public class CypherInflectorTest extends GraphTestBase {
   Transaction tx = mock(Transaction.class);
   CurieUtil curieUtil = mock(CurieUtil.class);
   CypherInflector inflector;
-
-  void addRelationship(String parentIri, String childIri, RelationshipType type) {
-    Node parent = createNode(parentIri);
-    Node child = createNode(childIri);
-    child.createRelationshipTo(parent, type);
-  }
 
   @Before
   public void setup() {

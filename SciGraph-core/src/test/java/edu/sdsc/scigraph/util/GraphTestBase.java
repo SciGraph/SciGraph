@@ -25,6 +25,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -51,6 +53,12 @@ public class GraphTestBase {
     graph.setNodeProperty(node, "uri", uri);
     graph.setNodeProperty(node, "fragment", GraphUtil.getFragment(uri));
     return graphDb.getNodeById(node);
+  }
+
+  protected Relationship addRelationship(String parentIri, String childIri, RelationshipType type) {
+    Node parent = createNode(parentIri);
+    Node child = createNode(childIri);
+    return child.createRelationshipTo(parent, type);
   }
 
   @BeforeClass
