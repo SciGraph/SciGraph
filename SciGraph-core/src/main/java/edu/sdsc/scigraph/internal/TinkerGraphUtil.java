@@ -19,12 +19,17 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
+
+import scala.collection.convert.Wrappers.SeqWrapper;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -37,6 +42,8 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
  * Utilities for building TinkerGraphs from Neo4j objects
  */
 public final class TinkerGraphUtil {
+
+  static final Logger logger = Logger.getLogger(TinkerGraphUtil.class.getName());
 
   static void copyProperties(PropertyContainer container, Element element) {
     for (String key: container.getPropertyKeys()) {
@@ -143,6 +150,28 @@ public final class TinkerGraphUtil {
     Graph graph = new TinkerGraph();
     addGraph(graph, graph1);
     addGraph(graph, graph2);
+    return graph;
+  }
+
+  public static TinkerGraph resultToGraph(ExecutionResult result) {
+    TinkerGraph graph = new TinkerGraph();
+    for (Map<String, Object> map: result) {
+      for (Object value: map.values()) {
+        if (null == value) {
+          continue;
+        } else if (value instanceof PropertyContainer) {
+          addElement(graph, (PropertyContainer)value);
+        } else if (value instanceof SeqWrapper) {
+          for (Object thing: (SeqWrapper<?>)value) {
+            if (thing instanceof PropertyContainer) {
+              addElement(graph, (PropertyContainer) thing);
+            }
+          }
+        } else {
+          logger.warning("Not converting " + value.getClass() + " to tinker graph");
+        }
+      }
+    }
     return graph;
   }
 

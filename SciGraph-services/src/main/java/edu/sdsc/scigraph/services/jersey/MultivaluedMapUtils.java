@@ -36,8 +36,8 @@ public class MultivaluedMapUtils {
    * @param separator an optional separator to further split the values in the map
    * @return the new multimap
    */
-  public static Multimap<String, String> multivaluedMapToMultimap(MultivaluedMap<String, String> map, Optional<Character> separator) {
-    Multimap<String, String> merged = ArrayListMultimap.create();
+  public static Multimap<String, Object> multivaluedMapToMultimap(MultivaluedMap<String, String> map, Optional<Character> separator) {
+    Multimap<String, Object> merged = ArrayListMultimap.create();
     for (Entry<String, List<String>> entry: map.entrySet()) {
       for (String value: entry.getValue()) {
         if (separator.isPresent()) {
@@ -56,7 +56,7 @@ public class MultivaluedMapUtils {
    * @param map the original map
    * @return the new multimap
    */
-  public static Multimap<String, String> multivaluedMapToMultimap(MultivaluedMap<String, String> map) {
+  public static Multimap<String, Object> multivaluedMapToMultimap(MultivaluedMap<String, String> map) {
     return multivaluedMapToMultimap(map, Optional.<Character>absent());
   }
 
@@ -68,8 +68,8 @@ public class MultivaluedMapUtils {
    * @param uriInfo the uriinfo
    * @return the merged multimap
    */
-  public static Multimap<String, String> merge(UriInfo uriInfo) {
-    Multimap<String, String> merged = ArrayListMultimap.create();
+  public static Multimap<String, Object> merge(UriInfo uriInfo) {
+    Multimap<String, Object> merged = ArrayListMultimap.create();
     merged.putAll(multivaluedMapToMultimap(uriInfo.getPathParameters(), Optional.of('+')));
     merged.putAll(multivaluedMapToMultimap(uriInfo.getQueryParameters()));
     return merged;

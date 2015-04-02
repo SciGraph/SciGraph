@@ -41,17 +41,17 @@ public class MapUtilsTest {
     pathParamMap.put("rel_id", newArrayList("fizz"));
     when(uriInfo.getPathParameters()).thenReturn(pathParamMap);
     when(uriInfo.getQueryParameters()).thenReturn(queryParamMap);
-    Multimap<String, String> actual = MultivaluedMapUtils.merge(uriInfo);
-    assertThat(actual.get("pathParam"), contains("paramValue"));
-    assertThat(actual.get("rel_id"), contains("fizz"));
+    Multimap<String, Object> actual = MultivaluedMapUtils.merge(uriInfo);
+    assertThat(actual.get("pathParam"), contains((Object)"paramValue"));
+    assertThat(actual.get("rel_id"), contains((Object)"fizz"));
   }
 
   @Test
   public void splitsMultivaluedPathParams() {
     MultivaluedHashMap<String, String> paramMap = new MultivaluedHashMap<>();
     paramMap.put("key", newArrayList("value1+value2"));
-    Multimap<String, String> actual = MultivaluedMapUtils.multivaluedMapToMultimap(paramMap, Optional.of('+'));
-    assertThat(actual.get("key"), contains("value1", "value2"));
+    Multimap<String, Object> actual = MultivaluedMapUtils.multivaluedMapToMultimap(paramMap, Optional.of('+'));
+    assertThat(actual.get("key"), contains((Object)"value1", (Object)"value2"));
   }
 
 }
