@@ -73,7 +73,7 @@ public class TinkerGraphUtilTest {
   public void addNodeIsIdempotent() {
     when(node.getId()).thenReturn(1L);
     when(node.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
-    Vertex v1 = TinkerGraphUtil.addElement(graph, node);
+    Vertex v1 = TinkerGraphUtil.addNode(graph, node);
     Vertex v2 = TinkerGraphUtil.addNode(graph, node);
     assertThat(v1, is(v2));
   }
