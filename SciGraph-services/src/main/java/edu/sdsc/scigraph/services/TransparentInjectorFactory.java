@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.services;
 
-import io.dropwizard.setup.Environment;
 import ru.vyarus.dropwizard.guice.injector.InjectorFactory;
 
 import com.google.inject.Guice;
