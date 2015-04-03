@@ -53,10 +53,9 @@ import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexHits;
 
@@ -81,7 +80,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   private static final Logger logger = Logger.getLogger(VocabularyNeo4jImpl.class.getName());
 
   private final GraphDatabaseService graph;
-  private final ExecutionEngine engine;
   private final SpellChecker spellChecker;
   private final CurieUtil curieUtil;
   private final NodeTransformer transformer;
@@ -90,7 +88,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   public VocabularyNeo4jImpl(GraphDatabaseService graph, @Nullable @IndicatesNeo4jGraphLocation String neo4jLocation,
       CurieUtil curieUtil, NodeTransformer transformer) throws IOException {
     this.graph = graph;
-    engine = new ExecutionEngine(graph);
     this.curieUtil = curieUtil;
     this.transformer = transformer;
     if (null != neo4jLocation) {
@@ -316,12 +313,10 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     return Suppliers.memoize(new Supplier<Set<String>>() {
       @Override
       public Set<String> get() {
-        ExecutionResult result =
-            engine.execute(
-                "START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
+        Result result = graph.execute("START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
         Set<String> categories = new HashSet<>();
-        while (result.iterator().hasNext()) {
-          Map<String, Object> col = result.iterator().next();
+        while (result.hasNext()) {
+          Map<String, Object> col = result.next();
           Object category = col.get("(n.category)");
           if (category.getClass().isArray()) {
             for (String cat : (String[]) category) {

@@ -25,9 +25,8 @@ import java.util.Set;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.Result;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -41,7 +40,7 @@ public class CypherUtilTest extends GraphTestBase{
 
   @Before
   public void test() {
-    util = new CypherUtil(graphDb, new ExecutionEngine(graphDb));
+    util = new CypherUtil(graphDb);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
@@ -91,8 +90,8 @@ public class CypherUtilTest extends GraphTestBase{
     Multimap<String, Object> params = HashMultimap.create();
     params.put("fragment", "1");
     params.put("rel", "fizz");
-    ExecutionResult result = util.execute("MATCH (n)<-[:${rel}!]-(n2) WHERE n.fragment = {fragment} RETURN n", params);
-    assertThat(result.iterator().next().size(), is(1));
+    Result result = util.execute("MATCH (n)<-[:${rel}!]-(n2) WHERE n.fragment = {fragment} RETURN n", params);
+    assertThat(result.next().size(), is(1));
   }
 
 }

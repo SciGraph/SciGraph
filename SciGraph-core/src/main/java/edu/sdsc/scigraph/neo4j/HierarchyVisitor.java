@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -33,7 +32,7 @@ import org.neo4j.graphdb.PathExpander;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.BranchState;
 import org.neo4j.graphdb.traversal.TraversalDescription;
@@ -47,7 +46,6 @@ import edu.sdsc.scigraph.owlapi.OwlRelationships;
 public class HierarchyVisitor {
 
   private final GraphDatabaseService graph;
-  private final ExecutionEngine engine;
   private final RelationshipType edgeType;
   private final Set<Node> rootNodes;
   private final boolean includeEquivalentClasses;
@@ -90,7 +88,6 @@ public class HierarchyVisitor {
 
   private HierarchyVisitor(Builder builder) {
     this.graph = builder.graph;
-    engine = new ExecutionEngine(graph);
     this.edgeType = builder.edgeType;
     this.rootNodes = builder.rootNodes;
     this.includeEquivalentClasses = builder.includeEquivalentClasses;
@@ -100,10 +97,10 @@ public class HierarchyVisitor {
   Collection<Node> getRootNodes() {
     Set<Node> roots = new HashSet<>();
     if (rootNodes.isEmpty()) {
-      ResourceIterator<Map<String,Object>> result = engine.execute(
+      Result result = graph.execute(
           String.format("MATCH (n)<-[:%1$s]-(s) " +
               "WHERE not(()<-[:%1$s]-n) AND not(n:anonymous) " +
-              "RETURN DISTINCT n", edgeType.toString())).iterator();
+              "RETURN DISTINCT n", edgeType.toString()));
       while (result.hasNext()) {
         Map<String, Object> map = result.next();
         roots.add((Node)map.get("n"));

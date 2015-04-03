@@ -23,11 +23,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Result;
 
 import scala.collection.convert.Wrappers.SeqWrapper;
 
@@ -153,9 +153,10 @@ public final class TinkerGraphUtil {
     return graph;
   }
 
-  public static TinkerGraph resultToGraph(ExecutionResult result) {
+  public static TinkerGraph resultToGraph(Result result) {
     TinkerGraph graph = new TinkerGraph();
-    for (Map<String, Object> map: result) {
+    while (result.hasNext()) {
+      Map<String, Object> map = result.next();
       for (Object value: map.values()) {
         if (null == value) {
           continue;

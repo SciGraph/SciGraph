@@ -30,7 +30,6 @@ import javax.inject.Singleton;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -123,12 +122,6 @@ public class Neo4jModule extends AbstractModule {
       }
       throw e;
     }
-  }
-
-  @Provides
-  @Singleton
-  ExecutionEngine getExecutionEngine(GraphDatabaseService graphDb) {
-    return new ExecutionEngine(graphDb);
   }
 
 }

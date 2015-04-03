@@ -25,8 +25,8 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 
 import org.glassfish.jersey.process.Inflector;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Optional;
@@ -73,7 +73,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
     try (Transaction tx = graphDb.beginTx()) {
       long start = System.currentTimeMillis();
       start = System.currentTimeMillis();
-      ExecutionResult result = cypherUtil.execute(config.getQuery(), paramMap);
+      Result result = cypherUtil.execute(config.getQuery(), paramMap);
       logger.fine((System.currentTimeMillis() - start) + " to execute query" );
       start = System.currentTimeMillis();
       TinkerGraph graph = TinkerGraphUtil.resultToGraph(result);

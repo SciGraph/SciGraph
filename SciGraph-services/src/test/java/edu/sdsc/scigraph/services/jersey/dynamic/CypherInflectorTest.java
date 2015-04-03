@@ -32,7 +32,6 @@ import javax.ws.rs.core.UriInfo;
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Transaction;
 
@@ -59,7 +58,7 @@ public class CypherInflectorTest extends GraphTestBase {
 
   @Before
   public void setup() {
-    CypherUtil cypherUtil = new CypherUtil(graphDb, new ExecutionEngine(graphDb));
+    CypherUtil cypherUtil = new CypherUtil(graphDb);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));

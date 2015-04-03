@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,9 +32,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Splitter;
@@ -51,12 +50,10 @@ public class CypherUtil {
   private static Pattern pattern = Pattern.compile(ENTAILMENT_REGEX);
 
   private final GraphDatabaseService graphDb;
-  private final ExecutionEngine engine;
 
   @Inject
-  public CypherUtil(GraphDatabaseService graphDb, ExecutionEngine engine) {
+  public CypherUtil(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
-    this.engine = engine;
   }
 
   /***
@@ -64,10 +61,10 @@ public class CypherUtil {
    * @param params
    * @return
    */
-  public ExecutionResult execute(String query, Multimap<String, Object> params) {
+  public Result execute(String query, Multimap<String, Object> params) {
     query = substituteRelationships(query, params);
     query = entailRelationships(query);
-    return engine.execute(query, flattenMap(params));
+    return graphDb.execute(query, flattenMap(params));
   }
 
   static Map<String, Object> flattenMap(Multimap<String, Object> paramMap) {
@@ -85,12 +82,13 @@ public class CypherUtil {
       Map<String, Object> params = new HashMap<>();
       params.put("fragment", parent);
       try (Transaction tx = graphDb.beginTx()) {
-        ExecutionResult result = engine.execute(
+        Result result = graphDb.execute(
             "START parent=node:node_auto_index(fragment={fragment}) " +
                 "MATCH (parent)<-[:subPropertyOf*]-(subProperty) " +
                 "RETURN distinct subProperty.fragment as subProperty", params);
-        for (Map<String, Object> resultMap: result) {
-          entailedTypes.add((String) resultMap.get("subProperty"));
+        while (result.hasNext()) {
+          Map<String, Object> map = result.next();
+          entailedTypes.add((String) map.get("subProperty"));
         }
         tx.success();
       }

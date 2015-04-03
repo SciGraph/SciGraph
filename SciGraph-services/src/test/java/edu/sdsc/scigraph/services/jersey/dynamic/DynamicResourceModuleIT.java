@@ -30,7 +30,6 @@ import javax.ws.rs.core.UriInfo;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -64,7 +63,6 @@ public class DynamicResourceModuleIT {
     protected void configure() {
       install(new DynamicResourceModule());
       bind(GraphDatabaseService.class).toInstance(graphDb);
-      bind(ExecutionEngine.class).toInstance(new ExecutionEngine(graphDb));
       bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(IndicatesCurieMapping.class).toInstance(new HashMap<String, String>());
     }
 
