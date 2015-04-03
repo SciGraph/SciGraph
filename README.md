@@ -69,7 +69,7 @@ Run the services:
 	cd ../SciGraph-services
     mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
 
-Check out some of the REST endpoints:
+Check out some of the REST endpoints (the Vagrant box has port 9000 mapped so you can use your host browser to check these out):
 
  - [Get autocomplete options for a prefix](http://localhost:9000/scigraph/vocabulary/autocomplete/Sp)
 
