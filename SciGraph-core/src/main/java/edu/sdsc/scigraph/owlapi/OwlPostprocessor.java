@@ -44,7 +44,6 @@ public class OwlPostprocessor {
   private static final Logger logger = Logger.getLogger(OwlPostprocessor.class.getName());
 
   private final GraphDatabaseService graphDb;
-  private final ReadableIndex<Node> nodeIndex;
 
   private final Map<String, String> categoryMap;
 
@@ -52,7 +51,6 @@ public class OwlPostprocessor {
       @Named("owl.categories") Map<String, String> categoryMap) {
     this.graphDb = graphDb;
     this.categoryMap = categoryMap;
-    this.nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
   }
 
   public void postprocess() {
@@ -120,6 +118,7 @@ public class OwlPostprocessor {
     for (Entry<String, String> category : categories.entrySet()) {
       Node root = null;
       try (Transaction tx = graphDb.beginTx()) {
+        ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
         root = nodeIndex.get(CommonProperties.URI, category.getKey()).getSingle();
         tx.success();
       }
