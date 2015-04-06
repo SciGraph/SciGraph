@@ -52,6 +52,8 @@ A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to mod
     vagrant up
     vagrant ssh
 
+<em>Note that because Neo4j is using memory mapped IO the database cannot be stored in a Vagrant shared directory</em>
+
 If you're not using the vagrant box make sure you have `git`, `maven`, and `java 7` available.
 SciGraph currently has known issues with Java 8. It _should_ still work but prefer Java 7 unless you're just kicking the tires.
 
