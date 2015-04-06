@@ -48,12 +48,11 @@ Getting Started
 ---------------
 A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to modify your `localhost`. You can launch a provisioned box like this 
 
-	git clone https://github.com/SciCrunch/SciGraph
-    cd SciGraph/src/test/resources/vagrant/
+	curl https://raw.githubusercontent.com/SciCrunch/SciGraph/master/src/test/resources/vagrant/Vagrantfile -o Vagrantfile
     vagrant up
     vagrant ssh
 
-If you're not using the provided vagrant box make sure you have `git`, `maven`, and `java 7` available.
+If you're not using the vagrant box make sure you have `git`, `maven`, and `java 7` available.
 
 Clone and compile the project:
 
