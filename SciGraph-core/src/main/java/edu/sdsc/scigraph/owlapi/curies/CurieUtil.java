@@ -34,8 +34,11 @@ public class CurieUtil {
 
   private final ImmutableBiMap<String, String> curieMap;
 
+  /***
+   * @param curieMap A map from CURIE prefix to IRI prefix
+   */
   @Inject
-  CurieUtil(@IndicatesCurieMapping Map<String, String> curieMap) {
+  public CurieUtil(@IndicatesCurieMapping Map<String, String> curieMap) {
     this.curieMap = ImmutableBiMap.copyOf(curieMap);
   }
 
