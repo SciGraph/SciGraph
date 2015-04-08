@@ -51,7 +51,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="#hasTopping"/>
-                <owl:someValuesFrom rdf:resource="#PeperoniSausageTopping"/>
+                <owl:someValuesFrom rdf:resource="#PepperoniSausageTopping"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -76,7 +76,7 @@
                     <owl:Class>
                         <owl:unionOf rdf:parseType="Collection">
                             <owl:Class rdf:about="#MozzarellaTopping"/>
-                            <owl:Class rdf:about="#PeperoniSausageTopping"/>
+                            <owl:Class rdf:about="#PepperoniSausageTopping"/>
                             <owl:Class rdf:about="#TomatoTopping"/>
                         </owl:unionOf>
                     </owl:Class>
@@ -118,7 +118,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="#hasTopping"/>
-                <owl:someValuesFrom rdf:resource="#PeperoniSausageTopping"/>
+                <owl:someValuesFrom rdf:resource="#PepperoniSausageTopping"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -137,7 +137,7 @@
                     <owl:Class>
                         <owl:unionOf rdf:parseType="Collection">
                             <owl:Class rdf:about="#MozzarellaTopping"/>
-                            <owl:Class rdf:about="#PeperoniSausageTopping"/>
+                            <owl:Class rdf:about="#PepperoniSausageTopping"/>
                             <owl:Class rdf:about="#JalapenoPepperTopping"/>
                             <owl:Class rdf:about="#TomatoTopping"/>
                             <owl:Class rdf:about="#HotGreenPepperTopping"/>
@@ -649,7 +649,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="#hasTopping"/>
-                <owl:someValuesFrom rdf:resource="#PeperoniSausageTopping"/>
+                <owl:someValuesFrom rdf:resource="#PepperoniSausageTopping"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -672,7 +672,7 @@
                         <owl:unionOf rdf:parseType="Collection">
                             <owl:Class rdf:about="#AnchoviesTopping"/>
                             <owl:Class rdf:about="#MozzarellaTopping"/>
-                            <owl:Class rdf:about="#PeperoniSausageTopping"/>
+                            <owl:Class rdf:about="#PepperoniSausageTopping"/>
                             <owl:Class rdf:about="#TomatoTopping"/>
                             <owl:Class rdf:about="#CaperTopping"/>
                             <owl:Class rdf:about="#OliveTopping"/>
@@ -1533,9 +1533,9 @@
 
 
 
-    <!-- Class: http://www.co-ode.org/ontologies/pizza/pizza.owl#PeperoniSausageTopping -->
+    <!-- Class: http://www.co-ode.org/ontologies/pizza/pizza.owl#PepperoniSausageTopping -->
 
-    <owl:Class rdf:about="#PeperoniSausageTopping">
+    <owl:Class rdf:about="#PepperoniSausageTopping">
         <rdfs:label>Pepperoni Sausage</rdfs:label>
         <rdfs:subClassOf>
             <owl:Class rdf:about="#MeatTopping"/>
@@ -2987,10 +2987,10 @@
     </owl:Class>
     <owl:Class rdf:about="#HotSpicedBeefTopping">
         <owl:disjointWith>
-            <owl:Class rdf:about="#PeperoniSausageTopping"/>
+            <owl:Class rdf:about="#PepperoniSausageTopping"/>
         </owl:disjointWith>
     </owl:Class>
-    <owl:Class rdf:about="#PeperoniSausageTopping">
+    <owl:Class rdf:about="#PepperoniSausageTopping">
         <owl:disjointWith>
             <owl:Class rdf:about="#HotSpicedBeefTopping"/>
         </owl:disjointWith>
@@ -6187,10 +6187,10 @@
     </owl:Class>
     <owl:Class rdf:about="#ChickenTopping">
         <owl:disjointWith>
-            <owl:Class rdf:about="#PeperoniSausageTopping"/>
+            <owl:Class rdf:about="#PepperoniSausageTopping"/>
         </owl:disjointWith>
     </owl:Class>
-    <owl:Class rdf:about="#PeperoniSausageTopping">
+    <owl:Class rdf:about="#PepperoniSausageTopping">
         <owl:disjointWith>
             <owl:Class rdf:about="#ChickenTopping"/>
         </owl:disjointWith>
@@ -6255,14 +6255,14 @@
             <owl:Class rdf:about="#LaReine"/>
         </owl:disjointWith>
     </owl:Class>
-    <owl:Class rdf:about="#PeperoniSausageTopping">
+    <owl:Class rdf:about="#PepperoniSausageTopping">
         <owl:disjointWith>
             <owl:Class rdf:about="#HamTopping"/>
         </owl:disjointWith>
     </owl:Class>
     <owl:Class rdf:about="#HamTopping">
         <owl:disjointWith>
-            <owl:Class rdf:about="#PeperoniSausageTopping"/>
+            <owl:Class rdf:about="#PepperoniSausageTopping"/>
         </owl:disjointWith>
     </owl:Class>
     <owl:Class rdf:about="#Veneziana">
