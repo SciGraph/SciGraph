@@ -15,13 +15,17 @@
  */
 package edu.sdsc.scigraph.neo4j;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Objects;
+
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 
 /***
  * A convenience class for representing a RelationshipType and Direction.
  */
-public class DirectedRelationshipType {
+public final class DirectedRelationshipType {
 
   private final RelationshipType type;
   private final Direction direction;
@@ -31,8 +35,8 @@ public class DirectedRelationshipType {
   }
 
   public DirectedRelationshipType(RelationshipType type, Direction direction) {
-    this.type = type;
-    this.direction = direction;
+    this.type = checkNotNull(type);
+    this.direction = checkNotNull(direction);
   }
 
   public RelationshipType getType() {
@@ -41,6 +45,25 @@ public class DirectedRelationshipType {
 
   public Direction getDirection() {
     return direction;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(type.name(), direction);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof DirectedRelationshipType)) {
+      return false;
+    }
+    DirectedRelationshipType c = (DirectedRelationshipType) obj;
+    return Objects.equals(type.name(), c.getType().name()) && Objects.equals(direction, c.getDirection());
+  }
+
+  @Override
+  public String toString() {
+    return type.name() + " - " + direction.name();
   }
 
 }
