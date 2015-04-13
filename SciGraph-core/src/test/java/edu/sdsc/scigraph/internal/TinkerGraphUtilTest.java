@@ -20,6 +20,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -161,5 +163,28 @@ public class TinkerGraphUtilTest {
     assertThat(graph.getVertices(), containsInAnyOrder(g1v1, g1v2, g2v2));
     assertThat(graph.getEdges(), containsInAnyOrder(g1e1, g2e1));
   }
+
+  @Test
+  public void primitivePropertiesAreReturned() {
+    TinkerGraph graph = new TinkerGraph();
+    Vertex v = graph.addVertex(1);
+    assertThat(TinkerGraphUtil.getProperty(v, "foo", String.class), is(Optional.<String>absent()));
+    v.setProperty("foo", "bar");
+    assertThat(TinkerGraphUtil.getProperty(v, "foo", String.class), is(Optional.of("bar")));
+  }
+
+  @Test
+  public void collectionsAreReturned() {
+    TinkerGraph graph = new TinkerGraph();
+    Vertex v = graph.addVertex(1);
+    assertThat(TinkerGraphUtil.getProperties(v, "foo", String.class), is(empty()));
+    v.setProperty("foo", "bar");
+    assertThat(TinkerGraphUtil.getProperties(v, "foo", String.class), contains("bar"));
+    v.setProperty("foo", newHashSet("bar", "baz"));
+    assertThat(TinkerGraphUtil.getProperties(v, "foo", String.class), containsInAnyOrder("bar", "baz"));
+    v.setProperty("foo", new String[] {"bar", "baz"});
+    assertThat(TinkerGraphUtil.getProperties(v, "foo", String.class), containsInAnyOrder("bar", "baz"));
+  }
+  
 
 }
