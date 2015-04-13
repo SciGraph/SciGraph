@@ -15,8 +15,11 @@
  */
 package edu.sdsc.scigraph.internal;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,7 @@ import org.neo4j.graphdb.Result;
 
 import scala.collection.convert.Wrappers.SeqWrapper;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
@@ -175,5 +179,44 @@ public final class TinkerGraphUtil {
     }
     return graph;
   }
+
+  static public <T> Optional<T> getProperty(Element container, String property,
+      Class<T> type) {
+    Optional<T> value = Optional.<T> absent();
+    if (container.getPropertyKeys().contains(property)) {
+      value = Optional.<T> of(type.cast(container.getProperty(property)));
+    }
+    return value;
+  }
+
+  static public <T> Collection<T> getProperties(Element container, String property,
+      Class<T> type) {
+    List<T> list = new ArrayList<>();
+    if (container.getPropertyKeys().contains(property)) {
+      return getPropertiesAsSet(container.getProperty(property), type);
+    }
+    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> Set<T> getPropertiesAsSet(Object value, Class<T> type) {
+    Set<T> set = new HashSet<>();
+    if (value instanceof Collection) {
+      return newHashSet((Collection<T>)value);
+    }
+    else if (value.getClass().isArray()) {
+      List<Object> objects = new ArrayList<>();
+      for (int i = 0; i < Array.getLength(value); i++) {
+        objects.add(Array.get(value, i));
+      }
+      for (Object o : objects) {
+        set.add(type.cast(o));
+      }
+    } else {
+      set.add(type.cast(value));
+    }
+    return set;
+  }
+
 
 }
