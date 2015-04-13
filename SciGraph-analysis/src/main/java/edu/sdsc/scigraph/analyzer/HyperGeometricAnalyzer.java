@@ -36,53 +36,67 @@ public class HyperGeometricAnalyzer {
 		this.graphDb = graphDb;
 	}
 
-	public double getCountFrom(Set<AnalyzerResult> set, Long id) {
+	private double getCountFrom(Set<AnalyzerResult> set, Long id) throws Exception {
 		for (AnalyzerResult el : set) {
 			if (el.getN().getId() == id) {
 				return el.getCount();
 			}
 		}
-		System.out.println("NOT GOOD"); // TODO throw proper exception
-		return 0;
+		throw new Exception("Coud not retrieve count for id " + id);
+	}
+
+	private Set<AnalyzerResult> getSampleSetNodes(List<String> sampleSet) {
+		Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
+		Result result = graphDb.execute("match (n:pizza)-[rel:hasTopping]->(t) where HAS (n.label) and n.label in "
+				+ sampleSet + " return t, count(*)");
+		while (result.hasNext()) {
+			Map<String, Object> map = result.next();
+			sampleSetNodes.add(new AnalyzerResult((Node) map.get("t"), (Long) map.get("count(*)")));
+		}
+		return sampleSetNodes;
+	}
+
+	private Set<AnalyzerResult> getCompleteSetNodes() {
+		Result result2 = graphDb.execute("match (n:pizza)-[rel:hasTopping]->(t) return t, count(*)");
+		Set<AnalyzerResult> allSubjects = new HashSet<AnalyzerResult>();
+		while (result2.hasNext()) {
+			Map<String, Object> map = result2.next();
+			allSubjects.add(new AnalyzerResult((Node) map.get("t"), (Long) map.get("count(*)")));
+		}
+		return allSubjects;
+	}
+
+	private int getTotalCount() {
+		Result result3 = graphDb.execute("match (n:pizza) return count(*)");
+		int totalCount = 0;
+		while (result3.hasNext()) {
+			Map<String, Object> map = result3.next();
+			totalCount = ((Long) map.get("count(*)")).intValue();
+		}
+		return totalCount;
 	}
 
 	public List<AnalyzerResult> analyze(List<String> sampleSet) {
 		ArrayList<AnalyzerResult> pValues = new ArrayList<AnalyzerResult>();
-		Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
-		try (Transaction tx = graphDb.beginTx();
-				Result result = graphDb
-						.execute("match (n:pizza)-[rel:hasTopping]->(t) where HAS (n.label) and n.label in "
-								+ sampleSet + " return t, count(*)")) {
-			while (result.hasNext()) {
-				Map<String, Object> map = result.next();
-				sampleSetNodes.add(new AnalyzerResult((Node) map.get("t"), (Long) map.get("count(*)")));
-			}
-			System.out.println("sympleSetNodes " + sampleSetNodes);
+		try (Transaction tx = graphDb.beginTx()) {
+			Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(sampleSet);
 
-			Result result2 = graphDb.execute("match (n:pizza)-[rel:hasTopping]->(t) return t, count(*)");
-			Set<AnalyzerResult> allSubjects = new HashSet<AnalyzerResult>();
-			while (result2.hasNext()) {
-				Map<String, Object> map = result2.next();
-				allSubjects.add(new AnalyzerResult((Node) map.get("t"), (Long) map.get("count(*)")));
-			}
-			System.out.println("allSubjects " + allSubjects);
+			Set<AnalyzerResult> completeSetNodes = getCompleteSetNodes();
 
-			Result result3 = graphDb.execute("match (n:pizza) return count(*)");
-			int totalNumberOfPizzas = 0;
-			while (result3.hasNext()) {
-				Map<String, Object> map = result3.next();
-				totalNumberOfPizzas = ((Long) map.get("count(*)")).intValue();
-			}
-			System.out.println("total " + totalNumberOfPizzas);
+			int totalCount = getTotalCount();
+			System.out.println(sampleSetNodes);
+			System.out.println(completeSetNodes);
+			System.out.println(totalCount);
 
+			// apply the HyperGeometricDistribution for each topping
 			for (AnalyzerResult n : sampleSetNodes) {
-				HypergeometricDistribution hypergeometricDistribution = new HypergeometricDistribution(
-						totalNumberOfPizzas, (int) getCountFrom(allSubjects, n.getN().getId()), sampleSet.size());
+				HypergeometricDistribution hypergeometricDistribution = new HypergeometricDistribution(totalCount,
+						(int) getCountFrom(completeSetNodes, n.getN().getId()), sampleSet.size());
 				double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount());
 				pValues.add(new AnalyzerResult(n.getN(), p));
 			}
-			System.out.println("pValues " + pValues);
 
+			// sort by p-value
 			Collections.sort(pValues, new AnalyzerResultComparator());
 
 			tx.success();
