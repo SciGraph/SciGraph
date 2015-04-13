@@ -19,21 +19,21 @@ import org.neo4j.graphdb.Node;
 
 public class AnalyzerResult {
 
-	private final Node n;
+	private final Node node;
 	private final double count;
 
 	public AnalyzerResult(Node n, double count) {
-		this.n = n;
+		this.node = n;
 		this.count = count;
 	}
 	
 	public AnalyzerResult(Node n, int count) {
-		this.n = n;
+		this.node = n;
 		this.count = count;
 	}
 
-	public Node getN() {
-		return n;
+	public Node getNode() {
+		return node;
 	}
 
 	public double getCount() {

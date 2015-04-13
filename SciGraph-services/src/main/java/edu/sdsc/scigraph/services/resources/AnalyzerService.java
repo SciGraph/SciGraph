@@ -25,16 +25,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 
 import com.codahale.metrics.annotation.Timed;
 
 import edu.sdsc.scigraph.analyzer.AnalyzerResult;
 import edu.sdsc.scigraph.analyzer.HyperGeometricAnalyzer;
-import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.internal.GraphApi;
-import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 
 @Path("/analyzer")
@@ -52,24 +48,15 @@ public class AnalyzerService extends BaseResource {
 
 	@GET
 	@Timed
-	public String analyze(@QueryParam("pizza") List<String> pizzas) {
+	public String analyze(@QueryParam("samples") List<String> samples,
+			@QueryParam("ontologyClass") String ontologyClass, @QueryParam("path") String path) {
 		HyperGeometricAnalyzer hyperGeometricAnalyzer = new HyperGeometricAnalyzer(graphDb);
-		List<AnalyzerResult> pValues = hyperGeometricAnalyzer.analyze(pizzas, "pizza", "hasTopping");
+		List<AnalyzerResult> pValues = hyperGeometricAnalyzer.analyze(samples, ontologyClass, path);
 		String response = "";
 		for (AnalyzerResult p : pValues) {
-			response += p.getN() + " " + p.getCount() + "\n";
+			response += p.getNode() + " " + p.getCount() + "\n";
 		}
 		return response;
-	}
-
-	public String formatNode(Node n) {
-		return n.getId()
-				+ " " // + n.getLabels() + " " + n.getPropertyKeys() + " "
-				+ GraphUtil.getProperties(n, NodeProperties.LABEL, String.class) + " "
-				+ GraphUtil.getProperties(n, Concept.CATEGORY, String.class);
-		// + " "
-		// + n.getRelationships()
-		// + " "
 	}
 
 }
