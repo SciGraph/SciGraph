@@ -48,14 +48,14 @@ public class GraphTestBase {
 
   Transaction tx;
 
-  protected Node createNode(String uri) {
+  static protected Node createNode(String uri) {
     long node = graph.createNode(uri);
     graph.setNodeProperty(node, "uri", uri);
     graph.setNodeProperty(node, "fragment", GraphUtil.getFragment(uri));
     return graphDb.getNodeById(node);
   }
 
-  protected Relationship addRelationship(String parentIri, String childIri, RelationshipType type) {
+  static protected Relationship addRelationship(String parentIri, String childIri, RelationshipType type) {
     Node parent = createNode(parentIri);
     Node child = createNode(childIri);
     return child.createRelationshipTo(parent, type);
