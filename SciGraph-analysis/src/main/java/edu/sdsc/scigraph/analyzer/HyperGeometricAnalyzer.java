@@ -1,15 +1,17 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package edu.sdsc.scigraph.analyzer;
 
@@ -36,7 +38,7 @@ public class HyperGeometricAnalyzer {
 
   private double getCountFrom(Set<AnalyzerResult> set, Long id) throws Exception {
     for (AnalyzerResult el : set) {
-      if (el.getNode().getId() == id) {
+      if (el.getNodeId() == id) {
         return el.getCount();
       }
     }
@@ -52,7 +54,8 @@ public class HyperGeometricAnalyzer {
     Result result = graphDb.execute(query);
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
-      sampleSetNodes.add(new AnalyzerResult((Node) map.get("t"), (Long) map.get("count(*)")));
+      sampleSetNodes.add(new AnalyzerResult(((Node) map.get("t")).getId(), (Long) map
+          .get("count(*)")));
     }
     return sampleSetNodes;
   }
@@ -63,7 +66,8 @@ public class HyperGeometricAnalyzer {
     Set<AnalyzerResult> allSubjects = new HashSet<AnalyzerResult>();
     while (result2.hasNext()) {
       Map<String, Object> map = result2.next();
-      allSubjects.add(new AnalyzerResult((Node) map.get("t"), (Long) map.get("count(*)")));
+      allSubjects
+          .add(new AnalyzerResult(((Node) map.get("t")).getId(), (Long) map.get("count(*)")));
     }
     return allSubjects;
   }
@@ -91,10 +95,10 @@ public class HyperGeometricAnalyzer {
       // apply the HyperGeometricDistribution for each topping
       for (AnalyzerResult n : sampleSetNodes) {
         HypergeometricDistribution hypergeometricDistribution =
-            new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes, n
-                .getNode().getId()), sampleSet.size());
+            new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes,
+                n.getNodeId()), sampleSet.size());
         double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount());
-        pValues.add(new AnalyzerResult(n.getNode(), p));
+        pValues.add(new AnalyzerResult(n.getNodeId(), p));
       }
 
       // sort by p-value
