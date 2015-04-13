@@ -93,6 +93,11 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>edu.sdsc</groupId>
+      <artifactId>scigraph-analysis</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
@@ -124,7 +129,7 @@
       <artifactId>shiro-core</artifactId>
       <version>1.2.3</version>
     </dependency>
-
+    
     <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>

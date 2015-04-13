@@ -24,4 +24,18 @@
   </parent>
   <artifactId>scigraph-analysis</artifactId>
   <name>SciGraph - analysis</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>edu.sdsc</groupId>
+      <artifactId>scigraph-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>3.4.1</version>
+    </dependency>
+  </dependencies>
+
 </project>
