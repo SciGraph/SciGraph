@@ -20,7 +20,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Objects;
 
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /***
  * A convenience class for representing a RelationshipType and Direction.
@@ -28,6 +33,7 @@ import org.neo4j.graphdb.RelationshipType;
 public final class DirectedRelationshipType {
 
   private final RelationshipType type;
+
   private final Direction direction;
 
   public DirectedRelationshipType(RelationshipType type) {
@@ -39,10 +45,23 @@ public final class DirectedRelationshipType {
     this.direction = checkNotNull(direction);
   }
 
+  @JsonCreator
+  public DirectedRelationshipType(@JsonProperty("type") String type, @JsonProperty("direction") String direction) {
+    this.type = DynamicRelationshipType.withName(type);
+    this.direction = Direction.valueOf(direction);
+  }
+
+  @JsonIgnore
   public RelationshipType getType() {
     return type;
   }
 
+  @JsonProperty("type")
+  public String getRelationshipType() {
+    return type.name();
+  }
+  
+  @JsonProperty
   public Direction getDirection() {
     return direction;
   }
