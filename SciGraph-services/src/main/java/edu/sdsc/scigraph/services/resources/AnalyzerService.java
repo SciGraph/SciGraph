@@ -54,12 +54,11 @@ public class AnalyzerService extends BaseResource {
 	@Timed
 	public String analyze(@QueryParam("pizza") List<String> pizzas) {
 		HyperGeometricAnalyzer hyperGeometricAnalyzer = new HyperGeometricAnalyzer(graphDb);
-		List<AnalyzerResult> pValues = hyperGeometricAnalyzer.analyze(pizzas);
+		List<AnalyzerResult> pValues = hyperGeometricAnalyzer.analyze(pizzas, "pizza", "hasTopping");
 		String response = "";
 		for (AnalyzerResult p : pValues) {
 			response += p.getN() + " " + p.getCount() + "\n";
 		}
-		System.out.println(pValues);
 		return response;
 	}
 

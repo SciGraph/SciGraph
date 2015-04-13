@@ -45,10 +45,10 @@ public class HyperGeometricAnalyzer {
 		throw new Exception("Coud not retrieve count for id " + id);
 	}
 
-	private Set<AnalyzerResult> getSampleSetNodes(List<String> sampleSet) {
+	private Set<AnalyzerResult> getSampleSetNodes(List<String> sampleSet, String ontologyClass, String path) {
 		Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
-		Result result = graphDb.execute("match (n:pizza)-[rel:hasTopping]->(t) where HAS (n.label) and n.label in "
-				+ sampleSet + " return t, count(*)");
+		Result result = graphDb.execute("match (n:" + ontologyClass + ")-[rel:" + path
+				+ "]->(t) where HAS (n.label) and n.label in " + sampleSet + " return t, count(*)");
 		while (result.hasNext()) {
 			Map<String, Object> map = result.next();
 			sampleSetNodes.add(new AnalyzerResult((Node) map.get("t"), (Long) map.get("count(*)")));
@@ -66,8 +66,8 @@ public class HyperGeometricAnalyzer {
 		return allSubjects;
 	}
 
-	private int getTotalCount() {
-		Result result3 = graphDb.execute("match (n:pizza) return count(*)");
+	private int getTotalCount(String ontologyClass) {
+		Result result3 = graphDb.execute("match (n:" + ontologyClass + ") return count(*)");
 		int totalCount = 0;
 		while (result3.hasNext()) {
 			Map<String, Object> map = result3.next();
@@ -76,17 +76,14 @@ public class HyperGeometricAnalyzer {
 		return totalCount;
 	}
 
-	public List<AnalyzerResult> analyze(List<String> sampleSet) {
+	public List<AnalyzerResult> analyze(List<String> sampleSet, String ontologyClass, String path) {
 		ArrayList<AnalyzerResult> pValues = new ArrayList<AnalyzerResult>();
 		try (Transaction tx = graphDb.beginTx()) {
-			Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(sampleSet);
+			Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(sampleSet, ontologyClass, path);
 
 			Set<AnalyzerResult> completeSetNodes = getCompleteSetNodes();
 
-			int totalCount = getTotalCount();
-			System.out.println(sampleSetNodes);
-			System.out.println(completeSetNodes);
-			System.out.println(totalCount);
+			int totalCount = getTotalCount(ontologyClass);
 
 			// apply the HyperGeometricDistribution for each topping
 			for (AnalyzerResult n : sampleSetNodes) {
