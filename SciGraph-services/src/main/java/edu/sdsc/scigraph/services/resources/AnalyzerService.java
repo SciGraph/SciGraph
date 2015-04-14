@@ -51,15 +51,11 @@ public class AnalyzerService extends BaseResource {
 
   @GET
   @Timed
-  public String analyze(@QueryParam("samples") List<String> samples,
+  public List<AnalyzerResult> analyze(@QueryParam("samples") List<String> samples,
       @QueryParam("ontologyClass") String ontologyClass, @QueryParam("path") String path) {
     HyperGeometricAnalyzer hyperGeometricAnalyzer = new HyperGeometricAnalyzer(graphDb);
     List<AnalyzerResult> pValues = hyperGeometricAnalyzer.analyze(samples, ontologyClass, path);
-    String response = "";
-    for (AnalyzerResult p : pValues) {
-      response += p.getNodeId() + " " + p.getCount() + "\n";
-    }
-    return response;
+    return pValues;
   }
 
 }
