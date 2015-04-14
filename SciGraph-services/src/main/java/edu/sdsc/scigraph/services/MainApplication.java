@@ -35,7 +35,6 @@ import org.glassfish.jersey.server.filter.UriConnegFilter;
 
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.wordnik.swagger.config.ConfigFactory;
@@ -67,9 +66,9 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     bootstrap.addBundle(new AssetsBundle("/swagger/", "/docs", "index.html"));
     bootstrap.addBundle(new ViewBundle<ApplicationConfiguration>() {
       @Override
-      public ImmutableMap<String, ImmutableMap<String, String>> getViewConfiguration(
+      public Map<String, Map<String, String>> getViewConfiguration(
           ApplicationConfiguration configuration) {
-        return ImmutableMap.<String, ImmutableMap<String, String>>of();
+        return new HashMap<>();
       }
     });
     bootstrap.addBundle(GuiceBundle.builder()
