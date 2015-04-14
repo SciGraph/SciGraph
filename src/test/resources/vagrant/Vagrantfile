@@ -2,9 +2,10 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "hashicorp/precise32"
+  config.vm.box = "ubuntu/trusty64"
   config.vm.network "forwarded_port", guest: 9000, host:9000
   config.vm.provider "virtualbox" do |vb|
+     vb.name = "SciGraph Example Box"
      vb.memory = "2048"
   end
   config.vm.provision "shell", inline: <<-SHELL
