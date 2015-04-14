@@ -22,18 +22,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
+
 public class HyperGeometricAnalyzer {
 
-  private GraphDatabaseService graphDb;
+  private final GraphDatabaseService graphDb;
+  private final CurieUtil curieUtil;
 
-  public HyperGeometricAnalyzer(GraphDatabaseService graphDb) {
+  @Inject
+  public HyperGeometricAnalyzer(GraphDatabaseService graphDb, CurieUtil curieUtil) {
     this.graphDb = graphDb;
+    this.curieUtil = curieUtil;
   }
 
   private double getCountFrom(Set<AnalyzerResult> set, Long id) throws Exception {

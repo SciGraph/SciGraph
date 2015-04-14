@@ -18,44 +18,36 @@ package edu.sdsc.scigraph.services.resources;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-
 import com.codahale.metrics.annotation.Timed;
 
 import edu.sdsc.scigraph.analyzer.AnalyzerResult;
 import edu.sdsc.scigraph.analyzer.HyperGeometricAnalyzer;
-import edu.sdsc.scigraph.internal.GraphApi;
-import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 
 @Path("/analyzer")
 @Produces(MediaType.APPLICATION_JSON)
 public class AnalyzerService extends BaseResource {
 
-  private final GraphDatabaseService graphDb;
-  private final GraphApi api;
-  private final CurieUtil curieUtil;
+  private final Provider<HyperGeometricAnalyzer> provider;
 
   @Inject
-  AnalyzerService(GraphDatabaseService graphDb, GraphApi api, CurieUtil curieUtil) {
-    this.graphDb = graphDb;
-    this.api = api;
-    this.curieUtil = curieUtil;
+  AnalyzerService(Provider<HyperGeometricAnalyzer> provider) {
+    this.provider = provider;
   }
 
   @GET
   @Timed
   public List<AnalyzerResult> analyze(@QueryParam("samples") List<String> samples,
       @QueryParam("ontologyClass") String ontologyClass, @QueryParam("path") String path) {
-    HyperGeometricAnalyzer hyperGeometricAnalyzer = new HyperGeometricAnalyzer(graphDb);
-    List<AnalyzerResult> pValues = hyperGeometricAnalyzer.analyze(samples, ontologyClass, path);
-    return pValues;
+    HyperGeometricAnalyzer hyperGeometricAnalyzer = provider.get();
+    return hyperGeometricAnalyzer.analyze(samples, ontologyClass, path);
   }
 
 }
