@@ -24,6 +24,8 @@ import com.google.inject.Provides;
 
 import edu.sdsc.scigraph.annotation.EntityModule;
 import edu.sdsc.scigraph.lexical.LexicalLibModule;
+import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.opennlp.OpenNlpModule;
 import edu.sdsc.scigraph.owlapi.curies.CurieModule;
@@ -44,6 +46,7 @@ class SciGraphApplicationModule extends AbstractModule implements ConfigurationA
   @Override
   protected void configure() {
     install(new Neo4jModule(configuration.getGraphConfiguration()));
+    bind(Graph.class).to(GraphTransactionalImpl.class);
     install(new EntityModule());
     install(new LexicalLibModule());
     install(new OpenNlpModule());
