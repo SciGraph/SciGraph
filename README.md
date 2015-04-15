@@ -81,6 +81,8 @@ Check out some of the REST endpoints (the Vagrant box has port 9000 mapped so yo
  
  - [Visualize the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping.png)
  
+ - [Visualize the graph neighborhood of a class by using a CURIE](http://localhost:9000/scigraph/graph/neighbors/pizza:AmericanHot.png)
+ 
  - [Visualize a custom, domain specific Cypher query](http://localhost:9000/scigraph/dynamic/toppings.png?pizza_id=FourSeasons)
 
 Also browse the [generated REST documentation](http://localhost:9000/scigraph/docs/)

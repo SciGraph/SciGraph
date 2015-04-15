@@ -11,6 +11,8 @@ logging:
 
 graphConfiguration:
   location: ../SciGraph-core/target/pizzaGraph
+  curies:
+    'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
   indexedNodeProperties:
     - label
     - fragment
