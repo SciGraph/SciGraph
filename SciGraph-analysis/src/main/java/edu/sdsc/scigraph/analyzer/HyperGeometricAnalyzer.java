@@ -55,9 +55,13 @@ public class HyperGeometricAnalyzer {
   private Set<AnalyzerResult> getSampleSetNodes(List<String> sampleSet, String ontologyClass,
       String path) {
     Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
+    List<String> sampleSetWithQuotes = new ArrayList<String> ();
+    for(String sample: sampleSet){
+      sampleSetWithQuotes.add("\"" + sample + "\"");
+    }
     String query =
         "match (n:" + ontologyClass + ")-[rel:" + path
-            + "]->(t) where HAS (n.label) and n.label in " + sampleSet + " return t, count(*)";
+            + "]->(t) where HAS (n.label) and n.label in " + sampleSetWithQuotes + " return t, count(*)";
     Result result = graphDb.execute(query);
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
@@ -99,7 +103,7 @@ public class HyperGeometricAnalyzer {
 
       int totalCount = getTotalCount(ontologyClass);
 
-      // apply the HyperGeometricDistribution for each topping
+      // apply the HyperGeometricDistribution for each node
       for (AnalyzerResult n : sampleSetNodes) {
         HypergeometricDistribution hypergeometricDistribution =
             new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes,
