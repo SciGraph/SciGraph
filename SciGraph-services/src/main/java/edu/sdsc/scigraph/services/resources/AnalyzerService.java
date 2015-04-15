@@ -15,11 +15,12 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.validation.Valid;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,9 +29,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.sdsc.scigraph.analyzer.AnalyzeRequest;
 import edu.sdsc.scigraph.analyzer.AnalyzerResult;
@@ -58,12 +56,9 @@ public class AnalyzerService extends BaseResource {
 
   @POST
   @Timed
-  public List<AnalyzerResult> analyzePost(String body) throws JsonParseException,
-      JsonMappingException, IOException {
+  @Consumes(MediaType.APPLICATION_JSON)
+  public List<AnalyzerResult> analyzePost(@Valid AnalyzeRequest analyzeRequest) {
     HyperGeometricAnalyzer hyperGeometricAnalyzer = provider.get();
-    ObjectMapper mapper = new ObjectMapper();
-    AnalyzeRequest analyzeRequest = mapper.readValue(body, AnalyzeRequest.class);
-    // TODO enforce not null
     return hyperGeometricAnalyzer.analyze(analyzeRequest.getSamples(),
         analyzeRequest.getOntologyClass(), analyzeRequest.getPath());
   }
