@@ -56,11 +56,11 @@ public class AnalyzerService extends BaseResource {
   @ApiOperation(value = "Class Enrichment Service", response = String.class,
   notes="")
   public List<AnalyzerResult> analyze(
-      @ApiParam( value = "A list of CURIEs to include in the sample", required = true)
+      @ApiParam( value = "A list of CURIEs for nodes whose attributes are to be tested for enrichment. For example, a list of genes.", required = true)
       @QueryParam("sample") Set<String> samples,
-      @ApiParam( value = "A parent ontology class", required = true)
+      @ApiParam( value = "CURIE for parent ontology class for the attribute to be tested. For example, GO biological process", required = true)
       @QueryParam("ontologyClass") String ontologyClass,
-      @ApiParam( value = "A path expression for enrichment", required = true)
+      @ApiParam( value = "A path expression that connects sample nodes to attribute class nodes", required = true)
       @QueryParam("path") String path) {
     HyperGeometricAnalyzer hyperGeometricAnalyzer = provider.get();
     return hyperGeometricAnalyzer.analyze(samples, ontologyClass, path);
