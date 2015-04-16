@@ -33,6 +33,7 @@ import org.neo4j.graphdb.Transaction;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 
 public class HyperGeometricAnalyzer {
@@ -61,13 +62,12 @@ public class HyperGeometricAnalyzer {
     Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
     List<Long> sampleSetId = new ArrayList<Long>();
     for (String sample : request.getSamples()) {
-      // sampleSetWithQuotes.add("\"" + curieUtil.getIri(sample) + "\"");
       Optional<String> nodeOpt = curieUtil.getIri(sample);
       if (nodeOpt.isPresent()) {
         Optional<Long> nodeIdOpt = graph.getNode(nodeOpt.get());
-        if(nodeIdOpt.isPresent()) {
+        if (nodeIdOpt.isPresent()) {
           sampleSetId.add(nodeIdOpt.get());
-        }else{
+        } else {
           throw new Exception(nodeOpt.get() + " does not map to a node.");
         }
       } else {
@@ -75,8 +75,8 @@ public class HyperGeometricAnalyzer {
       }
     }
     String query =
-        "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath() + "]->(t) where id(n) in "
-            + sampleSetId + " return t, count(*)";
+        "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath()
+            + "]->(t) where id(n) in " + sampleSetId + " return t, count(*)";
     Result result = graphDb.execute(query);
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
@@ -87,7 +87,9 @@ public class HyperGeometricAnalyzer {
   }
 
   private Set<AnalyzerResult> getCompleteSetNodes(AnalyzeRequest request) {
-    String query = "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath() + "]->(t) return t, count(*)";
+    String query =
+        "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath()
+            + "]->(t) return t, count(*)";
     Result result2 = graphDb.execute(query);
     Set<AnalyzerResult> allSubjects = new HashSet<AnalyzerResult>();
     while (result2.hasNext()) {
@@ -109,20 +111,39 @@ public class HyperGeometricAnalyzer {
     return totalCount;
   }
 
+  private String resolveCurieToFragment(String curie) throws Exception {
+    Optional<String> resolvedCurie = curieUtil.getIri(curie);
+    if (resolvedCurie.isPresent()) {
+      return GraphUtil.getFragment(resolvedCurie.get());
+    } else {
+      throw new Exception("Curie " + curie + " not recognized.");
+    }
+  }
+
+  private AnalyzeRequest processRequest(AnalyzeRequest request) throws Exception {
+    String resolvedPath = resolveCurieToFragment(request.getPath());
+    String resolvedOntologyClass = resolveCurieToFragment(request.getOntologyClass());
+    request.setPath(resolvedPath);
+    request.setOntologyClass(resolvedOntologyClass);
+    return request;
+  }
+
   public List<AnalyzerResult> analyze(AnalyzeRequest request) {
     ArrayList<AnalyzerResult> pValues = new ArrayList<AnalyzerResult>();
     try (Transaction tx = graphDb.beginTx()) {
-      Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(request);
+      AnalyzeRequest processedRequest = processRequest(request);
 
-      Set<AnalyzerResult> completeSetNodes = getCompleteSetNodes(request);
+      Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(processedRequest);
 
-      int totalCount = getTotalCount(request.getOntologyClass());
+      Set<AnalyzerResult> completeSetNodes = getCompleteSetNodes(processedRequest);
+
+      int totalCount = getTotalCount(processedRequest.getOntologyClass());
 
       // apply the HyperGeometricDistribution for each node
       for (AnalyzerResult n : sampleSetNodes) {
         HypergeometricDistribution hypergeometricDistribution =
             new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes,
-                n.getNodeId()), request.getSamples().size());
+                n.getNodeId()), processedRequest.getSamples().size());
         double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount());
         pValues.add(new AnalyzerResult(n.getNodeId(), p));
       }
