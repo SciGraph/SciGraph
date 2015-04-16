@@ -3,11 +3,11 @@ SciGraph
 [![Build Status](https://travis-ci.org/SciCrunch/SciGraph.svg?branch=master)](https://travis-ci.org/SciCrunch/SciGraph)
 [![Coverage Status](https://coveralls.io/repos/SciCrunch/SciGraph/badge.svg)](https://coveralls.io/r/SciCrunch/SciGraph)
 
-Represent ontologies in a Neo4j graph.
+Represent ontologies and ontology-encoded knowledge in a Neo4j graph.
 
 Motivation
 ----------
-SciGraph aims to represent ontologies as a Neo4j graph. SciGraph
+SciGraph aims to represent ontologies and data described using ontologies as a Neo4j graph. SciGraph
 reads ontologies with [owlapi](http://owlapi.sourceforge.net/) and ingests
 ontology formats available to owlapi (OWL, RDF, OBO, TTL, etc). 
 Have a look at [how SciGraph translates some simple ontologies](https://github.com/SciCrunch/SciGraph/wiki/Neo4jMapping).
