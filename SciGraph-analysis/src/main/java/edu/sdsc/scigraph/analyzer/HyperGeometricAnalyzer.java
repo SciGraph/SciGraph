@@ -43,7 +43,7 @@ public class HyperGeometricAnalyzer {
   private final Graph graph;
 
   @Inject
-  public HyperGeometricAnalyzer(GraphDatabaseService graphDb, CurieUtil curieUtil, Graph graph) {
+  HyperGeometricAnalyzer(GraphDatabaseService graphDb, CurieUtil curieUtil, Graph graph) {
     this.graphDb = graphDb;
     this.curieUtil = curieUtil;
     this.graph = graph;
