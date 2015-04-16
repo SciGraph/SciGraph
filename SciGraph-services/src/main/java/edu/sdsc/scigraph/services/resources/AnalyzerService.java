@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.services.resources;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -29,6 +30,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 import edu.sdsc.scigraph.analyzer.AnalyzeRequest;
 import edu.sdsc.scigraph.analyzer.AnalyzerResult;
@@ -36,6 +40,7 @@ import edu.sdsc.scigraph.analyzer.HyperGeometricAnalyzer;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 
 @Path("/analyzer")
+@Api(value = "/analyzer", description = "Analysis services")
 @Produces(MediaType.APPLICATION_JSON)
 public class AnalyzerService extends BaseResource {
 
@@ -48,8 +53,15 @@ public class AnalyzerService extends BaseResource {
 
   @GET
   @Timed
-  public List<AnalyzerResult> analyze(@QueryParam("samples") List<String> samples,
-      @QueryParam("ontologyClass") String ontologyClass, @QueryParam("path") String path) {
+  @ApiOperation(value = "Class Enrichment Service", response = String.class,
+  notes="")
+  public List<AnalyzerResult> analyze(
+      @ApiParam( value = "A list of CURIEs to include in the sample", required = true)
+      @QueryParam("sample") Set<String> samples,
+      @ApiParam( value = "A parent ontology class", required = true)
+      @QueryParam("ontologyClass") String ontologyClass,
+      @ApiParam( value = "A path expression for enrichment", required = true)
+      @QueryParam("path") String path) {
     HyperGeometricAnalyzer hyperGeometricAnalyzer = provider.get();
     return hyperGeometricAnalyzer.analyze(samples, ontologyClass, path);
   }

@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.analyzer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -57,7 +58,7 @@ public class HyperGeometricAnalyzer {
     throw new Exception("Coud not retrieve count for id " + id);
   }
 
-  private Set<AnalyzerResult> getSampleSetNodes(List<String> sampleSet, String ontologyClass,
+  private Set<AnalyzerResult> getSampleSetNodes(Collection<String> sampleSet, String ontologyClass,
       String path) throws Exception {
     Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
     List<Long> sampleSetId = new ArrayList<Long>();
@@ -110,7 +111,7 @@ public class HyperGeometricAnalyzer {
     return totalCount;
   }
 
-  public List<AnalyzerResult> analyze(List<String> sampleSet, String ontologyClass, String path) {
+  public List<AnalyzerResult> analyze(Collection<String> sampleSet, String ontologyClass, String path) {
     ArrayList<AnalyzerResult> pValues = new ArrayList<AnalyzerResult>();
     try (Transaction tx = graphDb.beginTx()) {
       Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(sampleSet, ontologyClass, path);
