@@ -30,17 +30,22 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
+import com.google.common.base.Optional;
+
+import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 
 public class HyperGeometricAnalyzer {
 
   private final GraphDatabaseService graphDb;
   private final CurieUtil curieUtil;
+  private final Graph graph;
 
   @Inject
-  public HyperGeometricAnalyzer(GraphDatabaseService graphDb, CurieUtil curieUtil) {
+  public HyperGeometricAnalyzer(GraphDatabaseService graphDb, CurieUtil curieUtil, Graph graph) {
     this.graphDb = graphDb;
     this.curieUtil = curieUtil;
+    this.graph = graph;
   }
 
   private double getCountFrom(Set<AnalyzerResult> set, Long id) throws Exception {
@@ -53,15 +58,26 @@ public class HyperGeometricAnalyzer {
   }
 
   private Set<AnalyzerResult> getSampleSetNodes(List<String> sampleSet, String ontologyClass,
-      String path) {
+      String path) throws Exception {
     Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
-    List<String> sampleSetWithQuotes = new ArrayList<String> ();
-    for(String sample: sampleSet){
-      sampleSetWithQuotes.add("\"" + sample + "\"");
+    List<Long> sampleSetId = new ArrayList<Long>();
+    for (String sample : sampleSet) {
+      // sampleSetWithQuotes.add("\"" + curieUtil.getIri(sample) + "\"");
+      Optional<String> nodeOpt = curieUtil.getIri(sample);
+      if (nodeOpt.isPresent()) {
+        Optional<Long> nodeIdOpt = graph.getNode(nodeOpt.get());
+        if(nodeIdOpt.isPresent()) {
+          sampleSetId.add(nodeIdOpt.get());
+        }else{
+          throw new Exception(nodeOpt.get() + " does not map to a node.");
+        }
+      } else {
+        throw new Exception(sample + " is not recognized.");
+      }
     }
     String query =
-        "match (n:" + ontologyClass + ")-[rel:" + path
-            + "]->(t) where HAS (n.label) and n.label in " + sampleSetWithQuotes + " return t, count(*)";
+        "match (n:" + ontologyClass + ")-[rel:" + path + "]->(t) where id(n) in "
+            + sampleSetId + " return t, count(*)";
     Result result = graphDb.execute(query);
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
