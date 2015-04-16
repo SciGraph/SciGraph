@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.analyzer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -58,11 +57,10 @@ public class HyperGeometricAnalyzer {
     throw new Exception("Coud not retrieve count for id " + id);
   }
 
-  private Set<AnalyzerResult> getSampleSetNodes(Collection<String> sampleSet, String ontologyClass,
-      String path) throws Exception {
+  private Set<AnalyzerResult> getSampleSetNodes(AnalyzeRequest request) throws Exception {
     Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
     List<Long> sampleSetId = new ArrayList<Long>();
-    for (String sample : sampleSet) {
+    for (String sample : request.getSamples()) {
       // sampleSetWithQuotes.add("\"" + curieUtil.getIri(sample) + "\"");
       Optional<String> nodeOpt = curieUtil.getIri(sample);
       if (nodeOpt.isPresent()) {
@@ -77,7 +75,7 @@ public class HyperGeometricAnalyzer {
       }
     }
     String query =
-        "match (n:" + ontologyClass + ")-[rel:" + path + "]->(t) where id(n) in "
+        "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath() + "]->(t) where id(n) in "
             + sampleSetId + " return t, count(*)";
     Result result = graphDb.execute(query);
     while (result.hasNext()) {
@@ -88,8 +86,8 @@ public class HyperGeometricAnalyzer {
     return sampleSetNodes;
   }
 
-  private Set<AnalyzerResult> getCompleteSetNodes(String ontologyClass, String path) {
-    String query = "match (n:" + ontologyClass + ")-[rel:" + path + "]->(t) return t, count(*)";
+  private Set<AnalyzerResult> getCompleteSetNodes(AnalyzeRequest request) {
+    String query = "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath() + "]->(t) return t, count(*)";
     Result result2 = graphDb.execute(query);
     Set<AnalyzerResult> allSubjects = new HashSet<AnalyzerResult>();
     while (result2.hasNext()) {
@@ -111,20 +109,20 @@ public class HyperGeometricAnalyzer {
     return totalCount;
   }
 
-  public List<AnalyzerResult> analyze(Collection<String> sampleSet, String ontologyClass, String path) {
+  public List<AnalyzerResult> analyze(AnalyzeRequest request) {
     ArrayList<AnalyzerResult> pValues = new ArrayList<AnalyzerResult>();
     try (Transaction tx = graphDb.beginTx()) {
-      Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(sampleSet, ontologyClass, path);
+      Set<AnalyzerResult> sampleSetNodes = getSampleSetNodes(request);
 
-      Set<AnalyzerResult> completeSetNodes = getCompleteSetNodes(ontologyClass, path);
+      Set<AnalyzerResult> completeSetNodes = getCompleteSetNodes(request);
 
-      int totalCount = getTotalCount(ontologyClass);
+      int totalCount = getTotalCount(request.getOntologyClass());
 
       // apply the HyperGeometricDistribution for each node
       for (AnalyzerResult n : sampleSetNodes) {
         HypergeometricDistribution hypergeometricDistribution =
             new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes,
-                n.getNodeId()), sampleSet.size());
+                n.getNodeId()), request.getSamples().size());
         double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount());
         pValues.add(new AnalyzerResult(n.getNodeId(), p));
       }

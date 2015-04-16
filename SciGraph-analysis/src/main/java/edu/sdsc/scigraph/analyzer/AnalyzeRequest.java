@@ -15,7 +15,7 @@
  */
 package edu.sdsc.scigraph.analyzer;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,7 +27,7 @@ public class AnalyzeRequest {
   @NotEmpty
   @NotNull
   @JsonProperty
-  private List<String> samples;
+  private Collection<String> samples;
   
   @NotEmpty
   @NotNull
@@ -39,11 +39,11 @@ public class AnalyzeRequest {
   @JsonProperty
   private String path;
 
-  public List<String> getSamples() {
+  public Collection<String> getSamples() {
     return samples;
   }
 
-  public void setSamples(List<String> samples) {
+  public void setSamples(Collection<String> samples) {
     this.samples = samples;
   }
 
