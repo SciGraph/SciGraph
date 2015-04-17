@@ -120,7 +120,7 @@ public class HyperGeometricAnalyzer {
     }
   }
 
-  private AnalyzeRequest processRequest(AnalyzeRequest request) throws Exception {
+  AnalyzeRequest processRequest(AnalyzeRequest request) throws Exception {
     String resolvedPath = resolveCurieToFragment(request.getPath());
     String resolvedOntologyClass = resolveCurieToFragment(request.getOntologyClass());
     request.setPath(resolvedPath);

@@ -76,7 +76,17 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
     request.getSamples().addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
     request.setOntologyClass("pizza:Pizza");
     request.setPath("pizza:hasTopping");
-    //assertThat(analyzer.analyze(request), is(not(empty())));
+    assertThat(analyzer.analyze(request), is(not(empty())));
+  }
+
+  @Test
+  public void processRequestDoesNotMutate() throws Exception {
+    AnalyzeRequest request = new AnalyzeRequest();
+    request.setPath("pizza:foo");
+    request.setOntologyClass("pizza:bar");
+    analyzer.processRequest(request);
+    assertThat(request.getPath(), is("pizza:foo"));
+    assertThat(request.getOntologyClass(), is("pizza:bar"));
   }
 
 }
