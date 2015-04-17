@@ -59,8 +59,8 @@ public class HyperGeometricAnalyzer {
   }
 
   private Set<AnalyzerResult> getSampleSetNodes(AnalyzeRequest request) throws Exception {
-    Set<AnalyzerResult> sampleSetNodes = new HashSet<AnalyzerResult>();
-    List<Long> sampleSetId = new ArrayList<Long>();
+    Set<AnalyzerResult> sampleSetNodes = new HashSet<>();
+    List<Long> sampleSetId = new ArrayList<>();
     for (String sample : request.getSamples()) {
       Optional<String> nodeOpt = curieUtil.getIri(sample);
       if (nodeOpt.isPresent()) {
@@ -91,7 +91,7 @@ public class HyperGeometricAnalyzer {
         "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath()
             + "]->(t) return t, count(*)";
     Result result2 = graphDb.execute(query);
-    Set<AnalyzerResult> allSubjects = new HashSet<AnalyzerResult>();
+    Set<AnalyzerResult> allSubjects = new HashSet<>();
     while (result2.hasNext()) {
       Map<String, Object> map = result2.next();
       allSubjects
@@ -129,7 +129,7 @@ public class HyperGeometricAnalyzer {
   }
 
   public List<AnalyzerResult> analyze(AnalyzeRequest request) {
-    ArrayList<AnalyzerResult> pValues = new ArrayList<AnalyzerResult>();
+    List<AnalyzerResult> pValues = new ArrayList<>();
     try (Transaction tx = graphDb.beginTx()) {
       AnalyzeRequest processedRequest = processRequest(request);
 
