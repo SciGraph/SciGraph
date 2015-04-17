@@ -43,7 +43,7 @@ import edu.sdsc.scigraph.neo4j.RelationshipMap;
 public class GraphTestBase {
 
   protected static GraphDatabaseService graphDb;
-  static Graph graph;
+  protected static Graph graph;
   static ConcurrentHashMap<String, Long> idMap = new ConcurrentHashMap<>();
 
   Transaction tx;

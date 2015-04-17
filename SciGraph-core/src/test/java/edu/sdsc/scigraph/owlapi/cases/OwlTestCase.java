@@ -22,7 +22,6 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
@@ -34,10 +33,6 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
 
-import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
-import edu.sdsc.scigraph.neo4j.IdMap;
-import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
@@ -55,21 +50,14 @@ import edu.sdsc.scigraph.util.GraphTestBase;
  */
 public abstract class OwlTestCase extends GraphTestBase {
 
-  ReadableIndex<Node> nodeIndex;
-
   boolean performInference = false;
 
   String getTestName() {
     return getClass().getSimpleName();
   }
 
-  Node getNode(String uri) {
-    return nodeIndex.get("uri", uri).getSingle();
-  }
-
   @Before
   public void loadOwl() throws Exception {
-    Graph batchGraph = new GraphTransactionalImpl(graphDb, new IdMap(), new RelationshipMap()); 
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     String uri = Resources.getResource("ontologies/cases/" + getTestName() + ".owl").toURI()
         .toString();
@@ -84,9 +72,8 @@ public abstract class OwlTestCase extends GraphTestBase {
     }
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
-    GraphOwlVisitor visitor = new GraphOwlVisitor(walker, batchGraph, new ArrayList<MappedProperty>());
+    GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, new ArrayList<MappedProperty>());
     walker.walkStructure(visitor);
-    nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
 
     OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
     postprocessor.processSomeValuesFrom();
@@ -94,6 +81,11 @@ public abstract class OwlTestCase extends GraphTestBase {
     drawGraph();
   }
 
+  static Node getNode(String iri) {
+    Long id = graph.getNode(iri).get();
+    return graphDb.getNodeById(id);
+  }
+  
   void drawGraph() throws IOException {
     GraphvizWriter writer = new GraphvizWriter();
     Walker walker = Walker.fullGraph(graphDb);
