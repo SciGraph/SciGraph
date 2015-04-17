@@ -16,6 +16,11 @@
 package edu.sdsc.scigraph.analyzer;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,9 +74,9 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
   public void test() {
     AnalyzeRequest request = new AnalyzeRequest();
     request.getSamples().addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
-    request.setOntologyClass("pizza:pizza");
+    request.setOntologyClass("pizza:Pizza");
     request.setPath("pizza:hasTopping");
-    System.out.println(analyzer.analyze(request));
+    //assertThat(analyzer.analyze(request), is(not(empty())));
   }
 
 }
