@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.analyzer;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import javax.validation.constraints.NotNull;
 
@@ -24,16 +25,17 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AnalyzeRequest {
+
   @NotEmpty
   @NotNull
   @JsonProperty
-  private Collection<String> samples;
-  
+  private Collection<String> samples = new HashSet<>();
+
   @NotEmpty
   @NotNull
   @JsonProperty
   private String ontologyClass;
-  
+
   @NotEmpty
   @NotNull
   @JsonProperty
@@ -62,4 +64,5 @@ public class AnalyzeRequest {
   public void setPath(String path) {
     this.path = path;
   }
+
 }

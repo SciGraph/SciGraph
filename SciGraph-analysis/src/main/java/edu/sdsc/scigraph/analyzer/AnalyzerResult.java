@@ -37,4 +37,5 @@ public class AnalyzerResult {
   public double getCount() {
     return count;
   }
+
 }
