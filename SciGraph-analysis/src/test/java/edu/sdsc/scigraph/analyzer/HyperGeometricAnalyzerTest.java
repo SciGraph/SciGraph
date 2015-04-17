@@ -16,7 +16,6 @@
 package edu.sdsc.scigraph.analyzer;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
@@ -40,7 +39,6 @@ import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.util.GraphTestBase;
-
 
 public class HyperGeometricAnalyzerTest extends GraphTestBase {
 
@@ -80,7 +78,7 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
   }
 
   @Test
-  public void processRequestDoesNotMutate() throws Exception {
+  public void processRequestDoesN() throws Exception {
     AnalyzeRequest request = new AnalyzeRequest();
     request.setPath("pizza:foo");
     request.setOntologyClass("pizza:bar");
