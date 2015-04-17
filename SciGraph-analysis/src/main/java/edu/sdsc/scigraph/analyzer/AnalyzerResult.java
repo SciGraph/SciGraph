@@ -15,7 +15,9 @@
  */
 package edu.sdsc.scigraph.analyzer;
 
-public class AnalyzerResult {
+import java.util.Objects;
+
+public final class AnalyzerResult {
 
   private final long nodeId;
   private final double count;
@@ -36,6 +38,27 @@ public class AnalyzerResult {
 
   public double getCount() {
     return count;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(nodeId);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (null == obj) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    return Objects.equals(getNodeId(), ((AnalyzerResult)obj).getNodeId());
+  }
+
+  @Override
+  public String toString() {
+    return nodeId + " (" + count + ")";
   }
 
 }
