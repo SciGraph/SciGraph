@@ -39,6 +39,7 @@ import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 
 public class GraphTestBase {
 
@@ -50,8 +51,11 @@ public class GraphTestBase {
 
   static protected Node createNode(String uri) {
     long node = graph.createNode(uri);
-    graph.setNodeProperty(node, "uri", uri);
-    graph.setNodeProperty(node, "fragment", GraphUtil.getFragment(uri));
+    graph.setNodeProperty(node, CommonProperties.URI, uri);
+    graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
+    if (uri.startsWith("_:")) {
+      graph.addLabel(node, OwlLabels.OWL_ANONYMOUS);
+    }
     return graphDb.getNodeById(node);
   }
 
