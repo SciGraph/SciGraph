@@ -32,6 +32,7 @@ mappedProperties:
   - name: label # The name of the new property
     properties: # The list of properties mapped to the new property
     - http://www.w3.org/2000/01/rdf-schema#label
+    - http://www.w3.org/2004/02/skos/core#prefLabel
   - name: comment
     properties:
     - http://www.w3.org/2000/01/rdf-schema#comment
