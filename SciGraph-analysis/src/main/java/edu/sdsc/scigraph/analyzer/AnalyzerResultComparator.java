@@ -21,6 +21,6 @@ public class AnalyzerResultComparator implements Comparator<AnalyzerResult> {
 
   @Override
   public int compare(AnalyzerResult o1, AnalyzerResult o2) {
-    return Double.compare(o1.getCount(), o2.getCount());
+    return Double.compare(o1.getpValue(), o2.getpValue());
   }
 }

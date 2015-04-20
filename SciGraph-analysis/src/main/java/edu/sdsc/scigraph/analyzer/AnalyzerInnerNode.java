@@ -17,26 +17,32 @@ package edu.sdsc.scigraph.analyzer;
 
 import java.util.Objects;
 
-public class AnalyzerResult {
-  private final String uri;
-  private final double pValue;
+public final class AnalyzerInnerNode {
 
-  public AnalyzerResult(String uri, double pValue) {
-    this.uri = uri;
-    this.pValue = pValue;
+  private final long nodeId;
+  private final double count;
+
+  public AnalyzerInnerNode(long n, double count) {
+    this.nodeId = n;
+    this.count = count;
   }
 
-  public String getUri() {
-    return uri;
+  public AnalyzerInnerNode(long n, int count) {
+    this.nodeId = n;
+    this.count = count;
   }
 
-  public double getpValue() {
-    return pValue;
+  public long getNodeId() {
+    return nodeId;
+  }
+
+  public double getCount() {
+    return count;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uri);
+    return Objects.hash(nodeId);
   }
 
   @Override
@@ -47,11 +53,12 @@ public class AnalyzerResult {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    return Objects.equals(getUri(), ((AnalyzerResult) obj).getUri());
+    return Objects.equals(getNodeId(), ((AnalyzerInnerNode)obj).getNodeId());
   }
 
   @Override
   public String toString() {
-    return uri + " (" + pValue + ")";
+    return nodeId + " (" + count + ")";
   }
+
 }

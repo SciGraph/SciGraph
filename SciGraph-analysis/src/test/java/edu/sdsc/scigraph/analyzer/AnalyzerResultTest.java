@@ -23,7 +23,7 @@ public class AnalyzerResultTest {
 
   @Test
   public void test() {
-    EqualsVerifier.forClass(AnalyzerResult.class).verify();
+    EqualsVerifier.forClass(AnalyzerInnerNode.class).verify();
   }
 
 }
