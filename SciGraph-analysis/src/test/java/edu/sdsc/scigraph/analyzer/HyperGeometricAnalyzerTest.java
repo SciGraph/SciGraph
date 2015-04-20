@@ -70,7 +70,6 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
 
   @Test
   public void smokeTest() {
-    System.out.println(graph.getNode("http://www.co-ode.org/ontologies/pizza/pizza.owl#PizzaTopping"));
     AnalyzeRequest request = new AnalyzeRequest();
     request.getSamples().addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
     request.setOntologyClass("pizza:Pizza");
