@@ -66,7 +66,7 @@ public class OwlApiUtils {
     } else if (literal.isDouble()) {
       literalValue = literal.parseDouble();
     } else {
-      // TODO: Ignore non-english literals for now
+      // This needs to be addressed  by #110
       if (literal.hasLang() && !literal.getLang().equals("en")) {
         if (!unknownLanguages.contains(literal.getLang())) {
           unknownLanguages.add(literal.getLang());
