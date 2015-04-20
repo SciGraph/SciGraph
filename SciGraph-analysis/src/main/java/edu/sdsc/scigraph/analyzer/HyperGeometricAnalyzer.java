@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.analyzer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -62,21 +63,12 @@ public class HyperGeometricAnalyzer {
     Set<AnalyzerResult> sampleSetNodes = new HashSet<>();
     List<Long> sampleSetId = new ArrayList<>();
     for (String sample : request.getSamples()) {
-      Optional<String> nodeOpt = curieUtil.getIri(sample);
-      if (nodeOpt.isPresent()) {
-        Optional<Long> nodeIdOpt = graph.getNode(nodeOpt.get());
-        if (nodeIdOpt.isPresent()) {
-          sampleSetId.add(nodeIdOpt.get());
-        } else {
-          throw new Exception(nodeOpt.get() + " does not map to a node.");
-        }
-      } else {
-        throw new Exception(sample + " is not recognized.");
-      }
+      sampleSetId.add(getNodeIdFromIri(sample));
     }
     String query =
-        "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath()
-            + "]->(t) where id(n) in " + sampleSetId + " return t, count(*)";
+        "match (r)<-[relSub: subClassOf*]-(n)-[rel:" + request.getPath() + "]->(t) where id(n) in "
+            + sampleSetId + " and id(r) = " + getNodeIdFromIri(request.getOntologyClass())
+            + " return t, count(*)";
     Result result = graphDb.execute(query);
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
@@ -86,10 +78,11 @@ public class HyperGeometricAnalyzer {
     return sampleSetNodes;
   }
 
-  private Set<AnalyzerResult> getCompleteSetNodes(AnalyzeRequest request) {
+
+  private Set<AnalyzerResult> getCompleteSetNodes(AnalyzeRequest request) throws Exception {
     String query =
-        "match (n:" + request.getOntologyClass() + ")-[rel:" + request.getPath()
-            + "]->(t) return t, count(*)";
+        "match (r)<-[relSub: subClassOf*]-(n)-[rel:" + request.getPath() + "]->(t) where id(r) = "
+            + getNodeIdFromIri(request.getOntologyClass()) + " return t, count(*)";
     Result result2 = graphDb.execute(query);
     Set<AnalyzerResult> allSubjects = new HashSet<>();
     while (result2.hasNext()) {
@@ -100,8 +93,10 @@ public class HyperGeometricAnalyzer {
     return allSubjects;
   }
 
-  private int getTotalCount(String ontologyClass) {
-    String query = "match (n:" + ontologyClass + ") return count(*)";
+  private int getTotalCount(String ontologyClass) throws Exception {
+    String query =
+        "match (n)-[rel: subClassOf*]->(r) where id(r) = " + getNodeIdFromIri(ontologyClass)
+            + " return count(*)";
     Result result3 = graphDb.execute(query);
     int totalCount = 0;
     while (result3.hasNext()) {
@@ -110,6 +105,7 @@ public class HyperGeometricAnalyzer {
     }
     return totalCount;
   }
+
 
   private String resolveCurieToFragment(String curie) throws Exception {
     Optional<String> resolvedCurie = curieUtil.getIri(curie);
@@ -120,12 +116,40 @@ public class HyperGeometricAnalyzer {
     }
   }
 
+  private String resolveCurieToIri(String curie) throws Exception {
+    if (curieUtil.getCurie(curie).isPresent()) {
+      return curie; // nothing to do, it is already an IRI
+    }
+    Optional<String> resolvedCurie = curieUtil.getIri(curie);
+    if (resolvedCurie.isPresent()) {
+      return resolvedCurie.get();
+    } else {
+      throw new Exception("Curie " + curie + " not recognized.");
+    }
+  }
+
+  private long getNodeIdFromIri(String iri) throws Exception {
+    Optional<Long> nodeIdOpt = graph.getNode(iri);
+    if (nodeIdOpt.isPresent()) {
+      return nodeIdOpt.get();
+    } else {
+      throw new Exception(iri + " does not map to a node.");
+    }
+  }
+
   AnalyzeRequest processRequest(AnalyzeRequest request) throws Exception {
     String resolvedPath = resolveCurieToFragment(request.getPath());
-    String resolvedOntologyClass = resolveCurieToFragment(request.getOntologyClass());
-    request.setPath(resolvedPath);
-    request.setOntologyClass(resolvedOntologyClass);
-    return request;
+    String resolvedOntologyClass = resolveCurieToIri(request.getOntologyClass());
+    Collection<String> resolvedSamples = new ArrayList<String>();
+    for (String sample : request.getSamples()) {
+      resolvedSamples.add(resolveCurieToIri(sample));
+    }
+
+    AnalyzeRequest resolvedAnalyzeRequest = new AnalyzeRequest();
+    resolvedAnalyzeRequest.setSamples(resolvedSamples);
+    resolvedAnalyzeRequest.setPath(resolvedPath);
+    resolvedAnalyzeRequest.setOntologyClass(resolvedOntologyClass);
+    return resolvedAnalyzeRequest;
   }
 
   public List<AnalyzerResult> analyze(AnalyzeRequest request) {

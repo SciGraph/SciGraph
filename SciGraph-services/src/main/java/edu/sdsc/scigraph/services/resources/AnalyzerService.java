@@ -27,6 +27,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
@@ -37,11 +38,14 @@ import com.wordnik.swagger.annotations.ApiParam;
 import edu.sdsc.scigraph.analyzer.AnalyzeRequest;
 import edu.sdsc.scigraph.analyzer.AnalyzerResult;
 import edu.sdsc.scigraph.analyzer.HyperGeometricAnalyzer;
+import edu.sdsc.scigraph.annotation.EntityAnnotation;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
+import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
+import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 
 @Path("/analyzer")
 @Api(value = "/analyzer", description = "Analysis services")
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
 public class AnalyzerService extends BaseResource {
 
   private final Provider<HyperGeometricAnalyzer> provider;
@@ -53,22 +57,27 @@ public class AnalyzerService extends BaseResource {
 
   @GET
   @Timed
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
   @Path("/enrichment")
   @ApiOperation(value = "Class Enrichment Service", response = String.class,
   notes="")
-  public List<AnalyzerResult> enrich(
+  public Object enrich(
       @ApiParam( value = "A list of CURIEs for nodes whose attributes are to be tested for enrichment. For example, a list of genes.", required = true)
       @QueryParam("sample") Set<String> samples,
       @ApiParam( value = "CURIE for parent ontology class for the attribute to be tested. For example, GO biological process", required = true)
       @QueryParam("ontologyClass") String ontologyClass,
       @ApiParam( value = "A path expression that connects sample nodes to attribute class nodes", required = true)
-      @QueryParam("path") String path) {
+      @QueryParam("path") String path,
+      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
+      @QueryParam("callback") String callback) {
     HyperGeometricAnalyzer hyperGeometricAnalyzer = provider.get();
-    AnalyzeRequest request = new AnalyzeRequest();
-    request.setOntologyClass(ontologyClass);
-    request.setPath(path);
-    request.setSamples(samples);
-    return hyperGeometricAnalyzer.analyze(request);
+    AnalyzeRequest analyzeRequest = new AnalyzeRequest();
+    analyzeRequest.setOntologyClass(ontologyClass);
+    analyzeRequest.setPath(path);
+    analyzeRequest.setSamples(samples);
+    List<AnalyzerResult> analyzeResult = hyperGeometricAnalyzer.analyze(analyzeRequest);
+    GenericEntity<List<AnalyzerResult>> response = new GenericEntity<List<AnalyzerResult>>(analyzeResult){};
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @POST
