@@ -37,7 +37,7 @@ public class RecognizerShouldAnnotateTest {
 
   @Before
   public void setUp() throws Exception {
-    recognizer = new EntityRecognizer(null);
+    recognizer = new EntityRecognizer(null, null);
     concept.setUri("http://x.org/1");
     concept.getLabels().add("Label");
     when(config.getExcludeCategories()).thenReturn(Collections.<String> emptySet());

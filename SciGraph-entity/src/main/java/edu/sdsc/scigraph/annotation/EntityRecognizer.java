@@ -26,17 +26,22 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Optional;
+
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
 public class EntityRecognizer {
 
   private final Vocabulary vocabulary;
+  private final CurieUtil curieUtil;
 
   @Inject
-  EntityRecognizer(Vocabulary vocabulary) throws IOException {
+  EntityRecognizer(Vocabulary vocabulary, CurieUtil curieUtil) throws IOException {
     this.vocabulary = vocabulary;
+    this.curieUtil = curieUtil;
   }
 
   public String getCssClass() {
@@ -68,7 +73,8 @@ public class EntityRecognizer {
     Set<Entity> entities = newHashSet();
     for (Concept term : terms) {
       if (shouldAnnotate(term, config)) {
-        entities.add(new Entity(term));
+        Optional<String> id = curieUtil.getCurie(term.getUri());
+        entities.add(new Entity(term.getLabels(), id.or(term.getUri()), term.getCategories()));
       }
     }
 

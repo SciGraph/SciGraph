@@ -23,11 +23,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
@@ -44,13 +47,16 @@ public class EntityRecognizerTest {
     concept.getLabels().add("foo");
     concept.setUri("http://x.org/1");
     when(vocabulary.getConceptsFromTerm(any(Query.class))).thenReturn(singletonList(concept));
-    recognizer = new EntityRecognizer(vocabulary);
+    Map<String, String> curieMap = new HashMap<>();
+    curieMap.put("X", "http://x.org/");
+    CurieUtil curieUtil = new CurieUtil(curieMap);
+    recognizer = new EntityRecognizer(vocabulary, curieUtil);
   }
 
   @Test
   public void testKnownEntity() {
     Collection<Entity> entities = recognizer.getEntities("foo", config);
-    assertThat(entities, contains(new Entity(concept)));
+    assertThat(entities, contains(new Entity(concept.getLabels(), "X:1")));
   }
 
 }
