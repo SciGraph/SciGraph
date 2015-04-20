@@ -16,7 +16,9 @@
 package edu.sdsc.scigraph.owlapi;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.validator.routines.UrlValidator;
@@ -47,6 +49,8 @@ public class OwlApiUtils {
 
   private static final UrlValidator validator = UrlValidator.getInstance();
 
+  private static final Set<String> unknownLanguages = new HashSet<>();
+
   /*** 
    * @param literal An OWLLiteral
    * @return an optional correctly typed Java object from the OWLLiteral
@@ -64,6 +68,10 @@ public class OwlApiUtils {
     } else {
       // TODO: Ignore non-english literals for now
       if (literal.hasLang() && !literal.getLang().equals("en")) {
+        if (!unknownLanguages.contains(literal.getLang())) {
+          unknownLanguages.add(literal.getLang());
+          logger.warning("Ignoring *all* literals with unsupported langauge: \"" + literal.getLang() + "\".");
+        }
         return Optional.absent();
       }
       literalValue = literal.getLiteral();

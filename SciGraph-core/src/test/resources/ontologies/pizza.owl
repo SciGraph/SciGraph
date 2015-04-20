@@ -156,6 +156,7 @@
 
     <owl:Class rdf:about="#AnchoviesTopping">
         <rdfs:label>Anchovy</rdfs:label>
+        <rdfs:label xml:lang="pt">Cobertura De Anchovies</rdfs:label>
         <rdfs:subClassOf>
             <owl:Class rdf:about="#FishTopping"/>
         </rdfs:subClassOf>
