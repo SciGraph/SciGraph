@@ -78,7 +78,7 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
   }
 
   @Test
-  public void processRequestDoesN() throws Exception {
+  public void processRequestDoesNotMutate() throws Exception {
     AnalyzeRequest request = new AnalyzeRequest();
     request.setPath("pizza:foo");
     request.setOntologyClass("pizza:bar");
