@@ -30,8 +30,6 @@ import javax.xml.bind.annotation.XmlValue;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 
-import edu.sdsc.scigraph.frames.Concept;
-
 // TODO: Can this be replaced by Concept?
 @XmlRootElement
 public final class Entity {
@@ -51,10 +49,6 @@ public final class Entity {
 
   public Entity(String term, String id) {
     this(newArrayList(term), id, Collections.<String> emptySet());
-  }
-
-  public Entity(Concept concept) {
-    this(concept.getLabels(), concept.getUri(), concept.getCategories());
   }
 
   public Entity(Iterable<String> terms, String id, Iterable<String> categories) {
