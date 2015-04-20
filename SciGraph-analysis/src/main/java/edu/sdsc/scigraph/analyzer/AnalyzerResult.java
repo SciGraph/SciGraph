@@ -17,7 +17,7 @@ package edu.sdsc.scigraph.analyzer;
 
 import java.util.Objects;
 
-public class AnalyzerResult {
+public final class AnalyzerResult {
   private final String iri;
   private final double pValue;
 
