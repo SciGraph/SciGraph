@@ -1,7 +1,7 @@
 SciGraph
 ========
-[![Build Status](https://travis-ci.org/SciGraph/SciGraph.svg?branch=master)](https://travis-ci.org/SciCrunch/SciGraph)
-[![Coverage Status](https://coveralls.io/repos/SciGraph/SciGraph/badge.svg)](https://coveralls.io/r/SciCrunch/SciGraph)
+[![Build Status](https://travis-ci.org/SciGraph/SciGraph.svg?branch=master)](https://travis-ci.org/SciGraph/SciGraph)
+[![Coverage Status](https://coveralls.io/repos/SciGraph/SciGraph/badge.svg)](https://coveralls.io/r/SciGraph/SciGraph)
 
 Represent ontologies in a Neo4j graph.
 
