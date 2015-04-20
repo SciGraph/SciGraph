@@ -33,6 +33,7 @@ import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Optional;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
@@ -169,9 +170,17 @@ public class HyperGeometricAnalyzer {
             new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes,
                 n.getNodeId()), processedRequest.getSamples().size());
         double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount());
-        Optional<String> iri = graph.getNodeProperty(n.getNodeId(), "uri", String.class);
+        Optional<String> iri =
+            graph.getNodeProperty(n.getNodeId(), CommonProperties.URI, String.class);
         if (iri.isPresent()) {
-          pValues.add(new AnalyzerResult(iri.get(), p));
+          String curie = "";
+          Optional<String> curieOpt = curieUtil.getCurie(iri.get());
+          if (curieOpt.isPresent()) {
+            curie = curieOpt.get();
+          } else {
+            curie = iri.get();
+          }
+          pValues.add(new AnalyzerResult(curie, p));
         } else {
           throw new Exception("Can't find node's uri for " + n.getNodeId());
         }

@@ -18,16 +18,16 @@ package edu.sdsc.scigraph.analyzer;
 import java.util.Objects;
 
 public class AnalyzerResult {
-  private final String uri;
+  private final String iri;
   private final double pValue;
 
-  public AnalyzerResult(String uri, double pValue) {
-    this.uri = uri;
+  public AnalyzerResult(String iri, double pValue) {
+    this.iri = iri;
     this.pValue = pValue;
   }
 
-  public String getUri() {
-    return uri;
+  public String getIri() {
+    return iri;
   }
 
   public double getpValue() {
@@ -36,7 +36,7 @@ public class AnalyzerResult {
 
   @Override
   public int hashCode() {
-    return Objects.hash(uri);
+    return Objects.hash(iri);
   }
 
   @Override
@@ -47,11 +47,11 @@ public class AnalyzerResult {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    return Objects.equals(getUri(), ((AnalyzerResult) obj).getUri());
+    return Objects.equals(getIri(), ((AnalyzerResult) obj).getIri());
   }
 
   @Override
   public String toString() {
-    return uri + " (" + pValue + ")";
+    return iri + " (" + pValue + ")";
   }
 }
