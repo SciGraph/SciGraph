@@ -44,6 +44,11 @@ Alternatives
 * [owlapi](https://owlcs.github.io/owlapi/)
 * [jena tdb](https://jena.apache.org/documentation/tdb/)
 
+Applications
+------------
+ * the [Monarch Initiative](monarchinitiative.org/) uses SciGraph for both ontologies and biological data modeling
+ * [SciCrunch](http://scicrunch.org/) uses SciGraph for vocabulary and annotation services
+
 Getting Started
 ---------------
 A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to modify your `localhost`. You can launch a provisioned box like this 
