@@ -103,8 +103,8 @@ public class GraphService extends BaseResource {
       @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse", required = false)
       @QueryParam("relationshipType") Optional<String> relationshipType,
-      @ApiParam(value = "Which direction to traverse: in, out, both (default). Only used if relationshipType is specified.", required = false)
-      @QueryParam("direction") @DefaultValue("both") String direction,
+      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false)
+      @QueryParam("direction") @DefaultValue("BOTH") String direction,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
     Set<Concept> roots = new HashSet<>();
@@ -120,15 +120,7 @@ public class GraphService extends BaseResource {
     Set<DirectedRelationshipType> types = new HashSet<>();
     if (relationshipType.isPresent()) {
       RelationshipType type = DynamicRelationshipType.withName(relationshipType.get());
-      Direction dir = Direction.BOTH;
-      switch (direction) {
-        case "in" : dir = Direction.INCOMING;
-        break;
-        case "out" : dir = Direction.OUTGOING;
-        break;
-        case "both" : dir = Direction.BOTH;
-        break;
-      }
+      Direction dir = Direction.valueOf(direction);
       types.add(new DirectedRelationshipType(type, dir));
     }
     TinkerGraph tg = new TinkerGraph();
@@ -172,8 +164,8 @@ public class GraphService extends BaseResource {
       @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse", required = false)
       @QueryParam("relationshipType") Optional<String> relationshipType,
-      @ApiParam(value = "Which direction to traverse: in, out, both (default). Only used if relationshipType is specified.", required = false)
-      @QueryParam("direction") @DefaultValue("both") String direction,
+      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false)
+      @QueryParam("direction") @DefaultValue("BOTH") String direction,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
     return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes, relationshipType, direction, callback);

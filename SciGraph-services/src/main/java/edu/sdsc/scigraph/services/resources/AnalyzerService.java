@@ -36,7 +36,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
 import edu.sdsc.scigraph.analyzer.AnalyzeRequest;
-import edu.sdsc.scigraph.analyzer.AnalyzerInnerNode;
 import edu.sdsc.scigraph.analyzer.AnalyzerResult;
 import edu.sdsc.scigraph.analyzer.HyperGeometricAnalyzer;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
