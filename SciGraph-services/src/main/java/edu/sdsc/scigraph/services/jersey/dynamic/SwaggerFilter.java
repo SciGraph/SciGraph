@@ -41,19 +41,19 @@ import edu.sdsc.scigraph.services.swagger.beans.api.Swagger;
 
 public class SwaggerFilter implements Filter {
 
-  private static final ObjectMapper MAPPER = Jackson.newObjectMapper(new YAMLFactory());
-  private static final ObjectMapper MAPPER2= Jackson.newObjectMapper();
+  private static final ObjectMapper YAML_MAPPER = Jackson.newObjectMapper(new YAMLFactory());
+  private static final ObjectMapper JSON_MAPPER= Jackson.newObjectMapper();
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {}
 
   static byte[] writeDynamicResource(InputStream is) throws IOException {
-    Swagger swagger = MAPPER.readValue(is, Swagger.class);
+    Swagger swagger = YAML_MAPPER.readValue(is, Swagger.class);
     Apis api = new Apis();
     api.setDescription("Dynamic Cypher resources");
     api.setPath("/dynamic");
     swagger.getApis().add(api);
-    return MAPPER2.writeValueAsBytes(swagger);
+    return JSON_MAPPER.writeValueAsBytes(swagger);
   }
 
   static boolean isGzip(ServletRequest request) {
