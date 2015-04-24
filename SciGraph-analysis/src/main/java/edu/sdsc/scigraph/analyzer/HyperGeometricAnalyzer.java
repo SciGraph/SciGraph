@@ -50,6 +50,17 @@ public class HyperGeometricAnalyzer {
     this.curieUtil = curieUtil;
     this.graph = graph;
   }
+  
+  private double computeBonferroniCoeff(Set<AnalyzerInnerNode> set) {
+    // Consider only properties which appear more than once
+    int count = 0;
+    for (AnalyzerInnerNode el : set) {
+      if (el.getCount() > 1) {
+        count ++;
+      }
+    }
+    return count;
+  }
 
   private double getCountFrom(Set<AnalyzerInnerNode> set, Long id) throws Exception {
     for (AnalyzerInnerNode el : set) {
@@ -161,6 +172,8 @@ public class HyperGeometricAnalyzer {
       Set<AnalyzerInnerNode> sampleSetNodes = getSampleSetNodes(processedRequest);
 
       Set<AnalyzerInnerNode> completeSetNodes = getCompleteSetNodes(processedRequest);
+      
+      double bonferroniCoeff = computeBonferroniCoeff(completeSetNodes);
 
       int totalCount = getTotalCount(processedRequest.getOntologyClass());
 
@@ -169,7 +182,7 @@ public class HyperGeometricAnalyzer {
         HypergeometricDistribution hypergeometricDistribution =
             new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes,
                 n.getNodeId()), processedRequest.getSamples().size());
-        double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount());
+        double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount()) * bonferroniCoeff;
         Optional<String> iri =
             graph.getNodeProperty(n.getNodeId(), CommonProperties.URI, String.class);
         if (iri.isPresent()) {
@@ -185,7 +198,7 @@ public class HyperGeometricAnalyzer {
           throw new Exception("Can't find node's uri for " + n.getNodeId());
         }
       }
-
+      
       // sort by p-value
       Collections.sort(pValues, new AnalyzerResultComparator());
 
