@@ -97,6 +97,12 @@ public final class TinkerGraphUtil {
     }
   }
 
+  public static void addPath(Graph graph, Iterable<PropertyContainer> path) {
+    for (PropertyContainer container: path) {
+      addElement(graph, container);
+    }
+  }
+
   static void copyProperties(Element source, Element target) {
     for (String key: source.getPropertyKeys()) {
       Object property = source.getProperty(key);

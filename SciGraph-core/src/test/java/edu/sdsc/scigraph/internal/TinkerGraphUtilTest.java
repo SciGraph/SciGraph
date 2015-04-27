@@ -29,12 +29,14 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 
 import com.google.common.base.Optional;
@@ -48,36 +50,52 @@ public class TinkerGraphUtilTest {
 
   TinkerGraph graph;
   Node node, otherNode;
+  Relationship relationship;
 
-  Node mockNode() {
+  Node mockNode(long id) {
     Node node = mock(Node.class);
+    when(node.getId()).thenReturn(id);
     when(node.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
     when(node.getLabels()).thenReturn(Collections.<Label>emptySet());
     return node;
   }
 
+  Relationship mockRealtionship(Node start, Node end) {
+    Relationship r = mock(Relationship.class);
+    when(r.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
+    when(r.getType()).thenReturn(DynamicRelationshipType.withName("FOO"));
+    when(r.getStartNode()).thenReturn(start);
+    when(r.getEndNode()).thenReturn(end);
+    return r;
+  }
+
   @Before
   public void setup() {
-    node = mockNode();
-    otherNode = mockNode();
+    node = mockNode(0L);
+    otherNode = mockNode(1L);
     graph = new TinkerGraph();
+    relationship = mockRealtionship(node, otherNode);
   }
 
   @Test
   public void idsAreTranslated() {
-    when(node.getId()).thenReturn(1L);
-    when(node.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
     Vertex v = TinkerGraphUtil.addNode(graph, node);
-    assertThat(v.getId(), is((Object)"1"));
+    assertThat(v.getId(), is((Object)"0"));
   }
 
   @Test
   public void addNodeIsIdempotent() {
-    when(node.getId()).thenReturn(1L);
-    when(node.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
     Vertex v1 = TinkerGraphUtil.addNode(graph, node);
     Vertex v2 = TinkerGraphUtil.addNode(graph, node);
     assertThat(v1, is(v2));
+  }
+
+  @Test
+  public void pathsAreTranslated() {
+    Iterable<PropertyContainer> path = newArrayList(node, relationship, otherNode);
+    TinkerGraphUtil.addPath(graph, path);
+    assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(2)));
+    assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(1)));
   }
 
   @Test
@@ -130,8 +148,6 @@ public class TinkerGraphUtilTest {
 
   @Test
   public void relationshipsAreTranslated() {
-    when(node.getId()).thenReturn(1L);
-    when(otherNode.getId()).thenReturn(2L);
     Vertex u = TinkerGraphUtil.addNode(graph, node);
     Vertex v = TinkerGraphUtil.addNode(graph, otherNode);
     Relationship relationship = mock(Relationship.class);
@@ -185,6 +201,5 @@ public class TinkerGraphUtilTest {
     v.setProperty("foo", new String[] {"bar", "baz"});
     assertThat(TinkerGraphUtil.getProperties(v, "foo", String.class), containsInAnyOrder("bar", "baz"));
   }
-  
 
 }
