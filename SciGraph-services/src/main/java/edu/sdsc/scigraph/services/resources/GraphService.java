@@ -72,9 +72,8 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")
 @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
-            MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML,
+            MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
             CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
-            CustomMediaTypes.APPLICATION_XGMML,
             CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
 public class GraphService extends BaseResource {
 
