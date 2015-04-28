@@ -34,7 +34,7 @@ labels to graph nodes, auto-complete functionality, OpenRefine resolution servic
 IRI resolution. Additional support for identifying these vocabulary entities
 in free text can be found in the `scigraph-entity` module.
 
-SciGraph can also be used as a stand-alone DropWizard web service (via `scigraph-services`). SciGraph services support adding custom Cypher
+SciGraph can also be used as a stand-alone Dropwizard web service (via `scigraph-services`). SciGraph services support adding custom Cypher
 queries during application configuration to keep the code base domain agnostic.
 
 Note that SciGraph is "OWL-centric". If you have, for example, and arbitrary SKOS ontology that doesn't assert skos:Concept as an owl:Class these skos:Concepts will not be visible to the owlapi and not loaded in the resulting Neo4j graph.
@@ -49,10 +49,12 @@ Applications
 ------------
  * the [Monarch Initiative](monarchinitiative.org/) uses SciGraph for both ontologies and biological data modeling
  * [SciCrunch](http://scicrunch.org/) uses SciGraph for vocabulary and annotation services
+ * [CINERGI](http://earthcube.org/group/cinergi) uses SciGraph for vocabulary and annotation services
 
 Getting Started
 ---------------
-A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to modify your `localhost`. You can launch a provisioned box like this 
+A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to modify your `localhost` (you'll also need [VirtualBox](https://www.virtualbox.org/)).
+You can launch a provisioned box like this and then follow the steps below:
 
 	curl https://raw.githubusercontent.com/SciCrunch/SciGraph/master/src/test/resources/vagrant/Vagrantfile -o Vagrantfile
     vagrant up
@@ -79,7 +81,7 @@ Run the services:
 
 Check out some of the REST endpoints (the Vagrant box has port 9000 mapped so you can use your host browser to check these out):
 
- - [Get autocomplete options for a prefix](http://localhost:9000/scigraph/vocabulary/autocomplete/Sp)
+ - [Get autocomplete candidates for a prefix](http://localhost:9000/scigraph/vocabulary/autocomplete/Sp)
 
  - [Find a class based on an "exactish" term match](http://localhost:9000/scigraph/vocabulary/search/Shrimps)
 
