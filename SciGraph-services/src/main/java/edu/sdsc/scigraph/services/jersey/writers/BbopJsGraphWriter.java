@@ -52,7 +52,7 @@ public class BbopJsGraphWriter extends GraphWriter {
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
 
   // TODO: Move these next three methods someplace common
-  String getCurieOrFragment(Vertex vertex) {
+  static String getCurieOrFragment(Vertex vertex) {
     String property = vertex.getPropertyKeys().contains(CommonProperties.CURIE) 
         ? CommonProperties.CURIE : CommonProperties.FRAGMENT; 
     return (String)vertex.getProperty(property);

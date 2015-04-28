@@ -71,8 +71,11 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")
-@Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-  MediaType.APPLICATION_XML})
+@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
+            MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML,
+            CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
+            CustomMediaTypes.APPLICATION_XGMML,
+            CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
 public class GraphService extends BaseResource {
 
   private final Vocabulary vocabulary;
@@ -91,9 +94,6 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get neighbors", response = TinkerGraph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
-    CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNeighborsFromMultipleRoots(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @QueryParam("id") Set<String> ids,
@@ -152,9 +152,6 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get neighbors", response = TinkerGraph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
-    CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNeighbors(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,
@@ -176,9 +173,6 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get all properties of a node", response = TinkerGraph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_GRAPHSON, CustomMediaTypes.TEXT_GML, 
-    CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNode(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,
@@ -192,6 +186,7 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get all relationship types", response = String.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, MediaType.APPLICATION_XML})
   public Object getRelationships(
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
