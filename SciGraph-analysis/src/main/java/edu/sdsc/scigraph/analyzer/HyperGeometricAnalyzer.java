@@ -22,9 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -50,13 +53,13 @@ public class HyperGeometricAnalyzer {
     this.curieUtil = curieUtil;
     this.graph = graph;
   }
-  
+
   private double computeBonferroniCoeff(Set<AnalyzerInnerNode> set) {
     // Consider only properties which appear more than once
     int count = 0;
     for (AnalyzerInnerNode el : set) {
       if (el.getCount() > 1) {
-        count ++;
+        count++;
       }
     }
     return count;
@@ -78,7 +81,7 @@ public class HyperGeometricAnalyzer {
       sampleSetId.add(getNodeIdFromIri(sample));
     }
     String query =
-        "match (r)<-[relSub: subClassOf*]-(n)-[rel:" + request.getPath() + "]->(t) where id(n) in "
+        "match (r)<-[relSub: subClassOf*]-(n)" + request.getPath() + "(t) where id(n) in "
             + sampleSetId + " and id(r) = " + getNodeIdFromIri(request.getOntologyClass())
             + " return t, count(*)";
     Result result = graphDb.execute(query);
@@ -93,7 +96,7 @@ public class HyperGeometricAnalyzer {
 
   private Set<AnalyzerInnerNode> getCompleteSetNodes(AnalyzeRequest request) throws Exception {
     String query =
-        "match (r)<-[relSub: subClassOf*]-(n)-[rel:" + request.getPath() + "]->(t) where id(r) = "
+        "match (r)<-[relSub: subClassOf*]-(n)" + request.getPath() + "(t) where id(r) = "
             + getNodeIdFromIri(request.getOntologyClass()) + " return t, count(*)";
     Result result2 = graphDb.execute(query);
     Set<AnalyzerInnerNode> allSubjects = new HashSet<>();
@@ -120,12 +123,8 @@ public class HyperGeometricAnalyzer {
 
 
   private String resolveCurieToFragment(String curie) throws Exception {
-    Optional<String> resolvedCurie = curieUtil.getIri(curie);
-    if (resolvedCurie.isPresent()) {
-      return GraphUtil.getFragment(resolvedCurie.get());
-    } else {
-      throw new Exception("Curie " + curie + " not recognized.");
-    }
+    String resolvedCurie = resolveCurieToIri(curie);
+    return GraphUtil.getFragment(resolvedCurie);
   }
 
   private String resolveCurieToIri(String curie) throws Exception {
@@ -149,8 +148,39 @@ public class HyperGeometricAnalyzer {
     }
   }
 
+  private String resolveProvidedPath(String providedPath) throws Exception {
+    StringBuffer sb = new StringBuffer();
+    Pattern p = Pattern.compile("\\[(.*?)\\]");
+    Matcher m = p.matcher(providedPath);
+
+    while (m.find()) {
+
+      String text = m.group(1);
+      String[] splitOnStar = text.substring(1).split("\\*"); // removes the : of the path and split
+                                                             // on star
+      String withoutStar = splitOnStar[0];
+      String[] splitOnPipe = withoutStar.split("\\|"); // split on pipe
+      ArrayList<String> pipes = new ArrayList<String>();
+      for (String sanitized : splitOnPipe) {
+        pipes.add(resolveCurieToFragment(sanitized));
+      }
+      String resolved = StringUtils.join(pipes, '|');
+
+      if (text.contains("*")) {
+        if (splitOnStar.length > 1) {
+          resolved += "*" + splitOnStar[1];
+        } else {
+          resolved += "*";
+        }
+      }
+      m.appendReplacement(sb, Matcher.quoteReplacement("[:" + resolved + "]"));
+    }
+    m.appendTail(sb);
+    return sb.toString();
+  }
+
   AnalyzeRequest processRequest(AnalyzeRequest request) throws Exception {
-    String resolvedPath = resolveCurieToFragment(request.getPath());
+    String resolvedPath = resolveProvidedPath(request.getPath());
     String resolvedOntologyClass = resolveCurieToIri(request.getOntologyClass());
     Collection<String> resolvedSamples = new ArrayList<String>();
     for (String sample : request.getSamples()) {
@@ -172,7 +202,7 @@ public class HyperGeometricAnalyzer {
       Set<AnalyzerInnerNode> sampleSetNodes = getSampleSetNodes(processedRequest);
 
       Set<AnalyzerInnerNode> completeSetNodes = getCompleteSetNodes(processedRequest);
-      
+
       double bonferroniCoeff = computeBonferroniCoeff(completeSetNodes);
 
       int totalCount = getTotalCount(processedRequest.getOntologyClass());
@@ -182,7 +212,9 @@ public class HyperGeometricAnalyzer {
         HypergeometricDistribution hypergeometricDistribution =
             new HypergeometricDistribution(totalCount, (int) getCountFrom(completeSetNodes,
                 n.getNodeId()), processedRequest.getSamples().size());
-        double p = hypergeometricDistribution.upperCumulativeProbability((int) n.getCount()) * bonferroniCoeff;
+        double p =
+            hypergeometricDistribution.upperCumulativeProbability((int) n.getCount())
+                * bonferroniCoeff;
         Optional<String> iri =
             graph.getNodeProperty(n.getNodeId(), CommonProperties.URI, String.class);
         if (iri.isPresent()) {
@@ -198,7 +230,7 @@ public class HyperGeometricAnalyzer {
           throw new Exception("Can't find node's uri for " + n.getNodeId());
         }
       }
-      
+
       // sort by p-value
       Collections.sort(pValues, new AnalyzerResultComparator());
 

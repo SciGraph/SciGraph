@@ -73,7 +73,7 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
     AnalyzeRequest request = new AnalyzeRequest();
     request.getSamples().addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
     request.setOntologyClass("pizza:Pizza");
-    request.setPath("pizza:hasTopping");
+    request.setPath("-[:pizza:hasTopping]->");
     assertThat(analyzer.analyze(request), is(not(empty())));
   }
 
