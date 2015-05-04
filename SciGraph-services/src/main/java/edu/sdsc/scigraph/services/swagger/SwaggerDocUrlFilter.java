@@ -26,6 +26,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/***
+ * This filter exists to forward <b>scigraph/docs</b> to <b>scigraph/docs/</b>.
+ */
 public class SwaggerDocUrlFilter implements Filter {
 
   private static final String DOC_TRAILER = "/scigraph/docs";
