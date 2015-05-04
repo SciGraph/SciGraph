@@ -67,7 +67,7 @@ public class OwlApiUtils {
       literalValue = literal.parseDouble();
     } else {
       // This needs to be addressed  by #110
-      if (literal.hasLang() && !literal.getLang().equals("en")) {
+      if (literal.hasLang() && !literal.getLang().startsWith("en")) {
         if (!unknownLanguages.contains(literal.getLang())) {
           unknownLanguages.add(literal.getLang());
           logger.warning("Ignoring *all* literals with unsupported langauge: \"" + literal.getLang() + "\".");
