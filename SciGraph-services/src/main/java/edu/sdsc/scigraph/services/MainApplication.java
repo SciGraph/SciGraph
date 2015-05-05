@@ -108,14 +108,14 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     environment.jersey().getResourceConfig().addProperties(props);
     addWriters(environment.jersey());
 
-    environment.servlets().addFilter("swaggerDocResolver", new SwaggerDocUrlFilter())
-    .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), false, "/*");;
-
     //TODO: This path should not be hard coded.
     configureSwagger(environment, "scigraph");
     environment.servlets().addFilter("Swagger Filter", factory.getInjector().getInstance(SwaggerFilter.class))
     .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/api-docs/");
 
+    environment.servlets().addFilter("swaggerDocResolver", new SwaggerDocUrlFilter())
+    .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), false, "/*");
+    
     DynamicCypherResourceFactory cypherFactory = factory.getInjector().getInstance(DynamicCypherResourceFactory.class);
     for (Apis config: configuration.getCypherResources()) {
       environment.jersey().getResourceConfig().registerResources(cypherFactory.create(config).getBuilder().build());
