@@ -4,6 +4,7 @@ graphConfiguration:
     # Loading will append content to existing graphs.
     location: target/pizzaGraph
     indexedNodeProperties:
+      - category
       - label
       - fragment
     exactNodeProperties:

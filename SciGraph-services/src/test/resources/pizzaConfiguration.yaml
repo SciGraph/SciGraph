@@ -14,6 +14,7 @@ graphConfiguration:
   curies:
     'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
   indexedNodeProperties:
+    - category
     - label
     - fragment
   exactNodeProperties:
