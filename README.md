@@ -67,7 +67,7 @@ SciGraph currently has known issues with Java 8. It _should_ still work but pref
 
 Clone and compile the project:
 
-    git clone https://github.com/SciCrunch/SciGraph; cd SciGraph; mvn -DskipTests -DskipITs install
+    git clone https://github.com/SciGraph/SciGraph; cd SciGraph; mvn -DskipTests -DskipITs install
 
 Build the graph:
 
