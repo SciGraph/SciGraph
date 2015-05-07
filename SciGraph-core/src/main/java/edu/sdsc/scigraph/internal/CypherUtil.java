@@ -37,6 +37,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 /***
@@ -56,15 +57,14 @@ public class CypherUtil {
     this.graphDb = graphDb;
   }
 
-  /***
-   * @param query
-   * @param params
-   * @return
-   */
   public Result execute(String query, Multimap<String, Object> params) {
     query = substituteRelationships(query, params);
     query = entailRelationships(query);
     return graphDb.execute(query, flattenMap(params));
+  }
+
+  public Result execute(String query) {
+    return execute(query, HashMultimap.<String, Object>create());
   }
 
   static Map<String, Object> flattenMap(Multimap<String, Object> paramMap) {
