@@ -157,6 +157,10 @@ public class OwlLoadConfiguration {
       return properties;
     }
 
+    public void setProperties(List<String> properties) {
+      this.properties = properties;
+    }
+
     @Override
     public String toString() {
       return MoreObjects.toStringHelper(this.getClass()).add("name", name)
