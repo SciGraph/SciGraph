@@ -143,7 +143,11 @@ public class OwlLoadConfiguration {
 
   public static class MappedProperty {
     String name;
-    List<String> properties;
+    List<String> properties = new ArrayList<>();
+
+    public MappedProperty(String name) {
+      this.name = name;
+    }
 
     public String getName() {
       return name;
