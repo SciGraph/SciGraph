@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.owlapi.loader;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,7 +60,10 @@ final class OwlOntologyConsumer implements Callable<Long> {
     try {
       while (true) {
         if (numProducersShutdown.get() < numProducers || !queue.isEmpty()) {
-          OWLObject owlObject = queue.take();
+          OWLObject owlObject = queue.poll(1, TimeUnit.MINUTES);
+          if (null == owlObject) {
+            continue;
+          }
           if (0 == queue.size() % 100_000) {
             logger.info("Currently " + queue.size() + " objects remaining in the queue");
           }
