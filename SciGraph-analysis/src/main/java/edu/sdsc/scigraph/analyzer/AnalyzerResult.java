@@ -20,10 +20,16 @@ import java.util.Objects;
 public final class AnalyzerResult {
   private final String iri;
   private final double pValue;
+  private final String labels;
 
-  public AnalyzerResult(String iri, double pValue) {
+  public AnalyzerResult(String labels, String iri, double pValue) {
+    this.labels = labels;
     this.iri = iri;
     this.pValue = pValue;
+  }
+  
+  public String getLabels() {
+    return labels;
   }
 
   public String getIri() {
@@ -52,6 +58,6 @@ public final class AnalyzerResult {
 
   @Override
   public String toString() {
-    return iri + " (" + pValue + ")";
+    return labels + " " + iri + " (" + pValue + ")";
   }
 }

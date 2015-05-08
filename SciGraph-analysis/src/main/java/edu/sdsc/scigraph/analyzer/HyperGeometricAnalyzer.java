@@ -37,6 +37,7 @@ import org.neo4j.graphdb.Transaction;
 import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
+import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
@@ -225,7 +226,8 @@ public class HyperGeometricAnalyzer {
           } else {
             curie = iri.get();
           }
-          pValues.add(new AnalyzerResult(curie, p));
+          String labels = StringUtils.join(graph.getNodeProperties(n.getNodeId(), NodeProperties.LABEL, String.class), ", ");
+          pValues.add(new AnalyzerResult(labels,curie, p));
         } else {
           throw new Exception("Can't find node's uri for " + n.getNodeId());
         }

@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.not;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.BeforeClass;
@@ -34,6 +35,7 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
 
+import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.owlapi.GraphOwlVisitor;
 import edu.sdsc.scigraph.owlapi.OwlPostprocessor;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
@@ -53,7 +55,16 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
     manager.loadOntologyFromOntologyDocument(iri);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
 
-    GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, new ArrayList<MappedProperty>());
+    MappedProperty mappedProperty = new MappedProperty(NodeProperties.LABEL);
+    List<String> properties = new ArrayList<String>();
+    properties.add("http://www.w3.org/2000/01/rdf-schema#label");
+    properties.add("http://www.w3.org/2004/02/skos/core#prefLabel");
+    mappedProperty.setProperties(properties);
+    
+    ArrayList<MappedProperty> mappedPropertyList = new ArrayList<MappedProperty>();
+    mappedPropertyList.add(mappedProperty);
+
+    GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, mappedPropertyList);
     walker.walkStructure(visitor);
     Map<String, String> categories = new HashMap<>();
     categories.put("http://www.co-ode.org/ontologies/pizza/pizza.owl#NamedPizza", "pizza");
@@ -71,7 +82,8 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
   @Test
   public void smokeTest() {
     AnalyzeRequest request = new AnalyzeRequest();
-    request.getSamples().addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
+    request.getSamples()
+        .addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
     request.setOntologyClass("pizza:Pizza");
     request.setPath("-[:pizza:hasTopping]->");
     assertThat(analyzer.analyze(request), is(not(empty())));
