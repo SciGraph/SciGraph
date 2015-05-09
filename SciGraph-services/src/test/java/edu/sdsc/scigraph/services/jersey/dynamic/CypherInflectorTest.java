@@ -58,7 +58,7 @@ public class CypherInflectorTest extends GraphTestBase {
 
   @Before
   public void setup() {
-    CypherUtil cypherUtil = new CypherUtil(graphDb);
+    CypherUtil cypherUtil = new CypherUtil(graphDb, curieUtil);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
