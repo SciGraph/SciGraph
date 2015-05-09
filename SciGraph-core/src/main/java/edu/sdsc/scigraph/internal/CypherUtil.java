@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.internal;
 
 import static com.google.common.base.Joiner.on;
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -36,9 +37,14 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+
+import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 
 /***
  * A utility for more expressive Cypher queries.
@@ -51,10 +57,12 @@ public class CypherUtil {
   private static Pattern pattern = Pattern.compile(ENTAILMENT_REGEX);
 
   private final GraphDatabaseService graphDb;
+  private final CurieUtil curieUtil;
 
   @Inject
-  public CypherUtil(GraphDatabaseService graphDb) {
+  public CypherUtil(GraphDatabaseService graphDb, CurieUtil curieUtil) {
     this.graphDb = graphDb;
+    this.curieUtil = curieUtil;
   }
 
   public Result execute(String query, Multimap<String, Object> params) {
@@ -78,6 +86,9 @@ public class CypherUtil {
   Set<String> getEntailedRelationshipTypes(Set<String> parents) {
     Set<String> entailedTypes = new HashSet<>();
     for (String parent: parents) {
+      if (curieUtil.getIri(parent).isPresent()) {
+        parent = GraphUtil.getFragment(curieUtil.getIri(parent).get());
+      }
       entailedTypes.add(parent);
       Map<String, Object> params = new HashMap<>();
       params.put("fragment", parent);
@@ -109,11 +120,23 @@ public class CypherUtil {
     return buffer.toString();
   }
 
-  static String substituteRelationships(String query, final Multimap<String, Object> valueMap) {
+  String substituteRelationships(String query, final Multimap<String, Object> valueMap) {
     StrSubstitutor substitutor = new StrSubstitutor(new StrLookup<String>() {
       @Override
       public String lookup(String key) {
-        return on('|').join(valueMap.get(key));
+        Collection<String> resolvedRelationshipTypes = transform(valueMap.get(key), new Function<Object, String>() {
+          @Override
+          public String apply(Object input) {
+            Optional<String> iri = curieUtil.getIri(input.toString());
+            if (iri.isPresent()) {
+              return GraphUtil.getFragment(iri.get());
+            } else {
+              return input.toString();
+            }
+          }
+          
+        });
+        return on('|').join(resolvedRelationshipTypes);
       }
     });
     return substitutor.replace(query);

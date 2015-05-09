@@ -19,6 +19,9 @@ import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
@@ -28,10 +31,12 @@ import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Result;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.util.GraphTestBase;
 
 public class CypherUtilTest extends GraphTestBase{
@@ -40,7 +45,10 @@ public class CypherUtilTest extends GraphTestBase{
 
   @Before
   public void test() {
-    util = new CypherUtil(graphDb);
+    CurieUtil curieUtil = mock(CurieUtil.class);
+    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getIri("FOO:foo")).thenReturn(Optional.of("http://x.org/#foo"));
+    util = new CypherUtil(graphDb, curieUtil);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
@@ -51,8 +59,17 @@ public class CypherUtilTest extends GraphTestBase{
     Multimap<String, Object> valueMap = HashMultimap.create();
     valueMap.put("node_id", "HP_123");
     valueMap.put("rel_id", "RO_1");
-    String actual = CypherUtil.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
+    String actual = util.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
     assertThat(actual, is("({node_id}-[:RO_1!]-(end)"));
+  }
+
+  @Test
+  public void substituteCurieRelationship() {
+    Multimap<String, Object> valueMap = HashMultimap.create();
+    valueMap.put("node_id", "HP_123");
+    valueMap.put("rel_id", "FOO:foo");
+    String actual = util.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
+    assertThat(actual, is("({node_id}-[:foo!]-(end)"));
   }
 
   @Test
@@ -61,13 +78,19 @@ public class CypherUtilTest extends GraphTestBase{
     valueMap.put("node_id", "HP_123");
     valueMap.put("rel_id", "RO_1");
     valueMap.put("rel_id", "RO_2");
-    String actual = CypherUtil.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
+    String actual = util.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
     assertThat(actual, is("({node_id}-[:RO_2|RO_1!]-(end)"));
   }
 
   @Test
   public void entailmentRegex() {
     String result = util.entailRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
+    assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
+  }
+
+  @Test
+  public void curiesAreEntailed() {
+    String result = util.entailRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
     assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
   }
 
