@@ -1,17 +1,15 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.sdsc.scigraph.analyzer;
 
@@ -38,6 +36,7 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.NodeProperties;
+import edu.sdsc.scigraph.internal.CypherUtil;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
@@ -47,12 +46,15 @@ public class HyperGeometricAnalyzer {
   private final GraphDatabaseService graphDb;
   private final CurieUtil curieUtil;
   private final Graph graph;
+  private final CypherUtil cypherUtil;
 
   @Inject
-  HyperGeometricAnalyzer(GraphDatabaseService graphDb, CurieUtil curieUtil, Graph graph) {
+  HyperGeometricAnalyzer(GraphDatabaseService graphDb, CurieUtil curieUtil, Graph graph,
+      CypherUtil cypherUtil) {
     this.graphDb = graphDb;
     this.curieUtil = curieUtil;
     this.graph = graph;
+    this.cypherUtil = cypherUtil;
   }
 
   private double computeBonferroniCoeff(Set<AnalyzerInnerNode> set) {
@@ -82,10 +84,10 @@ public class HyperGeometricAnalyzer {
       sampleSetId.add(getNodeIdFromIri(sample));
     }
     String query =
-        "match (r)<-[relSub: subClassOf*]-(n)" + request.getPath() + "(t) where id(n) in "
-            + sampleSetId + " and id(r) = " + getNodeIdFromIri(request.getOntologyClass())
-            + " return t, count(*)";
-    Result result = graphDb.execute(query);
+        "match (r)<-[:subClassOf*]-(n)" + request.getPath()
+            + "(i)<-[:subClassOf*]-(t) where id(n) in " + sampleSetId + " and id(r) = "
+            + getNodeIdFromIri(request.getOntologyClass()) + " return t, count(*)";
+    Result result = cypherUtil.execute(query);
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
       sampleSetNodes.add(new AnalyzerInnerNode(((Node) map.get("t")).getId(), (Long) map
@@ -97,9 +99,10 @@ public class HyperGeometricAnalyzer {
 
   private Set<AnalyzerInnerNode> getCompleteSetNodes(AnalyzeRequest request) throws Exception {
     String query =
-        "match (r)<-[relSub: subClassOf*]-(n)" + request.getPath() + "(t) where id(r) = "
+        "match (r)<-[:subClassOf*]-(n)" + request.getPath()
+            + "(i)<-[:subClassOf*]-(t) where id(r) = "
             + getNodeIdFromIri(request.getOntologyClass()) + " return t, count(*)";
-    Result result2 = graphDb.execute(query);
+    Result result2 = cypherUtil.execute(query);
     Set<AnalyzerInnerNode> allSubjects = new HashSet<>();
     while (result2.hasNext()) {
       Map<String, Object> map = result2.next();
@@ -111,9 +114,9 @@ public class HyperGeometricAnalyzer {
 
   private int getTotalCount(String ontologyClass) throws Exception {
     String query =
-        "match (n)-[rel: subClassOf*]->(r) where id(r) = " + getNodeIdFromIri(ontologyClass)
+        "match (n)-[:subClassOf*]->(r) where id(r) = " + getNodeIdFromIri(ontologyClass)
             + " return count(*)";
-    Result result3 = graphDb.execute(query);
+    Result result3 = cypherUtil.execute(query);
     int totalCount = 0;
     while (result3.hasNext()) {
       Map<String, Object> map = result3.next();
@@ -140,7 +143,18 @@ public class HyperGeometricAnalyzer {
     }
   }
 
-  private long getNodeIdFromIri(String iri) throws Exception {
+//  private long getNodeIdFromIri(String iri) throws Exception {
+//    Optional<Long> nodeIdOpt = graph.getNode(iri);
+//    if (nodeIdOpt.isPresent()) {
+//      return nodeIdOpt.get();
+//    } else {
+//      throw new Exception(iri + " does not map to a node.");
+//    }
+//  }
+  
+  // TODO rename this function
+  private long getNodeIdFromIri(String curie) throws Exception {
+    String iri = resolveCurieToIri(curie);
     Optional<Long> nodeIdOpt = graph.getNode(iri);
     if (nodeIdOpt.isPresent()) {
       return nodeIdOpt.get();
@@ -149,56 +163,56 @@ public class HyperGeometricAnalyzer {
     }
   }
 
-  private String resolveProvidedPath(String providedPath) throws Exception {
-    StringBuffer sb = new StringBuffer();
-    Pattern p = Pattern.compile("\\[(.*?)\\]");
-    Matcher m = p.matcher(providedPath);
+//  private String resolveProvidedPath(String providedPath) throws Exception {
+//    StringBuffer sb = new StringBuffer();
+//    Pattern p = Pattern.compile("\\[(.*?)\\]");
+//    Matcher m = p.matcher(providedPath);
+//
+//    while (m.find()) {
+//
+//      String text = m.group(1);
+//      String[] splitOnStar = text.substring(1).split("\\*"); // removes the : of the path and split
+//                                                             // on star
+//      String withoutStar = splitOnStar[0];
+//      String[] splitOnPipe = withoutStar.split("\\|"); // split on pipe
+//      ArrayList<String> pipes = new ArrayList<String>();
+//      for (String sanitized : splitOnPipe) {
+//        pipes.add(resolveCurieToFragment(sanitized));
+//      }
+//      String resolved = StringUtils.join(pipes, '|');
+//
+//      if (text.contains("*")) {
+//        if (splitOnStar.length > 1) {
+//          resolved += "*" + splitOnStar[1];
+//        } else {
+//          resolved += "*";
+//        }
+//      }
+//      m.appendReplacement(sb, Matcher.quoteReplacement("[:" + resolved + "]"));
+//    }
+//    m.appendTail(sb);
+//    return sb.toString();
+//  }
 
-    while (m.find()) {
-
-      String text = m.group(1);
-      String[] splitOnStar = text.substring(1).split("\\*"); // removes the : of the path and split
-                                                             // on star
-      String withoutStar = splitOnStar[0];
-      String[] splitOnPipe = withoutStar.split("\\|"); // split on pipe
-      ArrayList<String> pipes = new ArrayList<String>();
-      for (String sanitized : splitOnPipe) {
-        pipes.add(resolveCurieToFragment(sanitized));
-      }
-      String resolved = StringUtils.join(pipes, '|');
-
-      if (text.contains("*")) {
-        if (splitOnStar.length > 1) {
-          resolved += "*" + splitOnStar[1];
-        } else {
-          resolved += "*";
-        }
-      }
-      m.appendReplacement(sb, Matcher.quoteReplacement("[:" + resolved + "]"));
-    }
-    m.appendTail(sb);
-    return sb.toString();
-  }
-
-  AnalyzeRequest processRequest(AnalyzeRequest request) throws Exception {
-    String resolvedPath = resolveProvidedPath(request.getPath());
-    String resolvedOntologyClass = resolveCurieToIri(request.getOntologyClass());
-    Collection<String> resolvedSamples = new ArrayList<String>();
-    for (String sample : request.getSamples()) {
-      resolvedSamples.add(resolveCurieToIri(sample));
-    }
-
-    AnalyzeRequest resolvedAnalyzeRequest = new AnalyzeRequest();
-    resolvedAnalyzeRequest.setSamples(resolvedSamples);
-    resolvedAnalyzeRequest.setPath(resolvedPath);
-    resolvedAnalyzeRequest.setOntologyClass(resolvedOntologyClass);
-    return resolvedAnalyzeRequest;
-  }
+//  AnalyzeRequest processRequest(AnalyzeRequest request) throws Exception {
+//    String resolvedPath = resolveProvidedPath(request.getPath());
+//    String resolvedOntologyClass = resolveCurieToIri(request.getOntologyClass());
+//    Collection<String> resolvedSamples = new ArrayList<String>();
+//    for (String sample : request.getSamples()) {
+//      resolvedSamples.add(resolveCurieToIri(sample));
+//    }
+//
+//    AnalyzeRequest resolvedAnalyzeRequest = new AnalyzeRequest();
+//    resolvedAnalyzeRequest.setSamples(resolvedSamples);
+//    resolvedAnalyzeRequest.setPath(resolvedPath);
+//    resolvedAnalyzeRequest.setOntologyClass(resolvedOntologyClass);
+//    return resolvedAnalyzeRequest;
+//  }
 
   public List<AnalyzerResult> analyze(AnalyzeRequest request) {
     List<AnalyzerResult> pValues = new ArrayList<>();
     try (Transaction tx = graphDb.beginTx()) {
-      AnalyzeRequest processedRequest = processRequest(request);
+      AnalyzeRequest processedRequest = request;//processRequest(request);
 
       Set<AnalyzerInnerNode> sampleSetNodes = getSampleSetNodes(processedRequest);
 
@@ -226,8 +240,10 @@ public class HyperGeometricAnalyzer {
           } else {
             curie = iri.get();
           }
-          String labels = StringUtils.join(graph.getNodeProperties(n.getNodeId(), NodeProperties.LABEL, String.class), ", ");
-          pValues.add(new AnalyzerResult(labels,curie, p));
+          String labels =
+              StringUtils.join(
+                  graph.getNodeProperties(n.getNodeId(), NodeProperties.LABEL, String.class), ", ");
+          pValues.add(new AnalyzerResult(labels, curie, p));
         } else {
           throw new Exception("Can't find node's uri for " + n.getNodeId());
         }
