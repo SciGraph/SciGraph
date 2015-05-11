@@ -27,7 +27,9 @@ import java.util.Set;
 
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Result;
 
@@ -43,6 +45,9 @@ public class CypherUtilTest extends GraphTestBase{
 
   CypherUtil util;
 
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+
   @Before
   public void test() {
     CurieUtil curieUtil = mock(CurieUtil.class);
@@ -55,12 +60,21 @@ public class CypherUtilTest extends GraphTestBase{
   }
 
   @Test
+  public void naiveInjectionPrevention() {
+    Multimap<String, Object> valueMap = HashMultimap.create();
+    valueMap.put("node_id", "HP_123");
+    valueMap.put("rel_id", "DELETE *");
+    exception.expect(IllegalArgumentException.class);
+    util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
+  }
+
+  @Test
   public void substituteSingleRelationship() {
     Multimap<String, Object> valueMap = HashMultimap.create();
     valueMap.put("node_id", "HP_123");
     valueMap.put("rel_id", "RO_1");
-    String actual = util.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
-    assertThat(actual, is("({node_id}-[:RO_1!]-(end)"));
+    String actual = util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
+    assertThat(actual, is("({node_id})-[:RO_1!]-(end)"));
   }
 
   @Test
@@ -68,8 +82,14 @@ public class CypherUtilTest extends GraphTestBase{
     Multimap<String, Object> valueMap = HashMultimap.create();
     valueMap.put("node_id", "HP_123");
     valueMap.put("rel_id", "FOO:foo");
-    String actual = util.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
-    assertThat(actual, is("({node_id}-[:foo!]-(end)"));
+    String actual = util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
+    assertThat(actual, is("({node_id})-[:foo!]-(end)"));
+  }
+
+  @Test
+  public void replaceCurieRelationship() {
+    String actual = util.resolveRelationships("(start)-[:FOO:foo]-(end)");
+    assertThat(actual, is("(start)-[:foo]-(end)"));
   }
 
   @Test
@@ -78,19 +98,19 @@ public class CypherUtilTest extends GraphTestBase{
     valueMap.put("node_id", "HP_123");
     valueMap.put("rel_id", "RO_1");
     valueMap.put("rel_id", "RO_2");
-    String actual = util.substituteRelationships("({node_id}-[:${rel_id}!]-(end)", valueMap);
-    assertThat(actual, is("({node_id}-[:RO_2|RO_1!]-(end)"));
+    String actual = util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
+    assertThat(actual, is("({node_id})-[:RO_2|RO_1!]-(end)"));
   }
 
   @Test
   public void entailmentRegex() {
-    String result = util.entailRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
+    String result = util.resolveRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
     assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
   }
 
   @Test
   public void curiesAreEntailed() {
-    String result = util.entailRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
+    String result = util.resolveRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
     assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
   }
 

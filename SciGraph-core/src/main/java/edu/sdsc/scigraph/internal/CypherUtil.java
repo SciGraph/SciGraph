@@ -53,8 +53,8 @@ import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
  */
 public class CypherUtil {
 
-  private static final String ENTAILMENT_REGEX = "\\:[a-zA-Z0-9_:.|]*!";
-  private static Pattern pattern = Pattern.compile(ENTAILMENT_REGEX);
+  private static final String ENTAILMENT_REGEX = "\\:[a-zA-Z0-9_:.|]*!?";
+  private static Pattern ENTAILMENT_PATTERN = Pattern.compile(ENTAILMENT_REGEX);
 
   private final GraphDatabaseService graphDb;
   private final CurieUtil curieUtil;
@@ -67,7 +67,7 @@ public class CypherUtil {
 
   public Result execute(String query, Multimap<String, Object> params) {
     query = substituteRelationships(query, params);
-    query = entailRelationships(query);
+    query = resolveRelationships(query);
     return graphDb.execute(query, flattenMap(params));
   }
 
@@ -83,12 +83,9 @@ public class CypherUtil {
     return flatMap;
   }
 
-  Set<String> getEntailedRelationshipTypes(Set<String> parents) {
+  Set<String> getEntailedRelationshipTypes(Collection<String> parents) {
     Set<String> entailedTypes = new HashSet<>();
     for (String parent: parents) {
-      if (curieUtil.getIri(parent).isPresent()) {
-        parent = GraphUtil.getFragment(curieUtil.getIri(parent).get());
-      }
       entailedTypes.add(parent);
       Map<String, Object> params = new HashMap<>();
       params.put("fragment", parent);
@@ -107,14 +104,34 @@ public class CypherUtil {
     return entailedTypes;
   }
 
-  String entailRelationships(String cypher) {
-    Matcher m = pattern.matcher(cypher);
+  String resolveRelationships(String cypher) {
+    Matcher m = ENTAILMENT_PATTERN.matcher(cypher);
     StringBuffer buffer = new StringBuffer();
     while (m.find()) {
-      String group = m.group().substring(1, m.group().length() - 1);
-      Set<String> parentTypes = newHashSet(Splitter.on('|').split(group));
-      String entailedTypes = on('|').join(getEntailedRelationshipTypes(parentTypes));
-      m.appendReplacement(buffer, ":" + entailedTypes);
+      String group = m.group().substring(1, m.group().length());
+      boolean entail = false;
+      if (group.endsWith("!")) {
+        entail = true;
+        group = group.substring(0, group.length() - 1);
+      }
+      Collection<String> parentTypes = transform(newHashSet(Splitter.on('|').split(group)), new Function<String, String>() {
+        @Override
+        public String apply(String type) {
+          if (curieUtil.getIri(type).isPresent()) {
+             return GraphUtil.getFragment(curieUtil.getIri(type).get());
+          } else {
+            return type;
+          }
+        }
+        
+      });
+      if (entail) {
+        String entailedTypes = on('|').join(getEntailedRelationshipTypes(parentTypes));
+        m.appendReplacement(buffer, ":" + entailedTypes);
+      } else {
+        String resolvedTypes = on('|').join(parentTypes);
+        m.appendReplacement(buffer, ":" + resolvedTypes);
+      }
     }
     m.appendTail(buffer);
     return buffer.toString();
@@ -127,6 +144,9 @@ public class CypherUtil {
         Collection<String> resolvedRelationshipTypes = transform(valueMap.get(key), new Function<Object, String>() {
           @Override
           public String apply(Object input) {
+            if (input.toString().matches(".*(\\s).*")) {
+              throw new IllegalArgumentException("Cypher relationship templates must not contain spaces");
+            }
             Optional<String> iri = curieUtil.getIri(input.toString());
             if (iri.isPresent()) {
               return GraphUtil.getFragment(iri.get());
