@@ -21,7 +21,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 
 import com.tinkerpop.blueprints.Element;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import com.tinkerpop.blueprints.Graph;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
@@ -52,7 +52,7 @@ public class ArrayPropertyTransformer {
     }
   }
 
-  public static void transform(TinkerGraph graph) {
+  public static void transform(Graph graph) {
     transform(graph.getVertices());
     transform(graph.getEdges());
   }
