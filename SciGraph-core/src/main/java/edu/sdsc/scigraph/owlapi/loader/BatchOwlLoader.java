@@ -39,7 +39,6 @@ import org.apache.commons.cli.PosixParser;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
-import org.semanticweb.owlapi.model.OWLObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -90,7 +89,7 @@ public class BatchOwlLoader {
   Collection<OntologySetup> ontologies;
 
   @Inject
-  BlockingQueue<OWLObject> queue;
+  BlockingQueue<OWLCompositeObject> queue;
 
   @Inject
   BlockingQueue<OntologySetup> urlQueue;

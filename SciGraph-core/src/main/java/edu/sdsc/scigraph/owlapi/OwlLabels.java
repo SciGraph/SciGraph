@@ -26,6 +26,8 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
  */
 public class OwlLabels {
 
+  public static final Label OWL_ONTOLOGY = DynamicLabel.label(getFragment(OWLRDFVocabulary.OWL_ONTOLOGY));
+  
   public static final Label OWL_ANONYMOUS = DynamicLabel.label("anonymous");
 
   public static final Label OWL_CLASS = DynamicLabel.label(getFragment(OWLRDFVocabulary.OWL_CLASS));

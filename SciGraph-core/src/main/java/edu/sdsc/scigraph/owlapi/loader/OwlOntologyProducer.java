@@ -37,12 +37,12 @@ final class OwlOntologyProducer implements Callable<Void>{
 
   private static final Logger logger = Logger.getLogger(OwlOntologyProducer.class.getName());
 
-  private final BlockingQueue<OWLObject> queue;
+  private final BlockingQueue<OWLCompositeObject> queue;
   private final BlockingQueue<OntologySetup> ontologQueue;
   private final AtomicInteger numProducersShutdown;
 
   @Inject
-  OwlOntologyProducer(BlockingQueue<OWLObject> queue, BlockingQueue<OntologySetup> ontologyQueue, 
+  OwlOntologyProducer(BlockingQueue<OWLCompositeObject> queue, BlockingQueue<OntologySetup> ontologyQueue, 
       @IndicatesNumberOfShutdownProducers AtomicInteger numProducersShutdown) {
     logger.info("Producer starting up...");
     this.queue = queue;
@@ -67,15 +67,15 @@ final class OwlOntologyProducer implements Callable<Void>{
     long objectCount = 0;
     for (OWLOntology ontology: manager.getOntologies()) {
       for (OWLObject object: ontology.getNestedClassExpressions()) {
-        queue.put(object);
+        queue.put(new OWLCompositeObject(ontology, object));
         objectCount++;
       }
       for (OWLObject object: ontology.getSignature(true)) {
-        queue.put(object);
+        queue.put(new OWLCompositeObject(ontology, object));
         objectCount++;
       }
       for (OWLObject object: ontology.getAxioms()) {
-        queue.put(object);
+        queue.put(new OWLCompositeObject(ontology, object));
         objectCount++;
       }
     }

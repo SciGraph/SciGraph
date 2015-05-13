@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitor;
 
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
@@ -38,7 +39,9 @@ import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 public class OwlOntologyConsumerTest {
 
   OwlOntologyConsumer consumer;
-  BlockingQueue<OWLObject> queue = new LinkedBlockingQueue<>();
+  BlockingQueue<OWLCompositeObject> queue = new LinkedBlockingQueue<>();
+  OWLOntology ontology = mock(OWLOntology.class);
+  OWLObject object = mock(OWLObject.class);
 
   @Before
   public void setup() {
@@ -53,18 +56,17 @@ public class OwlOntologyConsumerTest {
   @SuppressWarnings("unchecked")
   @Test
   public void consumerProcessesSingleObject() {
-    OWLObject object = mock(OWLObject.class);
-    queue.add(object);
+    queue.add(new OWLCompositeObject(ontology, object));
     assertThat(consumer.call(), is(1L));
     verify(object, times(1)).accept(any(OWLOntologyWalkerVisitor.class));
+    verify(ontology, times(1)).accept(any(OWLOntologyWalkerVisitor.class));
   }
 
   @SuppressWarnings("unchecked")
   @Test
   public void acceptThrowsUncheckedException() {
-    OWLObject object = mock(OWLObject.class);
     when(object.accept(any(OWLOntologyWalkerVisitor.class))).thenThrow(new RuntimeException());
-    queue.add(object);
+    queue.add(new OWLCompositeObject(ontology, object));
     assertThat(consumer.call(), is(1L));
   }
 

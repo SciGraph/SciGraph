@@ -58,6 +58,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
@@ -110,12 +111,17 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   @Override
   public Void visit(OWLOntology ontology) {
-    logger.info("Walking ontology: " + ontology.getOntologyID());
     this.ontology = Optional.of(ontology);
+    OWLOntologyID id = ontology.getOntologyID();
+    if (null == id.getOntologyIRI()) {
+      logger.warning("Ignoring null ontology ID for " + ontology.toString());
+    } else {
+      getOrCreateNode(id.getOntologyIRI().toString(), OwlLabels.OWL_ONTOLOGY);
+    }
     return null;
   }
 
-  private long getOrCreateNode(String iri) {
+  private long getOrCreateNode(String iri, Label... labels) {
     Optional<Long> node = graph.getNode(iri.toString());
     if (!node.isPresent()) {
       long nodeId = graph.createNode(iri.toString());
@@ -123,15 +129,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       graph.setNodeProperty(nodeId, CommonProperties.FRAGMENT, GraphUtil.getFragment(iri));
       node = Optional.of(nodeId);
     }
-    return node.get();
-  }
-
-  private long getOrCreateNode(String iri, Label... labels) {
-    long node = getOrCreateNode(iri);
     for (Label label: labels) {
-      graph.addLabel(node, label);
+      graph.addLabel(node.get(), label);
     }
-    return node;
+    return node.get();
   }
 
   @Override
@@ -319,6 +320,12 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     }
     long relationship = graph.createRelationship(subject, object, type);
     graph.setRelationshipProperty(relationship, CommonProperties.URI, property.toString());
+    /*if (ontology.isPresent()) {
+      OWLOntologyID ontologyId = ontology.get().getOntologyID();
+      if (null != ontologyId.getOntologyIRI()) {
+        graph.setRelationshipProperty(relationship, OwlLabels.OWL_ONTOLOGY.toString(), ontologyId.getOntologyIRI().toString());
+      }
+    }*/
     return relationship;
   }
 

@@ -29,7 +29,6 @@ import javax.inject.Singleton;
 
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
-import org.semanticweb.owlapi.model.OWLObject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -70,7 +69,7 @@ class OwlLoaderModule extends AbstractModule {
     bind(new TypeLiteral<List<MappedProperty>>() {}).annotatedWith(IndicatesMappedProperties.class).toInstance(config.getMappedProperties());
     bind(Graph.class).to(GraphBatchImpl.class).in(Scopes.SINGLETON);
 
-    bind(new TypeLiteral<BlockingQueue<OWLObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLObject>>(){}).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>(){}).in(Scopes.SINGLETON);
     bind(new TypeLiteral<BlockingQueue<OntologySetup>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OntologySetup>>(){}).in(Scopes.SINGLETON);
 
     bind(Integer.class).annotatedWith(IndicatesNumberOfConsumerThreads.class).toInstance(config.getConsumerThreadCount());

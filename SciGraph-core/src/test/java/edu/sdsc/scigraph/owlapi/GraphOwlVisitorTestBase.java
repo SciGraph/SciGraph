@@ -53,6 +53,7 @@ import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
+import edu.sdsc.scigraph.neo4j.GraphDump;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
@@ -63,7 +64,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
 
   @ClassRule
   public static TemporaryFolder folder = new TemporaryFolder();
-  
+
   private T graph;
 
   static String path;
@@ -110,6 +111,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     graph.shutdown();
     graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(path.toString());
     tx = graphDb.beginTx();
+    GraphDump.dumpGraph(graphDb);
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;
   }
@@ -147,6 +149,12 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     Node mother = getNode(ROOT + "/Mother");
     assertThat(GraphUtil.getProperty(mother, CommonProperties.URI, String.class).get(), is(ROOT
         + "/Mother"));
+  }
+
+  @Test
+  public void ontologyNodesIsCreated() {
+    Node mother = getNode(ROOT);
+    assertThat(mother.getLabels(), hasItem(OwlLabels.OWL_ONTOLOGY));
   }
 
   @Test

@@ -23,8 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.semanticweb.owlapi.model.OWLObject;
-
 import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.neo4j.Graph;
@@ -38,13 +36,13 @@ final class OwlOntologyConsumer implements Callable<Long> {
 
   private static final Logger logger = Logger.getLogger(OwlOntologyConsumer.class.getName());
 
-  private final BlockingQueue<OWLObject> queue;
+  private final BlockingQueue<OWLCompositeObject> queue;
   private final int numProducers;
   private final GraphOwlVisitor visitor;
   private final AtomicInteger numProducersShutdown;
 
   @Inject
-  OwlOntologyConsumer(BlockingQueue<OWLObject> queue, Graph graph, @IndicatesNumberOfProducerThreads int numProducers,
+  OwlOntologyConsumer(BlockingQueue<OWLCompositeObject> queue, Graph graph, @IndicatesNumberOfProducerThreads int numProducers,
       @IndicatesMappedProperties List<MappedProperty> mappedProperties,
       @IndicatesNumberOfShutdownProducers AtomicInteger numProducersShutdown) {
     logger.info("Ontology consumer starting up...");
@@ -60,7 +58,7 @@ final class OwlOntologyConsumer implements Callable<Long> {
     try {
       while (true) {
         if (numProducersShutdown.get() < numProducers || !queue.isEmpty()) {
-          OWLObject owlObject = queue.poll(1, TimeUnit.MINUTES);
+          OWLCompositeObject owlObject = queue.poll(1, TimeUnit.MINUTES);
           if (null == owlObject) {
             continue;
           }
@@ -68,7 +66,8 @@ final class OwlOntologyConsumer implements Callable<Long> {
             logger.info("Currently " + queue.size() + " objects remaining in the queue");
           }
           try {
-            owlObject.accept(visitor);
+            owlObject.getOntology().accept(visitor);
+            owlObject.getObject().accept(visitor);
           } catch (RuntimeException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
           }
