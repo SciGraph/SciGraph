@@ -53,7 +53,6 @@ import com.google.common.io.Resources;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.neo4j.GraphDump;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
@@ -111,7 +110,6 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     graph.shutdown();
     graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(path.toString());
     tx = graphDb.beginTx();
-    GraphDump.dumpGraph(graphDb);
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;
   }
