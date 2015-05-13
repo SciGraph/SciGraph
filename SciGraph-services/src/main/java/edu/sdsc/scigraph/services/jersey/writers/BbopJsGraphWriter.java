@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.services.jersey.writers;
 
-import static com.google.common.collect.Lists.newArrayList;
 import io.dropwizard.jackson.Jackson;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashSet;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -43,6 +41,7 @@ import com.tinkerpop.blueprints.Vertex;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
+import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.services.api.graph.BbopGraph;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -73,23 +72,6 @@ public class BbopJsGraphWriter extends GraphWriter {
     return label;
   }
 
-  static Collection<String> getCategories(Vertex vertex) {
-    Collection<String> categories = new HashSet<>();
-    if (vertex.getPropertyKeys().contains(Concept.CATEGORY)) {
-      Object value = vertex.getProperty(Concept.CATEGORY);
-      if (value.getClass().isArray()) {
-        for (int i = 0; i < Array.getLength(value); i++) {
-          categories.add((String)Array.get(value, i));
-        }
-      } else if (value instanceof Iterable) {
-        categories.addAll(newArrayList((Iterable<String>)value)); 
-      } else {
-        categories.add((String) value);
-      }
-    }
-    return categories;
-  }
-
   @Override
   public void writeTo(Graph data, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> headers, OutputStream out) throws IOException {
@@ -101,7 +83,8 @@ public class BbopJsGraphWriter extends GraphWriter {
       if (label.isPresent()) {
         bbopNode.setLbl(label.get());
       }
-      bbopNode.getMeta().put(Concept.CATEGORY, getCategories(vertex));
+      Collection<String> categories = TinkerGraphUtil.getProperties(vertex, Concept.CATEGORY, String.class);
+      bbopNode.getMeta().put(Concept.CATEGORY, categories);
       bbopGraph.getNodes().add(bbopNode);
     }
     for (Edge edge: data.getEdges()) {

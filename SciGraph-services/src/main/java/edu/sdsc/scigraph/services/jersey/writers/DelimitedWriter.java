@@ -34,6 +34,9 @@ import org.apache.commons.csv.CSVPrinter;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
+import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.internal.TinkerGraphUtil;
+
 abstract public class DelimitedWriter extends GraphWriter {
 
   abstract CSVPrinter getCsvPrinter(Writer writer) throws IOException;
@@ -50,7 +53,7 @@ abstract public class DelimitedWriter extends GraphWriter {
         vals.clear();
         vals.add(BbopJsGraphWriter.getCurieOrFragment(vertex));
         vals.add(BbopJsGraphWriter.getLabel(vertex).or(""));
-        vals.add(BbopJsGraphWriter.getCategories(vertex).toString());
+        vals.add(TinkerGraphUtil.getProperties(vertex, Concept.CATEGORY, String.class).toString());
         printer.printRecord(vals);
       }
     }
