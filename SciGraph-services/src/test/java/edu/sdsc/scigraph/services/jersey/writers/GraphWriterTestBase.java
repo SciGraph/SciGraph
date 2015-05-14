@@ -33,6 +33,8 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
+
 public abstract class GraphWriterTestBase {
 
   TinkerGraph graph = new TinkerGraph();
@@ -42,8 +44,10 @@ public abstract class GraphWriterTestBase {
   public void setup() {
     Vertex v = graph.addVertex(0);
     Vertex w = graph.addVertex(1);
+    v.setProperty(CommonProperties.URI, "http://x.org/v");
     v.setProperty("list", newArrayList("elt1", "elt2"));
     v.setProperty("array", new String[]{"elt1", "elt2"});
+    w.setProperty(CommonProperties.URI, "http://x.org/w");
     v.addEdge("edge", w);
   }
 
