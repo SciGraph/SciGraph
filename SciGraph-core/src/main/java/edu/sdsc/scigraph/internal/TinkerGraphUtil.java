@@ -35,6 +35,7 @@ import org.neo4j.graphdb.Result;
 import scala.collection.convert.Wrappers.SeqWrapper;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
@@ -42,12 +43,16 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
+
 /***
  * Utilities for building TinkerGraphs from Neo4j objects
  */
 public final class TinkerGraphUtil {
 
   static final Logger logger = Logger.getLogger(TinkerGraphUtil.class.getName());
+
+  static final ImmutableSet<String> PROTECTED_PROPERTY_KEYS = ImmutableSet.of(CommonProperties.URI, CommonProperties.CURIE);
 
   static void copyProperties(PropertyContainer container, Element element) {
     for (String key: container.getPropertyKeys()) {
@@ -224,5 +229,18 @@ public final class TinkerGraphUtil {
     return set;
   }
 
+  static void project(Graph graph, Collection<String> projection) {
+    if (projection.contains("*")) {
+      return;
+    }
+    for (Vertex vertex: graph.getVertices()) {
+      for (String key: vertex.getPropertyKeys()) {
+        if (!projection.contains(key) &&
+            !PROTECTED_PROPERTY_KEYS.contains(key)) {
+          vertex.removeProperty(key);
+        }
+      }
+    }
+  }
 
 }

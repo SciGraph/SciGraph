@@ -46,6 +46,8 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
+
 public class TinkerGraphUtilTest {
 
   TinkerGraph graph;
@@ -200,6 +202,28 @@ public class TinkerGraphUtilTest {
     assertThat(TinkerGraphUtil.getProperties(v, "foo", String.class), containsInAnyOrder("bar", "baz"));
     v.setProperty("foo", new String[] {"bar", "baz"});
     assertThat(TinkerGraphUtil.getProperties(v, "foo", String.class), containsInAnyOrder("bar", "baz"));
+  }
+
+  @Test
+  public void propertiesProject() {
+    TinkerGraph graph = new TinkerGraph();
+    Vertex v = graph.addVertex(1);
+    v.setProperty(CommonProperties.URI, "http://x.org/a");
+    v.setProperty("foo", "fizz");
+    v.setProperty("bar", "baz");
+    TinkerGraphUtil.project(graph, newHashSet("foo"));
+    assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", CommonProperties.URI));
+  }
+
+  @Test
+  public void allPropertiesProject() {
+    TinkerGraph graph = new TinkerGraph();
+    Vertex v = graph.addVertex(1);
+    v.setProperty(CommonProperties.URI, "http://x.org/a");
+    v.setProperty("foo", "fizz");
+    v.setProperty("bar", "baz");
+    TinkerGraphUtil.project(graph, newHashSet("*"));
+    assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", "bar", CommonProperties.URI));
   }
 
 }
