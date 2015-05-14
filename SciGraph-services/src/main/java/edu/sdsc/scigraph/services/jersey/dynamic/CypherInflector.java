@@ -17,6 +17,7 @@ package edu.sdsc.scigraph.services.jersey.dynamic;
 
 import static com.google.common.collect.Iterables.getFirst;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -83,6 +84,11 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
         if ("true".equals(getFirst(paramMap.get(key), "false"))) {
           aspectMap.get(key).invoke(graph);
         }
+      }
+      if (paramMap.containsKey("project")) {
+        @SuppressWarnings("unchecked")
+        Collection<String> projection = (Collection<String>)(Collection<?>)paramMap.get("project");
+        TinkerGraphUtil.project(graph, projection);
       }
       tx.success();
       return graph;

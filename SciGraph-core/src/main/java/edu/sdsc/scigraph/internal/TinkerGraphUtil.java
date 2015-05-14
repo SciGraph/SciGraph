@@ -229,7 +229,7 @@ public final class TinkerGraphUtil {
     return set;
   }
 
-  static void project(Graph graph, Collection<String> projection) {
+  public static void project(Graph graph, Collection<String> projection) {
     if (projection.contains("*")) {
       return;
     }

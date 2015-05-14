@@ -61,6 +61,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.internal.GraphApi;
+import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
@@ -104,6 +105,8 @@ public class GraphService extends BaseResource {
       @QueryParam("relationshipType") Optional<String> relationshipType,
       @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false)
       @QueryParam("direction") @DefaultValue("BOTH") String direction,
+      @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
+      @QueryParam("project") @DefaultValue("*") Set<String> projection,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
     Set<Concept> roots = new HashSet<>();
@@ -142,6 +145,7 @@ public class GraphService extends BaseResource {
       tg = api.getNeighbors(newHashSet(nodes), depth.get(), types, nodePredicate);
       tx.success();
     }
+    TinkerGraphUtil.project(tg, projection);
     GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
@@ -166,9 +170,11 @@ public class GraphService extends BaseResource {
       @QueryParam("relationshipType") Optional<String> relationshipType,
       @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false)
       @QueryParam("direction") @DefaultValue("BOTH") String direction,
+      @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
+      @QueryParam("project") @DefaultValue("*") Set<String> projection,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
-    return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes, relationshipType, direction, callback);
+    return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes, relationshipType, direction, projection, callback);
   }
 
   @GET
@@ -183,9 +189,11 @@ public class GraphService extends BaseResource {
   public Object getNode(
       @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
       @PathParam("id") String id,
+      @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
+      @QueryParam("project") @DefaultValue("*") Set<String> projection,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
-    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>absent(), null, callback);
+    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>absent(), null, projection, callback);
   }
 
   @GET
