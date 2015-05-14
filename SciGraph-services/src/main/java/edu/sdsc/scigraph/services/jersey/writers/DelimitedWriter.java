@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.services.jersey.writers;
 
+import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.IOException;
@@ -35,6 +36,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
 import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 
 abstract public class DelimitedWriter extends GraphWriter {
@@ -51,8 +53,9 @@ abstract public class DelimitedWriter extends GraphWriter {
       List<String> vals = new ArrayList<>();
       for (Vertex vertex: data.getVertices()) {
         vals.clear();
-        vals.add(BbopJsGraphWriter.getCurieOrFragment(vertex));
-        vals.add(BbopJsGraphWriter.getLabel(vertex).or(""));
+        vals.add(BbopJsGraphWriter.getCurieOrIri(vertex));
+        String label = getFirst(TinkerGraphUtil.getProperties(vertex, NodeProperties.LABEL, String.class), null);
+        vals.add(label);
         vals.add(TinkerGraphUtil.getProperties(vertex, Concept.CATEGORY, String.class).toString());
         printer.printRecord(vals);
       }

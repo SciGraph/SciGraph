@@ -15,12 +15,12 @@
  */
 package edu.sdsc.scigraph.services.jersey.writers;
 
+import static com.google.common.collect.Iterables.getFirst;
 import io.dropwizard.jackson.Jackson;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -29,10 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
-import jersey.repackaged.com.google.common.collect.Iterables;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -50,26 +47,8 @@ public class BbopJsGraphWriter extends GraphWriter {
 
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
 
-  // TODO: Move these next three methods someplace common
-  static String getCurieOrFragment(Vertex vertex) {
-    String property = vertex.getPropertyKeys().contains(CommonProperties.CURIE) 
-        ? CommonProperties.CURIE : CommonProperties.FRAGMENT; 
-    return (String)vertex.getProperty(property);
-  }
-
-  static Optional<String> getLabel(Vertex vertex) {
-    Optional<String> label = Optional.absent();
-    if (vertex.getPropertyKeys().contains(NodeProperties.LABEL)) {
-      Object value = vertex.getProperty(NodeProperties.LABEL);
-      if (value.getClass().isArray()) {
-        label = Optional.of((String)Array.get(value, 0));
-      } else if (value instanceof Iterable) {
-        label = Optional.of((String)Iterables.getFirst((Iterable<?>)value, null));
-      } else {
-        label = Optional.of((String) value);
-      }
-    }
-    return label;
+  static String getCurieOrIri(Vertex vertex) {
+    return TinkerGraphUtil.getProperty(vertex, CommonProperties.CURIE, String.class).or((String)vertex.getProperty(CommonProperties.URI));
   }
 
   @Override
@@ -78,11 +57,9 @@ public class BbopJsGraphWriter extends GraphWriter {
     BbopGraph bbopGraph = new BbopGraph();
     for (Vertex vertex: data.getVertices()) {
       BbopGraph.BbopNode bbopNode = new BbopGraph.BbopNode();
-      bbopNode.setId(getCurieOrFragment(vertex));
-      Optional<String> label = getLabel(vertex);
-      if (label.isPresent()) {
-        bbopNode.setLbl(label.get());
-      }
+      bbopNode.setId(getCurieOrIri(vertex));
+      String label = getFirst(TinkerGraphUtil.getProperties(vertex, NodeProperties.LABEL, String.class), null);
+      bbopNode.setLbl(label);
       Collection<String> categories = TinkerGraphUtil.getProperties(vertex, Concept.CATEGORY, String.class);
       bbopNode.getMeta().put(Concept.CATEGORY, categories);
       bbopGraph.getNodes().add(bbopNode);
@@ -91,8 +68,8 @@ public class BbopJsGraphWriter extends GraphWriter {
       BbopGraph.BbopEdge bbopEdge = new BbopGraph.BbopEdge();
       Vertex subject= edge.getVertex(Direction.OUT);
       Vertex object= edge.getVertex(Direction.IN);
-      bbopEdge.setSub(getCurieOrFragment(subject));
-      bbopEdge.setObj(getCurieOrFragment(object));
+      bbopEdge.setSub(getCurieOrIri(subject));
+      bbopEdge.setObj(getCurieOrIri(object));
       bbopEdge.setPred(edge.getLabel());
       bbopGraph.getEdges().add(bbopEdge);
     }
