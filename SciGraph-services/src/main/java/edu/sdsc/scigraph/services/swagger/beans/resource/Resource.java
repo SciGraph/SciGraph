@@ -22,7 +22,7 @@ public class Resource {
   private String apiVersion;
   private List<Apis> apis = new ArrayList<>();
   private String basePath;
-  private Models models;
+  private List<String> models = new ArrayList<>();
   private List<String> produces;
   private String resourcePath;
   private String swaggerVersion;
@@ -51,11 +51,11 @@ public class Resource {
     this.basePath = basePath;
   }
 
-  public Models getModels() {
+  public List<String> getModels() {
     return this.models;
   }
 
-  public void setModels(Models models) {
+  public void setModels(List<String> models) {
     this.models = models;
   }
 
