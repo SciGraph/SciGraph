@@ -190,7 +190,7 @@ public class GraphService extends BaseResource {
 
   @GET
   @Path("/relationship_types")
-  @ApiOperation(value = "Get all relationship types", response = String.class)
+  @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, MediaType.APPLICATION_XML})
@@ -206,6 +206,26 @@ public class GraphService extends BaseResource {
           return relationshipType.name();
         }
       }));
+      tx.success();
+    }
+    sort(relationships);
+    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
+  }
+
+  @GET
+  @Path("/properties")
+  @ApiOperation(value = "Get all property keys", response = String.class, responseContainer="List")
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, MediaType.APPLICATION_XML})
+  public Object getProperties(
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
+      @QueryParam("callback") String callback) {
+    List<String> relationships = new ArrayList<>();
+    try (Transaction tx = graphDb.beginTx()) {
+      for (String key: GlobalGraphOperations.at(graphDb).getAllPropertyKeys()) {
+        relationships.add(key);
+      }
       tx.success();
     }
     sort(relationships);
