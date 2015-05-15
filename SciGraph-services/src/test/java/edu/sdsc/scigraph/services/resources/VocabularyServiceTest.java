@@ -42,7 +42,7 @@ public class VocabularyServiceTest {
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
 
   private final Concept hippocampus = new Concept(1L);
-  
+
   private static final CurieUtil curieUtil = mock(CurieUtil.class);
 
   @ClassRule
@@ -58,18 +58,6 @@ public class VocabularyServiceTest {
     when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
   }
 
-  @Test(expected=Exception.class)
-  public void testUnknownUri() {
-    resources.client().target("/vocabulary/uri/http%3A%2F%2Fexample.org%2Fnone").request().accept(MediaType.APPLICATION_XML).get(String.class);
-  }
-
-  @Test
-  public void testKnownUriJson() throws Exception {
-    String response = resources.client().target("/vocabulary/uri/http%3A%2F%2Fexample.org%2Ffoo").request().accept(MediaType.APPLICATION_JSON).get(String.class);
-    String expected = fixture("fixtures/hippocampus.json");
-    assertEquals(expected, response, true);
-  }
-  
   @Test
   public void testKnownIdJson() throws Exception {
     when(vocabulary.getConceptFromId(any(Vocabulary.Query.class))).thenReturn(newArrayList(hippocampus));

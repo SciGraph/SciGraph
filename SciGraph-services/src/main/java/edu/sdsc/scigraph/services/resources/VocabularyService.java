@@ -118,29 +118,6 @@ public class VocabularyService extends BaseResource {
   }
 
   @GET
-  @Path("/uri/{uri}")
-  @ApiOperation(value = "Find a concept by URI", response = Concept.class,
-  notes = "This call will return at most one concept")
-  @ApiResponses({
-    @ApiResponse(code = 404, message = "Concept with URI could not be found")
-  })
-  @Timed
-  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object findByUri(
-      @ApiParam( value = "URI to find", required = true )
-      @PathParam("uri") String uri,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) throws Exception {
-    Optional<Concept> concept = vocabulary.getConceptFromUri(uri);
-    if (concept.isPresent()) {
-      GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(mapper.map(concept.get(), ConceptDTO.class)){};
-      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
-    } else {
-      throw new WebApplicationException(404);
-    }
-  }
-
-  @GET
   @Path("/id/{id}")
   @ApiOperation(value = "Find a concept by its ID",
   notes = "Find concepts that match either a URI fragment or a CURIE. " +
