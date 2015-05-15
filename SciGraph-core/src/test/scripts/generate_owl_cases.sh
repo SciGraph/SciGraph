@@ -56,7 +56,7 @@ cd target/owl_cases
 
 `rm -fr SciGraph.wiki`
 `pandoc -f html -t markdown index.html > index.md`
-`git clone git@github.com:SciCrunch/SciGraph.wiki.git`
+`git clone git@github.com:SciGraph/SciGraph.wiki.git`
 cd SciGraph.wiki
 `cp ../index.md Neo4jMapping.md`
 `mkdir -p images`
