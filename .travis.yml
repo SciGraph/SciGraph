@@ -12,4 +12,4 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 
 after_success:
-  - mvn cobertura:cobertura coveralls:report
+  - mvn test cobertura:cobertura coveralls:report
