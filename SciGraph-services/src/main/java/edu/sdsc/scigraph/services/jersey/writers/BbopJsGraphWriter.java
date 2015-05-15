@@ -30,13 +30,13 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.services.api.graph.BbopGraph;
@@ -46,6 +46,9 @@ import edu.sdsc.scigraph.services.api.graph.BbopGraph;
 public class BbopJsGraphWriter extends GraphWriter {
 
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
+
+  private static final ImmutableSet<String> IGNORED_PROPERTY_KEYS =
+      ImmutableSet.of(CommonProperties.URI, NodeProperties.LABEL, CommonProperties.CURIE);
 
   static String getCurieOrIri(Vertex vertex) {
     return TinkerGraphUtil.getProperty(vertex, CommonProperties.CURIE, String.class).or((String)vertex.getProperty(CommonProperties.URI));
@@ -60,8 +63,13 @@ public class BbopJsGraphWriter extends GraphWriter {
       bbopNode.setId(getCurieOrIri(vertex));
       String label = getFirst(TinkerGraphUtil.getProperties(vertex, NodeProperties.LABEL, String.class), null);
       bbopNode.setLbl(label);
-      Collection<String> categories = TinkerGraphUtil.getProperties(vertex, Concept.CATEGORY, String.class);
-      bbopNode.getMeta().put(Concept.CATEGORY, categories);
+      for (String key: vertex.getPropertyKeys()) {
+        if (IGNORED_PROPERTY_KEYS.contains(key)) {
+          continue;
+        }
+        Collection<Object> values = TinkerGraphUtil.getProperties(vertex, key, Object.class);
+        bbopNode.getMeta().put(key, values);
+      }
       bbopGraph.getNodes().add(bbopNode);
     }
     for (Edge edge: data.getEdges()) {
