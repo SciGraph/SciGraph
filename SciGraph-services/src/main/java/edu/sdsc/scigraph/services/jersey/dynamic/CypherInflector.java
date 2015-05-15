@@ -42,6 +42,7 @@ import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.curies.AddCurries;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
+import edu.sdsc.scigraph.services.api.graph.ArrayPropertyTransformer;
 import edu.sdsc.scigraph.services.jersey.MultivaluedMapUtils;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
@@ -90,6 +91,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
         Collection<String> projection = (Collection<String>)(Collection<?>)paramMap.get("project");
         TinkerGraphUtil.project(graph, projection);
       }
+      ArrayPropertyTransformer.transform(graph);
       tx.success();
       return graph;
     }

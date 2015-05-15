@@ -64,6 +64,7 @@ import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
+import edu.sdsc.scigraph.services.api.graph.ArrayPropertyTransformer;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
@@ -146,6 +147,7 @@ public class GraphService extends BaseResource {
       tx.success();
     }
     TinkerGraphUtil.project(tg, projection);
+    ArrayPropertyTransformer.transform(tg);
     GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }

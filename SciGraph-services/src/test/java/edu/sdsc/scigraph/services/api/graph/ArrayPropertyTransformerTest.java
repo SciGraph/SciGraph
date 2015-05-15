@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.services.api.graph;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
@@ -45,14 +46,16 @@ public class ArrayPropertyTransformerTest {
     ArrayPropertyTransformer.transform(graph);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
-  public void singleProperties_areConvertedToArrays() {
-    assertThat((String[])v1.getProperty("foo"), is(new String[]{"bar"}));
+  public void singleProperties_areConvertedToLists() {
+    assertThat((Iterable<String>)v1.getProperty("foo"), contains("bar"));
   }
 
   @Test
-  public void edgeProperties_areConvertedToArrays() {
-    assertThat((Integer[])e.getProperty("foo"), is(new Integer[]{1}));
+  @SuppressWarnings("unchecked")
+  public void edgeProperties_areConvertedToIterables() {
+    assertThat((Iterable<Integer>)e.getProperty("foo"), contains(1));
   }
 
   @Test

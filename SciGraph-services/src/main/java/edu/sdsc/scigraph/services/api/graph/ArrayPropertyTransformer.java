@@ -15,9 +15,10 @@
  */
 package edu.sdsc.scigraph.services.api.graph;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
-import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.tinkerpop.blueprints.Element;
@@ -28,24 +29,23 @@ import edu.sdsc.scigraph.frames.EdgeProperties;
 
 public class ArrayPropertyTransformer {
 
-  private static final Collection<String> protectedKeys = newHashSet(
-      CommonProperties.CONVENIENCE, CommonProperties.FRAGMENT, CommonProperties.URI, CommonProperties.OWL_TYPE,
+  private static final Collection<String> PROTECTED_PROPERTY_KEYS = newHashSet(
+      CommonProperties.CURIE, CommonProperties.CONVENIENCE, CommonProperties.FRAGMENT, CommonProperties.URI, CommonProperties.OWL_TYPE,
       EdgeProperties.QUANTIFICATION_TYPE, EdgeProperties.REFLEXIVE, EdgeProperties.SYMMETRIC, EdgeProperties.TRANSITIVE);
 
   static void transform(Iterable<? extends Element> elements) {
     for (Element element: elements) {
       for (String key: element.getPropertyKeys()) {
-        if (protectedKeys.contains(key)) {
+        if (PROTECTED_PROPERTY_KEYS.contains(key)) {
           continue;
         } else {
           Object value = element.getProperty(key);
           if (value instanceof Iterable) {
-            // TODO: Should these be transformed to arrays (or vice versa?)
+            // Leave it
           } else if (value.getClass().isArray()) {
+            element.setProperty(key, Arrays.asList(value));
           } else {
-            Object newValue = Array.newInstance(value.getClass(), 1);
-            Array.set(newValue, 0, value);
-            element.setProperty(key, newValue);
+            element.setProperty(key, newArrayList(value));
           }
         }
       }
