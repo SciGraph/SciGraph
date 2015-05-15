@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.owlapi;
 import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getIri;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
+import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
@@ -70,6 +72,7 @@ import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitor;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Collections2;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
@@ -379,6 +382,21 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long subProperty = getOrCreateNode(getIri(axiom.getSubProperty()));
     long superProperty = getOrCreateNode(getIri(axiom.getSuperProperty()));
     graph.createRelationship(subProperty, superProperty, OwlRelationships.RDFS_SUB_PROPERTY_OF);
+    return null;
+  }
+
+  @Override
+  public Void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
+    Collection<Long> nodes =
+        Collections2.transform(axiom.getObjectPropertiesInSignature(), new Function<OWLObjectProperty, Long>() {
+
+          @Override
+          public Long apply(OWLObjectProperty objectProperty) {
+            return getOrCreateNode(getIri(objectProperty));
+          }
+        });
+
+    graph.createRelationshipsPairwise(nodes, OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
     return null;
   }
 

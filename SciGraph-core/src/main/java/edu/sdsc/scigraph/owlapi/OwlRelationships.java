@@ -50,6 +50,9 @@ public class OwlRelationships {
   public static final RelationshipType RDFS_SUB_PROPERTY_OF = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.RDFS_SUB_PROPERTY_OF));
 
+  public static final RelationshipType OWL_EQUIVALENT_OBJECT_PROPERTY = DynamicRelationshipType
+      .withName(getFragment(OWLRDFVocabulary.OWL_EQUIVALENT_PROPERTY));
+  
   public static final RelationshipType OWL_PROPERTY_CHAIN_AXIOM = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.OWL_PROPERTY_CHAIN_AXIOM));
 

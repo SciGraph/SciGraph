@@ -290,6 +290,13 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   }
 
   @Test
+  public void testEquivalentProperties() {
+    Node hasChild1 = getNode(ROOT + "/hasChild");
+    Node hasChild2 = getNode(OTHER_ROOT + "/child");
+    assertThat(hasRelationship(hasChild1, hasChild2, OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY), is(true));
+  }
+
+  @Test
   public void chainedObjectProperties() {
     Node chain = getNode(ROOT + "/hasUncle");
     Node father = getNode(ROOT + "/hasFather");
