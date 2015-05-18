@@ -29,11 +29,15 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import com.google.common.base.Optional;
 
 public class OwlApiUtilsTest {
 
   static OWLDataFactory factory = OWLManager.getOWLDataFactory();
+  static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
   @Test
   public void testGetBooleanTypedLiteral() {
@@ -63,7 +67,7 @@ public class OwlApiUtilsTest {
     OWLLiteral literalEnLang = factory.getOWLLiteral("hello", "en");
     OWLLiteral literalEsLang = factory.getOWLLiteral("hello", "es");
     assertThat((String) OwlApiUtils.getTypedLiteralValue(literalEnLang).get(), is("hello"));
-    assertThat(OwlApiUtils.getTypedLiteralValue(literalEsLang).isPresent(), is(false));
+    assertThat(OwlApiUtils.getTypedLiteralValue(literalEsLang), is(Optional.absent()));
   }
 
   @Test
@@ -75,8 +79,14 @@ public class OwlApiUtilsTest {
   }
 
   @Test
+  public void getOntologyIri() throws Exception {
+    String ontologyIri = "http://x.org/ontology";
+    OWLOntology ontology = manager.createOntology(IRI.create(ontologyIri));
+    assertThat(OwlApiUtils.getIri(ontology), is(ontologyIri));
+  }
+
+  @Test
   public void loadOntology() throws Exception {
-    OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     OwlApiUtils.loadOntology(manager, "src/test/resources/ontologies/pizza.owl");
   }
 

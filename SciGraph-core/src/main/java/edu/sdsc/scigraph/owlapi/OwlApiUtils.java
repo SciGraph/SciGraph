@@ -111,6 +111,10 @@ public class OwlApiUtils {
     return property.asOWLAnnotationProperty().getIRI().toString();
   }
 
+  public static String getIri(OWLOntology ontology) {
+    return ontology.getOntologyID().getOntologyIRI().toString();
+  }
+
   public static String getFragment(OWLRDFVocabulary vocab) {
     return XMLUtils.getNCNameSuffix(vocab.getIRI());
   }
