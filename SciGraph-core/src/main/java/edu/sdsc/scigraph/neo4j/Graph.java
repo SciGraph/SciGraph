@@ -32,6 +32,8 @@ public interface Graph {
 
   /***
    * Create a node
+   * <p>
+   * This method is idempotent.
    * 
    * @param id the string ID of the node
    * @return the internal ID of a the node
