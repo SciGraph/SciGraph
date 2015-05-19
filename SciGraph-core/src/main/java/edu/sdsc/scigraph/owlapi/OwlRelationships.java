@@ -55,6 +55,9 @@ public class OwlRelationships {
   
   public static final RelationshipType OWL_PROPERTY_CHAIN_AXIOM = DynamicRelationshipType
       .withName(getFragment(OWLRDFVocabulary.OWL_PROPERTY_CHAIN_AXIOM));
+  
+  public static final RelationshipType RDFS_IS_DEFINED_BY = DynamicRelationshipType
+      .withName(getFragment(OWLRDFVocabulary.RDFS_IS_DEFINED_BY));
 
   public static final RelationshipType FILLER = DynamicRelationshipType.withName("filler");
 
