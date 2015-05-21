@@ -66,7 +66,8 @@ final class OwlOntologyConsumer implements Callable<Long> {
             logger.info("Currently " + queue.size() + " objects remaining in the queue");
           }
           try {
-            owlObject.getOntology().accept(visitor);
+            // TODO: OOOOT
+            //owlObject.getOntology().accept(visitor);
             owlObject.getObject().accept(visitor);
           } catch (RuntimeException e) {
             logger.log(Level.WARNING, e.getMessage(), e);

@@ -22,13 +22,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.google.inject.Inject;
 
+import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
+import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
@@ -40,14 +43,16 @@ final class OwlOntologyProducer implements Callable<Void>{
   private final BlockingQueue<OWLCompositeObject> queue;
   private final BlockingQueue<OntologySetup> ontologQueue;
   private final AtomicInteger numProducersShutdown;
+  private final Graph graph;
 
   @Inject
   OwlOntologyProducer(BlockingQueue<OWLCompositeObject> queue, BlockingQueue<OntologySetup> ontologyQueue, 
-      @IndicatesNumberOfShutdownProducers AtomicInteger numProducersShutdown) {
+      @IndicatesNumberOfShutdownProducers AtomicInteger numProducersShutdown, Graph graph) {
     logger.info("Producer starting up...");
     this.queue = queue;
     this.ontologQueue = ontologyQueue;
     this.numProducersShutdown = numProducersShutdown;
+    this.graph = graph;
   }
 
   public void reason(OWLOntologyManager manager, OWLOntology ont, OntologySetup config) throws Exception {
@@ -66,6 +71,7 @@ final class OwlOntologyProducer implements Callable<Void>{
     logger.info("Queueing axioms for: " + ontologyConfig);
     long objectCount = 0;
     for (OWLOntology ontology: manager.getOntologies()) {
+      // TODO: Do all of these need to be iterated?
       for (OWLObject object: ontology.getNestedClassExpressions()) {
         queue.put(new OWLCompositeObject(ontology, object));
         objectCount++;
@@ -81,6 +87,16 @@ final class OwlOntologyProducer implements Callable<Void>{
     }
     Thread.currentThread().setName(origThreadName);
     logger.info("Finished queueing " + objectCount + " axioms for: " + ontologyConfig);
+  }
+
+  public void addOntologyStructure(OWLOntologyManager manager, OWLOntology ontology) {
+    long parent = graph.createNode(OwlApiUtils.getIri(ontology));
+    for (OWLImportsDeclaration importDeclaration: ontology.getImportsDeclarations()) {
+      OWLOntology childOnt = manager.getImportedOntology(importDeclaration);
+      long child = graph.createNode(OwlApiUtils.getIri(childOnt));
+      graph.createRelationship(child, parent, OwlRelationships.RDFS_IS_DEFINED_BY);
+      addOntologyStructure(manager, childOnt);
+    }
   }
 
   @Override

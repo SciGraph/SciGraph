@@ -98,6 +98,13 @@
       <artifactId>dropwizard-configuration</artifactId>
       <version>${dropwizard.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-core</artifactId>
+      <version>${dropwizard.version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>commons-validator</groupId>

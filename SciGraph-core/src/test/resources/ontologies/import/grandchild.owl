@@ -1,0 +1,5 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:GrandChild
+Declaration(Class(:grandchild))
+)

@@ -33,8 +33,10 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -162,6 +164,22 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     assertThat(GraphUtil.getProperty(mother, CommonProperties.FRAGMENT, String.class).get(), is("Mother"));
   }
 
+  @Test
+  @Ignore
+  public void nodesHaveDefinedBy() {
+    Node mother = getNode(ROOT + "/Mother");
+    Node ontology = getNode(ROOT);
+    assertThat(hasRelationship(mother, ontology, OwlRelationships.RDFS_IS_DEFINED_BY), is(true));
+  }
+
+  @Test
+  @Ignore
+  public void relationshipsHaveDefinedBy() {
+    Node mother = getNode(ROOT + "/Mother");
+    Relationship r = getOnlyElement(mother.getRelationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.OUTGOING));
+    assertThat(GraphUtil.getProperties(r, OwlRelationships.RDFS_IS_DEFINED_BY.name(), String.class), contains(ROOT));
+  }
+  
   @Test
   public void classesAreCreated() {
     Node mother = getNode(ROOT + "/Mother");
