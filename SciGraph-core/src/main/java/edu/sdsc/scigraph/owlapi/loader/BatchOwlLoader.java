@@ -31,11 +31,11 @@ import javax.inject.Provider;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -174,7 +174,7 @@ public class BatchOwlLoader {
   }
 
   public static void main(String[] args) throws Exception {
-    CommandLineParser parser = new PosixParser();
+    CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
     try {
       cmd = parser.parse(getOptions(), args);
