@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
@@ -177,6 +178,10 @@ public final class TinkerGraphUtil {
           continue;
         } else if (value instanceof PropertyContainer) {
           addElement(graph, (PropertyContainer)value);
+        } else if (value instanceof Path) {
+          for (PropertyContainer container: (Path)value) {
+            addElement(graph, container);
+          }
         } else if (value instanceof SeqWrapper) {
           for (Object thing: (SeqWrapper<?>)value) {
             if (thing instanceof PropertyContainer) {
