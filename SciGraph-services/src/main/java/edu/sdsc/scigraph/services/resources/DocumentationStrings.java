@@ -64,6 +64,8 @@ class DocumentationStrings {
 
   final static String DIRECTION_DOC = "Which direction to traverse: INCOMING, OUTGOING, BOTH (default). Only used if relationshipType is specified.";
 
+  final static String DIRECTION_ALLOWED = "BOTH,INCOMING,OUTGOING";
+
   final static String PROJECTION_DOC = "Which properties to project. Defaults to '*'.";
 
   /********** Reconcile documentation **************/

@@ -104,7 +104,7 @@ public class GraphService extends BaseResource {
       @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse", required = false)
       @QueryParam("relationshipType") Optional<String> relationshipType,
-      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false)
+      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false, allowableValues = DocumentationStrings.DIRECTION_ALLOWED)
       @QueryParam("direction") @DefaultValue("BOTH") String direction,
       @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
       @QueryParam("project") @DefaultValue("*") Set<String> projection,
@@ -170,7 +170,7 @@ public class GraphService extends BaseResource {
       @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse", required = false)
       @QueryParam("relationshipType") Optional<String> relationshipType,
-      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false)
+      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false, allowableValues = DocumentationStrings.DIRECTION_ALLOWED)
       @QueryParam("direction") @DefaultValue("BOTH") String direction,
       @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
       @QueryParam("project") @DefaultValue("*") Set<String> projection,
