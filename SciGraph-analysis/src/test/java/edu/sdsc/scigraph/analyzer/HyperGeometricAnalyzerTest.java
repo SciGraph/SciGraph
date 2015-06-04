@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphdb.Transaction;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -61,7 +62,7 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
     properties.add("http://www.w3.org/2000/01/rdf-schema#label");
     properties.add("http://www.w3.org/2004/02/skos/core#prefLabel");
     mappedProperty.setProperties(properties);
-    
+
     ArrayList<MappedProperty> mappedPropertyList = new ArrayList<MappedProperty>();
     mappedPropertyList.add(mappedProperty);
 
@@ -70,9 +71,12 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
     Map<String, String> categories = new HashMap<>();
     categories.put("http://www.co-ode.org/ontologies/pizza/pizza.owl#NamedPizza", "pizza");
     categories.put("http://www.co-ode.org/ontologies/pizza/pizza.owl#PizzaTopping", "topping");
-    OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, categories);
-    postprocessor.processCategories(categories);
-    postprocessor.processSomeValuesFrom();
+    try (Transaction tx = graphDb.beginTx()) {
+      OwlPostprocessor postprocessor = new OwlPostprocessor(graphDb, categories);
+      postprocessor.processCategories(categories);
+      postprocessor.processSomeValuesFrom();
+      tx.success();
+    }
 
     Map<String, String> map = new HashMap<>();
     map.put("pizza", "http://www.co-ode.org/ontologies/pizza/pizza.owl#");
@@ -85,7 +89,7 @@ public class HyperGeometricAnalyzerTest extends GraphTestBase {
   public void smokeTest() {
     AnalyzeRequest request = new AnalyzeRequest();
     request.getSamples()
-        .addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
+    .addAll(newHashSet("pizza:FourSeasons", "pizza:AmericanHot", "pizza:Cajun"));
     request.setOntologyClass("pizza:Pizza");
     request.setPath("-[:pizza:hasTopping]->");
     assertThat(analyzer.analyze(request), is(not(empty())));
