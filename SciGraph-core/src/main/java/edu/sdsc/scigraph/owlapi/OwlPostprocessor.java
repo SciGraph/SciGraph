@@ -15,8 +15,10 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -116,19 +118,25 @@ public class OwlPostprocessor {
   public void processCategories(Map<String, String> categories) {
     logger.info("Processing categories");
     for (Entry<String, String> category : categories.entrySet()) {
-      Node root = null;
+      Set<Node> roots = new HashSet<>();
       try (Transaction tx = graphDb.beginTx()) {
         ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-        root = nodeIndex.get(CommonProperties.URI, category.getKey()).getSingle();
+        Node root = nodeIndex.get(CommonProperties.URI, category.getKey()).getSingle();
+        roots.add(root);
+        for (Relationship equiv: root.getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
+          roots.add(equiv.getOtherNode(root));
+        }
         tx.success();
       }
-      if (null == root) {
+      if (roots.isEmpty()) {
         logger.warning("Failed to locate " + category.getKey() + " while processing categories");
       } else {
-        logger.info("Processing category: " + category);
-        long count = processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
-            category.getValue());
-        logger.info("Processsed " + count + " nodes for " + category);
+        for (Node root: roots) {
+          logger.info("Processing category: " + category + " with IRI " + GraphUtil.getProperty(root, CommonProperties.URI, String.class));
+          long count = processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
+              category.getValue());
+          logger.info("Processsed " + count + " nodes for " + category);
+        }
       }
     }
   }
