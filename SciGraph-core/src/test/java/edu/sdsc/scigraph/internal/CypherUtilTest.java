@@ -56,6 +56,7 @@ public class CypherUtilTest extends GraphTestBase{
     util = new CypherUtil(graphDb, curieUtil);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
+    addRelationship("http://x.org/#fizz", "http://x.org/#fizz_equiv", OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
   }
 
@@ -105,19 +106,19 @@ public class CypherUtilTest extends GraphTestBase{
   @Test
   public void entailmentRegex() {
     String result = util.resolveRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
-    assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
+    assertThat(result, is("MATCH (n)-[:foo|fizz_equiv|fizz]-(n2) RETURN n"));
   }
 
   @Test
   public void curiesAreEntailed() {
     String result = util.resolveRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
-    assertThat(result, is("MATCH (n)-[:foo|fizz]-(n2) RETURN n"));
+    assertThat(result, is("MATCH (n)-[:foo|fizz_equiv|fizz]-(n2) RETURN n"));
   }
 
   @Test
   public void multipleEntailmentRegex() {
     Set<String> types = util.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
-    assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "baz"));
+    assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "fizz_equiv", "baz"));
   }
 
   @Test

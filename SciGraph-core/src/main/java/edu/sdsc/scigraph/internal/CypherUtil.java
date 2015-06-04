@@ -92,7 +92,7 @@ public class CypherUtil {
       try (Transaction tx = graphDb.beginTx()) {
         Result result = graphDb.execute(
             "START parent=node:node_auto_index(fragment={fragment}) " +
-                "MATCH (parent)<-[:subPropertyOf*]-(subProperty) " +
+                "MATCH (parent)<-[:subPropertyOf|equivalentProperty*]-(subProperty) " +
                 "RETURN distinct subProperty.fragment as subProperty", params);
         while (result.hasNext()) {
           Map<String, Object> map = result.next();
