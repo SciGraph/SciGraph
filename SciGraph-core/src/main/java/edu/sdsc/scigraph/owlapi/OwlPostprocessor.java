@@ -132,7 +132,7 @@ public class OwlPostprocessor {
         logger.warning("Failed to locate " + category.getKey() + " while processing categories");
       } else {
         for (Node root: roots) {
-          logger.info("Processing category: " + category + " with IRI " + GraphUtil.getProperty(root, CommonProperties.URI, String.class));
+          logger.info("Processing category: " + category);
           long count = processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
               category.getValue());
           logger.info("Processsed " + count + " nodes for " + category);
