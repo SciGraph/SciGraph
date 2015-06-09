@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.process.Inflector;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -46,7 +47,7 @@ import edu.sdsc.scigraph.services.api.graph.ArrayPropertyTransformer;
 import edu.sdsc.scigraph.services.jersey.MultivaluedMapUtils;
 import edu.sdsc.scigraph.services.swagger.beans.resource.Apis;
 
-class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph> {
+class CypherInflector implements Inflector<ContainerRequestContext, Response> {
 
   private static final Logger logger = Logger.getLogger(CypherInflector.class.getName());
 
@@ -68,7 +69,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
 
   @AddCurries
   @Override
-  public TinkerGraph apply(ContainerRequestContext context) {
+  public Response apply(ContainerRequestContext context) {
     logger.fine("Serving dynamic request");
     Multimap<String, Object> paramMap = MultivaluedMapUtils.merge(context.getUriInfo());
     paramMap = resolveCuries(paramMap);
@@ -93,7 +94,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, TinkerGraph>
       }
       ArrayPropertyTransformer.transform(graph);
       tx.success();
-      return graph;
+      return Response.ok(graph).cacheControl(config.getCacheControl()).build();
     }
   }
 

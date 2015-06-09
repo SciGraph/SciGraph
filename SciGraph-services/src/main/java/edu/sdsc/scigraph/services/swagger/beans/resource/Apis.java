@@ -18,10 +18,20 @@ package edu.sdsc.scigraph.services.swagger.beans.resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.CacheControl;
+
 public class Apis {
+
+  private static final int MAX_AGE = 60 * 60 * 24;
+
   private List<Operations> operations = new ArrayList<>();
   private String path;
   private String query;
+  private CacheControl cacheControl = new CacheControl();
+
+  public Apis() {
+    cacheControl.setMaxAge(MAX_AGE);
+  }
 
   public List<Operations> getOperations() {
     return this.operations;
@@ -42,8 +52,17 @@ public class Apis {
   public void setQuery(String query) {
     this.query = query;
   }
-  
+
   public String getQuery() {
     return query;
   }
+
+  public CacheControl getCacheControl() {
+    return cacheControl;
+  }
+
+  public void setCacheControl(CacheControl cacheControl) {
+    this.cacheControl = cacheControl;
+  }
+
 }

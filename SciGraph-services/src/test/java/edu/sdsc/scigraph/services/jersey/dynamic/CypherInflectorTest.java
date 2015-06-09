@@ -78,28 +78,28 @@ public class CypherInflectorTest extends GraphTestBase {
   @Test
   public void inflectorAppliesCorrectly() {
     config.setQuery("MATCH (n) RETURN n");
-    TinkerGraph graph = inflector.apply(context);
+    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
   }
 
   @Test
   public void inflectorAppliesCorrectly_withRelationshipEntailment() {
     config.setQuery("MATCH (n)-[r:foo!]-(m) RETURN n, r, m");
-    TinkerGraph graph = inflector.apply(context);
+    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
   }
 
   @Test
   public void inflectorAppliesCorrectly_withVariableRelationship() {
     config.setQuery("MATCH (n)-[r:${rel_id}]-(m) RETURN n, r, m");
-    TinkerGraph graph = inflector.apply(context);
+    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
   }
 
   @Test
   public void pathsAreReturnedCorrectly() {
     config.setQuery("MATCH (n {fragment:'foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
-    TinkerGraph graph = inflector.apply(context);
+    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
   }
 

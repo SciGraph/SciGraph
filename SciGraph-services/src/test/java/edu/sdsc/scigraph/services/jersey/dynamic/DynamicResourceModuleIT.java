@@ -88,7 +88,7 @@ public class DynamicResourceModuleIT {
   public void nodesAreReturned() {
     config.setQuery("MATCH (n) RETURN n");
     CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
-    TinkerGraph graph = inflector.apply(context);
+    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(0));
   }
@@ -97,7 +97,7 @@ public class DynamicResourceModuleIT {
   public void edgesAreReturned() {
     config.setQuery("MATCH (n)-[r]-(m) RETURN n, r, m");
     CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
-    TinkerGraph graph = inflector.apply(context);
+    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(1));
   }
@@ -106,7 +106,7 @@ public class DynamicResourceModuleIT {
   public void propertiesAreSubstituted() {
     config.setQuery("MATCH (n)-[r]-(m) WHERE n.foo = {foo} RETURN n, r, m");
     CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
-    TinkerGraph graph = inflector.apply(context);
+    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(1));
   }
