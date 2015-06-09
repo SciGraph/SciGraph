@@ -18,6 +18,7 @@ package edu.sdsc.scigraph.analyzer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +77,20 @@ public class HyperGeometricAnalyzer {
     throw new Exception("Coud not retrieve count for id " + id);
   }
 
+  private Set<AnalyzerInnerNode> resolveToParents(Long nodeId, Long count) {
+    Set<AnalyzerInnerNode> innerNodeSet = new HashSet<>();
+    String query = "match (n)<-[:subClassOf*]-(p) where id(n) = " + nodeId + " return p";
+    Result result = cypherUtil.execute(query);
+    while (result.hasNext()) {
+      Map<String, Object> map = result.next();
+      innerNodeSet.add(new AnalyzerInnerNode(((Node) map.get("p")).getId(), count));
+    }
+    return innerNodeSet;
+  }
+  
+  
   private Set<AnalyzerInnerNode> getSampleSetNodes(AnalyzeRequest request) throws Exception {
-    Set<AnalyzerInnerNode> sampleSetNodes = new HashSet<>();
+    Map<Long, AnalyzerInnerNode> sampleNodes = new HashMap<Long, AnalyzerInnerNode>();
     List<Long> sampleSetId = new ArrayList<>();
     for (String sample : request.getSamples()) {
       sampleSetId.add(getNodeIdFromIri(sample));
@@ -86,14 +99,23 @@ public class HyperGeometricAnalyzer {
         "match (r)<-[:subClassOf*]-(n)" + request.getPath()
             + "(i) where id(n) in " + sampleSetId + " and id(r) = "
             + getNodeIdFromIri(request.getOntologyClass()) + " with n, i as t return t, count(distinct n)";
-            //+ getNodeIdFromIri(request.getOntologyClass()) + " with n, i match (i)-[:subClassOf*0..]->(t) return t, count(distinct n)";
+    //System.out.println(query);
     Result result = cypherUtil.execute(query);
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
-      sampleSetNodes.add(new AnalyzerInnerNode(((Node) map.get("t")).getId(), (Long) map
-          .get("count(distinct n)")));
+      Long count = (Long) map.get("count(distinct n)");
+      Long nodeId = ((Node) map.get("t")).getId();
+      sampleNodes.put(nodeId, new AnalyzerInnerNode(nodeId, count));
+      for(AnalyzerInnerNode parentToAdd: resolveToParents(nodeId, count)){
+        if(sampleNodes.containsKey(parentToAdd.getNodeId())){
+          AnalyzerInnerNode existingNode = sampleNodes.get(parentToAdd.getNodeId());
+          sampleNodes.put(existingNode.getNodeId(),new  AnalyzerInnerNode(existingNode.getNodeId(), existingNode.getCount() + parentToAdd.getCount()));
+        }else{
+          sampleNodes.put(parentToAdd.getNodeId(), parentToAdd);
+        }
+      }
     }
-    return sampleSetNodes;
+    return new HashSet<AnalyzerInnerNode>(sampleNodes.values());
   }
   
   private Set<AnalyzerInnerNode> getCompleteSetNodes(AnalyzeRequest request) throws Exception {
@@ -101,13 +123,15 @@ public class HyperGeometricAnalyzer {
         "match (r)<-[:subClassOf*]-(n)" + request.getPath()
             + "(i) where id(r) = "
             + getNodeIdFromIri(request.getOntologyClass()) + " with n, i as t return t, count(distinct n)";
-            //+ getNodeIdFromIri(request.getOntologyClass()) + " with n, i match (i)-[:subClassOf*0..]->(t) return t, count(distinct n)";
+    //System.out.println(query);
     Result result2 = cypherUtil.execute(query);
     Set<AnalyzerInnerNode> allSubjects = new HashSet<>();
     while (result2.hasNext()) {
       Map<String, Object> map = result2.next();
-      allSubjects.add(new AnalyzerInnerNode(((Node) map.get("t")).getId(), (Long) map
-          .get("count(distinct n)")));
+      Long count = (Long) map.get("count(distinct n)");
+      Long nodeId = ((Node) map.get("t")).getId();
+      allSubjects.add(new AnalyzerInnerNode(nodeId, count));
+      allSubjects.addAll(resolveToParents(nodeId, count));
     }
     return allSubjects;
   }
