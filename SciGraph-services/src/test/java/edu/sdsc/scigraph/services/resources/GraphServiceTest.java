@@ -15,8 +15,17 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import javax.ws.rs.core.GenericType;
+
 import io.dropwizard.testing.junit.ResourceTestRule;
 
 import org.junit.Before;
@@ -24,34 +33,30 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import com.google.common.base.Optional;
-
-import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
-public class GraphServiceIT {
+public class GraphServiceTest {
 
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
   private static final GraphDatabaseService graphDb = mock(GraphDatabaseService.class);
   private static final GraphApi api = mock(GraphApi.class);
 
-  private final Concept foo = mock(Concept.class);
-
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
-      .addResource(new GraphService(vocabulary, graphDb, api)).build();
+  .addResource(new GraphService(vocabulary, graphDb, api)).build();
 
   @Before
   public void setup() {
-    when(vocabulary.getConceptFromUri("http://example.org/none")).thenReturn(
-        Optional.<Concept> absent());
-    when(vocabulary.getConceptFromUri("http://example.org/foo")).thenReturn(Optional.of(foo));
+    when(api.getAllPropertyKeys()).thenReturn(newArrayList("foo", "bar"));
   }
 
   @Test
   public void testPrefix() {
-
+    assertThat(
+        resources.client().target("/graph/properties").request().get(new GenericType<List<String>>(){}),
+        contains("bar", "foo"));
+    verify(api).getAllPropertyKeys();
   }
 
 }

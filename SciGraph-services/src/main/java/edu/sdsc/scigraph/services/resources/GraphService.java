@@ -231,15 +231,9 @@ public class GraphService extends BaseResource {
   public Object getProperties(
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
-    List<String> relationships = new ArrayList<>();
-    try (Transaction tx = graphDb.beginTx()) {
-      for (String key: GlobalGraphOperations.at(graphDb).getAllPropertyKeys()) {
-        relationships.add(key);
-      }
-      tx.success();
-    }
-    sort(relationships);
-    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
+    List<String> propertyKeys = new ArrayList<>(api.getAllPropertyKeys());
+    sort(propertyKeys);
+    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(propertyKeys) {}, callback);
   }
 
 }

@@ -16,6 +16,7 @@
 package edu.sdsc.scigraph.internal;
 
 import static com.google.common.collect.Iterables.isEmpty;
+import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,11 +30,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -138,6 +141,18 @@ public class GraphApi {
       }
     }
     return graph;
+  }
+
+  /***
+   * @return All the property keys in the graph.
+   */
+  public Collection<String> getAllPropertyKeys() {
+    Set<String> propertyKeys = new HashSet<>();
+    try (Transaction tx = graphDb.beginTx()) {
+      propertyKeys.addAll(newHashSet(GlobalGraphOperations.at(graphDb).getAllPropertyKeys()));
+      tx.success();
+    }
+    return propertyKeys;
   }
 
 }

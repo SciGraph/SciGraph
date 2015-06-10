@@ -37,6 +37,7 @@ public class GraphApiTest extends GraphTestBase {
   @Before
   public void addNodes() throws Exception {
     a = graphDb.createNode();
+    a.setProperty("foo", "bar");
     b = graphDb.createNode();
     c = graphDb.createNode();
     b.createRelationshipTo(a, OwlRelationships.RDFS_SUBCLASS_OF);
@@ -54,6 +55,11 @@ public class GraphApiTest extends GraphTestBase {
   public void equivalentEntailment_isReturned() {
     Collection<Node> entailment = graphApi.getEntailment(a, new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING), true);
     assertThat(entailment, contains(a, b, c));
+  }
+
+  @Test
+  public void allPropertyKeys_areReturned() {
+    assertThat(graphApi.getAllPropertyKeys(), contains("foo"));
   }
 
 }
