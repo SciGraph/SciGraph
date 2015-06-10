@@ -18,16 +18,11 @@ package edu.sdsc.scigraph.services.resources;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
 import io.dropwizard.testing.junit.ResourceTestRule;
 
 import java.net.URLEncoder;
-import java.util.Collections;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,8 +30,6 @@ import org.junit.rules.ExpectedException;
 
 import com.google.common.base.Charsets;
 
-import edu.sdsc.scigraph.frames.Concept;
-import edu.sdsc.scigraph.services.refine.ConceptView;
 import edu.sdsc.scigraph.services.refine.RefineResults;
 import edu.sdsc.scigraph.services.refine.ServiceMetadata;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
