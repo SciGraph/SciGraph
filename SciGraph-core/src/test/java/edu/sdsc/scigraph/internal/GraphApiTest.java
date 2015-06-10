@@ -15,6 +15,9 @@
  */
 package edu.sdsc.scigraph.internal;
 
+import static com.google.common.collect.Iterables.getFirst;
+import static com.google.common.collect.Iterables.getLast;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
@@ -60,6 +63,13 @@ public class GraphApiTest extends GraphTestBase {
   @Test
   public void allPropertyKeys_areReturned() {
     assertThat(graphApi.getAllPropertyKeys(), contains("foo"));
+  }
+
+  @Test
+  public void allRelationshipTypes_areReturned() {
+    // TODO: RelationshipTypeTokens don't equal RelationshipTypes
+    assertThat(getFirst(graphApi.getAllRelationshipTypes(), null).name(), is(OwlRelationships.RDFS_SUBCLASS_OF.name()));
+    assertThat(getLast(graphApi.getAllRelationshipTypes()).name(), is(OwlRelationships.OWL_EQUIVALENT_CLASS.name()));
   }
 
 }

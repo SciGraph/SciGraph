@@ -47,7 +47,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Function;
@@ -207,17 +206,12 @@ public class GraphService extends BaseResource {
   public Object getRelationships(
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
-    List<String> relationships = new ArrayList<>();
-    try (Transaction tx = graphDb.beginTx()) {
-      relationships = newArrayList(transform(GlobalGraphOperations.at(graphDb).getAllRelationshipTypes(),
-          new Function<RelationshipType, String>() {
-        @Override
-        public String apply(RelationshipType relationshipType) {
-          return relationshipType.name();
-        }
-      }));
-      tx.success();
-    }
+    List<String> relationships = newArrayList(transform(api.getAllRelationshipTypes(), new Function<RelationshipType, String>() {
+      @Override
+      public String apply(RelationshipType type) {
+        return type.name();
+      }
+    }));
     sort(relationships);
     return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
   }

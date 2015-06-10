@@ -144,6 +144,18 @@ public class GraphApi {
   }
 
   /***
+   * @return All the {@link RelationshipType}s in the graph.
+   */
+  public Collection<RelationshipType> getAllRelationshipTypes() {
+    Set<RelationshipType> relationships = new HashSet<>();
+    try (Transaction tx = graphDb.beginTx()) {
+      relationships.addAll(newHashSet(GlobalGraphOperations.at(graphDb).getAllRelationshipTypes()));
+      tx.success();
+    }
+    return relationships;
+  }
+
+  /***
    * @return All the property keys in the graph.
    */
   public Collection<String> getAllPropertyKeys() {

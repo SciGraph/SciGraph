@@ -31,7 +31,9 @@ import io.dropwizard.testing.junit.ResourceTestRule;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.RelationshipType;
 
 import edu.sdsc.scigraph.internal.GraphApi;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
@@ -49,14 +51,29 @@ public class GraphServiceTest {
   @Before
   public void setup() {
     when(api.getAllPropertyKeys()).thenReturn(newArrayList("foo", "bar"));
+    when(api.getAllRelationshipTypes()).thenReturn(
+        newArrayList((RelationshipType)DynamicRelationshipType.withName("foo"), (RelationshipType)DynamicRelationshipType.withName("bar")));
   }
 
   @Test
-  public void testPrefix() {
+  public void smokeConstructor() {
+    new GraphService(vocabulary, graphDb, api);
+  }
+
+  @Test
+  public void propertyKeys_areSorted() {
     assertThat(
         resources.client().target("/graph/properties").request().get(new GenericType<List<String>>(){}),
         contains("bar", "foo"));
     verify(api).getAllPropertyKeys();
+  }
+
+  @Test
+  public void relationshipTypes_areSorted() {
+    assertThat(
+        resources.client().target("/graph/relationship_types").request().get(new GenericType<List<String>>(){}),
+        contains("bar", "foo"));
+    verify(api).getAllRelationshipTypes();
   }
 
 }
