@@ -20,6 +20,7 @@ import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -40,6 +41,7 @@ import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
@@ -107,7 +109,7 @@ public class GraphApi {
   }
 
   @AddCurries
-  public TinkerGraph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
+  public Graph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
     TraversalDescription description = graphDb.traversalDescription()
         .depthFirst()
         .evaluator(Evaluators.toDepth(depth))
@@ -127,7 +129,7 @@ public class GraphApi {
         }
       });
     }
-    TinkerGraph graph = new TinkerGraph();
+    Graph graph = new TinkerGraph();
     for (Path path: description.traverse(nodes)) {
       Relationship relationship = path.lastRelationship();
       if (null != relationship) {
@@ -143,6 +145,10 @@ public class GraphApi {
     return graph;
   }
 
+  public List<Graph> getEdges(RelationshipType type, long start, long count) {
+    return null;
+  }
+  
   /***
    * @return All the {@link RelationshipType}s in the graph.
    */

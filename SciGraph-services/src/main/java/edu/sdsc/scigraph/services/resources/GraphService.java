@@ -53,6 +53,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -87,7 +88,7 @@ public class GraphService extends BaseResource {
 
   @GET
   @Path("/neighbors")
-  @ApiOperation(value = "Get neighbors", response = TinkerGraph.class)
+  @ApiOperation(value = "Get neighbors", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
@@ -125,7 +126,7 @@ public class GraphService extends BaseResource {
       Direction dir = Direction.valueOf(direction);
       types.add(new DirectedRelationshipType(type, dir));
     }
-    TinkerGraph tg = new TinkerGraph();
+    Graph tg = new TinkerGraph();
     try (Transaction tx = graphDb.beginTx()) {
       Iterable<Node> nodes = transform(roots, new Function<Concept, Node>() {
         @Override
@@ -147,13 +148,13 @@ public class GraphService extends BaseResource {
     }
     TinkerGraphUtil.project(tg, projection);
     ArrayPropertyTransformer.transform(tg);
-    GenericEntity<TinkerGraph> response = new GenericEntity<TinkerGraph>(tg) {};
+    GenericEntity<Graph> response = new GenericEntity<Graph>(tg) {};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
   @GET
   @Path("/neighbors/{id}")
-  @ApiOperation(value = "Get neighbors", response = TinkerGraph.class)
+  @ApiOperation(value = "Get neighbors", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
@@ -180,7 +181,7 @@ public class GraphService extends BaseResource {
 
   @GET
   @Path("/{id}")
-  @ApiOperation(value = "Get all properties of a node", response = TinkerGraph.class)
+  @ApiOperation(value = "Get all properties of a node", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,

@@ -31,8 +31,8 @@ import org.neo4j.graphdb.RelationshipType;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
@@ -70,28 +70,28 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
 
   @Test
   public void test1Neighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
+    Graph graph = graphApi.getNeighbors(newHashSet(b), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(4));
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(3));
   }
 
   @Test
   public void testKNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 10, Collections.<DirectedRelationshipType>emptySet(), absent);
+    Graph graph = graphApi.getNeighbors(newHashSet(b), 10, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(5));
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(4));
   }
 
   @Test
   public void testTypedNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 2, newHashSet(new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING)), absent);
+    Graph graph = graphApi.getNeighbors(newHashSet(b), 2, newHashSet(new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING)), absent);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(3));
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(2));
   }
 
   @Test
   public void testMultiTypedNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 1, 
+    Graph graph = graphApi.getNeighbors(newHashSet(b), 1, 
         newHashSet(new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING),
             new DirectedRelationshipType(fizz, Direction.INCOMING)), absent);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(3));
@@ -100,7 +100,7 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
 
   @Test
   public void testSingleNodeNeighborhood() {
-    TinkerGraph graph = graphApi.getNeighbors(newHashSet(f), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
+    Graph graph = graphApi.getNeighbors(newHashSet(f), 1, Collections.<DirectedRelationshipType>emptySet(), absent);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(1));
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(0));
   }
@@ -112,14 +112,14 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
       public boolean apply(Node node) {
         return (node != c);
       }};
-      TinkerGraph graph = graphApi.getNeighbors(newHashSet(b), 1, Collections.<DirectedRelationshipType>emptySet(), Optional.of(testPredicate));
+      Graph graph = graphApi.getNeighbors(newHashSet(b), 1, Collections.<DirectedRelationshipType>emptySet(), Optional.of(testPredicate));
       assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(4));
       assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(3));
   }
 
   @Test
   public void multipleAncestors_areReturned() {
-    TinkerGraph graph = graphApi.getNeighbors(newHashSet(i), 10,
+    Graph graph = graphApi.getNeighbors(newHashSet(i), 10,
         newHashSet(new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.OUTGOING)), absent);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(4));
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(4));
