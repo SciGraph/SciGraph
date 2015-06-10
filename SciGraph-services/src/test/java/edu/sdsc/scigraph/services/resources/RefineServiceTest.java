@@ -16,19 +16,35 @@
 package edu.sdsc.scigraph.services.resources;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 import io.dropwizard.testing.junit.ResourceTestRule;
+
+import java.net.URLEncoder;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import com.google.common.base.Charsets;
+
+import edu.sdsc.scigraph.frames.Concept;
+import edu.sdsc.scigraph.services.refine.ConceptView;
 import edu.sdsc.scigraph.services.refine.RefineResults;
 import edu.sdsc.scigraph.services.refine.ServiceMetadata;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 public class RefineServiceTest {
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
   private static final ServiceMetadata metadata = new ServiceMetadata();
@@ -42,8 +58,9 @@ public class RefineServiceTest {
   .addResource(new RefineService(vocabulary, metadata))
   .build();
 
-  @Before
-  public void setup() {
+  @Test
+  public void smokeConstructor() {
+    new RefineService(vocabulary, metadata);
   }
 
   @Test
@@ -53,14 +70,28 @@ public class RefineServiceTest {
   }
 
   @Test
-  public void resultsAreReturned_whenQueriesArePresent() {
+  public void resultsAreReturned_whenQueryIsPresent() {
     assertThat(
         resources.client().target("/refine/reconcile?query=hippocampus").request().get(RefineResults.class), instanceOf(RefineResults.class));
   }
 
-  @Test(expected=Exception.class)
+  @Test
+  public void resultsAreReturned_whenMultipleQueriesArePresent() throws Exception {
+    String query = URLEncoder.encode("{ \"q0\" : { \"query\" : \"foo\" }, \"q1\" : { \"query\" : \"bar\" } }", Charsets.UTF_8.name());
+    assertThat(
+        resources.client().target("/refine/reconcile?queries=" + query).request().get(String.class), is("{\"q1\":{\"result\":[]},\"q0\":{\"result\":[]}}"));
+  }
+
+  @Test()
   public void exceptionIsThrown_whenJsonIsMalformed() {
-      resources.client().target("/refine/reconcile?query=%5Bbad%20json%5D%5D").request().get(RefineResults.class);
+    exception.expect(Exception.class);
+    resources.client().target("/refine/reconcile?query=%5Bbad%20json%5D%5D").request().get(RefineResults.class);
+  }
+
+  @Test
+  public void preview_returns404_whenNotFound() {
+    assertThat(
+        resources.client().target("/refine/preview/foo").request().get().getStatus(), is(404));
   }
 
 }

@@ -34,6 +34,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
@@ -139,6 +140,9 @@ public class RefineService extends BaseResource {
   public ConceptView getView(@PathParam("id") String id) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Collection<Concept> concepts = vocabulary.getConceptFromId(query);
+    if (concepts.isEmpty()) {
+      throw new WebApplicationException(404);
+    }
     return new ConceptView(concepts.iterator().next());
   }
 
