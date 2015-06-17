@@ -199,6 +199,24 @@ public class GraphService extends BaseResource {
   }
 
   @GET
+  @Path("/edges")
+  @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, MediaType.APPLICATION_XML})
+  public Object getEdges(
+      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
+      @QueryParam("callback") String callback) {
+    List<String> relationships = newArrayList(transform(api.getAllRelationshipTypes(), new Function<RelationshipType, String>() {
+      @Override
+      public String apply(RelationshipType type) {
+        return type.name();
+      }
+    }));
+    sort(relationships);
+    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
+  }
+  @GET
   @Path("/relationship_types")
   @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
   @Timed

@@ -17,6 +17,7 @@ package edu.sdsc.scigraph.util;
 
 import static com.google.common.collect.Sets.newHashSet;
 
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.After;
@@ -33,6 +34,7 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
+import edu.sdsc.scigraph.internal.CypherUtil;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
@@ -40,10 +42,12 @@ import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 
 public class GraphTestBase {
 
   protected static GraphDatabaseService graphDb;
+  protected static CypherUtil cypherUtil;
   protected static Graph graph;
   static ConcurrentHashMap<String, Long> idMap = new ConcurrentHashMap<>();
 
@@ -82,6 +86,7 @@ public class GraphTestBase {
         Concept.ACRONYM));
     Neo4jModule.setupAutoIndexing(graphDb, config);
     graph = new GraphTransactionalImpl(graphDb, idMap, new RelationshipMap());
+    cypherUtil = new CypherUtil(graphDb, new CurieUtil(Collections.<String, String>emptyMap()));
   }
 
   @AfterClass

@@ -20,7 +20,7 @@ import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -31,6 +31,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
@@ -52,10 +53,12 @@ import edu.sdsc.scigraph.owlapi.curies.AddCurries;
 public class GraphApi {
 
   private final GraphDatabaseService graphDb;
+  private final CypherUtil cypherUtil;
 
   @Inject
-  public GraphApi(GraphDatabaseService graphDb) {
+  public GraphApi(GraphDatabaseService graphDb, CypherUtil cypherUtil) {
     this.graphDb = graphDb;
+    this.cypherUtil = cypherUtil;
   }
 
   /***
@@ -145,10 +148,27 @@ public class GraphApi {
     return graph;
   }
 
-  public List<Graph> getEdges(RelationshipType type, long start, long count) {
-    return null;
+  public Graph getEdges(RelationshipType type, long skip, long limit) {
+    String query = "MATCH path = (start)-[r:" + type.name() + "]->(end) "
+        + " RETURN path "
+        + " ORDER BY ID(r) "
+        + " SKIP " + skip 
+        + " LIMIT " + limit;
+    Graph graph = new TinkerGraph();
+    Result result;
+    try {
+      result = cypherUtil.execute(query);
+      while (result.hasNext()) {
+        Map<String, Object> map = result.next();
+        Path path = (Path) map.get("path");
+        TinkerGraphUtil.addPath(graph, path);
+      }
+    } catch (ArrayIndexOutOfBoundsException e) {
+      // Return and empty graph if the limit is too high...
+    }
+    return graph;
   }
-  
+
   /***
    * @return All the {@link RelationshipType}s in the graph.
    */

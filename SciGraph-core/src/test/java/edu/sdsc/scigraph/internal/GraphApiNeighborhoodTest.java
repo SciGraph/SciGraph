@@ -65,7 +65,7 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
     h.createRelationshipTo(j, OwlRelationships.RDFS_SUBCLASS_OF);
     g.createRelationshipTo(j, OwlRelationships.RDFS_SUBCLASS_OF);
     e.createRelationshipTo(b, fizz);
-    graphApi = new GraphApi(graphDb);
+    graphApi = new GraphApi(graphDb, cypherUtil);
   }
 
   @Test

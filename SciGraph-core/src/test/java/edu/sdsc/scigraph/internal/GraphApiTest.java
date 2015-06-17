@@ -17,6 +17,7 @@ package edu.sdsc.scigraph.internal;
 
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.getLast;
+import static com.google.common.collect.Iterables.size;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -27,6 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
+
+import com.tinkerpop.blueprints.Graph;
 
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
@@ -45,7 +48,7 @@ public class GraphApiTest extends GraphTestBase {
     c = graphDb.createNode();
     b.createRelationshipTo(a, OwlRelationships.RDFS_SUBCLASS_OF);
     c.createRelationshipTo(b, OwlRelationships.OWL_EQUIVALENT_CLASS);
-    graphApi = new GraphApi(graphDb);
+    graphApi = new GraphApi(graphDb, cypherUtil);
   }
 
   @Test
@@ -70,6 +73,20 @@ public class GraphApiTest extends GraphTestBase {
     // TODO: RelationshipTypeTokens don't equal RelationshipTypes
     assertThat(getFirst(graphApi.getAllRelationshipTypes(), null).name(), is(OwlRelationships.RDFS_SUBCLASS_OF.name()));
     assertThat(getLast(graphApi.getAllRelationshipTypes()).name(), is(OwlRelationships.OWL_EQUIVALENT_CLASS.name()));
+  }
+
+  @Test
+  public void edges_areReturned() {
+    Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, 0L, 1L);
+    assertThat(size(graph.getVertices()), is(2));
+    assertThat(size(graph.getEdges()), is(1));
+  }
+  
+  @Test
+  public void edges_areSkipped() {
+    Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, Long.MAX_VALUE, 1L);
+    assertThat(size(graph.getVertices()), is(0));
+    assertThat(size(graph.getEdges()), is(0));
   }
 
 }
