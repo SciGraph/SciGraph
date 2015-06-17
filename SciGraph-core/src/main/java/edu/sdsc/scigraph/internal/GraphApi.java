@@ -148,8 +148,10 @@ public class GraphApi {
     return graph;
   }
 
-  public Graph getEdges(RelationshipType type, long skip, long limit) {
-    String query = "MATCH path = (start)-[r:" + type.name() + "]->(end) "
+  public Graph getEdges(RelationshipType type, boolean entail, long skip, long limit) {
+    String query = "MATCH path = (start)-[r:" + type.name() 
+        + (entail ? "!" : "")
+        + "]->(end) "
         + " RETURN path "
         + " ORDER BY ID(r) "
         + " SKIP " + skip 

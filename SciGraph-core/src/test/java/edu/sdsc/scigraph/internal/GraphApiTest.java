@@ -77,14 +77,21 @@ public class GraphApiTest extends GraphTestBase {
 
   @Test
   public void edges_areReturned() {
-    Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, 0L, 1L);
+    Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, false, 0L, 1L);
     assertThat(size(graph.getVertices()), is(2));
     assertThat(size(graph.getEdges()), is(1));
   }
-  
+
+  @Test
+  public void edges_queryIsEntailed() {
+    Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, true, 0L, 1L);
+    assertThat(size(graph.getVertices()), is(2));
+    assertThat(size(graph.getEdges()), is(1));
+  }
+
   @Test
   public void edges_areSkipped() {
-    Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, Long.MAX_VALUE, 1L);
+    Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, false, Long.MAX_VALUE, 1L);
     assertThat(size(graph.getVertices()), is(0));
     assertThat(size(graph.getEdges()), is(0));
   }
