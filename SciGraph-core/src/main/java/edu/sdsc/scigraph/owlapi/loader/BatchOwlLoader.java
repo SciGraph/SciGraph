@@ -36,6 +36,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.mapdb.DB;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -161,6 +162,8 @@ public class BatchOwlLoader {
     logger.info("Loading ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
     loader.loadOntology();
+    DB mapDb = i.getInstance(DB.class);
+    mapDb.close();
     logger.info(format("Loading took %d minutes", timer.elapsed(TimeUnit.MINUTES)));
   }
 
