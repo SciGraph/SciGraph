@@ -18,7 +18,6 @@ package edu.sdsc.scigraph.services.resources;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -43,7 +42,6 @@ import org.neo4j.graphdb.Transaction;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.internal.GraphApi;
-import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 public class GraphServiceTest {
@@ -86,7 +84,7 @@ public class GraphServiceTest {
         contains("bar", "foo"));
     verify(api).getAllRelationshipTypes();
   }
-  
+
   @Test
   public void edges_areReturned() {
     assertThat(
