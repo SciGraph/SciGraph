@@ -153,7 +153,8 @@ public class GraphApi {
         + (entail ? "!" : "")
         + "]->(end) "
         + " RETURN path "
-        + " ORDER BY ID(r) "
+        // TODO: This slows down the query dramatically.
+        // + " ORDER BY ID(r) "
         + " SKIP " + skip 
         + " LIMIT " + limit;
     Graph graph = new TinkerGraph();

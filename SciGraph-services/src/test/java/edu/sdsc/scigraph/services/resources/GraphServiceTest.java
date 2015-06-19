@@ -18,24 +18,32 @@ package edu.sdsc.scigraph.services.resources;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import io.dropwizard.testing.junit.ResourceTestRule;
 
 import java.util.List;
 
 import javax.ws.rs.core.GenericType;
 
-import io.dropwizard.testing.junit.ResourceTestRule;
-
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
+
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.internal.GraphApi;
+import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
 
 public class GraphServiceTest {
@@ -43,6 +51,7 @@ public class GraphServiceTest {
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
   private static final GraphDatabaseService graphDb = mock(GraphDatabaseService.class);
   private static final GraphApi api = mock(GraphApi.class);
+  private static final Transaction tx = mock(Transaction.class);
 
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
@@ -53,6 +62,8 @@ public class GraphServiceTest {
     when(api.getAllPropertyKeys()).thenReturn(newArrayList("foo", "bar"));
     when(api.getAllRelationshipTypes()).thenReturn(
         newArrayList((RelationshipType)DynamicRelationshipType.withName("foo"), (RelationshipType)DynamicRelationshipType.withName("bar")));
+    when(graphDb.beginTx()).thenReturn(tx);
+    when(api.getEdges(any(RelationshipType.class), anyBoolean(), anyLong(), anyLong())).thenReturn(new TinkerGraph());
   }
 
   @Test
@@ -74,6 +85,13 @@ public class GraphServiceTest {
         resources.client().target("/graph/relationship_types").request().get(new GenericType<List<String>>(){}),
         contains("bar", "foo"));
     verify(api).getAllRelationshipTypes();
+  }
+  
+  @Test
+  public void edges_areReturned() {
+    assertThat(
+        resources.client().target("/graph/edges/subClassOf").request().get(String.class), 
+        StringContains.containsString("\"vertices\":[]"));
   }
 
 }

@@ -23,6 +23,7 @@ import static java.util.Collections.sort;
 import io.dropwizard.jersey.caching.CacheControl;
 import io.dropwizard.jersey.params.BooleanParam;
 import io.dropwizard.jersey.params.IntParam;
+import io.dropwizard.jersey.params.LongParam;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -199,23 +200,35 @@ public class GraphService extends BaseResource {
   }
 
   @GET
-  @Path("/edges")
-  @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
+  @Path("/edges/{type}")
+  @ApiOperation(value = "Get nodes connected by an edge type", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, MediaType.APPLICATION_XML})
+  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
+    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
+    CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
+    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getEdges(
+      @ApiParam(value = "The type of the edge", required = true)
+      @PathParam("type") String type,
+      @ApiParam(value = "Should subproperties and equivalent properties be included", required = false)
+      @QueryParam("entail") @DefaultValue("true") BooleanParam entail,
+      @ApiParam(value = "The number of edges to be returned", required = false)
+      @QueryParam("limit") @DefaultValue("100") LongParam limit,
+      @ApiParam(value = "The number of edges to skip", required = false)
+      @QueryParam("skip") @DefaultValue("0") LongParam skip,
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
-    List<String> relationships = newArrayList(transform(api.getAllRelationshipTypes(), new Function<RelationshipType, String>() {
-      @Override
-      public String apply(RelationshipType type) {
-        return type.name();
-      }
-    }));
-    sort(relationships);
-    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
+    Graph edgeGraph = new TinkerGraph();
+    try (Transaction tx = graphDb.beginTx()) {
+      RelationshipType relationshipType = DynamicRelationshipType.withName(type);
+      edgeGraph = api.getEdges(relationshipType, entail.get(), skip.get(), limit.get());
+      tx.success();
+    }
+    GenericEntity<Graph> response = new GenericEntity<Graph>(edgeGraph) {};
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
+
   @GET
   @Path("/relationship_types")
   @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
