@@ -160,18 +160,16 @@ public final class ReachabilityIndex {
     logger.info("Reachability index created.");
   }
 
-  @SuppressWarnings("deprecation")
   Transaction batchTransactions(Transaction tx, int operationCount) {
     if (operationCount % transactionBatchSize == 0) {
       tx.success();
-      tx.finish();
+      tx.close();
       return graphDb.beginTx();
     } else {
       return tx;
     }
   }
 
-  @SuppressWarnings("deprecation")
   void commitIndexToGraph(InMemoryReachabilityIndex inMemoryIndex) {
     Transaction tx = graphDb.beginTx();
 
@@ -185,10 +183,9 @@ public final class ReachabilityIndex {
 
     metaDataNode.setProperty(INDEX_EXISTS_PROPERTY, true);
     tx.success();
-    tx.finish();
+    tx.close();
   }
 
-  @SuppressWarnings("deprecation")
   public void dropIndex() {
     if (indexExists()) {
       Transaction tx = graphDb.beginTx();
@@ -205,7 +202,7 @@ public final class ReachabilityIndex {
       metaDataNode.setProperty(INDEX_EXISTS_PROPERTY, false);
 
       tx.success();
-      tx.finish();
+      tx.close();
       logger.info("Reachability index dropped.");
     } else {
       logger.warning("There was no reachability index to drop.");
