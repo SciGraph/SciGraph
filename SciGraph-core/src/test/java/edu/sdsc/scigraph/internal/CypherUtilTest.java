@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.internal;
 
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,6 +24,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.hamcrest.collection.IsMapContaining;
@@ -31,8 +33,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -117,8 +121,20 @@ public class CypherUtilTest extends GraphTestBase{
 
   @Test
   public void multipleEntailmentRegex() {
-    Set<String> types = util.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
+    Set<String> types = util.getEntailedRelationshipNames(newHashSet("foo", "bar"));
     assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "fizz_equiv", "baz"));
+  }
+
+  @Test
+  public void multipleEntailmentRegex_types() {
+    Set<RelationshipType> types = util.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
+    Collection<String> typeNames = transform(types, new Function<RelationshipType, String>() {
+      @Override
+      public String apply(RelationshipType arg0) {
+        return arg0.name();
+      }
+    });
+    assertThat(typeNames, containsInAnyOrder("foo", "bar", "fizz", "fizz_equiv", "baz"));
   }
 
   @Test

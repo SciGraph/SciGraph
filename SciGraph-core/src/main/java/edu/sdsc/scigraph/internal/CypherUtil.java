@@ -21,6 +21,7 @@ import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,7 +34,9 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
@@ -83,7 +86,22 @@ public class CypherUtil {
     return flatMap;
   }
 
-  Set<String> getEntailedRelationshipTypes(Collection<String> parents) {
+  Set<RelationshipType> getEntailedRelationshipTypes(Collection<String> parents) {
+    Set<String> relationshipNames = getEntailedRelationshipNames(parents);
+    Collection<RelationshipType> relationshipTypes = Collections.emptySet();
+    try (Transaction tx = graphDb.beginTx()) {
+      relationshipTypes = transform(relationshipNames, new Function<String, RelationshipType>() {
+        @Override
+        public RelationshipType apply(String name) {
+          return DynamicRelationshipType.withName(name);
+        }
+      });
+      tx.success();
+    }
+    return new HashSet<RelationshipType>(relationshipTypes);
+  }
+
+  Set<String> getEntailedRelationshipNames(Collection<String> parents) {
     Set<String> entailedTypes = new HashSet<>();
     for (String parent: parents) {
       entailedTypes.add(parent);
@@ -118,15 +136,15 @@ public class CypherUtil {
         @Override
         public String apply(String type) {
           if (curieUtil.getIri(type).isPresent()) {
-             return GraphUtil.getFragment(curieUtil.getIri(type).get());
+            return GraphUtil.getFragment(curieUtil.getIri(type).get());
           } else {
             return type;
           }
         }
-        
+
       });
       if (entail) {
-        String entailedTypes = on('|').join(getEntailedRelationshipTypes(parentTypes));
+        String entailedTypes = on('|').join(getEntailedRelationshipNames(parentTypes));
         m.appendReplacement(buffer, ":" + entailedTypes);
       } else {
         String resolvedTypes = on('|').join(parentTypes);
@@ -154,7 +172,7 @@ public class CypherUtil {
               return input.toString();
             }
           }
-          
+
         });
         return on('|').join(resolvedRelationshipTypes);
       }
