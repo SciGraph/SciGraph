@@ -86,7 +86,7 @@ public class CypherUtil {
     return flatMap;
   }
 
-  Set<RelationshipType> getEntailedRelationshipTypes(Collection<String> parents) {
+  public Set<RelationshipType> getEntailedRelationshipTypes(Collection<String> parents) {
     Set<String> relationshipNames = getEntailedRelationshipNames(parents);
     Collection<RelationshipType> relationshipTypes = Collections.emptySet();
     try (Transaction tx = graphDb.beginTx()) {
