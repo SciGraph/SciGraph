@@ -66,6 +66,7 @@ import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.services.api.graph.ArrayPropertyTransformer;
+import edu.sdsc.scigraph.services.jersey.BadRequestException;
 import edu.sdsc.scigraph.services.jersey.BaseResource;
 import edu.sdsc.scigraph.services.jersey.CustomMediaTypes;
 import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
@@ -123,9 +124,16 @@ public class GraphService extends BaseResource {
     }
     Set<DirectedRelationshipType> types = new HashSet<>();
     if (relationshipType.isPresent()) {
-      RelationshipType type = DynamicRelationshipType.withName(relationshipType.get());
-      Direction dir = Direction.valueOf(direction);
-      types.add(new DirectedRelationshipType(type, dir));
+      if (!getRelationshipTypeNames().contains(relationshipType.get())) {
+        throw new BadRequestException("Unknown relationship type: " + relationshipType.get());
+      }
+      try {
+        RelationshipType type = DynamicRelationshipType.withName(relationshipType.get());
+        Direction dir = Direction.valueOf(direction);
+        types.add(new DirectedRelationshipType(type, dir));
+      } catch (Exception e) {
+        throw new BadRequestException("Unknown direction: " + direction);
+      }
     }
     Graph tg = new TinkerGraph();
     try (Transaction tx = graphDb.beginTx()) {
@@ -229,6 +237,16 @@ public class GraphService extends BaseResource {
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
+  // TODO: Move this to scigraph-core
+  List<String> getRelationshipTypeNames() {
+    return newArrayList(transform(api.getAllRelationshipTypes(), new Function<RelationshipType, String>() {
+      @Override
+      public String apply(RelationshipType type) {
+        return type.name();
+      }
+    }));
+  }
+
   @GET
   @Path("/relationship_types")
   @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
@@ -238,12 +256,7 @@ public class GraphService extends BaseResource {
   public Object getRelationships(
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
-    List<String> relationships = newArrayList(transform(api.getAllRelationshipTypes(), new Function<RelationshipType, String>() {
-      @Override
-      public String apply(RelationshipType type) {
-        return type.name();
-      }
-    }));
+    List<String> relationships = getRelationshipTypeNames();
     sort(relationships);
     return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
   }

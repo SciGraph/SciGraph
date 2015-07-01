@@ -20,17 +20,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-public class JSONProcessingException extends WebApplicationException {
+public class BadRequestException extends WebApplicationException {
 
   private static final long serialVersionUID = 1L;
 
-  public JSONProcessingException() {
+  public BadRequestException() {
     super(Response.status(Status.BAD_REQUEST).build());
   }
 
-  public JSONProcessingException(String json) {
+  public BadRequestException(String message) {
     super(Response.status(Status.BAD_REQUEST).
-        entity("Failed parse JSON: " + json).type(MediaType.TEXT_PLAIN).build());
+        entity(message).type(MediaType.TEXT_PLAIN).build());
   }
 
 }

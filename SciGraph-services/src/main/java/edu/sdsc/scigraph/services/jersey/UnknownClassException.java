@@ -16,6 +16,8 @@
 package edu.sdsc.scigraph.services.jersey;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 public class UnknownClassException extends WebApplicationException {
@@ -23,11 +25,12 @@ public class UnknownClassException extends WebApplicationException {
   private static final long serialVersionUID = 1L;
 
   public UnknownClassException() {
-    super(Status.NOT_FOUND);
+    super(Response.status(Status.NOT_FOUND).build());
   }
 
   public UnknownClassException(String id) {
-    super("Failed to find class with ID: " + id, Status.NOT_FOUND);
+    super(Response.status(Status.NOT_FOUND).
+        entity("Failed to find class with ID: " + id).type(MediaType.TEXT_PLAIN).build());
   }
 
 }
