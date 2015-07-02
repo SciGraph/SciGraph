@@ -106,11 +106,9 @@ public class BatchOwlLoader {
   void loadOntology() throws InterruptedException {
     if (!ontologies.isEmpty()) {
       for (int i = 0; i < numConsumers; i++) {
-        //exec.submit(new OwlOntologyConsumer(queue, graph, PRODUCER_COUNT, mappedProperties, numProducersShutdown));
         exec.submit(consumerProvider.get());
       }
       for (int i = 0; i < numProducers; i++) {
-        //exec.submit(new OwlOntologyProducer(queue, urlQueue, numProducersShutdown));
         exec.submit(producerProvider.get());
       }
       for (OntologySetup ontology: ontologies) {
