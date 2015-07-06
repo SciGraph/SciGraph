@@ -9,6 +9,9 @@ SubClassOf(:c :b)
 SubClassOf(:d :c)
 SubClassOf(:e :d)
 
+# a redundant axiom
+SubClassOf(:e :c)
+
 # equivalence axioms sufficient to build complete hierarchy
 EquivalentClasses(:ax ObjectSomeValuesFrom(:p :a))
 EquivalentClasses(:bx ObjectSomeValuesFrom(:p :b))

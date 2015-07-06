@@ -108,4 +108,14 @@ public class ReasonerUtilTest {
     assertThat(util.shouldReason(), is(false));
   }
 
+  @Test
+  public void redundantAxioms_areRemoved() throws Exception {
+    OWLClass e = dataFactory.getOWLClass(IRI.create("http://example.org/e"));
+    OWLClass c = dataFactory.getOWLClass(IRI.create("http://example.org/c"));
+    OWLClassAxiom originalSubclass = dataFactory.getOWLSubClassOfAxiom(e, c);
+    assertThat(ont.containsAxiom(originalSubclass), is(true));
+    util.removeRedundantAxioms();
+    assertThat(ont.containsAxiom(originalSubclass), is(false)); 
+  }
+
 }
