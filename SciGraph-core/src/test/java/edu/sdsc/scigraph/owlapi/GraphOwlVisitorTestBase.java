@@ -33,7 +33,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.neo4j.graphdb.Direction;
@@ -165,7 +164,6 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   }
 
   @Test
-  @Ignore
   public void nodesHaveDefinedBy() {
     Node mother = getNode(ROOT + "/Mother");
     Node ontology = getNode(ROOT);
@@ -173,7 +171,6 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   }
 
   @Test
-  @Ignore
   public void relationshipsHaveDefinedBy() {
     Node mother = getNode(ROOT + "/Mother");
     Relationship r = getOnlyElement(mother.getRelationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.OUTGOING));
