@@ -154,26 +154,27 @@ public class ReasonerUtil {
   // Ticket #130
   // credit to @hdietze for the code
   void removeRedundantAxioms() {
-    final OWLOntology rootOntology = reasoner.getRootOntology();
     final List<RemoveAxiom> changes = new ArrayList<RemoveAxiom>();
-    Set<OWLClass> allClasses = rootOntology.getClassesInSignature(false);
+    Set<OWLClass> allClasses = ont.getClassesInSignature(true);
     logger.info("Check classes for redundant super class axioms, all OWL classes count: " + allClasses.size());
-    for(OWLClass cls : allClasses) {
+    for (OWLClass cls: allClasses) {
       final Set<OWLClass> directSuperClasses = reasoner.getSuperClasses(cls, true).getFlattened();
-      Set<OWLSubClassOfAxiom> subClassAxioms = rootOntology.getSubClassAxiomsForSubClass(cls);
-      for (final OWLSubClassOfAxiom subClassAxiom : subClassAxioms) {
-        subClassAxiom.getSuperClass().accept(new OWLClassExpressionVisitorAdapter(){
-          @Override
-          public void visit(OWLClass desc) {
-            if (directSuperClasses.contains(desc) == false) {
-              changes.add(new RemoveAxiom(rootOntology, subClassAxiom));
+      for (final OWLOntology importedOntology: ont.getImportsClosure()) {
+        Set<OWLSubClassOfAxiom> subClassAxioms = importedOntology.getSubClassAxiomsForSubClass(cls);
+        for (final OWLSubClassOfAxiom subClassAxiom : subClassAxioms) {
+          subClassAxiom.getSuperClass().accept(new OWLClassExpressionVisitorAdapter(){
+            @Override
+            public void visit(OWLClass desc) {
+              if (directSuperClasses.contains(desc) == false) {
+                changes.add(new RemoveAxiom(importedOntology, subClassAxiom));
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
     logger.info("Found redundant axioms: " + changes.size());
-    List<OWLOntologyChange> result = rootOntology.getOWLOntologyManager().applyChanges(changes);
+    List<OWLOntologyChange> result = manager.applyChanges(changes);
     logger.info("Removed axioms: " + result.size());
   }
 
@@ -200,12 +201,11 @@ public class ReasonerUtil {
       }
     }
 
-    removeRedundantAxioms();
-
-    reasoner.dispose();
     logger.info("Applying reasoned axioms: " + changes.size());
     manager.applyChanges(changes);
     logger.info("Completed applying reasoning changes");
+    removeRedundantAxioms();
+    reasoner.dispose();
     return true;
   }
 
