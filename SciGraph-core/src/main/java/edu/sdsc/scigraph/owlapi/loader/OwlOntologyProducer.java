@@ -31,6 +31,7 @@ import com.google.inject.Inject;
 
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.OwlApiUtils;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
@@ -71,16 +72,11 @@ final class OwlOntologyProducer implements Callable<Void>{
     logger.info("Queueing axioms for: " + ontologyConfig);
     long objectCount = 0;
     for (OWLOntology ontology: manager.getOntologies()) {
-      // TODO: Do all of these need to be iterated?
-      for (OWLObject object: ontology.getNestedClassExpressions()) {
+      for (OWLObject object: ontology.getClassesInSignature(false)) {
         queue.put(new OWLCompositeObject(ontology, object));
         objectCount++;
       }
-      for (OWLObject object: ontology.getSignature(true)) {
-        queue.put(new OWLCompositeObject(ontology, object));
-        objectCount++;
-      }
-      for (OWLObject object: ontology.getAxioms()) {
+      for (OWLObject object: ontology.getAxioms()) { // only in the current ontology
         queue.put(new OWLCompositeObject(ontology, object));
         objectCount++;
       }
@@ -89,12 +85,17 @@ final class OwlOntologyProducer implements Callable<Void>{
     logger.info("Finished queueing " + objectCount + " axioms for: " + ontologyConfig);
   }
 
-  public void addOntologyStructure(OWLOntologyManager manager, OWLOntology ontology) {
+  void addOntologyStructure(OWLOntologyManager manager, OWLOntology ontology) {
     long parent = graph.createNode(OwlApiUtils.getIri(ontology));
+    graph.addLabel(parent, OwlLabels.OWL_ONTOLOGY);
     for (OWLImportsDeclaration importDeclaration: ontology.getImportsDeclarations()) {
       OWLOntology childOnt = manager.getImportedOntology(importDeclaration);
       long child = graph.createNode(OwlApiUtils.getIri(childOnt));
+      graph.addLabel(parent, OwlLabels.OWL_ONTOLOGY);
       graph.createRelationship(child, parent, OwlRelationships.RDFS_IS_DEFINED_BY);
+      if (ontology.equals(childOnt)) {
+        continue;
+      }
       addOntologyStructure(manager, childOnt);
     }
   }
@@ -108,10 +109,13 @@ final class OwlOntologyProducer implements Callable<Void>{
           break;
         } else {
           OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-          logger.info("Loading ontology: " + ontologyConfig);
+          logger.info("Processing ontology: " + ontologyConfig);
           try {
-            OWLOntology ont = OwlApiUtils.loadOntology(manager, ontologyConfig.url());
-            reason(manager, ont, ontologyConfig);
+            OWLOntology ontology = OwlApiUtils.loadOntology(manager, ontologyConfig.url());
+            reason(manager, ontology, ontologyConfig);
+            logger.info("Adding ontology structure");
+            addOntologyStructure(manager, ontology);
+            logger.info("Finished adding ontology structure");
             queueObjects(manager, ontologyConfig);
           } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to load ontology: " + ontologyConfig, e);
