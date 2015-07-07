@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getIri;
 
@@ -112,14 +113,8 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.shutdown();
   }
 
-  String getOntologyIri() {
-    OWLOntologyID id = ontology.get().getOntologyID();
-    if (null == id.getOntologyIRI()) {
-      logger.fine("Ignoring null ontology ID for " + ontology.toString());
-      return null;
-    } else {
-      return id.getOntologyIRI().toString();
-    }
+  public void setOntology(OWLOntology ontology) {
+    this.ontology = Optional.of(checkNotNull(ontology));
   }
 
   @Override
@@ -134,6 +129,11 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     return null;
   }
 
+  private long addDefinedBy(Long node) {
+    long ontologyNode = graph.getNode(OwlApiUtils.getIri(ontology.get())).get();
+    return graph.createRelationship(node, ontologyNode, OwlRelationships.RDFS_IS_DEFINED_BY);
+  }
+
   private long getOrCreateNode(String iri, Label... labels) {
     Optional<Long> node = graph.getNode(iri.toString());
     if (!node.isPresent()) {
@@ -142,8 +142,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       graph.setNodeProperty(nodeId, CommonProperties.FRAGMENT, GraphUtil.getFragment(iri));
       node = Optional.of(nodeId);
     }
-    /*Optional<Long> ontology = graph.getNode(getOntologyIri());
-    graph.createRelationship(node.get(), ontology.get(), OwlRelationships.RDFS_IS_DEFINED_BY);*/
     for (Label label: labels) {
       graph.addLabel(node.get(), label);
     }
@@ -152,14 +150,14 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private long getOrCreateRelationship(long start, long end, RelationshipType type) {
     long relationship = graph.createRelationship(start, end, type);
-    //graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), getOntologyIri());
+    graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), OwlApiUtils.getIri(ontology.get()));
     return relationship;
   }
-  
+
   private Collection<Long> getOrCreateRelationshipPairwise(Collection<Long> nodeIds, RelationshipType type) {
     Collection<Long> relationships = graph.createRelationshipsPairwise(nodeIds, type);
     for (long relationship: relationships) {
-      //graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), getOntologyIri());
+      graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), OwlApiUtils.getIri(ontology.get()));
     }
     return relationships;
   }
@@ -189,6 +187,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLDeclarationAxiom axiom) {
     String iri = getIri(axiom);
     long node = getOrCreateNode(iri);
+    addDefinedBy(node);
     if (axiom.getEntity() instanceof OWLClass) {
       graph.addLabel(node, OwlLabels.OWL_CLASS);
     } else if (axiom.getEntity() instanceof OWLNamedIndividual) {
