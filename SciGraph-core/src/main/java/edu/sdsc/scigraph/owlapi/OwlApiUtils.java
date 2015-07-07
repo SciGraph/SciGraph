@@ -51,6 +51,8 @@ public class OwlApiUtils {
 
   private static final Set<String> unknownLanguages = new HashSet<>();
 
+  private static final Set<OWLOntology> ontologiesWithoutIris = new HashSet<>();
+
   /*** 
    * @param literal An OWLLiteral
    * @return an optional correctly typed Java object from the OWLLiteral
@@ -112,7 +114,16 @@ public class OwlApiUtils {
   }
 
   public static String getIri(OWLOntology ontology) {
-    return ontology.getOntologyID().getOntologyIRI().toString();
+    String iri = "_:" + ontology.hashCode();
+    if (null != ontology.getOntologyID() && null != ontology.getOntologyID().getOntologyIRI()) {
+      iri = ontology.getOntologyID().getOntologyIRI().toString();
+    } else {
+      if (!ontologiesWithoutIris.contains(ontology)) {
+        ontologiesWithoutIris.add(ontology);
+        logger.warning("Failed to find IRI for " + ontology + " - using hash code instead.");
+      }
+    }
+    return iri;
   }
 
   public static String getFragment(OWLRDFVocabulary vocab) {
