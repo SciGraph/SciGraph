@@ -33,6 +33,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -313,7 +314,14 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLSubClassOfAxiom axiom) {
     long subclass = getOrCreateNode(getIri(axiom.getSubClass()));
     long superclass = getOrCreateNode(getIri(axiom.getSuperClass()));
-    getOrCreateRelationship(subclass, superclass, OwlRelationships.RDFS_SUBCLASS_OF);
+    long relationship = getOrCreateRelationship(subclass, superclass, OwlRelationships.RDFS_SUBCLASS_OF);
+    for (OWLAnnotation annotation: axiom.getAnnotations()) {
+      String property = annotation.getProperty().getIRI().toString();
+      Optional<Object> value = OwlApiUtils.getTypedLiteralValue((OWLLiteral) annotation.getValue());
+      if (value.isPresent()) {
+        graph.addRelationshipProperty(relationship, property, value.get());
+      }
+    }
     return null;
   }
 

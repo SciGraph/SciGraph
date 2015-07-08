@@ -1,0 +1,7 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestSubclassOf
+SubClassOf(
+Annotation(:foo "bar"^^xsd:string) 
+:subclass :superclass)
+)
