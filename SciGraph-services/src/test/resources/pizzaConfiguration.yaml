@@ -24,9 +24,9 @@ graphConfiguration:
 cypherResources:
   - path: /dynamic/toppings
     query: |
-            MATCH (pizza)-[r:hasTopping]->(topping)
+            MATCH path = (pizza)-[:hasTopping]->(topping)
             WHERE pizza.fragment = {pizza_id}
-            RETURN distinct pizza, r, topping
+            RETURN path
     operations:
       - nickname: toppings
         summary: Get toppings for a pizza
