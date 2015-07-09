@@ -90,6 +90,10 @@ final class OwlOntologyProducer implements Callable<Void>{
     graph.addLabel(parent, OwlLabels.OWL_ONTOLOGY);
     for (OWLImportsDeclaration importDeclaration: ontology.getImportsDeclarations()) {
       OWLOntology childOnt = manager.getImportedOntology(importDeclaration);
+      if (null == childOnt) {
+        // TODO: Why is childOnt sometimes null?
+        continue;
+      }
       long child = graph.createNode(OwlApiUtils.getIri(childOnt));
       graph.addLabel(parent, OwlLabels.OWL_ONTOLOGY);
       graph.createRelationship(child, parent, OwlRelationships.RDFS_IS_DEFINED_BY);

@@ -122,6 +122,10 @@ public class OwlPostprocessor {
       try (Transaction tx = graphDb.beginTx()) {
         ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
         Node root = nodeIndex.get(CommonProperties.URI, category.getKey()).getSingle();
+        if (null == root) {
+          logger.warning("Failed to locate " + category.getKey() + " while processing categories");
+          continue;
+        }
         roots.add(root);
         for (Relationship equiv: root.getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
           roots.add(equiv.getOtherNode(root));
