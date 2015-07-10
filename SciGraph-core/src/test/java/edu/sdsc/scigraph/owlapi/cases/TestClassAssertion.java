@@ -48,4 +48,11 @@ public class TestClassAssertion extends OwlTestCase {
     assertThat("OPE edge should start with the target.", relationship.getEndNode(), is(c));
   }
 
+  @Test
+  public void anonymousLabelsAreAppliedToAnonymousIndividuals() {
+    Node anon = getNode("_:anonymousIndividual");
+    assertThat(anon.hasLabel(OwlLabels.OWL_ANONYMOUS), is(true));
+    
+  }
+
 }

@@ -180,7 +180,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLNamedIndividual individual) {
     String iri = getIri(individual);
-    getOrCreateNode(iri, OwlLabels.OWL_NAMED_INDIVIDUAL);
+    long individualNode = getOrCreateNode(iri, OwlLabels.OWL_NAMED_INDIVIDUAL);
+    if (individual.isAnonymous()) {
+      graph.addLabel(individualNode, OwlLabels.OWL_ANONYMOUS);
+    }
     return null;
   }
 
@@ -287,6 +290,9 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   @Override
   public Void visit(OWLClassAssertionAxiom axiom) {
     long individual = getOrCreateNode(getIri(axiom.getIndividual()));
+    if (axiom.getIndividual().isAnonymous()) {
+      graph.addLabel(individual, OwlLabels.OWL_ANONYMOUS);
+    }
     long type = getOrCreateNode(getIri(axiom.getClassExpression()));
     getOrCreateRelationship(individual, type, OwlRelationships.RDF_TYPE);
     return null;
