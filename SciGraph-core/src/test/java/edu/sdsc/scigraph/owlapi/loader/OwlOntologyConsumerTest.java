@@ -56,7 +56,7 @@ public class OwlOntologyConsumerTest {
   @SuppressWarnings("unchecked")
   @Test
   public void consumerProcessesSingleObject() {
-    queue.add(new OWLCompositeObject(ontology, object));
+    queue.add(new OWLCompositeObject("http://example.org", object));
     assertThat(consumer.call(), is(1L));
     verify(object, times(1)).accept(any(OWLOntologyWalkerVisitor.class));
     // TODO: verify(ontology, times(1)).accept(any(OWLOntologyWalkerVisitor.class));
@@ -66,7 +66,7 @@ public class OwlOntologyConsumerTest {
   @Test
   public void acceptThrowsUncheckedException() {
     when(object.accept(any(OWLOntologyWalkerVisitor.class))).thenThrow(new RuntimeException());
-    queue.add(new OWLCompositeObject(ontology, object));
+    queue.add(new OWLCompositeObject("http://example.org", object));
     assertThat(consumer.call(), is(1L));
   }
 

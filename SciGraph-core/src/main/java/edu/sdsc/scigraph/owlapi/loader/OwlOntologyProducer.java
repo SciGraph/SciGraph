@@ -72,16 +72,18 @@ final class OwlOntologyProducer implements Callable<Void>{
     logger.info("Queueing axioms for: " + ontologyConfig);
     long objectCount = 0;
     for (OWLOntology ontology: manager.getOntologies()) {
+      String ontologyIri = OwlApiUtils.getIri(ontology);
+
       for (OWLObject object: ontology.getNestedClassExpressions()) {
-        queue.put(new OWLCompositeObject(ontology, object));
+        queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
       for (OWLObject object: ontology.getClassesInSignature(false)) {
-        queue.put(new OWLCompositeObject(ontology, object));
+        queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
       for (OWLObject object: ontology.getAxioms()) { // only in the current ontology
-        queue.put(new OWLCompositeObject(ontology, object));
+        queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
     }

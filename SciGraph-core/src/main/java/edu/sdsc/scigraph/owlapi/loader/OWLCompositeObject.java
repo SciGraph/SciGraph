@@ -16,19 +16,18 @@
 package edu.sdsc.scigraph.owlapi.loader;
 
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 class OWLCompositeObject {
 
-  private final OWLOntology ontology;
+  private final String ontology;
   private final OWLObject object;
 
-  OWLCompositeObject(OWLOntology ontology, OWLObject object) {
+  OWLCompositeObject(String ontology, OWLObject object) {
     this.ontology = ontology;
     this.object = object;
   }
 
-  public OWLOntology getOntology() {
+  public String getOntology() {
     return ontology;
   }
 
