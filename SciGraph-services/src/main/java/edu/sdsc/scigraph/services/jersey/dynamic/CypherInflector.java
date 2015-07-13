@@ -104,7 +104,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
       if (entry.getValue() instanceof String) {
         Optional<String> iri = curieUtil.getIri((String)entry.getValue());
         if (iri.isPresent()) {
-          map.put(entry.getKey(), GraphUtil.getFragment(iri.get()));
+          map.put(entry.getKey(), iri.get());
         } else {
           map.put(entry.getKey(), entry.getValue());
         }

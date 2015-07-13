@@ -205,23 +205,12 @@ public class HyperGeometricAnalyzer {
         double p =
             hypergeometricDistribution.upperCumulativeProbability((int) n.getCount())
                 * bonferroniCoeff;
-        Optional<String> iri =
-            graph.getNodeProperty(n.getNodeId(), CommonProperties.IRI, String.class);
-        if (iri.isPresent()) {
-          String curie = "";
-          Optional<String> curieOpt = curieUtil.getCurie(iri.get());
-          if (curieOpt.isPresent()) {
-            curie = curieOpt.get();
-          } else {
-            curie = iri.get();
-          }
-          String labels =
-              StringUtils.join(
-                  graph.getNodeProperties(n.getNodeId(), NodeProperties.LABEL, String.class), ", ");
-          pValues.add(new AnalyzerResult(labels, curie, p));
-        } else {
-          throw new Exception("Can't find node's uri for " + n.getNodeId());
-        }
+        String iri = graph.getNodeProperty(n.getNodeId(), CommonProperties.IRI, String.class).get();
+        String curie = curieUtil.getCurie(iri).or(iri);
+        String labels =
+            StringUtils.join(
+                graph.getNodeProperties(n.getNodeId(), NodeProperties.LABEL, String.class), ", ");
+        pValues.add(new AnalyzerResult(labels, curie, p));
       }
 
       // sort by p-value

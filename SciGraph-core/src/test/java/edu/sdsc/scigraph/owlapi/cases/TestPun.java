@@ -38,7 +38,7 @@ public class TestPun extends OwlTestCase {
     Node j = getNode("http://example.org/j");
     Node k = getNode("http://example.org/k");
 
-    RelationshipType p = DynamicRelationshipType.withName("p");
+    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
     Relationship relationship = getOnlyElement(GraphUtil.getRelationships(i, j, p));
     assertThat("OPE edge should start with the subject.", relationship.getStartNode(), is(i));
     assertThat("OPE edge should end with the target.", relationship.getEndNode(), is(j));

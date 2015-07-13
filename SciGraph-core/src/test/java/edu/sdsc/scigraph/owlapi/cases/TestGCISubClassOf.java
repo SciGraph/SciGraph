@@ -33,7 +33,7 @@ import edu.sdsc.scigraph.owlapi.OwlRelationships;
 public class TestGCISubClassOf extends OwlTestCase {
 
   Node subclass, superclass;
-  RelationshipType p = DynamicRelationshipType.withName("p");
+  RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
   
   @Before
   public void setup() {

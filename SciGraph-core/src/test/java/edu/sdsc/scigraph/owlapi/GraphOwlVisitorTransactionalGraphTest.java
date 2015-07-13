@@ -20,7 +20,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
@@ -42,7 +41,6 @@ public class GraphOwlVisitorTransactionalGraphTest extends GraphOwlVisitorTestBa
       Concept.ACRONYM));
     config.getIndexedNodeProperties().addAll(newHashSet(
         NodeProperties.LABEL,
-        CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM,
         Concept.ABREVIATION,
         Concept.ACRONYM));

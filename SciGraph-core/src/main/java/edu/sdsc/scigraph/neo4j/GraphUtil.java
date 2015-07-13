@@ -24,9 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
-import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
@@ -43,10 +41,6 @@ import com.google.common.base.Predicate;
  * <b>NOTE:</b> Clients are responsible for managing transactions around these methods.
  */
 public class GraphUtil {
-
-  private static final Logger logger = Logger.getLogger(GraphUtil.class.getName());
-  
-  private static final UrlValidator validator = new UrlValidator(UrlValidator.ALLOW_2_SLASHES);
 
   /***
    * Add a property value to a container.
@@ -177,35 +171,6 @@ public class GraphUtil {
   public static Iterable<Relationship> getRelationships(final Node a, final Node b,
       RelationshipType type) {
     return getRelationships(a, b, type, true);
-  }
-
-  /***
-   * Returns the "fragment" of an IRI
-   * 
-   * <p>Due to historical ID spaces the fragment is
-   * the true RFC3987 fragment (foo in http://example.org#foo) if the {@code uri} has one.
-   * If a true fragment is not present then the fragment is the final path element 
-   * (foo in http://example.org/foo)
-   * 
-   * @param iri uri with a fragment
-   * @return the "fragment" of the IRI
-   */
-  @Deprecated
-  public static String getFragment(String iri) {
-    if (validator.isValid(checkNotNull(iri))) {
-      if (iri.contains("#")) {
-        return iri.substring(iri.lastIndexOf('#') + 1);
-      } else {
-        return iri.replaceFirst(".*/(.*)", "$1");
-      }
-    } else if (iri.startsWith("_:")) {
-      return iri;
-    } else if (iri.startsWith("mailto:")) {
-      return iri.substring("mailto:".length());
-    } else {
-      logger.warning("Failed to find a fragment for IRI: " + iri);
-      throw new IllegalArgumentException("Failed to find a fragment for IRI: " + iri);
-    }
   }
 
   /***

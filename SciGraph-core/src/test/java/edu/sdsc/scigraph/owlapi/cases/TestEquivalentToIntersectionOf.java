@@ -38,7 +38,7 @@ public class TestEquivalentToIntersectionOf extends OwlTestCase {
     Node anonymousClass = getNode("_:-574176990");
     Node fillerClass = getNode("http://example.org/fillerClass");
 
-    RelationshipType p = DynamicRelationshipType.withName("p");
+    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
     Relationship r = getOnlyElement(GraphUtil.getRelationships(anonymousClass, fillerClass, p));
 
     assertThat(GraphUtil.getProperty(r, CommonProperties.CONVENIENCE, Boolean.class),

@@ -85,11 +85,12 @@ public class ImageWriter extends GraphWriter {
         }
       }
 
-      if (vertex.getPropertyKeys().contains(CommonProperties.FRAGMENT)) {
+      // TODO: add curies
+      /*if (vertex.getPropertyKeys().contains(CommonProperties.FRAGMENT)) {
         return (String) vertex.getProperty(CommonProperties.FRAGMENT) + label;
-      } else {
+      } else {*/
         return (String) vertex.getProperty(CommonProperties.IRI) + label;
-      }
+      //}
     }
   };
 

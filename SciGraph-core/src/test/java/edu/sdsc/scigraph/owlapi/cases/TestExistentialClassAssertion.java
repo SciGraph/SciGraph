@@ -36,7 +36,7 @@ public class TestExistentialClassAssertion extends OwlTestCase {
   public void testSubclass() {
     Node i = getNode("http://example.org/i");
     Node c = getNode("http://example.org/c");
-    RelationshipType p = DynamicRelationshipType.withName("p");
+    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
 
     Relationship r = getOnlyElement(GraphUtil.getRelationships(i, c, p, true));
     assertThat(GraphUtil.getProperty(r, CommonProperties.CONVENIENCE, Boolean.class),

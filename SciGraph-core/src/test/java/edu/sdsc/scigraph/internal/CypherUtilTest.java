@@ -53,15 +53,16 @@ public class CypherUtilTest extends GraphTestBase{
   public ExpectedException exception = ExpectedException.none();
 
   @Before
-  public void test() {
+  public void setup() {
     CurieUtil curieUtil = mock(CurieUtil.class);
     when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
     when(curieUtil.getIri("FOO:foo")).thenReturn(Optional.of("http://x.org/#foo"));
+    when(curieUtil.getIri("FOO:fizz")).thenReturn(Optional.of("http://x.org/#fizz"));
     util = new CypherUtil(graphDb, curieUtil);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#fizz", "http://x.org/#fizz_equiv", OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
-    addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
+    addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("http://x.org/#fizz"));
   }
 
   @Test
@@ -71,6 +72,12 @@ public class CypherUtilTest extends GraphTestBase{
     valueMap.put("rel_id", "DELETE *");
     exception.expect(IllegalArgumentException.class);
     util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
+  }
+
+  @Test
+  public void jsonPropertiesAreNotRegexed() {
+    String query = util.resolveRelationships("(a {foo: 'bar'})-[:fizz*]-(end)");
+    assertThat(query, is("(a {foo: 'bar'})-[:`fizz`*]-(end)"));
   }
 
   @Test
@@ -88,13 +95,13 @@ public class CypherUtilTest extends GraphTestBase{
     valueMap.put("node_id", "HP_123");
     valueMap.put("rel_id", "FOO:foo");
     String actual = util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
-    assertThat(actual, is("({node_id})-[:foo!]-(end)"));
+    assertThat(actual, is("({node_id})-[:http://x.org/#foo!]-(end)"));
   }
 
   @Test
   public void replaceCurieRelationship() {
     String actual = util.resolveRelationships("(start)-[:FOO:foo]-(end)");
-    assertThat(actual, is("(start)-[:foo]-(end)"));
+    assertThat(actual, is("(start)-[:`http://x.org/#foo`]-(end)"));
   }
 
   @Test
@@ -109,32 +116,32 @@ public class CypherUtilTest extends GraphTestBase{
 
   @Test
   public void entailmentRegex() {
-    String result = util.resolveRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
-    assertThat(result, is("MATCH (n)-[:foo|fizz_equiv|fizz]-(n2) RETURN n"));
+    String result = util.resolveRelationships("MATCH (n)-[:http://x.org/#foo!]-(n2) RETURN n");
+    assertThat(result, is("MATCH (n)-[:`http://x.org/#fizz`|`http://x.org/#foo`|`http://x.org/#fizz_equiv`]-(n2) RETURN n"));
   }
 
   @Test
   public void curiesAreEntailed() {
     String result = util.resolveRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
-    assertThat(result, is("MATCH (n)-[:foo|fizz_equiv|fizz]-(n2) RETURN n"));
+    assertThat(result, is("MATCH (n)-[:`http://x.org/#fizz`|`http://x.org/#foo`|`http://x.org/#fizz_equiv`]-(n2) RETURN n"));
   }
 
   @Test
   public void multipleEntailmentRegex() {
-    Set<String> types = util.getEntailedRelationshipNames(newHashSet("foo", "bar"));
-    assertThat(types, containsInAnyOrder("foo", "bar", "fizz", "fizz_equiv", "baz"));
+    Set<String> types = util.getEntailedRelationshipNames(newHashSet("http://x.org/#fizz", "http://x.org/#bar"));
+    assertThat(types, containsInAnyOrder("http://x.org/#bar", "http://x.org/#fizz", "http://x.org/#fizz_equiv", "http://x.org/#baz"));
   }
 
   @Test
   public void multipleEntailmentRegex_types() {
-    Set<RelationshipType> types = util.getEntailedRelationshipTypes(newHashSet("foo", "bar"));
+    Set<RelationshipType> types = util.getEntailedRelationshipTypes(newHashSet("http://x.org/#foo", "http://x.org/#bar"));
     Collection<String> typeNames = transform(types, new Function<RelationshipType, String>() {
       @Override
       public String apply(RelationshipType arg0) {
         return arg0.name();
       }
     });
-    assertThat(typeNames, containsInAnyOrder("foo", "bar", "fizz", "fizz_equiv", "baz"));
+    assertThat(typeNames, containsInAnyOrder("http://x.org/#foo", "http://x.org/#bar", "http://x.org/#fizz", "http://x.org/#fizz_equiv", "http://x.org/#baz"));
   }
 
   @Test
@@ -148,9 +155,9 @@ public class CypherUtilTest extends GraphTestBase{
   @Test
   public void executeExecutes() {
     Multimap<String, Object> params = HashMultimap.create();
-    params.put("fragment", "1");
-    params.put("rel", "fizz");
-    Result result = util.execute("MATCH (n)<-[:${rel}!]-(n2) WHERE n.fragment = {fragment} RETURN n", params);
+    params.put("iri", "http://x.org/#1");
+    params.put("rel", "FOO:fizz");
+    Result result = util.execute("MATCH (n)<-[:${rel}!]-(n2) WHERE n.iri = {iri} RETURN n", params);
     assertThat(result.next().size(), is(1));
   }
 

@@ -37,7 +37,6 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.internal.CypherUtil;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
-import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 import edu.sdsc.scigraph.neo4j.Neo4jModule;
 import edu.sdsc.scigraph.neo4j.RelationshipMap;
@@ -56,7 +55,6 @@ public class GraphTestBase {
   static protected Node createNode(String iri) {
     long node = graph.createNode(iri);
     graph.setNodeProperty(node, CommonProperties.IRI, iri);
-    graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(iri));
     if (iri.startsWith("_:")) {
       graph.addLabel(node, OwlLabels.OWL_ANONYMOUS);
     }
@@ -80,7 +78,6 @@ public class GraphTestBase {
         Concept.ACRONYM));
     config.getIndexedNodeProperties().addAll(newHashSet(
         NodeProperties.LABEL,
-        CommonProperties.FRAGMENT,
         Concept.CATEGORY, Concept.SYNONYM,
         Concept.ABREVIATION,
         Concept.ACRONYM));

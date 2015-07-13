@@ -22,7 +22,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -119,10 +118,6 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     return nodeIndex.get(CommonProperties.IRI, uri).getSingle();
   }
 
-  Node getNodeFromFragment(String fragment) {
-    return nodeIndex.get(CommonProperties.FRAGMENT, fragment).getSingle();
-  }
-
   static boolean hasRelationship(Node node1, Node node2, RelationshipType type) {
     Iterable<Relationship> relationships = GraphUtil.getRelationships(node1, node2, type);
     return size(relationships) == 1;
@@ -157,13 +152,6 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   }
 
   @Test
-  public void fragmentIndexesAreCreated() {
-    Node mother = getNodeFromFragment("Mother");
-    assertThat(mother, is(notNullValue()));
-    assertThat(GraphUtil.getProperty(mother, CommonProperties.FRAGMENT, String.class).get(), is("Mother"));
-  }
-
-  @Test
   public void nodesHaveDefinedBy() {
     Node mother = getNode(ROOT + "/Mother");
     Node ontology = getNode(ROOT);
@@ -183,7 +171,6 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     assertThat(mother.getLabels(), hasItem(OwlLabels.OWL_CLASS));
     assertThat(GraphUtil.getProperty(mother, CommonProperties.IRI, String.class).get(), is(ROOT
         + "/Mother"));
-    assertThat(GraphUtil.getProperty(mother, CommonProperties.FRAGMENT, String.class).get(), is("Mother"));
   }
 
   @Test
@@ -219,7 +206,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   public void nonLiteralAnnotationAssertionAxiom() {
     Node person = getNode(ROOT + "/Person");
     Node fazz = getNode(ROOT + "/Fazz");
-    Relationship relationship = getOnlyElement(GraphUtil.getRelationships(person, fazz, DynamicRelationshipType.withName("fizz"), true));
+    Relationship relationship = getOnlyElement(GraphUtil.getRelationships(person, fazz, DynamicRelationshipType.withName(ROOT + "/fizz"), true));
     assertThat(GraphUtil.getProperty(relationship, CommonProperties.IRI, String.class).get(),
         is(ROOT + "/fizz"));
   }
@@ -262,7 +249,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   public void objectPropertyAssertions() {
     Node susan = getNode(ROOT + "/Susan");
     Node meg = getNode(ROOT + "/Meg");
-    assertThat(hasDirectedRelationship(susan, meg, DynamicRelationshipType.withName("hasAncestor")), is(true));
+    assertThat(hasDirectedRelationship(susan, meg, DynamicRelationshipType.withName(ROOT + "/#hasAncestor")), is(true));
   }
 
   @Test

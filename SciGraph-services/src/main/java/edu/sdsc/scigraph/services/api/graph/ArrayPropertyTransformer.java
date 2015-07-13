@@ -30,7 +30,7 @@ import edu.sdsc.scigraph.frames.EdgeProperties;
 public class ArrayPropertyTransformer {
 
   private static final Collection<String> PROTECTED_PROPERTY_KEYS = newHashSet(
-      CommonProperties.CURIE, CommonProperties.CONVENIENCE, CommonProperties.FRAGMENT, CommonProperties.IRI, CommonProperties.OWL_TYPE,
+      CommonProperties.CURIE, CommonProperties.CONVENIENCE, CommonProperties.IRI, CommonProperties.OWL_TYPE,
       EdgeProperties.QUANTIFICATION_TYPE, EdgeProperties.REFLEXIVE, EdgeProperties.SYMMETRIC, EdgeProperties.TRANSITIVE);
 
   static void transform(Iterable<? extends Element> elements) {

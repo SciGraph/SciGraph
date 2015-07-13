@@ -79,7 +79,6 @@ import com.google.common.collect.Collections2;
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
-import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
@@ -140,7 +139,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     if (!node.isPresent()) {
       long nodeId = graph.createNode(iri.toString());
       graph.setNodeProperty(nodeId, CommonProperties.IRI, iri.toString());
-      graph.setNodeProperty(nodeId, CommonProperties.FRAGMENT, GraphUtil.getFragment(iri));
       node = Optional.of(nodeId);
     }
     for (Label label: labels) {
@@ -240,9 +238,8 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         } else if (axiom.getValue() instanceof OWLAnonymousIndividual) {
           object = getOrCreateNode(OwlApiUtils.getIri((OWLAnonymousIndividual)axiom.getValue()));
         }
-        String fragment = GraphUtil.getFragment(property);
         long assertion =
-            getOrCreateRelationship(subject, object, DynamicRelationshipType.withName(fragment));
+            getOrCreateRelationship(subject, object, DynamicRelationshipType.withName(property));
         graph.setRelationshipProperty(assertion, CommonProperties.IRI, property);
         graph.setRelationshipProperty(assertion, CommonProperties.OWL_TYPE,
             OwlRelationships.OWL_ANNOTATION.name());
@@ -357,9 +354,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     String property = getIri(axiom.getProperty());
     long object = getOrCreateNode(getIri(axiom.getObject()));
     RelationshipType type = DynamicRelationshipType.withName(property.toString());
-    if (null != GraphUtil.getFragment(property)) {
-      type = DynamicRelationshipType.withName(GraphUtil.getFragment(property));
-    }
+
     long relationship = getOrCreateRelationship(subject, object, type);
     graph.setRelationshipProperty(relationship, CommonProperties.IRI, property.toString());
     return relationship;

@@ -48,7 +48,6 @@ public class NodeTransformer implements Function<Node, Concept> {
       Concept concept = new Concept(n.getId());
       concept.setIri((String) n.getProperty(Concept.IRI, null));
       concept.setAnonymous(n.hasLabel(OwlLabels.OWL_ANONYMOUS));
-      concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
       concept.setDeprecated(isDeprecated(n));
 
       for (String definition : GraphUtil.getProperties(n, Concept.DEFINITION, String.class)) {

@@ -142,18 +142,6 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   }
 
   @Test
-  public void testGetByFragment() {
-    Query query = new Vocabulary.Query.Builder("cerebellum").build();
-    assertThat(vocabulary.getConceptFromId(query), contains(cerebellum));
-  }
-
-  @Test
-  public void testNonexistantFragment() {
-    Query query = new Vocabulary.Query.Builder("absent").build();
-    assertThat(vocabulary.getConceptFromId(query), is(empty()));
-  }
-
-  @Test
   public void testIdWithSpacesNoException() {
     Query query = new Vocabulary.Query.Builder("with space").build();
     assertThat(vocabulary.getConceptFromId(query), is(empty()));
@@ -235,12 +223,6 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testGetConceptFromCuriePrefix() {
     Query query = new Vocabulary.Query.Builder("HP:0008").build();
     assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
-  }
-
-  @Test
-  public void testGetConceptFromFragmentPrefix() {
-    Query query = new Vocabulary.Query.Builder("birnlex").build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampalFormation));
   }
 
   @Test

@@ -96,7 +96,7 @@ public class Concept extends NodeProperties {
 
   @Override
   public String toString() {
-    return String.format("%s (%s)", Iterables.toString(getLabels()), getFragment());
+    return String.format("%s (%s)", Iterables.toString(getLabels()), getIri());
   }
 
 }

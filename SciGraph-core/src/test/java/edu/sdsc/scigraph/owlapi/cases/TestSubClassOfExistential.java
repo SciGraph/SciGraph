@@ -43,7 +43,7 @@ public class TestSubClassOfExistential extends OwlTestCase {
     Node subclass = getNode("http://example.org/subclass");
     Node superclass = getNode("http://example.org/superclass");
 
-    RelationshipType p = DynamicRelationshipType.withName("p");
+    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
     Relationship relationship = getOnlyElement(GraphUtil.getRelationships(subclass, superclass, p));
     assertThat("subclassOf relationship should start with the subclass.",
         relationship.getStartNode(), is(subclass));

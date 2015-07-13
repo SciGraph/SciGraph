@@ -83,7 +83,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   private final SpellChecker spellChecker;
   private final CurieUtil curieUtil;
   private final NodeTransformer transformer;
-  
+
   @Inject
   public VocabularyNeo4jImpl(GraphDatabaseService graph, @Nullable @IndicatesNeo4jGraphLocation String neo4jLocation,
       CurieUtil curieUtil, NodeTransformer transformer) throws IOException {
@@ -176,20 +176,20 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     String idQuery = StringUtils.strip(query.getInput(), "\"");
     Optional<String> fullUri = curieUtil.getIri(idQuery);
     idQuery = QueryParser.escape(idQuery);
-
-    String queryString = format("%s:%s", CommonProperties.FRAGMENT, idQuery);
-    if (fullUri.isPresent()) {
-      queryString +=
-          String.format(" %s:%s", CommonProperties.IRI, QueryParser.escape(fullUri.get()));
-    }
-    IndexHits<Node> hits;
-    try (Transaction tx = graph.beginTx()) {
-      hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(parser.parse(queryString));
-      tx.success();
-      return limitHits(hits, query);
-    } catch (ParseException e) {
-      logger.log(Level.WARNING, "Failed to parse an ID query", e);
+    if (!fullUri.isPresent()) {
       return Collections.emptySet();
+    } else {
+      String queryString=
+          String.format(" %s:%s", CommonProperties.IRI, QueryParser.escape(fullUri.get()));
+      IndexHits<Node> hits;
+      try (Transaction tx = graph.beginTx()) {
+        hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(parser.parse(queryString));
+        tx.success();
+        return limitHits(hits, query);
+      } catch (ParseException e) {
+        logger.log(Level.WARNING, "Failed to parse an ID query", e);
+        return Collections.emptySet();
+      }
     }
 
   }
@@ -207,8 +207,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
         subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.IRI, (fullUri.get()))),
             Occur.SHOULD);
       }
-      subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
-          Occur.SHOULD);
 
       if (query.isIncludeSynonyms()) {
         subQuery.add(
@@ -225,7 +223,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
             parser.parse(formatQuery("%s%s:%s*", Concept.ACRONYM, LuceneUtils.EXACT_SUFFIX,
                 query.getInput())), Occur.SHOULD);
       }
-      
+
       finalQuery.add(subQuery, Occur.MUST);
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parse query", e);

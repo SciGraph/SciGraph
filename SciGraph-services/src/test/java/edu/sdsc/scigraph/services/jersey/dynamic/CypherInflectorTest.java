@@ -61,10 +61,10 @@ public class CypherInflectorTest extends GraphTestBase {
     CypherUtil cypherUtil = new CypherUtil(graphDb, curieUtil);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
-    addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("fizz"));
+    addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("http://x.org/#fizz"));
     when(context.getUriInfo()).thenReturn(uriInfo);
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
-    map.put("rel_id", newArrayList("fizz"));
+    map.put("rel_id", newArrayList("http://x.org/#fizz"));
     when(uriInfo.getQueryParameters()).thenReturn(map);
     map = new MultivaluedHashMap<>();
     map.put("pathParam", newArrayList("pathValue"));
@@ -84,21 +84,21 @@ public class CypherInflectorTest extends GraphTestBase {
 
   @Test
   public void inflectorAppliesCorrectly_withRelationshipEntailment() {
-    config.setQuery("MATCH (n)-[r:foo!]-(m) RETURN n, r, m");
+    config.setQuery("MATCH (n)-[r:X:foo!]-(m) RETURN n, r, m");
     TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
-    assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
+    assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("http://x.org/#fizz"));
   }
 
   @Test
   public void inflectorAppliesCorrectly_withVariableRelationship() {
     config.setQuery("MATCH (n)-[r:${rel_id}]-(m) RETURN n, r, m");
     TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
-    assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("fizz"));
+    assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("http://x.org/#fizz"));
   }
 
   @Test
   public void pathsAreReturnedCorrectly() {
-    config.setQuery("MATCH (n {fragment:'foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
+    config.setQuery("MATCH (n {iri:'http://x.org/#foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
     TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
   }
