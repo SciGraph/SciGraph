@@ -60,7 +60,7 @@ class DocumentationStrings {
 
   final static String RESULT_LIMIT_DOC = "Maximum result count";
 
-  final static String GRAPH_ID_DOC = "This ID should be either a CURIE or a URL fragment";
+  final static String GRAPH_ID_DOC = "This ID should be either a CURIE or an IRI";
 
   final static String DIRECTION_DOC = "Which direction to traverse: INCOMING, OUTGOING, BOTH (default). Only used if relationshipType is specified.";
 

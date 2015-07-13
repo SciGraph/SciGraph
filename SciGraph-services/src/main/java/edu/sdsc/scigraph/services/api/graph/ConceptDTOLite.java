@@ -28,7 +28,6 @@ public class ConceptDTOLite {
 
   private String iri;
   private Collection<String> labels = new HashSet<>();
-  private String fragment;
   private String curie;
   private Collection<String> categories = new HashSet<>();
   private Collection<String> synonyms = new HashSet<>();
@@ -51,15 +50,6 @@ public class ConceptDTOLite {
 
   public void setLabels(Collection<String> labels) {
     this.labels = labels;
-  }
-
-  @XmlAttribute
-  public String getFragment() {
-    return fragment;
-  }
-
-  public void setFragment(String fragment) {
-    this.fragment = fragment;
   }
 
   @XmlAttribute

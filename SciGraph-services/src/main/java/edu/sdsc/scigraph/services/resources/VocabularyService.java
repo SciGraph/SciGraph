@@ -120,12 +120,7 @@ public class VocabularyService extends BaseResource {
   @GET
   @Path("/id/{id}")
   @ApiOperation(value = "Find a concept by its ID",
-  notes = "Find concepts that match either an IRI fragment or a CURIE. " +
-      "Due to differences in representation \"fragment\" could refer to either of the following:" +
-      "<ul>" +
-      "<li>http://example.org/thing#<b>fragment</b>" +
-      "<li>http://example.org/thing/<b>fragment</b></ul>"+
-      "A single concept response is probable but not guarenteed.",
+  notes = "Find concepts matching either an IRI or a CURIE.",
       response = Concept.class)
   @ApiResponses({
     @ApiResponse(code = 404, message = "Concept with ID could not be found")

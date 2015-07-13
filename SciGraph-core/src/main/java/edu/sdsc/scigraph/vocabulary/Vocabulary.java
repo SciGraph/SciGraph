@@ -43,18 +43,14 @@ public interface Vocabulary {
   Optional<Concept> getConceptFromUri(String iri);
 
   /***
-   * Get concepts that match either an IRI fragment or a CURIE.
-   * <p>Due to differences in representation "fragment" means either:
-   * <p><ul>
-   * <li>http://example.org/thing#<b>fragment</b>
-   * <li>http://example.org/thing/<b>fragment</b>
-   * </ul>
+   * Get concepts that match either a compmlete IRI or a CURIE.
+   *
    * <p>
-   * CURIE prefixes must be specified during ontology loading.
+   * CURIE prefixes may be specified at runtime.
    * Given the following mapping: <i>http://example.org/CUR_ -> CUR</i> a concept with URI http://example.org/CUR_1 
    * would be retrievable as CUR:1.
    * 
-   * @param query  a {@link Query} with the fragment or CURIE as input
+   * @param query  a {@link Query} with the IRI or CURIE as input
    * @return concepts matching the query. Uniqueness is probable but not guaranteed.
    */
   Collection<Concept> getConceptFromId(Query query);

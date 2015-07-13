@@ -15,7 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static com.google.common.collect.Sets.newHashSet;
+import java.util.Collections;
 
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
@@ -30,8 +30,8 @@ public class GraphOwlVisitorBatchGraphTest extends GraphOwlVisitorTestBase<Graph
   @Override
   protected GraphBatchImpl createInstance() throws Exception {
     BatchInserter inserter = BatchInserters.inserter(path);
-    return new GraphBatchImpl(inserter, CommonProperties.IRI, newHashSet("fragment"),
-            newHashSet("fragment"), new IdMap(), new RelationshipMap());
+    return new GraphBatchImpl(inserter, CommonProperties.IRI, Collections.<String>emptySet(),
+        Collections.<String>emptySet(), new IdMap(), new RelationshipMap());
   }
 
 }
