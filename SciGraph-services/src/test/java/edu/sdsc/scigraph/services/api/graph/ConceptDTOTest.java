@@ -33,7 +33,6 @@ public class ConceptDTOTest {
   public void emptyListsAreReturned_whenPropertiesAreAbsent() throws Exception {
     ConceptDTO dto = new ConceptDTO();
     dto.setUri("http://example.org/foo");
-    dto.setFragment("foo");
     String actual = MAPPER.writeValueAsString(dto);
     String expected = fixture("fixtures/simpleConceptDTO.json");
     assertEquals(expected, actual, true);
