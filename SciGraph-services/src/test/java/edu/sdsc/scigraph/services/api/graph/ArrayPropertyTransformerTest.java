@@ -39,7 +39,7 @@ public class ArrayPropertyTransformerTest {
     TinkerGraph graph = new TinkerGraph();
     v1 = graph.addVertex(0);
     v2 = graph.addVertex(1);
-    v1.setProperty(CommonProperties.URI, "foo");
+    v1.setProperty(CommonProperties.IRI, "foo");
     v1.setProperty("foo", "bar");
     e = graph.addEdge(0, v1, v2, "test");
     e.setProperty("foo", 1);
@@ -60,7 +60,7 @@ public class ArrayPropertyTransformerTest {
 
   @Test
   public void protectedProperties_stayPrimitive() {
-    assertThat((String)v1.getProperty(CommonProperties.URI), is("foo"));
+    assertThat((String)v1.getProperty(CommonProperties.IRI), is("foo"));
   }
 
 }

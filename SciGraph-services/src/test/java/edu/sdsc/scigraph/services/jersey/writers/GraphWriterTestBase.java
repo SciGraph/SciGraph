@@ -44,10 +44,10 @@ public abstract class GraphWriterTestBase {
   public void setup() {
     Vertex v = graph.addVertex(0);
     Vertex w = graph.addVertex(1);
-    v.setProperty(CommonProperties.URI, "http://x.org/v");
+    v.setProperty(CommonProperties.IRI, "http://x.org/v");
     v.setProperty("list", newArrayList("elt1", "elt2"));
     v.setProperty("array", new String[]{"elt1", "elt2"});
-    w.setProperty(CommonProperties.URI, "http://x.org/w");
+    w.setProperty(CommonProperties.IRI, "http://x.org/w");
     v.addEdge("edge", w);
   }
 

@@ -80,7 +80,7 @@ public class Neo4jModule extends AbstractModule {
   public static void setupAutoIndexing(GraphDatabaseService graphDb, Neo4jConfiguration config) {
     try (Transaction tx = graphDb.beginTx()) {
       graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
-      Set<String> indexProperties = newHashSet(CommonProperties.URI);
+      Set<String> indexProperties = newHashSet(CommonProperties.IRI);
       indexProperties.addAll(config.getIndexedNodeProperties());
       indexProperties.addAll(transform(config.getExactNodeProperties(), new Function<String, String>() {
         @Override

@@ -63,7 +63,7 @@ public class GraphBatchImplIT {
     path = folder.newFolder().getAbsolutePath();
     BatchInserter inserter = BatchInserters.inserter(path);
     graph =
-        new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
+        new GraphBatchImpl(inserter, CommonProperties.IRI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
     foo = graph.createNode("http://example.org/foo");
   }
@@ -80,7 +80,7 @@ public class GraphBatchImplIT {
   public void testNodeCreation() {
     GraphDatabaseService graphDb = getGraphDB();
     assertThat(size(GlobalGraphOperations.at(graphDb).getAllNodes()), is(1));
-    IndexHits<Node> hits = nodeIndex.query(CommonProperties.URI + ":http\\://example.org/foo");
+    IndexHits<Node> hits = nodeIndex.query(CommonProperties.IRI + ":http\\://example.org/foo");
     assertThat(hits.getSingle().getId(), is(foo));
   }
 

@@ -88,7 +88,7 @@ public class ImageWriter extends GraphWriter {
       if (vertex.getPropertyKeys().contains(CommonProperties.FRAGMENT)) {
         return (String) vertex.getProperty(CommonProperties.FRAGMENT) + label;
       } else {
-        return (String) vertex.getProperty(CommonProperties.URI) + label;
+        return (String) vertex.getProperty(CommonProperties.IRI) + label;
       }
     }
   };

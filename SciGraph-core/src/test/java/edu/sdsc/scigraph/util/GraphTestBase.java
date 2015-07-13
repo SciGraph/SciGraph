@@ -53,11 +53,11 @@ public class GraphTestBase {
 
   Transaction tx;
 
-  static protected Node createNode(String uri) {
-    long node = graph.createNode(uri);
-    graph.setNodeProperty(node, CommonProperties.URI, uri);
-    graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(uri));
-    if (uri.startsWith("_:")) {
+  static protected Node createNode(String iri) {
+    long node = graph.createNode(iri);
+    graph.setNodeProperty(node, CommonProperties.IRI, iri);
+    graph.setNodeProperty(node, CommonProperties.FRAGMENT, GraphUtil.getFragment(iri));
+    if (iri.startsWith("_:")) {
       graph.addLabel(node, OwlLabels.OWL_ANONYMOUS);
     }
     return graphDb.getNodeById(node);

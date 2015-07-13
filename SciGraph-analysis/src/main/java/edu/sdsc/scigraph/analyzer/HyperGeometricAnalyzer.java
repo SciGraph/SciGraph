@@ -206,7 +206,7 @@ public class HyperGeometricAnalyzer {
             hypergeometricDistribution.upperCumulativeProbability((int) n.getCount())
                 * bonferroniCoeff;
         Optional<String> iri =
-            graph.getNodeProperty(n.getNodeId(), CommonProperties.URI, String.class);
+            graph.getNodeProperty(n.getNodeId(), CommonProperties.IRI, String.class);
         if (iri.isPresent()) {
           String curie = "";
           Optional<String> curieOpt = curieUtil.getCurie(iri.get());

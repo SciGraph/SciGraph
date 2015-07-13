@@ -77,12 +77,12 @@ public class OwlPostprocessor {
           Node object = r.getEndNode();
           String relationshipName =
               GraphUtil.getProperty(property, CommonProperties.FRAGMENT, String.class)
-              .or(GraphUtil.getProperty(property, CommonProperties.URI, String.class).get());
+              .or(GraphUtil.getProperty(property, CommonProperties.IRI, String.class).get());
           RelationshipType type = DynamicRelationshipType.withName(relationshipName);
           String propertyUri =
-              GraphUtil.getProperty(property, CommonProperties.URI, String.class).get();
+              GraphUtil.getProperty(property, CommonProperties.IRI, String.class).get();
           Relationship inferred = subject.createRelationshipTo(object, type);
-          inferred.setProperty(CommonProperties.URI, propertyUri);
+          inferred.setProperty(CommonProperties.IRI, propertyUri);
           inferred.setProperty(CommonProperties.CONVENIENCE, true);
           inferred.setProperty(CommonProperties.OWL_TYPE, relationship.getType().name());
         }
@@ -121,7 +121,7 @@ public class OwlPostprocessor {
       Set<Node> roots = new HashSet<>();
       try (Transaction tx = graphDb.beginTx()) {
         ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-        Node root = nodeIndex.get(CommonProperties.URI, category.getKey()).getSingle();
+        Node root = nodeIndex.get(CommonProperties.IRI, category.getKey()).getSingle();
         if (null == root) {
           logger.warning("Failed to locate " + category.getKey() + " while processing categories");
           continue;

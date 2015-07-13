@@ -51,7 +51,7 @@ public class CurieAdderTest {
   @Test
   public void curriesAreAdded() {
     Vertex v = graph.addVertex(null);
-    v.setProperty(CommonProperties.URI, "http://x.org/foo");
+    v.setProperty(CommonProperties.IRI, "http://x.org/foo");
     adder.addCuries(graph);
     assertThat((String)v.getProperty(CommonProperties.CURIE), is("x:foo"));
   }

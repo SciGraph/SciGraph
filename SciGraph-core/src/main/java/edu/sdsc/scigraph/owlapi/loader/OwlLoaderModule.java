@@ -62,7 +62,7 @@ class OwlLoaderModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(OwlLoadConfiguration.class).toInstance(config);
-    bindConstant().annotatedWith(IndicatesUniqueProperty.class).to(CommonProperties.URI);
+    bindConstant().annotatedWith(IndicatesUniqueProperty.class).to(CommonProperties.IRI);
     bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesIndexedProperties.class).toInstance(config.getGraphConfiguration().getIndexedNodeProperties());
     bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesExactIndexedProperties.class).toInstance(config.getGraphConfiguration().getExactNodeProperties());
     bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesMappedCategories.class).toInstance(config.getCategories());

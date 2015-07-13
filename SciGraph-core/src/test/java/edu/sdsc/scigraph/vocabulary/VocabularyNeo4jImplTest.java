@@ -68,8 +68,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   NodeTransformer transformer = new NodeTransformer();
 
-  Concept buildConcept(String uri, String label, String... categories) {
-    Node concept = createNode(uri);
+  Concept buildConcept(String iri, String label, String... categories) {
+    Node concept = createNode(iri);
     GraphUtil.addProperty(concept, Concept.LABEL, label);
     GraphUtil.addProperty(concept, NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, label);
     for (String category : categories) {

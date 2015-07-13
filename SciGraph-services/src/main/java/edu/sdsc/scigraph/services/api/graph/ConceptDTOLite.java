@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="class")
 public class ConceptDTOLite {
 
-  private String uri;
+  private String iri;
   private Collection<String> labels = new HashSet<>();
   private String fragment;
   private String curie;
@@ -38,11 +38,11 @@ public class ConceptDTOLite {
 
   @XmlAttribute
   public String getUri() {
-    return uri;
+    return iri;
   }
 
   public void setUri(String uri) {
-    this.uri = uri;
+    this.iri = uri;
   }
 
   public Collection<String> getLabels() {

@@ -208,22 +208,22 @@ public class TinkerGraphUtilTest {
   public void propertiesProject() {
     TinkerGraph graph = new TinkerGraph();
     Vertex v = graph.addVertex(1);
-    v.setProperty(CommonProperties.URI, "http://x.org/a");
+    v.setProperty(CommonProperties.IRI, "http://x.org/a");
     v.setProperty("foo", "fizz");
     v.setProperty("bar", "baz");
     TinkerGraphUtil.project(graph, newHashSet("foo"));
-    assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", CommonProperties.URI));
+    assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", CommonProperties.IRI));
   }
 
   @Test
   public void allPropertiesProject() {
     TinkerGraph graph = new TinkerGraph();
     Vertex v = graph.addVertex(1);
-    v.setProperty(CommonProperties.URI, "http://x.org/a");
+    v.setProperty(CommonProperties.IRI, "http://x.org/a");
     v.setProperty("foo", "fizz");
     v.setProperty("bar", "baz");
     TinkerGraphUtil.project(graph, newHashSet("*"));
-    assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", "bar", CommonProperties.URI));
+    assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", "bar", CommonProperties.IRI));
   }
 
 }

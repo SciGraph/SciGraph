@@ -116,7 +116,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   }
 
   Node getNode(String uri) {
-    return nodeIndex.get(CommonProperties.URI, uri).getSingle();
+    return nodeIndex.get(CommonProperties.IRI, uri).getSingle();
   }
 
   Node getNodeFromFragment(String fragment) {
@@ -146,7 +146,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   @Test
   public void uriIndexesAreCreated() {
     Node mother = getNode(ROOT + "/Mother");
-    assertThat(GraphUtil.getProperty(mother, CommonProperties.URI, String.class).get(), is(ROOT
+    assertThat(GraphUtil.getProperty(mother, CommonProperties.IRI, String.class).get(), is(ROOT
         + "/Mother"));
   }
 
@@ -181,7 +181,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   public void classesAreCreated() {
     Node mother = getNode(ROOT + "/Mother");
     assertThat(mother.getLabels(), hasItem(OwlLabels.OWL_CLASS));
-    assertThat(GraphUtil.getProperty(mother, CommonProperties.URI, String.class).get(), is(ROOT
+    assertThat(GraphUtil.getProperty(mother, CommonProperties.IRI, String.class).get(), is(ROOT
         + "/Mother"));
     assertThat(GraphUtil.getProperty(mother, CommonProperties.FRAGMENT, String.class).get(), is("Mother"));
   }
@@ -220,7 +220,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     Node person = getNode(ROOT + "/Person");
     Node fazz = getNode(ROOT + "/Fazz");
     Relationship relationship = getOnlyElement(GraphUtil.getRelationships(person, fazz, DynamicRelationshipType.withName("fizz"), true));
-    assertThat(GraphUtil.getProperty(relationship, CommonProperties.URI, String.class).get(),
+    assertThat(GraphUtil.getProperty(relationship, CommonProperties.IRI, String.class).get(),
         is(ROOT + "/fizz"));
   }
 

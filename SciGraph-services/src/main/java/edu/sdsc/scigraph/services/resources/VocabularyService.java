@@ -120,7 +120,7 @@ public class VocabularyService extends BaseResource {
   @GET
   @Path("/id/{id}")
   @ApiOperation(value = "Find a concept by its ID",
-  notes = "Find concepts that match either a URI fragment or a CURIE. " +
+  notes = "Find concepts that match either an IRI fragment or a CURIE. " +
       "Due to differences in representation \"fragment\" could refer to either of the following:" +
       "<ul>" +
       "<li>http://example.org/thing#<b>fragment</b>" +

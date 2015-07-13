@@ -48,10 +48,10 @@ public class BbopJsGraphWriter extends GraphWriter {
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
 
   private static final ImmutableSet<String> IGNORED_PROPERTY_KEYS =
-      ImmutableSet.of(CommonProperties.URI, NodeProperties.LABEL, CommonProperties.CURIE);
+      ImmutableSet.of(CommonProperties.IRI, NodeProperties.LABEL, CommonProperties.CURIE);
 
   static String getCurieOrIri(Vertex vertex) {
-    return TinkerGraphUtil.getProperty(vertex, CommonProperties.CURIE, String.class).or((String)vertex.getProperty(CommonProperties.URI));
+    return TinkerGraphUtil.getProperty(vertex, CommonProperties.CURIE, String.class).or((String)vertex.getProperty(CommonProperties.IRI));
   }
 
   @Override

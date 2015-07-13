@@ -139,7 +139,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     Optional<Long> node = graph.getNode(iri.toString());
     if (!node.isPresent()) {
       long nodeId = graph.createNode(iri.toString());
-      graph.setNodeProperty(nodeId, CommonProperties.URI, iri.toString());
+      graph.setNodeProperty(nodeId, CommonProperties.IRI, iri.toString());
       graph.setNodeProperty(nodeId, CommonProperties.FRAGMENT, GraphUtil.getFragment(iri));
       node = Optional.of(nodeId);
     }
@@ -243,7 +243,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         String fragment = GraphUtil.getFragment(property);
         long assertion =
             getOrCreateRelationship(subject, object, DynamicRelationshipType.withName(fragment));
-        graph.setRelationshipProperty(assertion, CommonProperties.URI, property);
+        graph.setRelationshipProperty(assertion, CommonProperties.IRI, property);
         graph.setRelationshipProperty(assertion, CommonProperties.OWL_TYPE,
             OwlRelationships.OWL_ANNOTATION.name());
       } else {
@@ -361,7 +361,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       type = DynamicRelationshipType.withName(GraphUtil.getFragment(property));
     }
     long relationship = getOrCreateRelationship(subject, object, type);
-    graph.setRelationshipProperty(relationship, CommonProperties.URI, property.toString());
+    graph.setRelationshipProperty(relationship, CommonProperties.IRI, property.toString());
     return relationship;
   }
 

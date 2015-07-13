@@ -45,7 +45,7 @@ public class OwlPostprocessorTest {
 
   void enableIndexing() {
     AutoIndexer<Node> nodeIndex = graphDb.index().getNodeAutoIndexer();
-    nodeIndex.startAutoIndexingProperty(CommonProperties.URI);
+    nodeIndex.startAutoIndexingProperty(CommonProperties.IRI);
     nodeIndex.setEnabled(true);
   }
 
@@ -55,7 +55,7 @@ public class OwlPostprocessorTest {
     Transaction tx = graphDb.beginTx();
     enableIndexing();
     parent = graphDb.createNode();
-    parent.setProperty(CommonProperties.URI, "http://example.org/a");
+    parent.setProperty(CommonProperties.IRI, "http://example.org/a");
     child = graphDb.createNode();
     child.createRelationshipTo(parent, OwlRelationships.RDFS_SUBCLASS_OF);
     grandChild = graphDb.createNode();

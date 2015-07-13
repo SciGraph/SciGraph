@@ -190,6 +190,7 @@ public class GraphUtil {
    * @param iri uri with a fragment
    * @return the "fragment" of the IRI
    */
+  @Deprecated
   public static String getFragment(String iri) {
     if (validator.isValid(checkNotNull(iri))) {
       if (iri.contains("#")) {

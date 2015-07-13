@@ -19,20 +19,19 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-
 /***
  * Properties common to both nodes and edges.
  */
 public class CommonProperties {
 
-  public static final String URI = "uri";
+  public static final String IRI = "iri";
   public static final String FRAGMENT = "fragment";
   public static final String CONVENIENCE = "convenience";
   public static final String OWL_TYPE = "owlType";
   public static final String CURIE = "curie";
 
   private final long id;
-  private String uri;
+  private String iri;
   private String fragment;
   private Set<String> types = new HashSet<>();
 
@@ -44,12 +43,12 @@ public class CommonProperties {
     return id;
   }
 
-  public void setUri(String uri) {
-    this.uri = uri;
+  public void setIri(String iri) {
+    this.iri = iri;
   }
 
-  public String getUri() {
-    return uri;
+  public String getIri() {
+    return iri;
   }
 
   public void setFragment(String fragment) {

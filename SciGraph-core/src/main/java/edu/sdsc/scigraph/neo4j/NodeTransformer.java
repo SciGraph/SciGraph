@@ -46,7 +46,7 @@ public class NodeTransformer implements Function<Node, Concept> {
   public Concept apply(Node n) {
     try (Transaction tx = n.getGraphDatabase().beginTx()) {
       Concept concept = new Concept(n.getId());
-      concept.setUri((String) n.getProperty(Concept.URI, null));
+      concept.setIri((String) n.getProperty(Concept.IRI, null));
       concept.setAnonymous(n.hasLabel(OwlLabels.OWL_ANONYMOUS));
       concept.setFragment((String) n.getProperty(Concept.FRAGMENT, null));
       concept.setDeprecated(isDeprecated(n));
@@ -75,7 +75,7 @@ public class NodeTransformer implements Function<Node, Concept> {
 
       for (Relationship r: n.getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
         Node equivalence = r.getStartNode().equals(n) ? r.getEndNode() : r.getStartNode();
-        concept.getEquivalentClasses().add((String)equivalence.getProperty(CommonProperties.URI));
+        concept.getEquivalentClasses().add((String)equivalence.getProperty(CommonProperties.IRI));
       }
 
       tx.success();

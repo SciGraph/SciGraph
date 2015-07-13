@@ -45,7 +45,7 @@ public class EntityRecognizerTest {
     Vocabulary vocabulary = mock(Vocabulary.class);
     concept = new Concept(1L);
     concept.getLabels().add("foo");
-    concept.setUri("http://x.org/1");
+    concept.setIri("http://x.org/1");
     when(vocabulary.getConceptsFromTerm(any(Query.class))).thenReturn(singletonList(concept));
     Map<String, String> curieMap = new HashMap<>();
     curieMap.put("X", "http://x.org/");

@@ -49,8 +49,8 @@ public class TestSubClassOfExistential extends OwlTestCase {
         relationship.getStartNode(), is(subclass));
     assertThat("subclassOf relationship should end with the superclass.",
         relationship.getEndNode(), is(superclass));
-    assertThat("relationship has the correct uri",
-        GraphUtil.getProperty(relationship, CommonProperties.URI, String.class),
+    assertThat("relationship has the correct iri",
+        GraphUtil.getProperty(relationship, CommonProperties.IRI, String.class),
         is(Optional.of("http://example.org/p")));
     assertThat("relationship is asserted",
         GraphUtil.getProperty(relationship, CommonProperties.CONVENIENCE, Boolean.class),

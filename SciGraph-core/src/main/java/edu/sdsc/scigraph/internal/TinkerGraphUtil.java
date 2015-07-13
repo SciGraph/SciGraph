@@ -53,7 +53,7 @@ public final class TinkerGraphUtil {
 
   static final Logger logger = Logger.getLogger(TinkerGraphUtil.class.getName());
 
-  static final ImmutableSet<String> PROTECTED_PROPERTY_KEYS = ImmutableSet.of(CommonProperties.URI, CommonProperties.CURIE);
+  static final ImmutableSet<String> PROTECTED_PROPERTY_KEYS = ImmutableSet.of(CommonProperties.IRI, CommonProperties.CURIE);
 
   static void copyProperties(PropertyContainer container, Element element) {
     for (String key: container.getPropertyKeys()) {

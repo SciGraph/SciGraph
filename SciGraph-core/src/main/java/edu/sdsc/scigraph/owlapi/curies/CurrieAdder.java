@@ -33,8 +33,8 @@ public class CurrieAdder implements MethodInterceptor {
 
   void addCuries(Graph graph) {
     for (Vertex vertex: graph.getVertices()) {
-      String uri = (String)vertex.getProperty(CommonProperties.URI);
-      Optional<String> curie = curieUtil.getCurie(uri);
+      String iri = (String)vertex.getProperty(CommonProperties.IRI);
+      Optional<String> curie = curieUtil.getCurie(iri);
       if (curie.isPresent()) {
         vertex.setProperty(CommonProperties.CURIE, curie.get());
       }

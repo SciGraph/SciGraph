@@ -36,14 +36,14 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 public interface Vocabulary {
 
   /***
-   * Get a concept from a URI
-   * @param uri  the URI
-   * @return an optional concept matching the URI
+   * Get a concept from an IRI
+   * @param iri  the IRI
+   * @return an optional concept matching the IRI
    */
-  Optional<Concept> getConceptFromUri(String uri);
+  Optional<Concept> getConceptFromUri(String iri);
 
   /***
-   * Get concepts that match either a URI fragment or a CURIE.
+   * Get concepts that match either an IRI fragment or a CURIE.
    * <p>Due to differences in representation "fragment" means either:
    * <p><ul>
    * <li>http://example.org/thing#<b>fragment</b>

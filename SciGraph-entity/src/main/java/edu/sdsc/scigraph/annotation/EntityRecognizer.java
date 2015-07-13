@@ -73,8 +73,8 @@ public class EntityRecognizer {
     Set<Entity> entities = newHashSet();
     for (Concept term : terms) {
       if (shouldAnnotate(term, config)) {
-        Optional<String> id = curieUtil.getCurie(term.getUri());
-        entities.add(new Entity(term.getLabels(), id.or(term.getUri()), term.getCategories()));
+        Optional<String> id = curieUtil.getCurie(term.getIri());
+        entities.add(new Entity(term.getLabels(), id.or(term.getIri()), term.getCategories()));
       }
     }
 

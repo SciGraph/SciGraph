@@ -133,7 +133,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     BooleanQuery prefixQueries = new BooleanQuery();
     for (String curie : query.getPrefixes()) {
       String prefix = curieUtil.getExpansion(curie);
-      prefixQueries.add(new WildcardQuery(new Term(CommonProperties.URI, prefix + "*")), Occur.SHOULD);
+      prefixQueries.add(new WildcardQuery(new Term(CommonProperties.IRI, prefix + "*")), Occur.SHOULD);
     }
     if (!query.getPrefixes().isEmpty()) {
       indexQuery.add(new BooleanClause(prefixQueries, Occur.MUST));
@@ -160,7 +160,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public Optional<Concept> getConceptFromUri(String uri) {
     try (Transaction tx = graph.beginTx()) {
-      Node node = graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.URI, uri.toString()).getSingle();
+      Node node = graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.IRI, uri.toString()).getSingle();
       tx.success();
       Concept concept = null;
       if (null != node) {
@@ -180,7 +180,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     String queryString = format("%s:%s", CommonProperties.FRAGMENT, idQuery);
     if (fullUri.isPresent()) {
       queryString +=
-          String.format(" %s:%s", CommonProperties.URI, QueryParser.escape(fullUri.get()));
+          String.format(" %s:%s", CommonProperties.IRI, QueryParser.escape(fullUri.get()));
     }
     IndexHits<Node> hits;
     try (Transaction tx = graph.beginTx()) {
@@ -204,7 +204,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
       Optional<String> fullUri = curieUtil.getIri(query.getInput());
       if (fullUri.isPresent()) {
-        subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.URI, (fullUri.get()))),
+        subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.IRI, (fullUri.get()))),
             Occur.SHOULD);
       }
       subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.FRAGMENT, query.getInput())),
