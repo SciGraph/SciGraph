@@ -158,9 +158,11 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   @Override
-  public Optional<Concept> getConceptFromUri(String uri) {
+  public Optional<Concept> getConceptFromId(Query query) {
+    String idQuery = StringUtils.strip(query.getInput(), "\"");
+    idQuery = curieUtil.getIri(idQuery).or(idQuery);
     try (Transaction tx = graph.beginTx()) {
-      Node node = graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.IRI, uri.toString()).getSingle();
+      Node node = graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.IRI, idQuery).getSingle();
       tx.success();
       Concept concept = null;
       if (null != node) {
@@ -168,30 +170,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       }
       return Optional.fromNullable(concept);
     }
-  }
-
-  @Override
-  public Collection<Concept> getConceptFromId(Query query) {
-    QueryParser parser = getQueryParser();
-    String idQuery = StringUtils.strip(query.getInput(), "\"");
-    Optional<String> fullUri = curieUtil.getIri(idQuery);
-    idQuery = QueryParser.escape(idQuery);
-    if (!fullUri.isPresent()) {
-      return Collections.emptySet();
-    } else {
-      String queryString=
-          String.format(" %s:%s", CommonProperties.IRI, QueryParser.escape(fullUri.get()));
-      IndexHits<Node> hits;
-      try (Transaction tx = graph.beginTx()) {
-        hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(parser.parse(queryString));
-        tx.success();
-        return limitHits(hits, query);
-      } catch (ParseException e) {
-        logger.log(Level.WARNING, "Failed to parse an ID query", e);
-        return Collections.emptySet();
-      }
-    }
-
   }
 
   @Override

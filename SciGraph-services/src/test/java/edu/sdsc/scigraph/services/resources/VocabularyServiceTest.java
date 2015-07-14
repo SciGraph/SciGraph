@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -52,15 +51,13 @@ public class VocabularyServiceTest {
 
   @Before
   public void setup() {
-    when(vocabulary.getConceptFromUri("http://example.org/none")).thenReturn(Optional.<Concept>absent());
-    when(vocabulary.getConceptFromUri("http://example.org/foo")).thenReturn(Optional.of(hippocampus));
     hippocampus.getLabels().add("Hippocampus");
     when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
   }
 
   @Test
   public void testKnownIdJson() throws Exception {
-    when(vocabulary.getConceptFromId(any(Vocabulary.Query.class))).thenReturn(newArrayList(hippocampus));
+    when(vocabulary.getConceptFromId(any(Vocabulary.Query.class))).thenReturn(Optional.of((hippocampus)));
     String response = resources.client().target("/vocabulary/id/foo").request().accept(MediaType.APPLICATION_JSON).get(String.class);
     String expected = fixture("fixtures/hippocampusInList.json");
     assertEquals(expected, response, true);

@@ -36,13 +36,6 @@ import edu.sdsc.scigraph.frames.NodeProperties;
 public interface Vocabulary {
 
   /***
-   * Get a concept from an IRI
-   * @param iri  the IRI
-   * @return an optional concept matching the IRI
-   */
-  Optional<Concept> getConceptFromUri(String iri);
-
-  /***
    * Get concepts that match either a compmlete IRI or a CURIE.
    *
    * <p>
@@ -51,9 +44,9 @@ public interface Vocabulary {
    * would be retrievable as CUR:1.
    * 
    * @param query  a {@link Query} with the IRI or CURIE as input
-   * @return concepts matching the query. Uniqueness is probable but not guaranteed.
+   * @return an optional concept
    */
-  Collection<Concept> getConceptFromId(Query query);
+  Optional<Concept> getConceptFromId(Query query);
 
   /***
    * Gets concepts from a prefix string - useful for auto-complete

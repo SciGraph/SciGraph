@@ -125,26 +125,26 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
 
   @Test
   public void testGetByUri() {
-    Optional<Concept> concept = vocabulary.getConceptFromUri("http://example.org/#hippocampus");
-    assertThat(concept.get(), is(hippocampus));
+    Query query = new Vocabulary.Query.Builder("http://example.org/#hippocampus").build();
+    assertThat(vocabulary.getConceptFromId(query).get(), is(hippocampus));
   }
 
   @Test
   public void testAbsentUri() {
-    Optional<Concept> concept = vocabulary.getConceptFromUri("http://example.org/absent");
-    assertThat(concept.isPresent(), is(false));
+    Query query = new Vocabulary.Query.Builder("http://example.org/absent").build();
+    assertThat(vocabulary.getConceptFromId(query).isPresent(), is(false));
   }
 
   @Test
   public void testGetByCurie() {
     Query query = new Vocabulary.Query.Builder("HP:0008").build();
-    assertThat(vocabulary.getConceptFromId(query), contains(hippocampus));
+    assertThat(vocabulary.getConceptFromId(query).get(), is(hippocampus));
   }
 
   @Test
   public void testIdWithSpacesNoException() {
     Query query = new Vocabulary.Query.Builder("with space").build();
-    assertThat(vocabulary.getConceptFromId(query), is(empty()));
+    assertThat(vocabulary.getConceptFromId(query).isPresent(), is(false));
   }
 
   @Test
@@ -321,7 +321,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testQuotedIdQuery() {
     Query query = new Vocabulary.Query.Builder("\"HP:0008\"").build();
-    assertThat(vocabulary.getConceptFromId(query), contains(hippocampus));
+    assertThat(vocabulary.getConceptFromId(query).get(), is(hippocampus));
   }
 
   @Test
