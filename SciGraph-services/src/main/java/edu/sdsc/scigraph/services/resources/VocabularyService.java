@@ -16,7 +16,8 @@
 package edu.sdsc.scigraph.services.resources;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.Iterables.transform;
+import static java.util.Collections.singleton;
 import static java.util.Collections.sort;
 import io.dropwizard.jersey.caching.CacheControl;
 import io.dropwizard.jersey.params.BooleanParam;
@@ -133,11 +134,11 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) throws Exception {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-    List<Concept> concepts = newArrayList(vocabulary.getConceptFromId(query));
-    if (concepts.isEmpty()) {
+    Optional<Concept> concept = vocabulary.getConceptFromId(query);
+    if (!concept.isPresent()) {
       throw new WebApplicationException(404);
     } else {
-      ConceptWrapper wrapper = new ConceptWrapper(transform(concepts, conceptDtoTransformer));
+      ConceptWrapper wrapper = new ConceptWrapper(transform(singleton(concept.get()), conceptDtoTransformer));
       GenericEntity<ConceptWrapper> response = new GenericEntity<ConceptWrapper>(wrapper){};
       return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
