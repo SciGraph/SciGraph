@@ -20,10 +20,15 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -104,12 +109,13 @@ public class BatchOwlLoader {
   }
 
   void loadOntology() throws InterruptedException {
+    Set<Future<?>> futures = new HashSet<>();
     if (!ontologies.isEmpty()) {
       for (int i = 0; i < numConsumers; i++) {
-        exec.submit(consumerProvider.get());
+        futures.add(exec.submit(consumerProvider.get()));
       }
       for (int i = 0; i < numProducers; i++) {
-        exec.submit(producerProvider.get());
+        futures.add(exec.submit(producerProvider.get()));
       }
       for (OntologySetup ontology: ontologies) {
         urlQueue.offer(ontology);
@@ -120,6 +126,13 @@ public class BatchOwlLoader {
     }
     exec.shutdown();
     exec.awaitTermination(10, TimeUnit.DAYS);
+    try {
+      for (Future<?> future: futures) {
+        future.get();
+      }
+    } catch (ExecutionException e) {
+      logger.log(Level.SEVERE, e.getMessage(), e);
+    }
     graph.shutdown();
     logger.info("Postprocessing...");
     postprocessorProvider.get().postprocess();

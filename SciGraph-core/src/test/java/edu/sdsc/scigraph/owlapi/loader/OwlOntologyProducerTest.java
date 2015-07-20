@@ -78,6 +78,16 @@ public class OwlOntologyProducerTest extends GraphTestBase {
   }
 
   @Test
+  public void circularOntologies_dontRecurseInfintely() throws Exception {
+    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:8080/circular_parent.owl"));
+    producer.addOntologyStructure(manager, ontology);
+    Optional<Long> parent = graph.getNode("http://example.org/ParentOntology");
+    Optional<Long> grandchild = graph.getNode("http://example.org/GrandChildOntology");
+    assertThat(graph.getRelationship(parent.get(), grandchild.get(), OwlRelationships.RDFS_IS_DEFINED_BY).isPresent(), is(true));
+    assertThat(graph.getRelationship(grandchild.get(), grandchild.get(), OwlRelationships.RDFS_IS_DEFINED_BY).isPresent(), is(true));
+  }
+
+  @Test
   public void objects_areQueued() throws InterruptedException {
     OntologySetup ontologyConfig = new OntologySetup();
     ontologyConfig.setUrl("http://localhost:8080/main.owl");
