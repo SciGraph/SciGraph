@@ -325,10 +325,13 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long superclass = getOrCreateNode(getIri(axiom.getSuperClass()));
     long relationship = getOrCreateRelationship(subclass, superclass, OwlRelationships.RDFS_SUBCLASS_OF);
     for (OWLAnnotation annotation: axiom.getAnnotations()) {
+      // TODO: Is there a more elegant way to process these annotations?
       String property = annotation.getProperty().getIRI().toString();
-      Optional<Object> value = OwlApiUtils.getTypedLiteralValue((OWLLiteral) annotation.getValue());
-      if (value.isPresent()) {
-        graph.addRelationshipProperty(relationship, property, value.get());
+      if (annotation.getValue() instanceof OWLLiteral) {
+        Optional<Object> value = OwlApiUtils.getTypedLiteralValue((OWLLiteral) annotation.getValue());
+        if (value.isPresent()) {
+          graph.addRelationshipProperty(relationship, property, value.get());
+        }
       }
     }
     return null;
