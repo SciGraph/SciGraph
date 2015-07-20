@@ -16,7 +16,7 @@
 package edu.sdsc.scigraph.services.resources;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Collections2.transform;
 import static java.util.Collections.singleton;
 import static java.util.Collections.sort;
 import io.dropwizard.jersey.caching.CacheControl;

@@ -19,7 +19,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import io.dropwizard.jersey.caching.CacheControl;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +38,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -139,11 +139,11 @@ public class RefineService extends BaseResource {
   @Produces(MediaType.TEXT_HTML)
   public ConceptView getView(@PathParam("id") String id) {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-    Collection<Concept> concepts = vocabulary.getConceptFromId(query);
-    if (concepts.isEmpty()) {
+    Optional<Concept> concept = vocabulary.getConceptFromId(query);
+    if (!concept.isPresent()) {
       throw new WebApplicationException(404);
     }
-    return new ConceptView(concepts.iterator().next());
+    return new ConceptView(concept.get());
   }
 
   @GET

@@ -15,7 +15,6 @@
  */
 package edu.sdsc.scigraph.services.resources;
 
-import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -26,7 +25,6 @@ import io.dropwizard.jersey.params.IntParam;
 import io.dropwizard.jersey.params.LongParam;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -115,12 +113,11 @@ public class GraphService extends BaseResource {
     Set<Concept> roots = new HashSet<>();
     for (String id: ids) {
       Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-      Collection<Concept> concepts = vocabulary.getConceptFromId(query);
-      if (concepts.isEmpty()) {
+      Optional<Concept> concept = vocabulary.getConceptFromId(query);
+      if (!concept.isPresent()) {
         throw new UnknownClassException(id);
       }
-      Concept concept = getFirst(vocabulary.getConceptFromId(query), null);
-      roots.add(concept);
+      roots.add(concept.get());
     }
     Set<DirectedRelationshipType> types = new HashSet<>();
     if (relationshipType.isPresent()) {
