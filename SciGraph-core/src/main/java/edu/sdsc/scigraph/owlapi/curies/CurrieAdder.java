@@ -26,7 +26,7 @@ import com.tinkerpop.blueprints.Vertex;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 
-public class CurrieAdder implements MethodInterceptor {
+final class CurrieAdder implements MethodInterceptor {
 
   @Inject
   CurieUtil curieUtil;
