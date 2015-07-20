@@ -39,7 +39,7 @@ public class CurieUtil {
    */
   @Inject
   public CurieUtil(@IndicatesCurieMapping Map<String, String> curieMap) {
-    this.curieMap = ImmutableBiMap.copyOf(curieMap);
+    this.curieMap = ImmutableBiMap.copyOf(checkNotNull(curieMap));
   }
 
   /***
