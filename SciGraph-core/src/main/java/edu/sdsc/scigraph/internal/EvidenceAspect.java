@@ -36,9 +36,10 @@ import com.tinkerpop.blueprints.Vertex;
 
 public class EvidenceAspect implements GraphAspect {
 
-  static final RelationshipType HAS_SUBJECT = DynamicRelationshipType.withName("hasSubject");
-  static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("hasObject");
-  static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("evidence");
+  // TODO: Fix fragments for #118
+  static final RelationshipType HAS_SUBJECT = DynamicRelationshipType.withName("association_has_subject");
+  static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("association_has_object");
+  static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("RO_0002558");
   static final RelationshipType SOURCE = DynamicRelationshipType.withName("source");
   
   
