@@ -35,6 +35,7 @@ import org.apache.commons.csv.CSVPrinter;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.frames.NodeProperties;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
@@ -42,6 +43,10 @@ import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 abstract public class DelimitedWriter extends GraphWriter {
 
   abstract CSVPrinter getCsvPrinter(Writer writer) throws IOException;
+
+  static String getCurieOrIri(Vertex vertex) {
+    return TinkerGraphUtil.getProperty(vertex, CommonProperties.CURIE, String.class).or((String)vertex.getProperty(CommonProperties.URI));
+  }
 
   @Override
   public void writeTo(Graph data, Class<?> type, Type genericType, Annotation[] annotations,
@@ -53,7 +58,7 @@ abstract public class DelimitedWriter extends GraphWriter {
       List<String> vals = new ArrayList<>();
       for (Vertex vertex: data.getVertices()) {
         vals.clear();
-        vals.add(BbopJsGraphWriter.getCurieOrIri(vertex));
+        vals.add(getCurieOrIri(vertex));
         String label = getFirst(TinkerGraphUtil.getProperties(vertex, NodeProperties.LABEL, String.class), null);
         vals.add(label);
         vals.add(TinkerGraphUtil.getProperties(vertex, Concept.CATEGORY, String.class).toString());

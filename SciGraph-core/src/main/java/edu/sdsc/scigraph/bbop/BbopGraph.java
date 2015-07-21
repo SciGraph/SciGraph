@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.services.api.graph;
+package edu.sdsc.scigraph.bbop;
 
 import java.util.ArrayList;
 import java.util.HashMap;

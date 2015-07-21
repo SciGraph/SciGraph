@@ -91,6 +91,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     ClassReaders.setReader(new DefaultJaxrsApiReader());
     SwaggerConfig config = ConfigFactory.config();
     config.setApiVersion("1.0.1");
+    // TODO: Fix this so the swagger client generator can work correctly
     config.setBasePath("../../" + basePath);
   }
 
@@ -109,7 +110,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
   void addWriters(JerseyEnvironment environment) throws Exception {
     for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.jersey.writers")) {
       if (!Modifier.isAbstract(classInfo.load().getModifiers())) {
-        environment.register(classInfo.load().newInstance());
+        environment.register(factory.getInjector().getInstance(classInfo.load()));
       }
     }
   }
