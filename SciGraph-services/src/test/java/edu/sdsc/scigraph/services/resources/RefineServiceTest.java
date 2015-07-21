@@ -18,7 +18,9 @@ package edu.sdsc.scigraph.services.resources;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import io.dropwizard.testing.junit.ResourceTestRule;
 
 import java.net.URLEncoder;
@@ -29,10 +31,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 
+import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.services.refine.RefineResults;
 import edu.sdsc.scigraph.services.refine.ServiceMetadata;
 import edu.sdsc.scigraph.vocabulary.Vocabulary;
+import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
 public class RefineServiceTest {
 
@@ -83,6 +88,7 @@ public class RefineServiceTest {
 
   @Test
   public void preview_returns404_whenNotFound() {
+    when(vocabulary.getConceptFromId(any(Query.class))).thenReturn(Optional.<Concept>absent());
     assertThat(
         resources.client().target("/refine/preview/foo").request().get().getStatus(), is(404));
   }
