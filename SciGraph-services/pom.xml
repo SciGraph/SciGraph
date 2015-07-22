@@ -158,7 +158,7 @@
     <dependency>
       <groupId>ru.vyarus</groupId>
       <artifactId>dropwizard-guicey</artifactId>
-      <version>3.0.0</version>
+      <version>3.0.1</version>
     </dependency>
     
     <dependency>
