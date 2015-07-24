@@ -13,19 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.internal;
-
-import com.tinkerpop.blueprints.Graph;
-
-/***
- * Like AOP - but AOG (Aspect Oriented Graphs).
+/**
+ * Internal APIs that may not be ready for prime time.
  */
-public interface GraphAspect {
-
-  /***
-   * Run some cross cutting code on a graph
-   * @param graph
-   */
-  void invoke(Graph graph);
-
-}
+package edu.sdsc.scigraph.internal;

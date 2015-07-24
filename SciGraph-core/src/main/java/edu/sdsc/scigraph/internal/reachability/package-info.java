@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.internal;
-
-import com.tinkerpop.blueprints.Graph;
-
-/***
- * Like AOP - but AOG (Aspect Oriented Graphs).
+/**
+ * A Neo4j implementation of the <a href="http://www.vldb.org/pvldb/vol6/p1978-jin.pdf">
+ * "Simple, Fast, and Scalable Reachability Oracle"</a>
  */
-public interface GraphAspect {
-
-  /***
-   * Run some cross cutting code on a graph
-   * @param graph
-   */
-  void invoke(Graph graph);
-
-}
+package edu.sdsc.scigraph.internal.reachability;

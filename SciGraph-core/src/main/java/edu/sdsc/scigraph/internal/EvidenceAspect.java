@@ -34,6 +34,9 @@ import com.google.common.base.Function;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
+/***
+ * Add "evidence" to a graph
+ */
 public class EvidenceAspect implements GraphAspect {
 
   // TODO: Fix fragments for #118
