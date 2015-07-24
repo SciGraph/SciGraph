@@ -13,34 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.bbop;
-
-import java.util.ArrayList;
-import java.util.List;
-
-/***
+/**
  * A bean representation of the <a href="https://github.com/berkeleybop/bbop-js/wiki/Graph">bbop-js</a>
- * graph representation.
+ * graph representation and associated utilities.
  */
-public final class BbopGraph {
-
-  List<BbopNode> nodes = new ArrayList<>();
-  List<BbopEdge> edges = new ArrayList<>();
-
-  public List<BbopNode> getNodes() {
-    return nodes;
-  }
-
-  public void setNodes(List<BbopNode> nodes) {
-    this.nodes = nodes;
-  }
-
-  public List<BbopEdge> getEdges() {
-    return edges;
-  }
-
-  public void setEdges(List<BbopEdge> edges) {
-    this.edges = edges;
-  }
-
-}
+package edu.sdsc.scigraph.bbop;

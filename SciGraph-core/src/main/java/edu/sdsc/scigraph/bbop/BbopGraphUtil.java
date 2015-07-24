@@ -49,10 +49,14 @@ public class BbopGraphUtil {
     return curieUtil.getCurie(iri).or(iri);
   }
   
+  /***
+   * @param graph The graph to convert
+   * @return a bbop representation of a {@link Graph}
+   */
   public BbopGraph convertGraph(Graph graph) {
     BbopGraph bbopGraph = new BbopGraph();
     for (Vertex vertex: graph.getVertices()) {
-      BbopGraph.BbopNode bbopNode = new BbopGraph.BbopNode();
+      BbopNode bbopNode = new BbopNode();
       bbopNode.setId(getCurieOrIri(vertex));
       String label = getFirst(TinkerGraphUtil.getProperties(vertex, NodeProperties.LABEL, String.class), null);
       bbopNode.setLbl(label);
@@ -66,7 +70,7 @@ public class BbopGraphUtil {
       bbopGraph.getNodes().add(bbopNode);
     }
     for (Edge edge: graph.getEdges()) {
-      BbopGraph.BbopEdge bbopEdge = new BbopGraph.BbopEdge();
+      BbopEdge bbopEdge = new BbopEdge();
       Vertex subject= edge.getVertex(Direction.OUT);
       Vertex object= edge.getVertex(Direction.IN);
       bbopEdge.setSub(getCurieOrIri(subject));

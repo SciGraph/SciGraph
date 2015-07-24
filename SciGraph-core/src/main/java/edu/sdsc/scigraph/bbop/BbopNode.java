@@ -15,32 +15,36 @@
  */
 package edu.sdsc.scigraph.bbop;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-/***
- * A bean representation of the <a href="https://github.com/berkeleybop/bbop-js/wiki/Graph">bbop-js</a>
- * graph representation.
- */
-public final class BbopGraph {
+public class BbopNode {
+  String id;
+  String lbl;
+  Map<String, Object> meta = new HashMap<>();
 
-  List<BbopNode> nodes = new ArrayList<>();
-  List<BbopEdge> edges = new ArrayList<>();
-
-  public List<BbopNode> getNodes() {
-    return nodes;
+  public String getId() {
+    return id;
   }
 
-  public void setNodes(List<BbopNode> nodes) {
-    this.nodes = nodes;
+  public void setId(String id) {
+    this.id = id;
   }
 
-  public List<BbopEdge> getEdges() {
-    return edges;
+  public String getLbl() {
+    return lbl;
   }
 
-  public void setEdges(List<BbopEdge> edges) {
-    this.edges = edges;
+  public void setLbl(String lbl) {
+    this.lbl = lbl;
+  }
+
+  public Map<String, Object> getMeta() {
+    return meta;
+  }
+
+  public void setMeta(Map<String, Object> meta) {
+    this.meta = meta;
   }
 
 }
