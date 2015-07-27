@@ -20,6 +20,7 @@ import java.io.File;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.Resource;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,13 +42,19 @@ public class BatchOwlLoaderIT {
 
   static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
+  static Server server = new Server(8080);
+
   @BeforeClass
   public static void setup() throws Exception {
-    Server server = new Server(8080);
     ResourceHandler handler = new ResourceHandler();
     handler.setBaseResource(Resource.newClassPathResource("/ontologies/import/"));
     server.setHandler(handler);
     server.start();
+  }
+
+  @AfterClass
+  public static void teardown() throws Exception {
+    server.stop();
   }
 
   @Test
@@ -60,7 +67,7 @@ public class BatchOwlLoaderIT {
     ontSetup.setUrl("http://127.0.0.1:8080/main.owl");
     config.getOntologies().add(ontSetup);
     BatchOwlLoader.load(config);
-    
+
     GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(folder.getRoot().toString());
     graphDb.beginTx();
     GraphvizWriter writer = new GraphvizWriter();

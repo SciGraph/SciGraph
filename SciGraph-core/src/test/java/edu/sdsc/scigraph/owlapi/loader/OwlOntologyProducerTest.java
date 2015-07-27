@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.Resource;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,13 +49,19 @@ public class OwlOntologyProducerTest extends GraphTestBase {
   OwlOntologyProducer producer;
   BlockingQueue<OWLCompositeObject> queue = new LinkedBlockingQueue<OWLCompositeObject>();
 
+  static Server server = new Server(8080);
+  
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    Server server = new Server(8080);
     ResourceHandler handler = new ResourceHandler();
     handler.setBaseResource(Resource.newClassPathResource("/ontologies/import/"));
     server.setHandler(handler);
     server.start();
+  }
+  
+  @AfterClass
+  public static void teardown() throws Exception {
+    server.stop();
   }
 
   @Before
