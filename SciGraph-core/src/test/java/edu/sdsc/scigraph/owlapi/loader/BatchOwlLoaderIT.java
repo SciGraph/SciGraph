@@ -42,7 +42,7 @@ public class BatchOwlLoaderIT {
 
   static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-  static Server server = new Server(8080);
+  static Server server = new Server(10000);
 
   @BeforeClass
   public static void setup() throws Exception {

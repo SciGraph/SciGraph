@@ -49,7 +49,7 @@ public class OwlOntologyProducerTest extends GraphTestBase {
   OwlOntologyProducer producer;
   BlockingQueue<OWLCompositeObject> queue = new LinkedBlockingQueue<OWLCompositeObject>();
 
-  static Server server = new Server(8080);
+  static Server server = new Server(10000);
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
