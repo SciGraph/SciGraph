@@ -71,7 +71,7 @@ public class OwlOntologyProducerTest extends GraphTestBase {
 
   @Test
   public void ontologyStructure_isAdded() throws OWLOntologyCreationException {
-    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:8080/main.owl"));
+    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:10000/main.owl"));
     producer.addOntologyStructure(manager, ontology);
     Optional<Long> main = graph.getNode("http://example.org/MainOntology");
     Optional<Long> child1 = graph.getNode("http://example.org/Child1");
@@ -86,7 +86,7 @@ public class OwlOntologyProducerTest extends GraphTestBase {
 
   @Test
   public void circularOntologies_dontRecurseInfintely() throws Exception {
-    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:8080/circular_parent.owl"));
+    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:10000/circular_parent.owl"));
     producer.addOntologyStructure(manager, ontology);
     Optional<Long> parent = graph.getNode("http://example.org/ParentOntology");
     Optional<Long> grandchild = graph.getNode("http://example.org/GrandChildOntology");
@@ -97,7 +97,7 @@ public class OwlOntologyProducerTest extends GraphTestBase {
   @Test
   public void objects_areQueued() throws InterruptedException {
     OntologySetup ontologyConfig = new OntologySetup();
-    ontologyConfig.setUrl("http://localhost:8080/main.owl");
+    ontologyConfig.setUrl("http://localhost:10000/main.owl");
     producer.queueObjects(manager, ontologyConfig);
     assertThat(queue.size(), is(greaterThan(0)));
   }

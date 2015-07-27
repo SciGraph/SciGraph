@@ -64,7 +64,7 @@ public class BatchOwlLoaderIT {
     neo4jConfig.setLocation(folder.getRoot().getAbsolutePath());
     config.setGraphConfiguration(neo4jConfig);
     OntologySetup ontSetup = new OntologySetup();
-    ontSetup.setUrl("http://127.0.0.1:8080/main.owl");
+    ontSetup.setUrl("http://127.0.0.1:10000/main.owl");
     config.getOntologies().add(ontSetup);
     BatchOwlLoader.load(config);
 
