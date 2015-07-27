@@ -1,7 +1,7 @@
 Prefix(:=<http://example.org/>)
 
 Ontology(:Child1
-Import( <http://localhost:8080/grandchild.owl> )
+Import( <http://localhost:10000/grandchild.owl> )
 Declaration(Class(:child1.1))
 Declaration(Class(:child1.2))
 SubClassOf(:child1.1 :child1.2)

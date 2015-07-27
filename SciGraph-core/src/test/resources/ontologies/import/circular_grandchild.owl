@@ -1,6 +1,6 @@
 Prefix(:=<http://example.org/>)
 
 Ontology(:GrandChildOntology
-Import( <http://localhost:8080/circular_parent.owl> )
-Import( <http://localhost:8080/circular_grandchild.owl> )
+Import( <http://localhost:10000/circular_parent.owl> )
+Import( <http://localhost:10000/circular_grandchild.owl> )
 )

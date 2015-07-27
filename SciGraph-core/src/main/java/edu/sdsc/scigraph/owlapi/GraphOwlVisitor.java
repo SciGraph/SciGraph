@@ -82,6 +82,9 @@ import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
+/***
+ * The core of the code for translating owlapi axioms into Neo4j structure.
+ */
 public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private static final Logger logger = Logger.getLogger(GraphOwlVisitor.class.getName());
