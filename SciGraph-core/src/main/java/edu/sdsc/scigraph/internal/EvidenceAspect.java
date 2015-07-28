@@ -64,7 +64,7 @@ public class EvidenceAspect implements GraphAspect {
         ));
     try (Transaction tx = graphDb.beginTx()) {
       for (Vertex vertex: graph.getVertices()) {
-        Node subject = graphDb.getNodeById(Long.valueOf((String)vertex.getId()));
+        Node subject = graphDb.getNodeById(Long.parseLong((String)vertex.getId()));
         for (Relationship hasSubject: subject.getRelationships(HAS_SUBJECT, Direction.INCOMING)) {
           Node annotation = hasSubject.getOtherNode(subject);
           for (Relationship hasObject: annotation.getRelationships(HAS_OBJECT, Direction.OUTGOING)) {

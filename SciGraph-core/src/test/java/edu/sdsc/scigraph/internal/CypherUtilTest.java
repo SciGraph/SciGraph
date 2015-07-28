@@ -93,7 +93,7 @@ public class CypherUtilTest extends GraphTestBase{
 
   @Test
   public void replaceCurieRelationship() {
-    String actual = util.resolveRelationships("(start)-[:FOO:foo]-(end)");
+    String actual = util.entailRelationships("(start)-[:FOO:foo]-(end)");
     assertThat(actual, is("(start)-[:foo]-(end)"));
   }
 
@@ -109,13 +109,13 @@ public class CypherUtilTest extends GraphTestBase{
 
   @Test
   public void entailmentRegex() {
-    String result = util.resolveRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
+    String result = util.entailRelationships("MATCH (n)-[:foo!]-(n2) RETURN n");
     assertThat(result, is("MATCH (n)-[:foo|fizz_equiv|fizz]-(n2) RETURN n"));
   }
 
   @Test
   public void curiesAreEntailed() {
-    String result = util.resolveRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
+    String result = util.entailRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
     assertThat(result, is("MATCH (n)-[:foo|fizz_equiv|fizz]-(n2) RETURN n"));
   }
 

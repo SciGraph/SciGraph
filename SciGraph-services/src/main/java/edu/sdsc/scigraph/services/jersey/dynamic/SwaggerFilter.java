@@ -64,12 +64,10 @@ public class SwaggerFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
-    boolean gzip = isGzip(request);
-    
     // Capture the output of the filter chain
     ByteArrayResponseWrapper wrappedResp = new ByteArrayResponseWrapper((HttpServletResponse) response);
     chain.doFilter(request, wrappedResp);
-    if (gzip) {
+    if (isGzip(request)) {
       try (InputStream is = new ByteArrayInputStream(wrappedResp.getBytes());
           GZIPInputStream gis = new GZIPInputStream(is);
           ByteArrayOutputStream bs = new ByteArrayOutputStream();
