@@ -68,7 +68,7 @@ public class BatchOwlLoaderIT {
     config.getOntologies().add(ontSetup);
     BatchOwlLoader.load(config);
 
-    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(folder.getRoot().toString());
+    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(folder.getRoot().toString()));
     graphDb.beginTx();
     GraphvizWriter writer = new GraphvizWriter();
     Walker walker = Walker.fullGraph(graphDb);
