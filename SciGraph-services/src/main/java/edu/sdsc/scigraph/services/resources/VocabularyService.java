@@ -39,15 +39,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.dozer.DozerBeanMapper;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
@@ -72,8 +69,7 @@ import edu.sdsc.scigraph.vocabulary.Vocabulary.Query;
 
 @Path("/vocabulary") 
 @Api(value = "/vocabulary", description = "Vocabulary services")
-@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML, })
+@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
 public class VocabularyService extends BaseResource {
 
   private final Vocabulary vocabulary;
@@ -142,8 +138,8 @@ public class VocabularyService extends BaseResource {
     if (concepts.isEmpty()) {
       throw new WebApplicationException(404);
     } else {
-      ConceptWrapper wrapper = new ConceptWrapper(transform(concepts, conceptDtoTransformer));
-      GenericEntity<ConceptWrapper> response = new GenericEntity<ConceptWrapper>(wrapper){};
+      List<ConceptDTO> dtos = transform(concepts, conceptDtoTransformer);
+      GenericEntity<List<ConceptDTO>> response = new GenericEntity<List<ConceptDTO>>(dtos){};
       return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
   }
@@ -241,8 +237,7 @@ public class VocabularyService extends BaseResource {
     sort(completions);
     int endIndex = limit.get() > completions.size() ? completions.size() : limit.get();
     completions = completions.subList(0, endIndex);
-    CompletionWrapper wrapper = new CompletionWrapper(completions);
-    GenericEntity<CompletionWrapper> response = new GenericEntity<CompletionWrapper>(wrapper){};
+    GenericEntity<List<Completion>> response = new GenericEntity<List<Completion>>(completions){};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
@@ -287,8 +282,8 @@ public class VocabularyService extends BaseResource {
     if (concepts.isEmpty()) {
       throw new WebApplicationException(404);
     } else {
-      ConceptWrapper wrapper = new ConceptWrapper(transform(concepts, conceptDtoTransformer));
-      GenericEntity<ConceptWrapper> response = new GenericEntity<ConceptWrapper>(wrapper){};
+      List<ConceptDTO> dtos = transform(concepts, conceptDtoTransformer);
+      GenericEntity<List<ConceptDTO>> response = new GenericEntity<List<ConceptDTO>>(dtos){};
       return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
   }
@@ -333,8 +328,8 @@ public class VocabularyService extends BaseResource {
     if (concepts.isEmpty()) {
       throw new WebApplicationException(404);
     } else {
-      ConceptWrapper wrapper = new ConceptWrapper(transform(concepts, conceptDtoTransformer));
-      GenericEntity<ConceptWrapper> response = new GenericEntity<ConceptWrapper>(wrapper){};
+      List<ConceptDTO> dtos = transform(concepts, conceptDtoTransformer);
+      GenericEntity<List<ConceptDTO>> response = new GenericEntity<List<ConceptDTO>>(dtos){};
       return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
   }
@@ -354,8 +349,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
     List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit.get()));
-    SuggestionWrapper wrapper = new SuggestionWrapper(suggestions);
-    GenericEntity<SuggestionWrapper> response = new GenericEntity<SuggestionWrapper>(wrapper){};
+    GenericEntity<List<String>> response = new GenericEntity<List<String>>(suggestions){};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
@@ -369,8 +363,8 @@ public class VocabularyService extends BaseResource {
   public Object getCategories(
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
-    CategoryWrapper categories = new CategoryWrapper(vocabulary.getAllCategories());
-    GenericEntity<CategoryWrapper> response = new GenericEntity<CategoryWrapper>(categories){};
+    Collection<String> categories = vocabulary.getAllCategories();
+    GenericEntity<Collection<String>> response = new GenericEntity<Collection<String>>(categories){};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
@@ -384,79 +378,9 @@ public class VocabularyService extends BaseResource {
   public Object getCuriePrefixes(
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
-    OntologyWrapper ontologies = new OntologyWrapper(vocabulary.getAllCuriePrefixes());
-    GenericEntity<OntologyWrapper> response = new GenericEntity<OntologyWrapper>(ontologies){};
+    Collection<String> prefixes = vocabulary.getAllCuriePrefixes();
+    GenericEntity<Collection<String>> response = new GenericEntity<Collection<String>>(prefixes){};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
-  }
-
-  @XmlRootElement(name="concepts")
-  private static class ConceptWrapper {
-    @XmlElement(name="concept")
-    @JsonProperty
-    List<ConceptDTO> concepts = new ArrayList<>();
-
-    @SuppressWarnings("unused")
-    ConceptWrapper() {}
-
-    ConceptWrapper(Collection<ConceptDTO> items) {
-      concepts.addAll(items);
-    }
-  }
-
-  @XmlRootElement(name="completions")
-  private static class CompletionWrapper {
-    @XmlElement(name="completion")
-    @JsonProperty
-    List<Completion> list = new ArrayList<>();
-
-    @SuppressWarnings("unused")
-    CompletionWrapper() {}
-
-    CompletionWrapper(Collection<Completion> items) {
-      list.addAll(items);
-    }
-  }
-
-  @XmlRootElement(name="suggestions")
-  private static class SuggestionWrapper {
-    @XmlElement(name="suggestion")
-    @JsonProperty
-    List<String> list = new ArrayList<>();
-
-    @SuppressWarnings("unused")
-    SuggestionWrapper() {}
-
-    SuggestionWrapper(Collection<String> items) {
-      list.addAll(items);
-    }
-  }
-
-  @XmlRootElement(name="categories")
-  private static class CategoryWrapper {
-    @XmlElement(name="category")
-    @JsonProperty
-    List<String> list = new ArrayList<>();
-
-    @SuppressWarnings("unused")
-    CategoryWrapper() {}
-
-    CategoryWrapper(Collection<String> items) {
-      list.addAll(items);
-    }
-  }
-
-  @XmlRootElement(name="ontologies")
-  private static class OntologyWrapper {
-    @XmlElement(name="ontology")
-    @JsonProperty
-    List<String> list = new ArrayList<>();
-
-    @SuppressWarnings("unused")
-    OntologyWrapper() {}
-
-    OntologyWrapper(Collection<String> items) {
-      list.addAll(items);
-    }
   }
 
 }
