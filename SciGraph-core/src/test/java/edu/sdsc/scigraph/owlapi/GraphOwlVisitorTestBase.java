@@ -27,6 +27,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +110,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, propertyMap);
     walker.walkStructure(visitor);
     graph.shutdown();
-    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(path.toString());
+    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     tx = graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;

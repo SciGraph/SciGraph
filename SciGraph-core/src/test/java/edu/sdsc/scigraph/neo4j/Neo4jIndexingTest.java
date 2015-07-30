@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
@@ -55,7 +56,7 @@ public class Neo4jIndexingTest {
   }
 
   GraphDatabaseService getGraphDb() {
-    return new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
+    return new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
   }
 
   void addIndexing() {
@@ -110,8 +111,8 @@ public class Neo4jIndexingTest {
   }
 
   @Test
-  public void testBatchIndexToAutoIndex() {
-    BatchInserter inserter = BatchInserters.inserter(path.toString());
+  public void testBatchIndexToAutoIndex() throws IOException {
+    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
     BatchInserterIndexProvider indexProvider = new LuceneBatchInserterIndexProvider(inserter);
     BatchInserterIndex index =
         indexProvider.nodeIndex("node_auto_index", MapUtil.stringMap("type", "exact"));

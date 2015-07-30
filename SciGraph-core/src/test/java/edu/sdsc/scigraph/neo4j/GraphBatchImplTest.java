@@ -17,6 +17,7 @@ package edu.sdsc.scigraph.neo4j;
 
 import static com.google.common.collect.Sets.newHashSet;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Rule;
@@ -34,7 +35,7 @@ public class GraphBatchImplTest extends GraphTestBase<GraphBatchImpl> {
   @Override
   protected GraphBatchImpl createInstance() throws IOException {
     String path = folder.newFolder().getAbsolutePath();
-    BatchInserter inserter = BatchInserters.inserter(path);
+    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
     return new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
   }

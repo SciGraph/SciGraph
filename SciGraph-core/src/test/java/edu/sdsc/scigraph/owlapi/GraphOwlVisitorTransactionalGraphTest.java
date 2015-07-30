@@ -17,6 +17,8 @@ package edu.sdsc.scigraph.owlapi;
 
 import static com.google.common.collect.Sets.newHashSet;
 
+import java.io.File;
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
@@ -33,7 +35,7 @@ public class GraphOwlVisitorTransactionalGraphTest extends GraphOwlVisitorTestBa
 
   @Override
   protected GraphTransactionalImpl createInstance() throws Exception {
-    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
+    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     Neo4jConfiguration config = new Neo4jConfiguration();
     config.getExactNodeProperties().addAll(newHashSet(
       NodeProperties.LABEL,

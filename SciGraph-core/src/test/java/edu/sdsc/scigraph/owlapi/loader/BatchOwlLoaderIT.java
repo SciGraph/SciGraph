@@ -46,6 +46,7 @@ public class BatchOwlLoaderIT {
 
   @BeforeClass
   public static void setup() throws Exception {
+    server.setStopAtShutdown(true);
     ResourceHandler handler = new ResourceHandler();
     handler.setBaseResource(Resource.newClassPathResource("/ontologies/import/"));
     server.setHandler(handler);
@@ -55,6 +56,7 @@ public class BatchOwlLoaderIT {
   @AfterClass
   public static void teardown() throws Exception {
     server.stop();
+    server.join();
   }
 
   @Test

@@ -50,18 +50,20 @@ public class OwlOntologyProducerTest extends GraphTestBase {
   BlockingQueue<OWLCompositeObject> queue = new LinkedBlockingQueue<OWLCompositeObject>();
 
   static Server server = new Server(10000);
-  
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+    server.setStopAtShutdown(true);
     ResourceHandler handler = new ResourceHandler();
     handler.setBaseResource(Resource.newClassPathResource("/ontologies/import/"));
     server.setHandler(handler);
     server.start();
   }
-  
+
   @AfterClass
   public static void teardown() throws Exception {
     server.stop();
+    server.join();
   }
 
   @Before
