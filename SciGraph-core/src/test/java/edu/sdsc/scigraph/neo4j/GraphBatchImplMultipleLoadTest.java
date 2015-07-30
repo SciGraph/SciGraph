@@ -60,13 +60,13 @@ public class GraphBatchImplMultipleLoadTest {
   }
 
   Graph getBatchGraph() throws IOException {
-    BatchInserter inserter = BatchInserters.inserter(new File(path));
+    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
     return new GraphBatchImpl(inserter, "uri", Collections.<String>emptySet(), Collections.<String>emptySet(),
         new IdMap(maker), new RelationshipMap(maker));
   }
 
   GraphDatabaseService getGraphDB() {
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     return graphDb;
   }
 

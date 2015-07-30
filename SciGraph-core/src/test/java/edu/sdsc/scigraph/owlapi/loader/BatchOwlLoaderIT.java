@@ -46,6 +46,7 @@ public class BatchOwlLoaderIT {
 
   @BeforeClass
   public static void setup() throws Exception {
+    server.setStopAtShutdown(true);
     ResourceHandler handler = new ResourceHandler();
     handler.setBaseResource(Resource.newClassPathResource("/ontologies/import/"));
     server.setHandler(handler);
@@ -55,6 +56,7 @@ public class BatchOwlLoaderIT {
   @AfterClass
   public static void teardown() throws Exception {
     server.stop();
+    server.join();
   }
 
   @Test
@@ -68,7 +70,7 @@ public class BatchOwlLoaderIT {
     config.getOntologies().add(ontSetup);
     BatchOwlLoader.load(config);
 
-    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(folder.getRoot().toString()));
+    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(folder.getRoot().toString());
     graphDb.beginTx();
     GraphvizWriter writer = new GraphvizWriter();
     Walker walker = Walker.fullGraph(graphDb);

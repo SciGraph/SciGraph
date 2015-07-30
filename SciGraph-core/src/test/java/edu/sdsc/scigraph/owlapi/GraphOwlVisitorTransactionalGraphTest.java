@@ -35,7 +35,7 @@ public class GraphOwlVisitorTransactionalGraphTest extends GraphOwlVisitorTestBa
 
   @Override
   protected GraphTransactionalImpl createInstance() throws Exception {
-    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
+    GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     Neo4jConfiguration config = new Neo4jConfiguration();
     config.getExactNodeProperties().addAll(newHashSet(
       NodeProperties.LABEL,

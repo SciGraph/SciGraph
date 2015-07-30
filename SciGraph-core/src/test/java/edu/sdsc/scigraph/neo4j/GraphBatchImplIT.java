@@ -62,7 +62,7 @@ public class GraphBatchImplIT {
   @Before
   public void setup() throws IOException {
     path = folder.newFolder().getAbsolutePath();
-    BatchInserter inserter = BatchInserters.inserter(new File(path));
+    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
     graph =
         new GraphBatchImpl(inserter, CommonProperties.URI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
@@ -71,7 +71,7 @@ public class GraphBatchImplIT {
 
   GraphDatabaseService getGraphDB() {
     graph.shutdown();
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     return graphDb;

@@ -91,7 +91,7 @@ class OwlLoaderModule extends AbstractModule {
   BatchInserter getInserter() throws IOException {
     File location = new File(config.getGraphConfiguration().getLocation());
     logger.info("Getting BatchInserter for " + location);
-    return BatchInserters.inserter(location, config.getGraphConfiguration().getNeo4jConfig());
+    return BatchInserters.inserter(location.toString(), config.getGraphConfiguration().getNeo4jConfig());
   }
 
 }
