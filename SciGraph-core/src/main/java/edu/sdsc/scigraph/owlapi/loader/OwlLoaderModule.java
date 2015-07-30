@@ -15,6 +15,8 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,9 +88,10 @@ class OwlLoaderModule extends AbstractModule {
 
   @Provides
   @Singleton
-  BatchInserter getInserter() {
-    logger.info("Getting BatchInserter");
-    return BatchInserters.inserter(config.getGraphConfiguration().getLocation(), config.getGraphConfiguration().getNeo4jConfig());
+  BatchInserter getInserter() throws IOException {
+    File location = new File(config.getGraphConfiguration().getLocation());
+    logger.info("Getting BatchInserter for " + location);
+    return BatchInserters.inserter(location, config.getGraphConfiguration().getNeo4jConfig());
   }
 
 }
