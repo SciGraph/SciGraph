@@ -15,6 +15,8 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,9 +24,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.google.inject.Inject;
@@ -57,7 +62,7 @@ final class OwlOntologyProducer implements Callable<Void>{
   }
 
   public void reason(OWLOntologyManager manager, OWLOntology ont, OntologySetup config) throws Exception {
-    if (config.getReasonerConfiguration().isPresent()) {
+    if (config.isSkipImports() == false && config.getReasonerConfiguration().isPresent()) {
       String origThreadName = Thread.currentThread().getName();
       Thread.currentThread().setName("reasoning - " + config);
       ReasonerUtil util = new ReasonerUtil(config.getReasonerConfiguration().get(), manager, ont);
@@ -114,11 +119,32 @@ final class OwlOntologyProducer implements Callable<Void>{
   public Void call() throws Exception {
     try {
       while (true) {
-        OntologySetup ontologyConfig = ontologQueue.take();
+        final OntologySetup ontologyConfig = ontologQueue.take();
         if (BatchOwlLoader.POISON_STR == ontologyConfig) {
           break;
         } else {
-          OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+          final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+          if (ontologyConfig.isSkipImports()) {
+            final Set<IRI> emptyOntologies = new HashSet<IRI>();
+            manager.addIRIMapper(new OWLOntologyIRIMapper() {
+              @Override
+              public IRI getDocumentIRI(IRI ontologyIRI) {
+                // quick check:
+                // do nothing for the original url and known empty ontologies
+                if (ontologyConfig.url().equals(ontologyIRI.toString()) 
+                   || emptyOntologies.contains(ontologyIRI)) {
+                  return null;
+                }
+                emptyOntologies.add(ontologyIRI);
+                try {
+                  OWLOntology emptyOntology = manager.createOntology(ontologyIRI);
+                  return emptyOntology.getOntologyID().getDefaultDocumentIRI();
+                } catch (OWLOntologyCreationException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+            });
+          }
           logger.info("Processing ontology: " + ontologyConfig);
           try {
             OWLOntology ontology = OwlApiUtils.loadOntology(manager, ontologyConfig.url());

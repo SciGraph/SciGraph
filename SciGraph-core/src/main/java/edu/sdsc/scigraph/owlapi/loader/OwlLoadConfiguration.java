@@ -77,6 +77,8 @@ public class OwlLoadConfiguration {
 
     Optional<ReasonerConfiguration> reasonerConfiguration = Optional.absent();
 
+    boolean skipImports = false;
+
     public String url() {
       return url;
     }
@@ -93,8 +95,19 @@ public class OwlLoadConfiguration {
       this.reasonerConfiguration = Optional.of(reasonerConfiguration);
     }
 
+    public boolean isSkipImports() {
+        return skipImports;
+    }
+
+    public void setSkipImports(boolean skipImports) {
+        this.skipImports = skipImports;
+    }
+
     @Override
     public String toString() {
+      if(skipImports) {
+        return url+" (skipImport)";
+      }
       return url;
     }
 
