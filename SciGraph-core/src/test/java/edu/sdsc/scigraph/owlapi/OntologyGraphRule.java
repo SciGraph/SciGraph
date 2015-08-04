@@ -19,11 +19,14 @@ import java.util.Collections;
 
 import org.junit.rules.ExternalResource;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.AutoIndexer;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
+import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphTransactionalImpl;
 import edu.sdsc.scigraph.neo4j.IdMap;
@@ -35,9 +38,16 @@ public class OntologyGraphRule extends ExternalResource {
   OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
   final String ontologyLocation;
   GraphDatabaseService graphDb;
+  IdMap idMap = new IdMap();
 
   public OntologyGraphRule(String ontologyLocation) {
     this.ontologyLocation = ontologyLocation;
+  }
+
+  void enableIndexing() {
+    AutoIndexer<Node> nodeIndex = graphDb.index().getNodeAutoIndexer();
+    nodeIndex.startAutoIndexingProperty(CommonProperties.URI);
+    nodeIndex.setEnabled(true);
   }
 
   @Override
@@ -45,18 +55,24 @@ public class OntologyGraphRule extends ExternalResource {
     OwlApiUtils.loadOntology(manager, ontologyLocation);
     OWLOntologyWalker walker = new OWLOntologyWalker(manager.getOntologies());
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
-    Graph graph = new GraphTransactionalImpl(graphDb, new IdMap(), new RelationshipMap());
+    enableIndexing();
+    Graph graph = new GraphTransactionalImpl(graphDb, idMap, new RelationshipMap());
     GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, Collections.<MappedProperty>emptyList());
     walker.walkStructure(visitor);
   }
 
   @Override
   protected void after() {
-    graphDb.shutdown();
+    //TODO: Why does this slow down tests so much?
+    //graphDb.shutdown();
   }
 
   public GraphDatabaseService getGraphDb() {
     return graphDb;
+  }
+
+  public IdMap getIdMap() {
+    return idMap;
   }
 
 }

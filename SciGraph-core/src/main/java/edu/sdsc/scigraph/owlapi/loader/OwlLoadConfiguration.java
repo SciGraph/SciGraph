@@ -31,6 +31,7 @@ public class OwlLoadConfiguration {
   private List<OntologySetup> ontologies = new ArrayList<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
+  private List<String> processors = new ArrayList<>();
 
   private int producerThreadCount = (int)Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0);
   private int consumerThreadCount = (int)Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0);
@@ -69,6 +70,14 @@ public class OwlLoadConfiguration {
 
   public void setConsumerThreadCount(int consumerThreadCount) {
     this.consumerThreadCount = consumerThreadCount;
+  }
+
+  public List<String> getProcessors() {
+    return processors;
+  }
+
+  public void setProcessors(List<String> processors) {
+    this.processors = processors;
   }
 
   public static class OntologySetup {

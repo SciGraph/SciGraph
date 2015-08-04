@@ -4,4 +4,6 @@ Ontology(:TestSubclassOf
 SubClassOf(:b :a)
 SubClassOf(:c :b)
 EquivalentClasses(:b :e)
+SubClassOf(:f :e)
+ClassAssertion(:c :i)
 )
