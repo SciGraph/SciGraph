@@ -11,6 +11,17 @@ graphConfiguration:
       - label
       - synonym
 
+    # Set Neo4j configuration options
+    neo4jConfig:
+      dump_configuration : true
+      dbms.pagecache.memory : 1G
+
+# The number of threads dedicated to reading ontologies
+producerThreadCount: 2
+
+# The number of threads dedicated to processing ontology axioms
+consumerThreadCount: 2  
+
 # A list of ontologies to import.
 ontologies:
   # Files can be local paths...
@@ -18,8 +29,8 @@ ontologies:
     # Or URIs
     #- http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine.rdf
     # And can optionally include a reasoner factory
-    reasonerConfiguration:
-      factory: org.semanticweb.elk.owlapi.ElkReasonerFactory
+    #reasonerConfiguration:
+    #  factory: org.semanticweb.elk.owlapi.ElkReasonerFactory
 
 # Categories are used for vocabulary term filtering and are inherited to
 # subclasses of their parent. They are also added as node labels for
