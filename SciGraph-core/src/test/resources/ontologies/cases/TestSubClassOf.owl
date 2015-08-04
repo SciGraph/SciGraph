@@ -1,7 +1,5 @@
 Prefix(:=<http://example.org/>)
 
 Ontology(:TestSubclassOf
-SubClassOf(:b :a)
-SubClassOf(:c :b)
-EquivalentClasses(:b :e)
+SubClassOf(:subclass :superclass)
 )
