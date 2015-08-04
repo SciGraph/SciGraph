@@ -15,10 +15,28 @@
  */
 package edu.sdsc.scigraph.owlapi.loader.processor;
 
-public interface GraphProcessor {
+import com.google.common.base.Optional;
 
-  void setConfiguration(String config) throws Exception;
+public class GraphProcessorConfiguration {
 
-  void process() throws Exception;
+  String className;
+
+  Optional<String> configuration;
+
+  public String getClassName() {
+    return className;
+  }
+
+  public void setClassName(String className) {
+    this.className = className;
+  }
+
+  public Optional<String> getConfiguration() {
+    return configuration;
+  }
+
+  public void setConfiguration(String configuration) {
+    this.configuration = Optional.of(configuration);
+  }
 
 }

@@ -18,9 +18,6 @@ package edu.sdsc.scigraph.owlapi.loader.processor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -49,11 +46,10 @@ public class CategoryProcessorTest {
 
   @BeforeClass
   public static void setup() throws Exception {
-    Map<String, String> categoryMap = new HashMap<>();
-    categoryMap.put("http://example.org/a", "foo");
     idMap = graphRule.getIdMap();
     graphDb = graphRule.getGraphDb();
-    CategoryProcessor processor = new CategoryProcessor(graphRule.getGraphDb(), categoryMap);
+    CategoryProcessor processor = new CategoryProcessor(graphRule.getGraphDb());
+    processor.setConfiguration("http://example.org/a : \n - foo");
     processor.process();
   }
 

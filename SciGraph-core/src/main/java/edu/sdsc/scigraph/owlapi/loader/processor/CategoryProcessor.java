@@ -15,14 +15,15 @@
  */
 package edu.sdsc.scigraph.owlapi.loader.processor;
 
+import io.dropwizard.jackson.Jackson;
+
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -30,7 +31,11 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.ReadableIndex;
 
-import com.google.common.collect.ImmutableMap;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.collect.Multimap;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
@@ -39,23 +44,28 @@ public class CategoryProcessor implements GraphProcessor {
 
   private static int BATCH_SIZE = 10_000;
   
+  private static final ObjectMapper YAML_MAPPER = Jackson.newObjectMapper(new YAMLFactory()).registerModule(new GuavaModule());
+  
   private static final Logger logger = Logger.getLogger(CategoryProcessor.class.getName());
 
   private final GraphDatabaseService graphDb;
-
-  private final Map<String, String> categories;
+  
+  private Multimap<String, String> categories;
 
   @Inject
-  public CategoryProcessor(GraphDatabaseService graphDb, 
-      @Named("owl.categories") Map<String, String> categories) {
+  public CategoryProcessor(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
-    this.categories = ImmutableMap.copyOf(categories);
+  }
+
+  @Override
+  public void setConfiguration(String config) throws Exception {
+    categories = YAML_MAPPER.readValue(config, new TypeReference<Multimap<String, String>>() {}); 
   }
 
   @Override
   public void process() throws Exception {
     logger.info("Processing categories");
-    for (Entry<String, String> category : categories.entrySet()) {
+    for (Entry<String, Collection<String>> category : categories.asMap().entrySet()) {
       Set<Node> roots = new HashSet<>();
       try (Transaction tx = graphDb.beginTx()) {
         ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();

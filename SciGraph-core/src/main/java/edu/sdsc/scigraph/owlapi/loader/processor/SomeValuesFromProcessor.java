@@ -48,6 +48,9 @@ class SomeValuesFromProcessor implements GraphProcessor {
   }
 
   @Override
+  public void setConfiguration(String config) throws Exception {/* no-op */}
+
+  @Override
   public void process() throws Exception {
     logger.info("Processing someValuesFrom axioms...");
     try (Transaction tx = graphDb.beginTx()) {

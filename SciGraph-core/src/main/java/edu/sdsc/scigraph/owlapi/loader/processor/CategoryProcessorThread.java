@@ -15,6 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi.loader.processor;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
@@ -27,6 +28,9 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Uniqueness;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+
 import edu.sdsc.scigraph.frames.Concept;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
@@ -37,21 +41,26 @@ class CategoryProcessorThread implements Callable<Long> {
 
   private final GraphDatabaseService graphDb;
   private final Node root;
-  private final String category;
+  private final Collection<String> categories;
+  private final Collection<Label> labels;
   private final int batchSize;
 
-  CategoryProcessorThread(GraphDatabaseService graphDb, Node root, String category, int batchSize) {
+  CategoryProcessorThread(GraphDatabaseService graphDb, Node root, Collection<String> categories, int batchSize) {
     this.graphDb = graphDb;
     this.root = root;
-    this.category = category;
+    this.categories = ImmutableSet.copyOf(categories);
     this.batchSize = batchSize;
+    Builder<Label> builder = ImmutableSet.builder();
+    for (String category: categories) {
+      builder.add(DynamicLabel.label(category));
+    }
+    labels = builder.build();
   }
 
   @Override
   public Long call() throws Exception {
-    Thread.currentThread().setName("category processor - " + category);
+    Thread.currentThread().setName("category processor - " + categories);
     long count = 0;
-    Label label = DynamicLabel.label(category);
     Transaction tx = graphDb.beginTx();
     for (Path position : graphDb.traversalDescription()
         .uniqueness(Uniqueness.NODE_GLOBAL)
@@ -61,8 +70,12 @@ class CategoryProcessorThread implements Callable<Long> {
         .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH)
         .traverse(root)) {
       Node end = position.endNode();
-      GraphUtil.addProperty(end, Concept.CATEGORY, category);
-      end.addLabel(label);
+      for (String category: categories) {
+        GraphUtil.addProperty(end, Concept.CATEGORY, category);
+      }
+      for (Label label: labels) {
+        end.addLabel(label);
+      }
       if (0 == ++count % batchSize) {
         logger.fine("Commiting " + count);
         tx.success();
@@ -72,7 +85,7 @@ class CategoryProcessorThread implements Callable<Long> {
     }
     tx.success();
     tx.close();
-    logger.info("Processsed " + count + " nodes for " + category);
+    logger.info("Processsed " + count + " nodes for " + categories);
     return count;
   }
 
