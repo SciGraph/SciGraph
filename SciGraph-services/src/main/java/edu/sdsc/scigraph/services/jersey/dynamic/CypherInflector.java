@@ -41,7 +41,7 @@ import edu.sdsc.scigraph.internal.CypherUtil;
 import edu.sdsc.scigraph.internal.GraphAspect;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
-import edu.sdsc.scigraph.owlapi.curies.AddCurries;
+import edu.sdsc.scigraph.owlapi.curies.AddCuries;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.services.api.graph.ArrayPropertyTransformer;
 import edu.sdsc.scigraph.services.jersey.MultivaluedMapUtils;
@@ -67,7 +67,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
     this.aspectMap = aspectMap;
   }
 
-  @AddCurries
+  @AddCuries
   @Override
   public Response apply(ContainerRequestContext context) {
     logger.fine("Serving dynamic request");

@@ -15,16 +15,11 @@
  */
 package edu.sdsc.scigraph.services.api.vocabulary;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import edu.sdsc.scigraph.services.api.graph.ConceptDTOLite;
 
-@XmlRootElement
 @JsonInclude(Include.NON_DEFAULT)
 public class Completion implements Comparable<Completion> {
 
@@ -42,17 +37,14 @@ public class Completion implements Comparable<Completion> {
     this.concept = concept;
   }
 
-  @XmlAttribute
   public String getCompletion() {
     return completion;
   }
 
-  @XmlAttribute
   public String getType() {
     return type;
   }
 
-  @XmlElement(name="class")
   public ConceptDTOLite getConcept() {
     return concept;
   }

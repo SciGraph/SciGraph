@@ -20,7 +20,6 @@ import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getIri;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,11 +95,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private String definingOntology;
 
   private Map<String, String> mappedProperties;
-
-  public GraphOwlVisitor(Graph graph,
-      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
-    this(new OWLOntologyWalker(Collections.<OWLOntology>emptySet()), graph, mappedProperties);
-  }
 
   @Inject
   public GraphOwlVisitor(OWLOntologyWalker walker, Graph graph,

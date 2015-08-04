@@ -18,12 +18,6 @@ package edu.sdsc.scigraph.services.api.graph;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name="class")
 public class ConceptDTOLite {
 
   private String uri;
@@ -36,7 +30,6 @@ public class ConceptDTOLite {
   private Collection<String> abbreviations = new HashSet<>();
   private boolean deprecated;
 
-  @XmlAttribute
   public String getUri() {
     return uri;
   }
@@ -53,7 +46,6 @@ public class ConceptDTOLite {
     this.labels = labels;
   }
 
-  @XmlAttribute
   public String getFragment() {
     return fragment;
   }
@@ -62,7 +54,6 @@ public class ConceptDTOLite {
     this.fragment = fragment;
   }
 
-  @XmlAttribute
   public String getCurie() {
     return curie;
   }
@@ -71,8 +62,6 @@ public class ConceptDTOLite {
     this.curie = curie;
   }
 
-  @XmlElementWrapper(name="categories")
-  @XmlElement(name="category")
   public Collection<String> getCategories() {
     return categories;
   }
@@ -81,8 +70,6 @@ public class ConceptDTOLite {
     this.categories = categories;
   }
 
-  @XmlElementWrapper(name="synonyms")
-  @XmlElement(name="synonym")
   public Collection<String> getSynonyms() {
     return synonyms;
   }
@@ -91,8 +78,6 @@ public class ConceptDTOLite {
     this.synonyms = synonyms;
   }
 
-  @XmlElementWrapper(name="acronyms")
-  @XmlElement(name="acronym")
   public Collection<String> getAcronyms() {
     return acronyms;
   }
@@ -101,8 +86,6 @@ public class ConceptDTOLite {
     this.acronyms = acronyms;
   }
 
-  @XmlElementWrapper(name="abbreviations")
-  @XmlElement(name="abbreviation")
   public Collection<String> getAbbreviations() {
     return abbreviations;
   }
@@ -111,7 +94,6 @@ public class ConceptDTOLite {
     this.abbreviations = abbreviations;
   }
 
-  @XmlAttribute
   public boolean isDeprecated() {
     return deprecated;
   }

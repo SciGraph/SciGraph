@@ -46,7 +46,7 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
-import edu.sdsc.scigraph.owlapi.curies.AddCurries;
+import edu.sdsc.scigraph.owlapi.curies.AddCuries;
 
 public class GraphApi {
 
@@ -80,7 +80,7 @@ public class GraphApi {
     return entailment;
   }
 
-  @AddCurries
+  @AddCuries
   public Graph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
     TraversalDescription description = graphDb.traversalDescription()
         .depthFirst()

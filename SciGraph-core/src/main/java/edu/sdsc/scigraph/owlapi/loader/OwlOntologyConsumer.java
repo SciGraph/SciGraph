@@ -58,6 +58,7 @@ final class OwlOntologyConsumer implements Callable<Long> {
     try {
       while (true) {
         if (numProducersShutdown.get() < numProducers || !queue.isEmpty()) {
+          // TODO: This should be removed with #141 work - no more incomplete ontology loads 
           OWLCompositeObject owlObject = queue.poll(1, TimeUnit.MINUTES);
           if (null == owlObject) {
             continue;

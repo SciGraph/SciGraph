@@ -43,7 +43,8 @@ import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.loader.bindings.*;
-class OwlLoaderModule extends AbstractModule {
+
+public class OwlLoaderModule extends AbstractModule {
 
   private static final Logger logger = Logger.getLogger(OwlLoaderModule.class.getName());
 

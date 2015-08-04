@@ -33,13 +33,13 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
-import edu.sdsc.scigraph.owlapi.curies.CurrieAdder;
+import edu.sdsc.scigraph.owlapi.curies.CurieAdder;
 
 public class CurieAdderTest {
 
   CurieUtil util = mock(CurieUtil.class);
   Graph graph = new TinkerGraph();
-  CurrieAdder adder = new CurrieAdder();
+  CurieAdder adder = new CurieAdder();
 
   @Before
   public void setup() {
