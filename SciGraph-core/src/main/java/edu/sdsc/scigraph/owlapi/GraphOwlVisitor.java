@@ -97,11 +97,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private Map<String, String> mappedProperties;
 
-  public GraphOwlVisitor(Graph graph,
-      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
-    this(new OWLOntologyWalker(Collections.<OWLOntology>emptySet()), graph, mappedProperties);
-  }
-
   @Inject
   public GraphOwlVisitor(OWLOntologyWalker walker, Graph graph,
       @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
