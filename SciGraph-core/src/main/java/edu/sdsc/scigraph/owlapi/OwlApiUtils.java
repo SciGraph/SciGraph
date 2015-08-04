@@ -42,6 +42,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;
+import com.google.common.io.Resources;
 
 public class OwlApiUtils {
 
@@ -141,10 +142,17 @@ public class OwlApiUtils {
     String origThreadName = Thread.currentThread().getName();
     Thread.currentThread().setName("read - " + ontology);
     OWLOntology ont;
+    
     if (validator.isValid(ontology)) {
       ont = manager.loadOntology(IRI.create(ontology));
-    } else {
+    } else if (new File(ontology).exists()){
       ont = manager.loadOntologyFromOntologyDocument(new File(ontology));
+    } else {
+      try {
+        ont = manager.loadOntologyFromOntologyDocument(Resources.getResource(ontology).openStream());
+      } catch (Exception e) {
+        throw new OWLOntologyCreationException("Failed to find ontology: " + ontology);
+      }
     }
     logger.info(String.format("Finished loading ontology with owlapi: %s", ontology));
     Thread.currentThread().setName(origThreadName);

@@ -51,7 +51,7 @@ import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 
-class OwlLoaderModule extends AbstractModule {
+public class OwlLoaderModule extends AbstractModule {
 
   private static final Logger logger = Logger.getLogger(OwlLoaderModule.class.getName());
 
