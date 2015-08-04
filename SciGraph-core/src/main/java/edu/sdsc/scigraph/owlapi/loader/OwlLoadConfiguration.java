@@ -27,161 +27,175 @@ import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 
 public class OwlLoadConfiguration {
 
-  private Neo4jConfiguration graphConfiguration;
-  private List<OntologySetup> ontologies = new ArrayList<>();
-  private Map<String, String> categories = new HashMap<>();
-  private List<MappedProperty> mappedProperties = new ArrayList<>();
+	private Neo4jConfiguration graphConfiguration;
+	private List<OntologySetup> ontologies = new ArrayList<>();
+	private Map<String, String> categories = new HashMap<>();
+	private List<MappedProperty> mappedProperties = new ArrayList<>();
 
-  private int producerThreadCount = (int)Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0);
-  private int consumerThreadCount = (int)Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0);
+	private int producerThreadCount = (int) Math.ceil(Runtime.getRuntime()
+			.availableProcessors() / 2.0);
+	private int consumerThreadCount = (int) Math.ceil(Runtime.getRuntime()
+			.availableProcessors() / 2.0);
 
-  public Neo4jConfiguration getGraphConfiguration() {
-    return graphConfiguration;
-  }
+	public Neo4jConfiguration getGraphConfiguration() {
+		return graphConfiguration;
+	}
 
-  public void setGraphConfiguration(Neo4jConfiguration ontologyConfiguration) {
-    this.graphConfiguration = ontologyConfiguration;
-  }
+	public void setGraphConfiguration(Neo4jConfiguration ontologyConfiguration) {
+		this.graphConfiguration = ontologyConfiguration;
+	}
 
-  public List<OntologySetup> getOntologies() {
-    return ontologies;
-  }
+	public List<OntologySetup> getOntologies() {
+		return ontologies;
+	}
 
-  public Map<String, String> getCategories() {
-    return categories;
-  }
+	public void setCategories(Map<String, String> categories) {
+		this.categories = categories;
+	}
 
-  public List<MappedProperty> getMappedProperties() {
-    return mappedProperties;
-  }
+	public Map<String, String> getCategories() {
+		return categories;
+	}
 
-  public int getProducerThreadCount() {
-    return producerThreadCount;
-  }
+	public void setMappedProperties(List<MappedProperty> mappedProperties) {
+		this.mappedProperties = mappedProperties;
+	}
 
-  public void setProducerThreadCount(int producerThreadCount) {
-    this.producerThreadCount = producerThreadCount;
-  }
+	public List<MappedProperty> getMappedProperties() {
+		return mappedProperties;
+	}
 
-  public int getConsumerThreadCount() {
-    return consumerThreadCount;
-  }
+	public int getProducerThreadCount() {
+		return producerThreadCount;
+	}
 
-  public void setConsumerThreadCount(int consumerThreadCount) {
-    this.consumerThreadCount = consumerThreadCount;
-  }
+	public void setProducerThreadCount(int producerThreadCount) {
+		this.producerThreadCount = producerThreadCount;
+	}
 
-  public static class OntologySetup {
+	public int getConsumerThreadCount() {
+		return consumerThreadCount;
+	}
 
-    String url;
+	public void setConsumerThreadCount(int consumerThreadCount) {
+		this.consumerThreadCount = consumerThreadCount;
+	}
 
-    Optional<ReasonerConfiguration> reasonerConfiguration = Optional.absent();
+	public static class OntologySetup {
 
-    boolean skipImports = false;
+		String url;
 
-    public String url() {
-      return url;
-    }
+		Optional<ReasonerConfiguration> reasonerConfiguration = Optional
+				.absent();
 
-    public void setUrl(String url) {
-      this.url = url;
-    }
+		boolean skipImports = false;
 
-    public Optional<ReasonerConfiguration> getReasonerConfiguration() {
-      return reasonerConfiguration;
-    }
+		public String url() {
+			return url;
+		}
 
-    public void setReasonerConfiguration(ReasonerConfiguration reasonerConfiguration) {
-      this.reasonerConfiguration = Optional.of(reasonerConfiguration);
-    }
+		public void setUrl(String url) {
+			this.url = url;
+		}
 
-    public boolean isSkipImports() {
-        return skipImports;
-    }
+		public Optional<ReasonerConfiguration> getReasonerConfiguration() {
+			return reasonerConfiguration;
+		}
 
-    public void setSkipImports(boolean skipImports) {
-        this.skipImports = skipImports;
-    }
+		public void setReasonerConfiguration(
+				ReasonerConfiguration reasonerConfiguration) {
+			this.reasonerConfiguration = Optional.of(reasonerConfiguration);
+		}
 
-    @Override
-    public String toString() {
-      if(skipImports) {
-        return url+" (skipImport)";
-      }
-      return url;
-    }
+		public boolean isSkipImports() {
+			return skipImports;
+		}
 
-  }
+		public void setSkipImports(boolean skipImports) {
+			this.skipImports = skipImports;
+		}
 
-  public static class ReasonerConfiguration {
+		@Override
+		public String toString() {
+			if (skipImports) {
+				return url + " (skipImport)";
+			}
+			return url;
+		}
 
-    String factory;
-    boolean addDirectInferredEdges = false;
-    boolean removeUnsatisfiableClasses = false;
-    boolean addInferredEquivalences = false;
+	}
 
-    public String getFactory() {
-      return factory;
-    }
+	public static class ReasonerConfiguration {
 
-    public void setFactory(String factory) {
-      this.factory = factory;
-    }
+		String factory;
+		boolean addDirectInferredEdges = false;
+		boolean removeUnsatisfiableClasses = false;
+		boolean addInferredEquivalences = false;
 
-    public boolean isAddDirectInferredEdges() {
-      return addDirectInferredEdges;
-    }
+		public String getFactory() {
+			return factory;
+		}
 
-    public void setAddDirectInferredEdges(boolean addDirectInferredEdges) {
-      this.addDirectInferredEdges = addDirectInferredEdges;
-    }
+		public void setFactory(String factory) {
+			this.factory = factory;
+		}
 
-    public boolean isRemoveUnsatisfiableClasses() {
-      return removeUnsatisfiableClasses;
-    }
+		public boolean isAddDirectInferredEdges() {
+			return addDirectInferredEdges;
+		}
 
-    public void setRemoveUnsatisfiableClasses(boolean removeUnsatisfiableClasses) {
-      this.removeUnsatisfiableClasses = removeUnsatisfiableClasses;
-    }
+		public void setAddDirectInferredEdges(boolean addDirectInferredEdges) {
+			this.addDirectInferredEdges = addDirectInferredEdges;
+		}
 
-    public boolean isAddInferredEquivalences() {
-      return addInferredEquivalences;
-    }
+		public boolean isRemoveUnsatisfiableClasses() {
+			return removeUnsatisfiableClasses;
+		}
 
-    public void setAddInferredEquivalences(boolean addInferredEquivalences) {
-      this.addInferredEquivalences = addInferredEquivalences;
-    }
+		public void setRemoveUnsatisfiableClasses(
+				boolean removeUnsatisfiableClasses) {
+			this.removeUnsatisfiableClasses = removeUnsatisfiableClasses;
+		}
 
-  }
+		public boolean isAddInferredEquivalences() {
+			return addInferredEquivalences;
+		}
 
-  public static class MappedProperty {
-    String name;
-    List<String> properties = new ArrayList<>();
+		public void setAddInferredEquivalences(boolean addInferredEquivalences) {
+			this.addInferredEquivalences = addInferredEquivalences;
+		}
 
-    public MappedProperty() { }
+	}
 
-    public MappedProperty(String name) {
-      this.name = name;
-    }
+	public static class MappedProperty {
+		String name;
+		List<String> properties = new ArrayList<>();
 
-    public String getName() {
-      return name;
-    }
+		public MappedProperty() {
+		}
 
-    public List<String> getProperties() {
-      return properties;
-    }
+		public MappedProperty(String name) {
+			this.name = name;
+		}
 
-    public void setProperties(List<String> properties) {
-      this.properties = properties;
-    }
+		public String getName() {
+			return name;
+		}
 
-    @Override
-    public String toString() {
-      return MoreObjects.toStringHelper(this.getClass()).add("name", name)
-          .add("properties", properties).toString();
-    }
+		public List<String> getProperties() {
+			return properties;
+		}
 
-  }
+		public void setProperties(List<String> properties) {
+			this.properties = properties;
+		}
+
+		@Override
+		public String toString() {
+			return MoreObjects.toStringHelper(this.getClass())
+					.add("name", name).add("properties", properties).toString();
+		}
+
+	}
 
 }

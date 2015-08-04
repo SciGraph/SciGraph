@@ -42,15 +42,7 @@ import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
-import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
-
+import edu.sdsc.scigraph.owlapi.loader.bindings.*;
 class OwlLoaderModule extends AbstractModule {
 
   private static final Logger logger = Logger.getLogger(OwlLoaderModule.class.getName());

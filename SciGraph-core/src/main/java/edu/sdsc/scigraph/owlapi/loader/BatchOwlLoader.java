@@ -46,8 +46,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Stopwatch;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -64,147 +62,155 @@ import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads
 
 public class BatchOwlLoader {
 
-  private static final Logger logger = Logger.getLogger(BatchOwlLoader.class.getName());
+	private static final Logger logger = Logger.getLogger(BatchOwlLoader.class
+			.getName());
 
-  static final OntologySetup POISON_STR = new OntologySetup();
+	static final OntologySetup POISON_STR = new OntologySetup();
 
-  @Inject
-  @IndicatesNumberOfConsumerThreads
-  int numConsumers;
+	@Inject
+	@IndicatesNumberOfConsumerThreads
+	int numConsumers;
 
-  @Inject
-  @IndicatesNumberOfProducerThreads
-  int numProducers;
+	@Inject
+	@IndicatesNumberOfProducerThreads
+	int numProducers;
 
-  @Inject
-  PostpostprocessorProvider postprocessorProvider;
+	@Inject
+	PostpostprocessorProvider postprocessorProvider;
 
-  @Inject
-  Graph graph;
+	@Inject
+	Graph graph;
 
-  @Inject
-  @IndicatesMappedProperties 
-  List<MappedProperty> mappedProperties;
+	@Inject
+	@IndicatesMappedProperties
+	List<MappedProperty> mappedProperties;
 
-  @Inject
-  Provider<OwlOntologyConsumer> consumerProvider;
+	@Inject
+	Provider<OwlOntologyConsumer> consumerProvider;
 
-  @Inject
-  Provider<OwlOntologyProducer> producerProvider;
+	@Inject
+	Provider<OwlOntologyProducer> producerProvider;
 
-  Collection<OntologySetup> ontologies;
+	Collection<OntologySetup> ontologies;
 
-  @Inject
-  BlockingQueue<OWLCompositeObject> queue;
+	@Inject
+	BlockingQueue<OWLCompositeObject> queue;
 
-  @Inject
-  BlockingQueue<OntologySetup> urlQueue;
-  
-  @Inject
-  ExecutorService exec; 
-  
-  static {
-    System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
-    OwlApiUtils.silenceOboParser();
-  }
+	@Inject
+	BlockingQueue<OntologySetup> urlQueue;
 
-  void loadOntology() throws InterruptedException {
-    Set<Future<?>> futures = new HashSet<>();
-    if (!ontologies.isEmpty()) {
-      for (int i = 0; i < numConsumers; i++) {
-        futures.add(exec.submit(consumerProvider.get()));
-      }
-      for (int i = 0; i < numProducers; i++) {
-        futures.add(exec.submit(producerProvider.get()));
-      }
-      for (OntologySetup ontology: ontologies) {
-        urlQueue.offer(ontology);
-      }
-      for (int i = 0; i < numProducers; i++) {
-        urlQueue.offer(POISON_STR);
-      }
-    }
-    exec.shutdown();
-    exec.awaitTermination(10, TimeUnit.DAYS);
-    try {
-      for (Future<?> future: futures) {
-        future.get();
-      }
-    } catch (ExecutionException e) {
-      logger.log(Level.SEVERE, e.getMessage(), e);
-    }
-    graph.shutdown();
-    logger.info("Postprocessing...");
-    postprocessorProvider.get().postprocess();
-    postprocessorProvider.shutdown();
-  }
+	@Inject
+	ExecutorService exec;
 
-  static class PostpostprocessorProvider implements Provider<OwlPostprocessor> {
+	static {
+		System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
+		OwlApiUtils.silenceOboParser();
+	}
 
-    @Inject
-    OwlLoadConfiguration config;
+	void loadOntology() throws InterruptedException {
+		Set<Future<?>> futures = new HashSet<>();
+		if (!ontologies.isEmpty()) {
+			for (int i = 0; i < numConsumers; i++) {
+				futures.add(exec.submit(consumerProvider.get()));
+			}
+			for (int i = 0; i < numProducers; i++) {
+				futures.add(exec.submit(producerProvider.get()));
+			}
+			for (OntologySetup ontology : ontologies) {
+				urlQueue.offer(ontology);
+			}
+			for (int i = 0; i < numProducers; i++) {
+				urlQueue.offer(POISON_STR);
+			}
+		}
+		exec.shutdown();
+		exec.awaitTermination(10, TimeUnit.DAYS);
+		try {
+			for (Future<?> future : futures) {
+				future.get();
+			}
+		} catch (ExecutionException e) {
+			logger.log(Level.SEVERE, e.getMessage(), e);
+		}
+		graph.shutdown();
+		logger.info("Postprocessing...");
+		postprocessorProvider.get().postprocess();
+		postprocessorProvider.shutdown();
+	}
 
-    @Inject
-    Provider<GraphDatabaseService> graphDbProvider;
+	static class PostpostprocessorProvider implements
+			Provider<OwlPostprocessor> {
 
-    GraphDatabaseService graphDb;
+		@Inject
+		OwlLoadConfiguration config;
 
-    @Override
-    public OwlPostprocessor get() {
-      graphDb = graphDbProvider.get();
-      return new OwlPostprocessor(graphDb, config.getCategories());
-    }
+		@Inject
+		Provider<GraphDatabaseService> graphDbProvider;
 
-    public void shutdown() {
-      try (Transaction tx = graphDb.beginTx()) {
-        logger.info(size(GlobalGraphOperations.at(graphDb).getAllNodes()) + " nodes");
-        logger.info(size(GlobalGraphOperations.at(graphDb).getAllRelationships()) + " relationships");
-        tx.success();
-      }
-      graphDb.shutdown();
-    }
+		GraphDatabaseService graphDb;
 
-  }
+		@Override
+		public OwlPostprocessor get() {
+			graphDb = graphDbProvider.get();
+			return new OwlPostprocessor(graphDb, config.getCategories());
+		}
 
-  public static void load(OwlLoadConfiguration config) throws InterruptedException {
-    Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getGraphConfiguration()));
-    BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
-    loader.ontologies = config.getOntologies();
-    logger.info("Loading ontologies...");
-    Stopwatch timer = Stopwatch.createStarted();
-    loader.loadOntology();
-    DB mapDb = i.getInstance(DB.class);
-    mapDb.close();
-    logger.info(format("Loading took %d minutes", timer.elapsed(TimeUnit.MINUTES)));
-  }
+		public void shutdown() {
+			try (Transaction tx = graphDb.beginTx()) {
+				logger.info(size(GlobalGraphOperations.at(graphDb)
+						.getAllNodes()) + " nodes");
+				logger.info(size(GlobalGraphOperations.at(graphDb)
+						.getAllRelationships()) + " relationships");
+				tx.success();
+			}
+			graphDb.shutdown();
+		}
 
-  protected static Options getOptions() {
-    Option configPath = new Option("c", "configpath", true,
-        "The location of the configuration file");
-    configPath.setRequired(true);
-    Options options = new Options();
-    options.addOption(configPath);
-    return options;
-  }
+	}
 
-  public static void main(String[] args) throws Exception {
-    CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = null;
-    try {
-      cmd = parser.parse(getOptions(), args);
-    } catch (ParseException e) {
-      System.err.println(e.getMessage());
-      HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp(BatchOwlLoader.class.getSimpleName(), getOptions());
-      System.exit(-1);
-    }
+	public static void load(OwlLoadConfiguration config)
+			throws InterruptedException {
+		Injector i = Guice.createInjector(new OwlLoaderModule(config),
+				new Neo4jModule(config.getGraphConfiguration()));
+		BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
+		loader.ontologies = config.getOntologies();
+		logger.info("Loading ontologies...");
+		Stopwatch timer = Stopwatch.createStarted();
+		loader.loadOntology();
+		DB mapDb = i.getInstance(DB.class);
+		mapDb.close();
+		logger.info(format("Loading took %d minutes",
+				timer.elapsed(TimeUnit.MINUTES)));
+	}
 
-    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c').trim()),
-        OwlLoadConfiguration.class);
-    load(config);
-    // TODO: Is Guice causing this to hang? #44
-    System.exit(0);
-  }
+	protected static Options getOptions() {
+		Option configPath = new Option("c", "configpath", true,
+				"The location of the configuration file");
+		configPath.setRequired(true);
+		Options options = new Options();
+		options.addOption(configPath);
+		return options;
+	}
+
+	public static void main(String[] args) throws Exception {
+		CommandLineParser parser = new DefaultParser();
+		CommandLine cmd = null;
+		try {
+			cmd = parser.parse(getOptions(), args);
+		} catch (ParseException e) {
+			System.err.println(e.getMessage());
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp(BatchOwlLoader.class.getSimpleName(),
+					getOptions());
+			System.exit(-1);
+		}
+
+		OwlLoadConfigurationLoader owlLoadConfigurationLoader = new OwlLoadConfigurationLoader(
+				new File(cmd.getOptionValue('c').trim()));
+		OwlLoadConfiguration config = owlLoadConfigurationLoader.loadConfig();
+		load(config);
+		// TODO: Is Guice causing this to hang? #44
+		System.exit(0);
+	}
 
 }

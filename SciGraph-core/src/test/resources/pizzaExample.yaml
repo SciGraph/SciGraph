@@ -10,6 +10,9 @@ graphConfiguration:
     exactNodeProperties:
       - label
       - synonym
+    curies:
+      'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
+      'rdfs' : 'http://www.w3.org/2000/01/rdf-schema#'
 
 # A list of ontologies to import.
 ontologies:
@@ -25,15 +28,15 @@ ontologies:
 # subclasses of their parent. They are also added as node labels for
 # convenience
 categories:
-    http://www.co-ode.org/ontologies/pizza/pizza.owl#NamedPizza : pizza
+    pizza:NamedPizza : pizza
     http://www.co-ode.org/ontologies/pizza/pizza.owl#PizzaTopping : topping
 
 # All properties are stored but can optionally be added to a new node property
 mappedProperties:
   - name: label # The name of the new property
     properties: # The list of properties mapped to the new property
-    - http://www.w3.org/2000/01/rdf-schema#label
+    - rdfs:label
     - http://www.w3.org/2004/02/skos/core#prefLabel
   - name: comment
     properties:
-    - http://www.w3.org/2000/01/rdf-schema#comment
+    - rdfs:comment
