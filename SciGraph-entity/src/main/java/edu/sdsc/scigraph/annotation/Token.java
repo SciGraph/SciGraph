@@ -19,12 +19,8 @@ import static java.lang.String.format;
 
 import java.util.Objects;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import com.google.common.collect.Range;
 
-@XmlRootElement
 public class Token<T> {
 
   protected final T token;
@@ -43,12 +39,10 @@ public class Token<T> {
     return token;
   }
 
-  @XmlAttribute
   public int getStart() {
     return range.lowerEndpoint();
   }
 
-  @XmlAttribute
   public int getEnd() {
     return range.upperEndpoint();
   }

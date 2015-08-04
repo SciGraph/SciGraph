@@ -15,12 +15,10 @@
  */
 package edu.sdsc.scigraph.annotation;
 
-import javax.xml.bind.annotation.XmlRootElement;
 
 /***
  * Represents an annotated section of text
  */
-@XmlRootElement(name = "annotation")
 public final class EntityAnnotation extends Token<Entity> implements Comparable<EntityAnnotation> {
 
   protected EntityAnnotation() {

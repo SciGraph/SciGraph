@@ -18,9 +18,6 @@ package edu.sdsc.scigraph.services.api.graph;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name="class")
 public class ConceptDTO extends ConceptDTOLite {
 
   private Collection<String> definitions = new HashSet<>();
