@@ -59,6 +59,8 @@ public class OwlApiUtils {
   private static final Set<OWLOntology> ontologiesWithoutIris = new HashSet<>();
 
   private static final HashFunction HASHER = Hashing.md5();
+  
+  private static boolean silencedParser = false;
 
   /*** 
    * @param literal An OWLLiteral
@@ -171,7 +173,10 @@ public class OwlApiUtils {
     return ont;
   }
 
-  public static void silenceOboParser() {
+  public static synchronized void silenceOboParser() {
+    if (silencedParser) {
+      return;
+    }
     OWLManager.createOWLOntologyManager();
     /* TODO: Why does this logging never become silent?
      * Logger logger = Logger.getLogger("org.obolibrary");
@@ -180,6 +185,7 @@ public class OwlApiUtils {
     for (Handler handler : handlers) {
       handler.setLevel(Level.SEVERE);
     }*/
+    // TODO: Why does this cause a concurrent modification exception if not synchronized
     OWLParserFactoryRegistry registry = OWLParserFactoryRegistry.getInstance();
     List<OWLParserFactory> factories = registry.getParserFactories();
     for (OWLParserFactory factory : factories) {
@@ -188,5 +194,6 @@ public class OwlApiUtils {
         registry.unregisterParserFactory(factory);
       }
     }
+    silencedParser = true;
   }
 }
