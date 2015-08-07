@@ -1,17 +1,15 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
@@ -23,7 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -61,8 +61,7 @@ import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads
 
 public class BatchOwlLoader {
 
-  private static final Logger logger = Logger.getLogger(BatchOwlLoader.class
-      .getName());
+  private static final Logger logger = Logger.getLogger(BatchOwlLoader.class.getName());
 
   static final OntologySetup POISON_STR = new OntologySetup();
 
@@ -82,7 +81,7 @@ public class BatchOwlLoader {
 
   @Inject
   List<OntologySetup> ontologies;
-  
+
   @Inject
   @IndicatesMappedProperties
   List<MappedProperty> mappedProperties;
@@ -108,13 +107,15 @@ public class BatchOwlLoader {
   }
 
   void loadOntology() throws InterruptedException {
+    CompletionService<Long> completionService = new ExecutorCompletionService<Long>(exec);
+
     Set<Future<?>> futures = new HashSet<>();
     if (!ontologies.isEmpty()) {
       for (int i = 0; i < numConsumers; i++) {
-        futures.add(exec.submit(consumerProvider.get()));
+        futures.add(completionService.submit(consumerProvider.get()));
       }
       for (int i = 0; i < numProducers; i++) {
-        futures.add(exec.submit(producerProvider.get()));
+        futures.add(completionService.submit(producerProvider.get()));
       }
       for (OntologySetup ontology : ontologies) {
         urlQueue.offer(ontology);
@@ -123,23 +124,29 @@ public class BatchOwlLoader {
         urlQueue.offer(POISON_STR);
       }
     }
+
+    while (futures.size() > 0) {
+      Future<?> completedFuture = completionService.take();
+      futures.remove(completedFuture);
+      try {
+        completedFuture.get();
+      } catch (ExecutionException e) {
+        logger.log(Level.SEVERE, "Stopping batchLoading due to: " + e.getMessage(), e);
+        e.printStackTrace();
+        exec.shutdownNow();
+        break;
+      }
+    }
+
     exec.shutdown();
     exec.awaitTermination(10, TimeUnit.DAYS);
-    try {
-      for (Future<?> future : futures) {
-        future.get();
-      }
-    } catch (ExecutionException e) {
-      logger.log(Level.SEVERE, e.getMessage(), e);
-    }
     graph.shutdown();
     logger.info("Postprocessing...");
     postprocessorProvider.get().postprocess();
     postprocessorProvider.shutdown();
   }
 
-  static class PostpostprocessorProvider implements
-  Provider<OwlPostprocessor> {
+  static class PostpostprocessorProvider implements Provider<OwlPostprocessor> {
 
     @Inject
     OwlLoadConfiguration config;
@@ -157,10 +164,9 @@ public class BatchOwlLoader {
 
     public void shutdown() {
       try (Transaction tx = graphDb.beginTx()) {
-        logger.info(size(GlobalGraphOperations.at(graphDb)
-            .getAllNodes()) + " nodes");
-        logger.info(size(GlobalGraphOperations.at(graphDb)
-            .getAllRelationships()) + " relationships");
+        logger.info(size(GlobalGraphOperations.at(graphDb).getAllNodes()) + " nodes");
+        logger.info(size(GlobalGraphOperations.at(graphDb).getAllRelationships())
+            + " relationships");
         tx.success();
       }
       graphDb.shutdown();
@@ -169,22 +175,21 @@ public class BatchOwlLoader {
   }
 
   public static void load(OwlLoadConfiguration config) throws InterruptedException {
-    Injector i = Guice.createInjector(
-        new OwlLoaderModule(config),
-        new Neo4jModule(config.getGraphConfiguration()));
+    Injector i =
+        Guice.createInjector(new OwlLoaderModule(config),
+            new Neo4jModule(config.getGraphConfiguration()));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
     logger.info("Loading ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
     loader.loadOntology();
     DB mapDb = i.getInstance(DB.class);
     mapDb.close();
-    logger.info(format("Loading took %d minutes",
-        timer.elapsed(TimeUnit.MINUTES)));
+    logger.info(format("Loading took %d minutes", timer.elapsed(TimeUnit.MINUTES)));
   }
 
   protected static Options getOptions() {
-    Option configPath = new Option("c", "configpath", true,
-        "The location of the configuration file");
+    Option configPath =
+        new Option("c", "configpath", true, "The location of the configuration file");
     configPath.setRequired(true);
     Options options = new Options();
     options.addOption(configPath);
@@ -199,13 +204,12 @@ public class BatchOwlLoader {
     } catch (ParseException e) {
       System.err.println(e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp(BatchOwlLoader.class.getSimpleName(),
-          getOptions());
+      formatter.printHelp(BatchOwlLoader.class.getSimpleName(), getOptions());
       System.exit(-1);
     }
 
-    OwlLoadConfigurationLoader owlLoadConfigurationLoader = new OwlLoadConfigurationLoader(
-        new File(cmd.getOptionValue('c').trim()));
+    OwlLoadConfigurationLoader owlLoadConfigurationLoader =
+        new OwlLoadConfigurationLoader(new File(cmd.getOptionValue('c').trim()));
     OwlLoadConfiguration config = owlLoadConfigurationLoader.loadConfig();
     load(config);
     // TODO: Is Guice causing this to hang? #44

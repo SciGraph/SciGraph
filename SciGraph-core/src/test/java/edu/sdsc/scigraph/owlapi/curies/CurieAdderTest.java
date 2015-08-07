@@ -49,7 +49,7 @@ public class CurieAdderTest {
   }
 
   @Test
-  public void curriesAreAdded() {
+  public void curiesAreAdded() {
     Vertex v = graph.addVertex(null);
     v.setProperty(CommonProperties.URI, "http://x.org/foo");
     adder.addCuries(graph);

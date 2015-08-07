@@ -27,175 +27,175 @@ import edu.sdsc.scigraph.neo4j.Neo4jConfiguration;
 
 public class OwlLoadConfiguration {
 
-	private Neo4jConfiguration graphConfiguration;
-	private List<OntologySetup> ontologies = new ArrayList<>();
-	private Map<String, String> categories = new HashMap<>();
-	private List<MappedProperty> mappedProperties = new ArrayList<>();
+  private Neo4jConfiguration graphConfiguration;
+  private List<OntologySetup> ontologies = new ArrayList<>();
+  private Map<String, String> categories = new HashMap<>();
+  private List<MappedProperty> mappedProperties = new ArrayList<>();
 
-	private int producerThreadCount = (int) Math.ceil(Runtime.getRuntime()
-			.availableProcessors() / 2.0);
-	private int consumerThreadCount = (int) Math.ceil(Runtime.getRuntime()
-			.availableProcessors() / 2.0);
+  private int producerThreadCount = (int) Math.ceil(Runtime.getRuntime()
+      .availableProcessors() / 2.0);
+  private int consumerThreadCount = (int) Math.ceil(Runtime.getRuntime()
+      .availableProcessors() / 2.0);
 
-	public Neo4jConfiguration getGraphConfiguration() {
-		return graphConfiguration;
-	}
+  public Neo4jConfiguration getGraphConfiguration() {
+    return graphConfiguration;
+  }
 
-	public void setGraphConfiguration(Neo4jConfiguration ontologyConfiguration) {
-		this.graphConfiguration = ontologyConfiguration;
-	}
+  public void setGraphConfiguration(Neo4jConfiguration ontologyConfiguration) {
+    this.graphConfiguration = ontologyConfiguration;
+  }
 
-	public List<OntologySetup> getOntologies() {
-		return ontologies;
-	}
+  public List<OntologySetup> getOntologies() {
+    return ontologies;
+  }
 
-	public void setCategories(Map<String, String> categories) {
-		this.categories = categories;
-	}
+  public void setCategories(Map<String, String> categories) {
+    this.categories = categories;
+  }
 
-	public Map<String, String> getCategories() {
-		return categories;
-	}
+  public Map<String, String> getCategories() {
+    return categories;
+  }
 
-	public void setMappedProperties(List<MappedProperty> mappedProperties) {
-		this.mappedProperties = mappedProperties;
-	}
+  public void setMappedProperties(List<MappedProperty> mappedProperties) {
+    this.mappedProperties = mappedProperties;
+  }
 
-	public List<MappedProperty> getMappedProperties() {
-		return mappedProperties;
-	}
+  public List<MappedProperty> getMappedProperties() {
+    return mappedProperties;
+  }
 
-	public int getProducerThreadCount() {
-		return producerThreadCount;
-	}
+  public int getProducerThreadCount() {
+    return producerThreadCount;
+  }
 
-	public void setProducerThreadCount(int producerThreadCount) {
-		this.producerThreadCount = producerThreadCount;
-	}
+  public void setProducerThreadCount(int producerThreadCount) {
+    this.producerThreadCount = producerThreadCount;
+  }
 
-	public int getConsumerThreadCount() {
-		return consumerThreadCount;
-	}
+  public int getConsumerThreadCount() {
+    return consumerThreadCount;
+  }
 
-	public void setConsumerThreadCount(int consumerThreadCount) {
-		this.consumerThreadCount = consumerThreadCount;
-	}
+  public void setConsumerThreadCount(int consumerThreadCount) {
+    this.consumerThreadCount = consumerThreadCount;
+  }
 
-	public static class OntologySetup {
+  public static class OntologySetup {
 
-		String url;
+    String url;
 
-		Optional<ReasonerConfiguration> reasonerConfiguration = Optional
-				.absent();
+    Optional<ReasonerConfiguration> reasonerConfiguration = Optional
+        .absent();
 
-		boolean skipImports = false;
+    boolean skipImports = false;
 
-		public String url() {
-			return url;
-		}
+    public String url() {
+      return url;
+    }
 
-		public void setUrl(String url) {
-			this.url = url;
-		}
+    public void setUrl(String url) {
+      this.url = url;
+    }
 
-		public Optional<ReasonerConfiguration> getReasonerConfiguration() {
-			return reasonerConfiguration;
-		}
+    public Optional<ReasonerConfiguration> getReasonerConfiguration() {
+      return reasonerConfiguration;
+    }
 
-		public void setReasonerConfiguration(
-				ReasonerConfiguration reasonerConfiguration) {
-			this.reasonerConfiguration = Optional.of(reasonerConfiguration);
-		}
+    public void setReasonerConfiguration(
+        ReasonerConfiguration reasonerConfiguration) {
+      this.reasonerConfiguration = Optional.of(reasonerConfiguration);
+    }
 
-		public boolean isSkipImports() {
-			return skipImports;
-		}
+    public boolean isSkipImports() {
+      return skipImports;
+    }
 
-		public void setSkipImports(boolean skipImports) {
-			this.skipImports = skipImports;
-		}
+    public void setSkipImports(boolean skipImports) {
+      this.skipImports = skipImports;
+    }
 
-		@Override
-		public String toString() {
-			if (skipImports) {
-				return url + " (skipImport)";
-			}
-			return url;
-		}
+    @Override
+    public String toString() {
+      if (skipImports) {
+        return url + " (skipImport)";
+      }
+      return url;
+    }
 
-	}
+  }
 
-	public static class ReasonerConfiguration {
+  public static class ReasonerConfiguration {
 
-		String factory;
-		boolean addDirectInferredEdges = false;
-		boolean removeUnsatisfiableClasses = false;
-		boolean addInferredEquivalences = false;
+    String factory;
+    boolean addDirectInferredEdges = false;
+    boolean removeUnsatisfiableClasses = false;
+    boolean addInferredEquivalences = false;
 
-		public String getFactory() {
-			return factory;
-		}
+    public String getFactory() {
+      return factory;
+    }
 
-		public void setFactory(String factory) {
-			this.factory = factory;
-		}
+    public void setFactory(String factory) {
+      this.factory = factory;
+    }
 
-		public boolean isAddDirectInferredEdges() {
-			return addDirectInferredEdges;
-		}
+    public boolean isAddDirectInferredEdges() {
+      return addDirectInferredEdges;
+    }
 
-		public void setAddDirectInferredEdges(boolean addDirectInferredEdges) {
-			this.addDirectInferredEdges = addDirectInferredEdges;
-		}
+    public void setAddDirectInferredEdges(boolean addDirectInferredEdges) {
+      this.addDirectInferredEdges = addDirectInferredEdges;
+    }
 
-		public boolean isRemoveUnsatisfiableClasses() {
-			return removeUnsatisfiableClasses;
-		}
+    public boolean isRemoveUnsatisfiableClasses() {
+      return removeUnsatisfiableClasses;
+    }
 
-		public void setRemoveUnsatisfiableClasses(
-				boolean removeUnsatisfiableClasses) {
-			this.removeUnsatisfiableClasses = removeUnsatisfiableClasses;
-		}
+    public void setRemoveUnsatisfiableClasses(
+        boolean removeUnsatisfiableClasses) {
+      this.removeUnsatisfiableClasses = removeUnsatisfiableClasses;
+    }
 
-		public boolean isAddInferredEquivalences() {
-			return addInferredEquivalences;
-		}
+    public boolean isAddInferredEquivalences() {
+      return addInferredEquivalences;
+    }
 
-		public void setAddInferredEquivalences(boolean addInferredEquivalences) {
-			this.addInferredEquivalences = addInferredEquivalences;
-		}
+    public void setAddInferredEquivalences(boolean addInferredEquivalences) {
+      this.addInferredEquivalences = addInferredEquivalences;
+    }
 
-	}
+  }
 
-	public static class MappedProperty {
-		String name;
-		List<String> properties = new ArrayList<>();
+  public static class MappedProperty {
+    String name;
+    List<String> properties = new ArrayList<>();
 
-		public MappedProperty() {
-		}
+    public MappedProperty() {
+    }
 
-		public MappedProperty(String name) {
-			this.name = name;
-		}
+    public MappedProperty(String name) {
+      this.name = name;
+    }
 
-		public String getName() {
-			return name;
-		}
+    public String getName() {
+      return name;
+    }
 
-		public List<String> getProperties() {
-			return properties;
-		}
+    public List<String> getProperties() {
+      return properties;
+    }
 
-		public void setProperties(List<String> properties) {
-			this.properties = properties;
-		}
+    public void setProperties(List<String> properties) {
+      this.properties = properties;
+    }
 
-		@Override
-		public String toString() {
-			return MoreObjects.toStringHelper(this.getClass())
-					.add("name", name).add("properties", properties).toString();
-		}
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(this.getClass())
+          .add("name", name).add("properties", properties).toString();
+    }
 
-	}
+  }
 
 }

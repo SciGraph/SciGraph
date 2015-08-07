@@ -1,17 +1,15 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
@@ -42,7 +40,7 @@ import edu.sdsc.scigraph.owlapi.ReasonerUtil;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
 
-final class OwlOntologyProducer implements Callable<Void>{
+final class OwlOntologyProducer implements Callable<Long> {
 
   private static final Logger logger = Logger.getLogger(OwlOntologyProducer.class.getName());
 
@@ -52,7 +50,8 @@ final class OwlOntologyProducer implements Callable<Void>{
   private final Graph graph;
 
   @Inject
-  OwlOntologyProducer(BlockingQueue<OWLCompositeObject> queue, BlockingQueue<OntologySetup> ontologyQueue, 
+  OwlOntologyProducer(BlockingQueue<OWLCompositeObject> queue,
+      BlockingQueue<OntologySetup> ontologyQueue,
       @IndicatesNumberOfShutdownProducers AtomicInteger numProducersShutdown, Graph graph) {
     logger.info("Producer starting up...");
     this.queue = queue;
@@ -61,7 +60,8 @@ final class OwlOntologyProducer implements Callable<Void>{
     this.graph = graph;
   }
 
-  public void reason(OWLOntologyManager manager, OWLOntology ont, OntologySetup config) throws Exception {
+  public void reason(OWLOntologyManager manager, OWLOntology ont, OntologySetup config)
+      throws Exception {
     if (config.isSkipImports() == false && config.getReasonerConfiguration().isPresent()) {
       String origThreadName = Thread.currentThread().getName();
       Thread.currentThread().setName("reasoning - " + config);
@@ -71,23 +71,24 @@ final class OwlOntologyProducer implements Callable<Void>{
     }
   }
 
-  public void queueObjects(OWLOntologyManager manager, OntologySetup ontologyConfig) throws InterruptedException {
+  public void queueObjects(OWLOntologyManager manager, OntologySetup ontologyConfig)
+      throws InterruptedException {
     String origThreadName = Thread.currentThread().getName();
     Thread.currentThread().setName("queueing axioms - " + ontologyConfig);
     logger.info("Queueing axioms for: " + ontologyConfig);
     long objectCount = 0;
-    for (OWLOntology ontology: manager.getOntologies()) {
+    for (OWLOntology ontology : manager.getOntologies()) {
       String ontologyIri = OwlApiUtils.getIri(ontology);
 
-      for (OWLObject object: ontology.getNestedClassExpressions()) {
+      for (OWLObject object : ontology.getNestedClassExpressions()) {
         queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
-      for (OWLObject object: ontology.getClassesInSignature(false)) {
+      for (OWLObject object : ontology.getClassesInSignature(false)) {
         queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
-      for (OWLObject object: ontology.getAxioms()) { // only in the current ontology
+      for (OWLObject object : ontology.getAxioms()) { // only in the current ontology
         queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
@@ -99,7 +100,7 @@ final class OwlOntologyProducer implements Callable<Void>{
   void addOntologyStructure(OWLOntologyManager manager, OWLOntology ontology) {
     long parent = graph.createNode(OwlApiUtils.getIri(ontology));
     graph.addLabel(parent, OwlLabels.OWL_ONTOLOGY);
-    for (OWLImportsDeclaration importDeclaration: ontology.getImportsDeclarations()) {
+    for (OWLImportsDeclaration importDeclaration : ontology.getImportsDeclarations()) {
       OWLOntology childOnt = manager.getImportedOntology(importDeclaration);
       if (null == childOnt) {
         // TODO: Why is childOnt sometimes null (when importing rdf)?
@@ -116,7 +117,7 @@ final class OwlOntologyProducer implements Callable<Void>{
   }
 
   @Override
-  public Void call() throws Exception {
+  public Long call() throws Exception {
     try {
       while (true) {
         final OntologySetup ontologyConfig = ontologQueue.take();
@@ -131,8 +132,8 @@ final class OwlOntologyProducer implements Callable<Void>{
               public IRI getDocumentIRI(IRI ontologyIRI) {
                 // quick check:
                 // do nothing for the original url and known empty ontologies
-                if (ontologyConfig.url().equals(ontologyIRI.toString()) 
-                   || emptyOntologies.contains(ontologyIRI)) {
+                if (ontologyConfig.url().equals(ontologyIRI.toString())
+                    || emptyOntologies.contains(ontologyIRI)) {
                   return null;
                 }
                 emptyOntologies.add(ontologyIRI);
@@ -140,7 +141,8 @@ final class OwlOntologyProducer implements Callable<Void>{
                   OWLOntology emptyOntology = manager.createOntology(ontologyIRI);
                   return emptyOntology.getOntologyID().getDefaultDocumentIRI();
                 } catch (OWLOntologyCreationException e) {
-                  throw new RuntimeException(e);
+                  logger.log(Level.SEVERE, "This should never happen: " + e);
+                  return null;
                 }
               }
             });
@@ -155,18 +157,18 @@ final class OwlOntologyProducer implements Callable<Void>{
             queueObjects(manager, ontologyConfig);
           } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to load ontology: " + ontologyConfig, e);
+            throw new Exception("Failed to load ontology: " + ontologyConfig + "\n" + e);
           }
         }
       }
-    } catch (InterruptedException e) { 
+    } catch (InterruptedException e) {
       logger.log(Level.WARNING, e.getMessage(), e);
-    }
-    finally {
+    } finally {
       numProducersShutdown.incrementAndGet();
+      logger.info("Producer shutting down...");
     }
+    return 0L;
 
-    logger.info("Producer shutting down...");
-    return null;
   }
 
 }
