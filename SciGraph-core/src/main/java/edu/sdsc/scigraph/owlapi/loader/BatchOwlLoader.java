@@ -108,7 +108,6 @@ public class BatchOwlLoader {
 
   void loadOntology() throws InterruptedException {
     CompletionService<Long> completionService = new ExecutorCompletionService<Long>(exec);
-
     Set<Future<?>> futures = new HashSet<>();
     if (!ontologies.isEmpty()) {
       for (int i = 0; i < numConsumers; i++) {
