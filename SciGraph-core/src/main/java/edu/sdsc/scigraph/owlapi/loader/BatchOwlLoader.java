@@ -107,7 +107,7 @@ public class BatchOwlLoader {
     OwlApiUtils.silenceOboParser();
   }
 
-  void loadOntology() throws InterruptedException {
+  public void loadOntology() throws InterruptedException {
     Set<Future<?>> futures = new HashSet<>();
     if (!ontologies.isEmpty()) {
       for (int i = 0; i < numConsumers; i++) {
