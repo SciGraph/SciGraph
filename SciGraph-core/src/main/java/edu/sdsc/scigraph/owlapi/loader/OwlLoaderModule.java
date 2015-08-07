@@ -42,7 +42,14 @@ import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.neo4j.GraphBatchImpl;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
-import edu.sdsc.scigraph.owlapi.loader.bindings.*;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
+import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 
 public class OwlLoaderModule extends AbstractModule {
 
@@ -62,6 +69,7 @@ public class OwlLoaderModule extends AbstractModule {
     bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesExactIndexedProperties.class).toInstance(config.getGraphConfiguration().getExactNodeProperties());
     bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesMappedCategories.class).toInstance(config.getCategories());
     bind(new TypeLiteral<List<MappedProperty>>() {}).annotatedWith(IndicatesMappedProperties.class).toInstance(config.getMappedProperties());
+    bind(new TypeLiteral<List<OntologySetup>>() {}).toInstance(config.getOntologies());
     bind(Graph.class).to(GraphBatchImpl.class).in(Scopes.SINGLETON);
 
     bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>(){}).in(Scopes.SINGLETON);
