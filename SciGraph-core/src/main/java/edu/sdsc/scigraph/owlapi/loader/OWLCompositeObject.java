@@ -15,9 +15,13 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
+import java.io.Serializable;
+
 import org.semanticweb.owlapi.model.OWLObject;
 
-class OWLCompositeObject {
+class OWLCompositeObject implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   private final String ontology;
   private final OWLObject object;
