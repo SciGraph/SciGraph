@@ -87,7 +87,7 @@ public class OwlApiUtilsTest {
     OWLClass clazz = factory.getOWLClass(IRI.create("http://example.org/Thing"));
     assertThat(OwlApiUtils.getIri((OWLClassExpression)clazz), is("http://example.org/Thing"));
     OWLObjectIntersectionOf expression = factory.getOWLObjectIntersectionOf(clazz);
-    assertThat(OwlApiUtils.getIri(expression), is("_:" + expression.hashCode()));
+    assertThat(OwlApiUtils.getIri(expression), is("_:" + OwlApiUtils.hash(expression.toString())));
   }
 
   @Test
