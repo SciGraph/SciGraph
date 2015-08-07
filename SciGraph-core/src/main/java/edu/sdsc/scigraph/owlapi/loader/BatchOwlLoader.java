@@ -108,7 +108,7 @@ public class BatchOwlLoader {
     OwlApiUtils.silenceOboParser();
   }
 
-  public void loadOntology() throws InterruptedException {
+  public void loadOntology() throws Throwable {
     CompletionService<Long> completionService = new ExecutorCompletionService<Long>(exec);
     Set<Future<?>> futures = new HashSet<>();
     if (!ontologies.isEmpty()) {
@@ -135,7 +135,7 @@ public class BatchOwlLoader {
         logger.log(Level.SEVERE, "Stopping batchLoading due to: " + e.getMessage(), e);
         e.printStackTrace();
         exec.shutdownNow();
-        break;
+        throw e.getCause();
       }
     }
 
