@@ -182,6 +182,7 @@ public class BatchOwlLoader {
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
     logger.info("Loading ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
+    // TODO catch exception and delete the incomplete graph through the graph location
     loader.loadOntology();
     DB mapDb = i.getInstance(DB.class);
     mapDb.close();

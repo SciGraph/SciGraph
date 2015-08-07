@@ -55,10 +55,18 @@ import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
  * Provides:
  * <ul>
  * <li>Relationship type substitution:
- *    <pre>(foo)-[:${relationship_type}]->(bar)</pre>
+ * 
+ * <pre>
+ * (foo)-[:${relationship_type}]->(bar)
+ * </pre>
+ * 
  * </li>
  * <li>Sub-property type entailment:
- *    <pre>(foo)-[:superProperty!]->(bar)</pre>
+ * 
+ * <pre>
+ * (foo)-[:superProperty!]->(bar)
+ * </pre>
+ * 
  * </li>
  */
 public class CypherUtil {
@@ -100,7 +108,7 @@ public class CypherUtil {
 
   static Map<String, Object> flattenMap(Multimap<String, Object> paramMap) {
     Map<String, Object> flatMap = new HashMap<>();
-    for (Entry<String, Collection<Object>> entry: paramMap.asMap().entrySet()) {
+    for (Entry<String, Collection<Object>> entry : paramMap.asMap().entrySet()) {
       flatMap.put(entry.getKey(), getFirst(entry.getValue(), null));
     }
     return flatMap;
@@ -123,15 +131,15 @@ public class CypherUtil {
 
   Set<String> getEntailedRelationshipNames(Collection<String> parents) {
     Set<String> entailedTypes = new HashSet<>();
-    for (String parent: parents) {
+    for (String parent : parents) {
       entailedTypes.add(parent);
       Map<String, Object> params = new HashMap<>();
       params.put("fragment", parent);
       try (Transaction tx = graphDb.beginTx()) {
-        Result result = graphDb.execute(
-            "START parent=node:node_auto_index(fragment={fragment}) " +
-                "MATCH (parent)<-[:subPropertyOf|equivalentProperty*]-(subProperty) " +
-                "RETURN distinct subProperty.fragment as subProperty", params);
+        Result result =
+            graphDb.execute("START parent=node:node_auto_index(fragment={fragment}) "
+                + "MATCH (parent)<-[:subPropertyOf|equivalentProperty*]-(subProperty) "
+                + "RETURN distinct subProperty.fragment as subProperty", params);
         while (result.hasNext()) {
           Map<String, Object> map = result.next();
           entailedTypes.add((String) map.get("subProperty"));
@@ -142,7 +150,7 @@ public class CypherUtil {
     return entailedTypes;
   }
 
-  String entailRelationships(String cypher) {
+  public String entailRelationships(String cypher) {
     Matcher m = ENTAILMENT_PATTERN.matcher(cypher);
     StringBuffer buffer = new StringBuffer();
     while (m.find()) {
@@ -152,17 +160,18 @@ public class CypherUtil {
         entail = true;
         group = group.substring(0, group.length() - 1);
       }
-      Collection<String> parentTypes = transform(newHashSet(Splitter.on('|').split(group)), new Function<String, String>() {
-        @Override
-        public String apply(String type) {
-          if (curieUtil.getIri(type).isPresent()) {
-            return GraphUtil.getFragment(curieUtil.getIri(type).get());
-          } else {
-            return type;
-          }
-        }
+      Collection<String> parentTypes =
+          transform(newHashSet(Splitter.on('|').split(group)), new Function<String, String>() {
+            @Override
+            public String apply(String type) {
+              if (curieUtil.getIri(type).isPresent()) {
+                return GraphUtil.getFragment(curieUtil.getIri(type).get());
+              } else {
+                return type;
+              }
+            }
 
-      });
+          });
       if (entail) {
         String entailedTypes = on('|').join(getEntailedRelationshipNames(parentTypes));
         m.appendReplacement(buffer, ":" + entailedTypes);
@@ -179,21 +188,23 @@ public class CypherUtil {
     StrSubstitutor substitutor = new StrSubstitutor(new StrLookup<String>() {
       @Override
       public String lookup(String key) {
-        Collection<String> resolvedRelationshipTypes = transform(valueMap.get(key), new Function<Object, String>() {
-          @Override
-          public String apply(Object input) {
-            if (input.toString().matches(".*(\\s).*")) {
-              throw new IllegalArgumentException("Cypher relationship templates must not contain spaces");
-            }
-            Optional<String> iri = curieUtil.getIri(input.toString());
-            if (iri.isPresent()) {
-              return GraphUtil.getFragment(iri.get());
-            } else {
-              return input.toString();
-            }
-          }
+        Collection<String> resolvedRelationshipTypes =
+            transform(valueMap.get(key), new Function<Object, String>() {
+              @Override
+              public String apply(Object input) {
+                if (input.toString().matches(".*(\\s).*")) {
+                  throw new IllegalArgumentException(
+                      "Cypher relationship templates must not contain spaces");
+                }
+                Optional<String> iri = curieUtil.getIri(input.toString());
+                if (iri.isPresent()) {
+                  return GraphUtil.getFragment(iri.get());
+                } else {
+                  return input.toString();
+                }
+              }
 
-        });
+            });
         return on('|').join(resolvedRelationshipTypes);
       }
     });
