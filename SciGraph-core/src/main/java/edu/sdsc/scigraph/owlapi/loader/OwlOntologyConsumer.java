@@ -63,7 +63,7 @@ final class OwlOntologyConsumer implements Callable<Long> {
           if (null == owlObject) {
             continue;
           }
-          /* TODO: Restores this somehow
+          /* TODO: Restore this somehow
            * if (0 == queue.size() % 100_000) {
             logger.info("Currently " + queue.size() + " objects remaining in the queue");
           }*/
