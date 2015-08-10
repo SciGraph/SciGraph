@@ -82,7 +82,7 @@ public class VocabularyService extends BaseResource {
     @Override
     public ConceptDTO apply(Concept input) {
       ConceptDTO dto =  mapper.map(input, ConceptDTO.class);
-      Optional<String> curie = curieUtil.getCurie(dto.getUri());
+      Optional<String> curie = curieUtil.getCurie(dto.getIri());
       if (curie.isPresent()) {
         dto.setCurie(curie.get());
       }
@@ -96,7 +96,7 @@ public class VocabularyService extends BaseResource {
     @Override
     public ConceptDTOLite apply(Concept input) {
       ConceptDTOLite dto =  mapper.map(input, ConceptDTOLite.class);
-      Optional<String> curie = curieUtil.getCurie(dto.getUri());
+      Optional<String> curie = curieUtil.getCurie(dto.getIri());
       if (curie.isPresent()) {
         dto.setCurie(curie.get());
       }

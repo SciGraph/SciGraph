@@ -29,12 +29,12 @@ public class ConceptDTOLite {
   private Collection<String> abbreviations = new HashSet<>();
   private boolean deprecated;
 
-  public String getUri() {
+  public String getIri() {
     return iri;
   }
 
-  public void setUri(String uri) {
-    this.iri = uri;
+  public void setIri(String iri) {
+    this.iri = iri;
   }
 
   public Collection<String> getLabels() {
