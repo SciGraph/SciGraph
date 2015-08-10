@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2014 Christopher Condit (condit@sdsc.edu)
+# Copyright (C) 2014 Christopher Condit (condit@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,6 @@ i=1
 for maven_opt in "${opts[@]}"
 do
   export MAVEN_OPTS="$maven_opt"
-  mvn -Djub.consumers=CONSOLE,XML -Djub.xml.file=target/$i.xml failsafe:integration-test -Dit.test=edu.sdsc.scigraph.internal.reachability.ReachabilityIndexPerfIT
+  mvn -Djub.consumers=CONSOLE,XML -Djub.xml.file=target/$i.xml failsafe:integration-test -Dit.test=io.scigraph.internal.reachability.ReachabilityIndexPerfIT
   ((i++))
 done

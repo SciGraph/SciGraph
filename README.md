@@ -10,7 +10,7 @@ Motivation
 ----------
 SciGraph aims to represent ontologies and data described using ontologies as a Neo4j graph. SciGraph
 reads ontologies with [owlapi](http://owlapi.sourceforge.net/) and ingests
-ontology formats available to owlapi (OWL, RDF, OBO, TTL, etc). 
+ontology formats available to owlapi (OWL, RDF, OBO, TTL, etc).
 Have a look at [how SciGraph translates some simple ontologies](https://github.com/SciCrunch/SciGraph/wiki/Neo4jMapping).
 
 Goals:
@@ -29,7 +29,7 @@ What's Included?
 SciGraph can be used in a number of ways. After the graph is generated it could be used in an application with no SciGraph dependency.
 
 It could be used in an application with the
-`scigraph-core` dependency which adds some convenience methods and includes "vocabulary" support. "Vocabulary" support resolves 
+`scigraph-core` dependency which adds some convenience methods and includes "vocabulary" support. "Vocabulary" support resolves
 labels to graph nodes, auto-complete functionality, OpenRefine resolution services, and CURIE to
 IRI resolution. Additional support for identifying these vocabulary entities
 in free text can be found in the `scigraph-entity` module.
@@ -77,12 +77,12 @@ Clone and compile the project:
 Build the graph:
 
     cd SciGraph-core
-    mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c src/test/resources/pizzaExample.yaml"
+    mvn exec:java -Dexec.mainClass="io.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c src/test/resources/pizzaExample.yaml"
 
 Run the services:
 
 	cd ../SciGraph-services
-    mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
+    mvn exec:java -Dexec.mainClass="io.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
 
 Check out some of the REST endpoints (the Vagrant box has port 9000 mapped so you can use your host browser to check these out):
 
@@ -90,13 +90,11 @@ Check out some of the REST endpoints (the Vagrant box has port 9000 mapped so yo
 
  - [Find a class based on an "exactish" term match](http://localhost:9000/scigraph/vocabulary/search/Shrimps)
 
- - [Get the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping)
- 
- - [Visualize the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/PrawnsTopping.png)
- 
- - [Visualize the graph neighborhood of a class by using a CURIE](http://localhost:9000/scigraph/graph/neighbors/pizza:AmericanHot.png)
- 
- - [Visualize a custom, domain specific Cypher query](http://localhost:9000/scigraph/dynamic/toppings.png?pizza_id=FourSeasons)
+ - [Get the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/pizza:PrawnsTopping)
+
+ - [Visualize the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/pizza:AmericanHot.png)
+
+ - [Visualize a custom, domain specific Cypher query](http://localhost:9000/scigraph/dynamic/toppings.png?pizza_id=pizza:FourSeasons)
 
 Also browse the [generated REST documentation](http://localhost:9000/scigraph/docs/)
 to see some of the other resources.
