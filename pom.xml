@@ -32,16 +32,23 @@
       <id>condit</id>
       <name>Chris Condit</name>
       <email>condit@gmail.com</email>
-        <roles>
-          <role>architect</role>
-          <role>developer</role>
-        </roles>
-        <timezone>America/Los_Angeles</timezone>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>America/Los_Angeles</timezone>
     </developer>
   </developers>
 
+  <issueManagement>
+    <url>https://github.com/SciGraph/SciGraph/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+
   <scm>
-    <developerConnection>scm:git:https://github.com/SciGraph/SciGraph.git</developerConnection>
+    <url>https://github.com/SciGraph/SciGraph/</url>
+    <connection>scm:git:git://github.com/SciGraph/SciGraph.git</connection>
+    <developerConnection>scm:git:git@github.com:SciGraph/SciGraph.git</developerConnection>
   </scm>
 
   <properties>
