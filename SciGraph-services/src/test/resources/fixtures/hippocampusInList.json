@@ -1,16 +1,13 @@
-[
-  {
-    "uri": null,
-    "labels": [
-      "Hippocampus"
-    ],
-    "fragment": null,
-    "curie": null,
-    "categories": [],
-    "synonyms": [],
-    "acronyms": [],
-    "abbreviations": [],
-    "definitions": [],
-    "deprecated": false
-  }
-]
+{
+  "uri": null,
+  "labels": [
+    "Hippocampus"
+  ],
+  "curie": null,
+  "categories": [],
+  "synonyms": [],
+  "acronyms": [],
+  "abbreviations": [],
+  "definitions": [],
+  "deprecated": false
+}

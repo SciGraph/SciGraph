@@ -45,7 +45,7 @@ abstract public class DelimitedWriter extends GraphWriter {
   abstract CSVPrinter getCsvPrinter(Writer writer) throws IOException;
 
   static String getCurieOrIri(Vertex vertex) {
-    return TinkerGraphUtil.getProperty(vertex, CommonProperties.CURIE, String.class).or((String)vertex.getProperty(CommonProperties.URI));
+    return TinkerGraphUtil.getProperty(vertex, CommonProperties.CURIE, String.class).or((String)vertex.getProperty(CommonProperties.IRI));
   }
 
   @Override

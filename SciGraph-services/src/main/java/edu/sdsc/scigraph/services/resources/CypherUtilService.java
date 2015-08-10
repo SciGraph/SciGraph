@@ -49,7 +49,7 @@ public class CypherUtilService extends BaseResource {
   @ApiOperation(value = "Cypher query resolver", response = String.class, notes = "")
   public String resolve(
       @ApiParam(value = "The cypher query to resolve", required = true) @QueryParam("cypherQuery") String cypherQuery) {
-    return cypherUtil.entailRelationships(cypherQuery);
+    return cypherUtil.resolveRelationships(cypherQuery);
   }
 
 }

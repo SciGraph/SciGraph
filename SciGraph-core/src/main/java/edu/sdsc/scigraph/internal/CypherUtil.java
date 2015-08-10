@@ -146,7 +146,7 @@ public class CypherUtil {
     }
   }
 
-  String resolveRelationships(String cypher) {
+  public String resolveRelationships(String cypher) {
     Matcher m = ENTAILMENT_PATTERN.matcher(cypher);
     StringBuffer buffer = new StringBuffer();
     while (m.find()) {

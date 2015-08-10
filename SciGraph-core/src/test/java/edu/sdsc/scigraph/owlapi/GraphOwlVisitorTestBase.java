@@ -182,7 +182,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     assertThat(nodes.hasNext(), is(true));
     while (nodes.hasNext()) {
       Node node = nodes.next();
-      assertThat(GraphUtil.getProperty(node, CommonProperties.URI, String.class).get(), startsWith("_:"));
+      assertThat(GraphUtil.getProperty(node, CommonProperties.IRI, String.class).get(), startsWith("_:"));
     }
       
     

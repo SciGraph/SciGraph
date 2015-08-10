@@ -37,7 +37,7 @@ public class BbopGraphUtil {
   private final CurieUtil curieUtil;
 
   private static final ImmutableSet<String> IGNORED_PROPERTY_KEYS =
-      ImmutableSet.of(CommonProperties.URI, NodeProperties.LABEL, CommonProperties.CURIE);
+      ImmutableSet.of(CommonProperties.IRI, NodeProperties.LABEL, CommonProperties.CURIE);
 
   @Inject
   public BbopGraphUtil(CurieUtil curieUtil) {
@@ -45,7 +45,7 @@ public class BbopGraphUtil {
   }
 
   String getCurieOrIri(Vertex vertex) {
-    String iri = (String)vertex.getProperty(CommonProperties.URI);
+    String iri = (String)vertex.getProperty(CommonProperties.IRI);
     return curieUtil.getCurie(iri).or(iri);
   }
   

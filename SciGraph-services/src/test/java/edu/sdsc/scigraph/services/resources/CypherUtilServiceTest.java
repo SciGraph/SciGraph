@@ -37,7 +37,7 @@ public class CypherUtilServiceTest {
 
   @Before
   public void setup() {
-    when(cypherUtil.entailRelationships("foo!")).thenReturn("foo");
+    when(cypherUtil.resolveRelationships("foo!")).thenReturn("foo");
   }
 
   @Test

@@ -134,12 +134,12 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) throws Exception {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
-    List<Concept> concepts = newArrayList(vocabulary.getConceptFromId(query));
-    if (concepts.isEmpty()) {
+    Optional<Concept> concept = vocabulary.getConceptFromId(query);
+    if (!concept.isPresent()) {
       throw new WebApplicationException(404);
     } else {
-      List<ConceptDTO> dtos = transform(concepts, conceptDtoTransformer);
-      GenericEntity<List<ConceptDTO>> response = new GenericEntity<List<ConceptDTO>>(dtos){};
+      ConceptDTO dto = conceptDtoTransformer.apply(concept.get());
+      GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(dto){};
       return JaxRsUtil.wrapJsonp(request.get(), response, callback);
     }
   }
