@@ -51,6 +51,11 @@ Applications
  * [SciCrunch](http://scicrunch.org/) uses SciGraph for vocabulary and annotation services
  * [CINERGI](http://earthcube.org/group/cinergi) uses SciGraph for vocabulary and annotation services
 
+Additional Documentation
+------------------------
+
+ * (Overview of SciGraph in NIF and Monarch)[http://j.mp/SciGraph] (google slides)
+
 Getting Started
 ---------------
 A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to modify your `localhost` (you'll also need [VirtualBox](https://www.virtualbox.org/)).
