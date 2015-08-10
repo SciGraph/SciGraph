@@ -29,7 +29,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.message.MessageProperties;
 import org.glassfish.jersey.server.filter.UriConnegFilter;
 
@@ -89,13 +91,26 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     ClassReaders.setReader(new DefaultJaxrsApiReader());
     SwaggerConfig config = ConfigFactory.config();
     config.setApiVersion("1.0.1");
+    // TODO: Fix this so the swagger client generator can work correctly
     config.setBasePath("../../" + basePath);
+  }
+
+  void configureCors(Environment environment) {
+    final FilterRegistration.Dynamic cors = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
+
+    // Configure CORS parameters
+    cors.setInitParameter("allowedOrigins", "*");
+    cors.setInitParameter("allowedHeaders", "X-Requested-With,Content-Type,Accept,Origin");
+    cors.setInitParameter("allowedMethods", "OPTIONS,GET,PUT,POST,DELETE,HEAD");
+
+    // Add URL mapping
+    cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
   }
 
   void addWriters(JerseyEnvironment environment) throws Exception {
     for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.jersey.writers")) {
       if (!Modifier.isAbstract(classInfo.load().getModifiers())) {
-        environment.register(classInfo.load().newInstance());
+        environment.register(factory.getInjector().getInstance(classInfo.load()));
       }
     }
   }
@@ -107,6 +122,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     props.put(MessageProperties.LEGACY_WORKERS_ORDERING, true);
     environment.jersey().getResourceConfig().addProperties(props);
     addWriters(environment.jersey());
+    configureCors(environment);
 
     //TODO: This path should not be hard coded.
     configureSwagger(environment, "scigraph");
@@ -115,7 +131,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
 
     environment.servlets().addFilter("swaggerDocResolver", new SwaggerDocUrlFilter())
     .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), false, "/*");
-    
+
     DynamicCypherResourceFactory cypherFactory = factory.getInjector().getInstance(DynamicCypherResourceFactory.class);
     for (Apis config: configuration.getCypherResources()) {
       environment.jersey().getResourceConfig().registerResources(cypherFactory.create(config).getBuilder().build());

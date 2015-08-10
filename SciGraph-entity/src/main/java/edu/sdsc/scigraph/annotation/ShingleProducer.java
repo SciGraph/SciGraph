@@ -44,7 +44,7 @@ public class ShingleProducer implements Runnable {
 
   private final static Logger logger = Logger.getLogger(ShingleProducer.class.getName());
 
-  final static int DEFAULT_SHINGLE_COUNT = 4;
+  final static int DEFAULT_SHINGLE_COUNT = 6;
 
   private final Analyzer analyzer;
   private final Reader reader;

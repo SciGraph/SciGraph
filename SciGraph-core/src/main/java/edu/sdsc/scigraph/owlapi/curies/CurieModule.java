@@ -22,9 +22,9 @@ public class CurieModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    CurrieAdder adder = new CurrieAdder();
+    CurieAdder adder = new CurieAdder();
     requestInjection(adder);
-    bindInterceptor(Matchers.any(), Matchers.annotatedWith(AddCurries.class), adder);
+    bindInterceptor(Matchers.any(), Matchers.annotatedWith(AddCuries.class), adder);
   }
 
 }

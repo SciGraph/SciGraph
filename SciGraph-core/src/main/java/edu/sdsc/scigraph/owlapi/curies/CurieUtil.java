@@ -39,7 +39,7 @@ public class CurieUtil {
    */
   @Inject
   public CurieUtil(@IndicatesCurieMapping Map<String, String> curieMap) {
-    this.curieMap = ImmutableBiMap.copyOf(curieMap);
+    this.curieMap = ImmutableBiMap.copyOf(checkNotNull(curieMap));
   }
 
   /***
@@ -66,10 +66,9 @@ public class CurieUtil {
    * @return An {@link Optional} CURIE
    */
   public Optional<String> getCurie(String iri) {
-    checkNotNull(iri);
     Optional<String> candidate = Optional.absent();
     for (String prefix: curieMap.inverse().keySet()) {
-      if (iri.startsWith(prefix) &&
+      if (checkNotNull(iri).startsWith(prefix) &&
           candidate.or("").length() < prefix.length()) {
         candidate = Optional.of(prefix);
       }

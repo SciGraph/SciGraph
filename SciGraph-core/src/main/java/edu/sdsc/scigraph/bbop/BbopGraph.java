@@ -13,22 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.sdsc.scigraph.services.jersey.writers;
+package edu.sdsc.scigraph.bbop;
 
-import javax.ws.rs.ext.MessageBodyWriter;
-import javax.xml.bind.JAXBException;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.tinkerpop.blueprints.Graph;
+/***
+ * A bean representation of the <a href="https://github.com/berkeleybop/bbop-js/wiki/Graph">bbop-js</a>
+ * graph representation.
+ */
+public final class BbopGraph {
 
-public class XgmmlWriterTest extends GraphWriterTestBase {
+  List<BbopNode> nodes = new ArrayList<>();
+  List<BbopEdge> edges = new ArrayList<>();
 
-  @Override
-  MessageBodyWriter<Graph> getWriter() {
-    try {
-      return new XgmmlWriter();
-    } catch (JAXBException e) {
-      return null;
-    }
+  public List<BbopNode> getNodes() {
+    return nodes;
+  }
+
+  public void setNodes(List<BbopNode> nodes) {
+    this.nodes = nodes;
+  }
+
+  public List<BbopEdge> getEdges() {
+    return edges;
+  }
+
+  public void setEdges(List<BbopEdge> edges) {
+    this.edges = edges;
   }
 
 }

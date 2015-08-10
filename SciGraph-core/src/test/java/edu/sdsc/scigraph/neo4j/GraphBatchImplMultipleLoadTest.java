@@ -19,6 +19,7 @@ import static com.google.common.collect.Iterables.size;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -58,19 +59,19 @@ public class GraphBatchImplMultipleLoadTest {
     maker = DBMaker.newMemoryDB().make();
   }
 
-  Graph getBatchGraph() {
-    BatchInserter inserter = BatchInserters.inserter(path);
+  Graph getBatchGraph() throws IOException {
+    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
     return new GraphBatchImpl(inserter, "uri", Collections.<String>emptySet(), Collections.<String>emptySet(),
         new IdMap(maker), new RelationshipMap(maker));
   }
 
   GraphDatabaseService getGraphDB() {
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path);
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     return graphDb;
   }
 
   @Test
-  public void testMultipleInserts() {
+  public void testMultipleInserts() throws IOException {
     Graph batchGraph = getBatchGraph();
     long a = batchGraph.createNode("a");
     long b = batchGraph.createNode("b");

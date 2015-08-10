@@ -17,8 +17,15 @@ package edu.sdsc.scigraph.internal;
 
 import com.tinkerpop.blueprints.Graph;
 
+/***
+ * Like AOP - but AOG (Aspect Oriented Graphs).
+ */
 public interface GraphAspect {
 
+  /***
+   * Run some cross cutting code on a graph
+   * @param graph
+   */
   void invoke(Graph graph);
 
 }

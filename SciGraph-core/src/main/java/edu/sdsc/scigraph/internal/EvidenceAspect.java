@@ -34,11 +34,15 @@ import com.google.common.base.Function;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
+/***
+ * Add "evidence" to a graph
+ */
 public class EvidenceAspect implements GraphAspect {
 
-  static final RelationshipType HAS_SUBJECT = DynamicRelationshipType.withName("hasSubject");
-  static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("hasObject");
-  static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("evidence");
+  // TODO: Fix fragments for #118
+  static final RelationshipType HAS_SUBJECT = DynamicRelationshipType.withName("association_has_subject");
+  static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("association_has_object");
+  static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("RO_0002558");
   static final RelationshipType SOURCE = DynamicRelationshipType.withName("source");
   
   
@@ -60,7 +64,7 @@ public class EvidenceAspect implements GraphAspect {
         ));
     try (Transaction tx = graphDb.beginTx()) {
       for (Vertex vertex: graph.getVertices()) {
-        Node subject = graphDb.getNodeById(Long.valueOf((String)vertex.getId()));
+        Node subject = graphDb.getNodeById(Long.parseLong((String)vertex.getId()));
         for (Relationship hasSubject: subject.getRelationships(HAS_SUBJECT, Direction.INCOMING)) {
           Node annotation = hasSubject.getOtherNode(subject);
           for (Relationship hasObject: annotation.getRelationships(HAS_OBJECT, Direction.OUTGOING)) {

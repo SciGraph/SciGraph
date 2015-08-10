@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.Resource;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,13 +49,21 @@ public class OwlOntologyProducerTest extends GraphTestBase {
   OwlOntologyProducer producer;
   BlockingQueue<OWLCompositeObject> queue = new LinkedBlockingQueue<OWLCompositeObject>();
 
+  static Server server = new Server(10000);
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    Server server = new Server(8080);
+    server.setStopAtShutdown(true);
     ResourceHandler handler = new ResourceHandler();
     handler.setBaseResource(Resource.newClassPathResource("/ontologies/import/"));
     server.setHandler(handler);
     server.start();
+  }
+
+  @AfterClass
+  public static void teardown() throws Exception {
+    server.stop();
+    server.join();
   }
 
   @Before
@@ -64,7 +73,7 @@ public class OwlOntologyProducerTest extends GraphTestBase {
 
   @Test
   public void ontologyStructure_isAdded() throws OWLOntologyCreationException {
-    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:8080/main.owl"));
+    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:10000/main.owl"));
     producer.addOntologyStructure(manager, ontology);
     Optional<Long> main = graph.getNode("http://example.org/MainOntology");
     Optional<Long> child1 = graph.getNode("http://example.org/Child1");
@@ -78,9 +87,19 @@ public class OwlOntologyProducerTest extends GraphTestBase {
   }
 
   @Test
+  public void circularOntologies_dontRecurseInfintely() throws Exception {
+    OWLOntology ontology = manager.loadOntology(IRI.create("http://localhost:10000/circular_parent.owl"));
+    producer.addOntologyStructure(manager, ontology);
+    Optional<Long> parent = graph.getNode("http://example.org/ParentOntology");
+    Optional<Long> grandchild = graph.getNode("http://example.org/GrandChildOntology");
+    assertThat(graph.getRelationship(parent.get(), grandchild.get(), OwlRelationships.RDFS_IS_DEFINED_BY).isPresent(), is(true));
+    assertThat(graph.getRelationship(grandchild.get(), grandchild.get(), OwlRelationships.RDFS_IS_DEFINED_BY).isPresent(), is(true));
+  }
+
+  @Test
   public void objects_areQueued() throws InterruptedException {
     OntologySetup ontologyConfig = new OntologySetup();
-    ontologyConfig.setUrl("http://localhost:8080/main.owl");
+    ontologyConfig.setUrl("http://localhost:10000/main.owl");
     producer.queueObjects(manager, ontologyConfig);
     assertThat(queue.size(), is(greaterThan(0)));
   }

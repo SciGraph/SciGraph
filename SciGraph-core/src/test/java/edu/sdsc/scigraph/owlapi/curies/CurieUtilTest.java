@@ -63,17 +63,17 @@ public class CurieUtilTest {
   }
 
   @Test
-  public void currie_whenShortMappingIsPresent() {
+  public void curie_whenShortMappingIsPresent() {
     assertThat(util.getCurie("http://x.org/foo"), is(Optional.of(":foo")));
   }
 
   @Test
-  public void currie_whenLongMappingIsPresent() {
+  public void curie_whenLongMappingIsPresent() {
     assertThat(util.getCurie("http://x.org/a_foo"), is(Optional.of("A:foo")));
   }
 
   @Test
-  public void noCurrie_whenMappingIsNotPresent() {
+  public void noCurie_whenMappingIsNotPresent() {
     assertThat(util.getCurie("http://none.org/none"), is(Optional.<String>absent()));
   }
 

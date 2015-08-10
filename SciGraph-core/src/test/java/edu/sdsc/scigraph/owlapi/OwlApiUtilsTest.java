@@ -21,7 +21,10 @@ import static org.junit.Assert.assertThat;
 import java.net.URISyntaxException;
 
 import org.hamcrest.core.IsInstanceOf;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -30,6 +33,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.google.common.base.Optional;
@@ -37,7 +41,15 @@ import com.google.common.base.Optional;
 public class OwlApiUtilsTest {
 
   static OWLDataFactory factory = OWLManager.getOWLDataFactory();
-  static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+  OWLOntologyManager manager;
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+
+  @Before
+  public void setup() {
+    manager = OWLManager.createOWLOntologyManager();
+  }
 
   @Test
   public void testGetBooleanTypedLiteral() {
@@ -75,7 +87,7 @@ public class OwlApiUtilsTest {
     OWLClass clazz = factory.getOWLClass(IRI.create("http://example.org/Thing"));
     assertThat(OwlApiUtils.getIri((OWLClassExpression)clazz), is("http://example.org/Thing"));
     OWLObjectIntersectionOf expression = factory.getOWLObjectIntersectionOf(clazz);
-    assertThat(OwlApiUtils.getIri(expression), is("_:" + expression.hashCode()));
+    assertThat(OwlApiUtils.getIri(expression), is("_:" + OwlApiUtils.hash(expression.toString())));
   }
 
   @Test
@@ -88,6 +100,17 @@ public class OwlApiUtilsTest {
   @Test
   public void loadOntology() throws Exception {
     OwlApiUtils.loadOntology(manager, "src/test/resources/ontologies/pizza.owl");
+  }
+
+  @Test
+  public void loadFromResource() throws Exception {
+    OwlApiUtils.loadOntology(manager, "ontologies/pizza.owl");
+  }
+
+  @Test
+  public void nonExistantOntology_throwsException() throws Exception {
+    exception.expect(OWLOntologyCreationException.class);
+    OwlApiUtils.loadOntology(manager, "fizz");
   }
 
   @Test

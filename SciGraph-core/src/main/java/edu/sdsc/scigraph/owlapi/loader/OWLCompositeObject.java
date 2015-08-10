@@ -15,20 +15,23 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
+import java.io.Serializable;
+
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
 
-class OWLCompositeObject {
+class OWLCompositeObject implements Serializable {
 
-  private final OWLOntology ontology;
+  private static final long serialVersionUID = 1L;
+
+  private final String ontology;
   private final OWLObject object;
 
-  OWLCompositeObject(OWLOntology ontology, OWLObject object) {
+  OWLCompositeObject(String ontology, OWLObject object) {
     this.ontology = ontology;
     this.object = object;
   }
 
-  public OWLOntology getOntology() {
+  public String getOntology() {
     return ontology;
   }
 

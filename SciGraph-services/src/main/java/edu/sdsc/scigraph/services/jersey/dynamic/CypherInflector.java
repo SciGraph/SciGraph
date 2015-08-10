@@ -40,7 +40,8 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import edu.sdsc.scigraph.internal.CypherUtil;
 import edu.sdsc.scigraph.internal.GraphAspect;
 import edu.sdsc.scigraph.internal.TinkerGraphUtil;
-import edu.sdsc.scigraph.owlapi.curies.AddCurries;
+import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.owlapi.curies.AddCuries;
 import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 import edu.sdsc.scigraph.services.api.graph.ArrayPropertyTransformer;
 import edu.sdsc.scigraph.services.jersey.MultivaluedMapUtils;
@@ -66,7 +67,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
     this.aspectMap = aspectMap;
   }
 
-  @AddCurries
+  @AddCuries
   @Override
   public Response apply(ContainerRequestContext context) {
     logger.fine("Serving dynamic request");
@@ -103,7 +104,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
       if (entry.getValue() instanceof String) {
         Optional<String> iri = curieUtil.getIri((String)entry.getValue());
         if (iri.isPresent()) {
-          map.put(entry.getKey(), iri.get());
+          map.put(entry.getKey(), GraphUtil.getFragment(iri.get()));
         } else {
           map.put(entry.getKey(), entry.getValue());
         }

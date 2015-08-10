@@ -51,13 +51,11 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ForwardingList;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -71,8 +69,7 @@ import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 
 @Path("/annotations")
 @Api(value = "/annotations", description = "Annotation services")
-@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-  MediaType.APPLICATION_XML })
+@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
 public class AnnotateService extends BaseResource {
 
   private static final Logger logger = Logger.getLogger(AnnotateService.class.getName());
@@ -204,7 +201,6 @@ public class AnnotateService extends BaseResource {
   }
 
   @POST
-  @Produces(MediaType.TEXT_XML)
   @Consumes("application/x-www-form-urlencoded")
   @ApiOperation(value = "Annotate text", response = String.class, 
   notes = "A POST resource for API clients wishing to annotate longer content. This is most likely the method of choice for most clients. "
@@ -275,7 +271,6 @@ public class AnnotateService extends BaseResource {
 
   @GET
   @Path("/entities")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
   @ApiOperation(value = "Get entities from text", response = EntityAnnotation.class, notes="Get entities from content without embedding them in the source.")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
@@ -320,10 +315,9 @@ public class AnnotateService extends BaseResource {
   @POST
   @Path("/entities")
   @Consumes("application/x-www-form-urlencoded")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Get entities from text", response = EntityAnnotation.class, 
   notes = "Get the entities from content without embedding them in the source - only the entities are returned. " +
-    DocumentationStrings.REST_ABUSE_DOC)
+      DocumentationStrings.REST_ABUSE_DOC)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object postEntities(
@@ -353,9 +347,8 @@ public class AnnotateService extends BaseResource {
   @GET
   @Path("/complete")
   @Consumes("application/x-www-form-urlencoded")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
   @ApiOperation(value = "Get embedded annotations as well as a separate list", response = Annotations.class, 
-    notes="A convenience resource for retrieving both a list of entities and annotated content")
+  notes="A convenience resource for retrieving both a list of entities and annotated content")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getEntitiesAndContent(
@@ -413,7 +406,6 @@ public class AnnotateService extends BaseResource {
   @POST
   @Path("/complete")
   @Consumes("application/x-www-form-urlencoded")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Get embedded annotations as well as a separate list", response = Annotations.class, 
   notes="A convenience resource for retrieving both a list of entities and annotated content. " + DocumentationStrings.REST_ABUSE_DOC)
   @Timed
@@ -454,31 +446,27 @@ public class AnnotateService extends BaseResource {
   }
 
   /***
-   * A utility JAXB class for {@link AnnotateService#getEntitiesAndContent(String, Set, Set, int, boolean, boolean, boolean, boolean, String)}.
+   * A utility class for {@link AnnotateService#getEntitiesAndContent(String, Set, Set, int, boolean, boolean, boolean, boolean, String)}.
    */
-  @XmlRootElement
-  static class Annotations /*extends ForwardingList<EntityAnnotation>*/ {
+  static class Annotations extends ForwardingList<EntityAnnotation> {
 
-    @XmlElement(name="entity")
-    @XmlElementWrapper(name="entities")
     List<EntityAnnotation> delegate;
 
-    @XmlElement
     String content;
 
     @Override
-    public int hashCode() {
-      return delegate.hashCode();
-    }
-
-    /*@Override
     protected List<EntityAnnotation> delegate() {
       return delegate;
-    }*/
+    }
 
     @Override
     public boolean equals(Object obj) {
       return delegate.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+      return delegate.hashCode();
     }
 
     @JsonProperty

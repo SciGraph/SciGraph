@@ -17,8 +17,6 @@ package edu.sdsc.scigraph.services.resources;
 
 import io.dropwizard.jersey.caching.CacheControl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -30,8 +28,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.codahale.metrics.annotation.Timed;
 import com.wordnik.swagger.annotations.Api;
@@ -47,8 +43,7 @@ import edu.sdsc.scigraph.services.jersey.JaxRsUtil;
 
 @Path("/lexical")
 @Api(value = "/lexical", description = "Lexical services")
-@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP,
-    MediaType.APPLICATION_XML })
+@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
 public class LexicalService extends BaseResource {
 
   @Inject
@@ -71,8 +66,8 @@ public class LexicalService extends BaseResource {
       @QueryParam("text") @DefaultValue("") String text,
       @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
       @QueryParam("callback") String callback) {
-    SentenceWrapper sentences = new SentenceWrapper(lexicalLib.extractSentences(text));
-    GenericEntity<SentenceWrapper> response = new GenericEntity<SentenceWrapper>(sentences){};
+    List<String> sentences = lexicalLib.extractSentences(text);
+    GenericEntity<List<String>> response = new GenericEntity<List<String>>(sentences){};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
@@ -142,19 +137,6 @@ public class LexicalService extends BaseResource {
     final List<Token<String>> chunks = lexicalLib.getEntities(text);
     GenericEntity<List<Token<String>>> response = new GenericEntity<List<Token<String>>>(chunks){};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);
-  }
-
-  @XmlRootElement(name="sentences")
-  private static class SentenceWrapper {
-    @XmlElement(name="sentence")
-    List<String> list=new ArrayList<>();
-
-    @SuppressWarnings("unused")
-    SentenceWrapper() {}
-
-    SentenceWrapper(Collection<String> items) {
-      list.addAll(items);
-    }
   }
 
 }

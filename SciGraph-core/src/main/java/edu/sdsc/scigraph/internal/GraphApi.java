@@ -25,7 +25,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -46,9 +45,8 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import edu.sdsc.scigraph.neo4j.DirectedRelationshipType;
-import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
-import edu.sdsc.scigraph.owlapi.curies.AddCurries;
+import edu.sdsc.scigraph.owlapi.curies.AddCuries;
 
 public class GraphApi {
 
@@ -82,36 +80,7 @@ public class GraphApi {
     return entailment;
   }
 
-
-  public boolean classIsInCategory(Node candidate, Node parentConcept) {
-    return classIsInCategory(candidate, parentConcept, OwlRelationships.RDFS_SUBCLASS_OF);
-  }
-
-  public boolean classIsInCategory(Node candidate, Node parent, RelationshipType... relationships) {
-    TraversalDescription description = graphDb.traversalDescription().depthFirst()
-        .evaluator(new Evaluator() {
-          @Override
-          public Evaluation evaluate(Path path) {
-            if (path.endNode().hasLabel(OwlLabels.OWL_CLASS)) {
-              return Evaluation.INCLUDE_AND_CONTINUE;
-            } else {
-              return Evaluation.EXCLUDE_AND_PRUNE;
-            }
-          }
-        });
-    for (RelationshipType type : relationships) {
-      description.relationships(type, Direction.OUTGOING);
-    }
-
-    for (Path position : description.traverse(candidate)) {
-      if (position.endNode().equals(parent)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @AddCurries
+  @AddCuries
   public Graph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
     TraversalDescription description = graphDb.traversalDescription()
         .depthFirst()

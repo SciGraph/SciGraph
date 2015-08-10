@@ -19,11 +19,17 @@ import static com.google.common.collect.Iterables.size;
 import static java.lang.String.format;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -41,8 +47,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Stopwatch;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -78,7 +82,10 @@ public class BatchOwlLoader {
   Graph graph;
 
   @Inject
-  @IndicatesMappedProperties 
+  List<OntologySetup> ontologies;
+
+  @Inject
+  @IndicatesMappedProperties
   List<MappedProperty> mappedProperties;
 
   @Inject
@@ -87,37 +94,51 @@ public class BatchOwlLoader {
   @Inject
   Provider<OwlOntologyProducer> producerProvider;
 
-  Collection<OntologySetup> ontologies;
-
   @Inject
   BlockingQueue<OWLCompositeObject> queue;
 
   @Inject
   BlockingQueue<OntologySetup> urlQueue;
-  
+
   @Inject
-  ExecutorService exec; 
-  
+  ExecutorService exec;
+
   static {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
     OwlApiUtils.silenceOboParser();
   }
 
-  void loadOntology() throws InterruptedException {
+  public void loadOntology() throws InterruptedException {
+    CompletionService<Long> completionService = new ExecutorCompletionService<Long>(exec);
+    Set<Future<?>> futures = new HashSet<>();
     if (!ontologies.isEmpty()) {
       for (int i = 0; i < numConsumers; i++) {
-        exec.submit(consumerProvider.get());
+        futures.add(completionService.submit(consumerProvider.get()));
       }
       for (int i = 0; i < numProducers; i++) {
-        exec.submit(producerProvider.get());
+        futures.add(completionService.submit(producerProvider.get()));
       }
-      for (OntologySetup ontology: ontologies) {
+      for (OntologySetup ontology : ontologies) {
         urlQueue.offer(ontology);
       }
       for (int i = 0; i < numProducers; i++) {
         urlQueue.offer(POISON_STR);
       }
     }
+
+    while (futures.size() > 0) {
+      Future<?> completedFuture = completionService.take();
+      futures.remove(completedFuture);
+      try {
+        completedFuture.get();
+      } catch (ExecutionException e) {
+        logger.log(Level.SEVERE, "Stopping batchLoading due to: " + e.getMessage(), e);
+        e.printStackTrace();
+        exec.shutdownNow();
+        throw new InterruptedException(e.getCause().getMessage());
+      }
+    }
+
     exec.shutdown();
     exec.awaitTermination(10, TimeUnit.DAYS);
     graph.shutdown();
@@ -145,7 +166,8 @@ public class BatchOwlLoader {
     public void shutdown() {
       try (Transaction tx = graphDb.beginTx()) {
         logger.info(size(GlobalGraphOperations.at(graphDb).getAllNodes()) + " nodes");
-        logger.info(size(GlobalGraphOperations.at(graphDb).getAllRelationships()) + " relationships");
+        logger.info(size(GlobalGraphOperations.at(graphDb).getAllRelationships())
+            + " relationships");
         tx.success();
       }
       graphDb.shutdown();
@@ -154,11 +176,13 @@ public class BatchOwlLoader {
   }
 
   public static void load(OwlLoadConfiguration config) throws InterruptedException {
-    Injector i = Guice.createInjector(new OwlLoaderModule(config), new Neo4jModule(config.getGraphConfiguration()));
+    Injector i =
+        Guice.createInjector(new OwlLoaderModule(config),
+            new Neo4jModule(config.getGraphConfiguration()));
     BatchOwlLoader loader = i.getInstance(BatchOwlLoader.class);
-    loader.ontologies = config.getOntologies();
     logger.info("Loading ontologies...");
     Stopwatch timer = Stopwatch.createStarted();
+    // TODO catch exception and delete the incomplete graph through the graph location
     loader.loadOntology();
     DB mapDb = i.getInstance(DB.class);
     mapDb.close();
@@ -166,8 +190,8 @@ public class BatchOwlLoader {
   }
 
   protected static Options getOptions() {
-    Option configPath = new Option("c", "configpath", true,
-        "The location of the configuration file");
+    Option configPath =
+        new Option("c", "configpath", true, "The location of the configuration file");
     configPath.setRequired(true);
     Options options = new Options();
     options.addOption(configPath);
@@ -186,9 +210,9 @@ public class BatchOwlLoader {
       System.exit(-1);
     }
 
-    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    OwlLoadConfiguration config = mapper.readValue(new File(cmd.getOptionValue('c').trim()),
-        OwlLoadConfiguration.class);
+    OwlLoadConfigurationLoader owlLoadConfigurationLoader =
+        new OwlLoadConfigurationLoader(new File(cmd.getOptionValue('c').trim()));
+    OwlLoadConfiguration config = owlLoadConfigurationLoader.loadConfig();
     load(config);
     // TODO: Is Guice causing this to hang? #44
     System.exit(0);

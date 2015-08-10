@@ -32,8 +32,10 @@ public class OwlLoadConfiguration {
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
 
-  private int producerThreadCount = (int)Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0);
-  private int consumerThreadCount = (int)Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0);
+  private int producerThreadCount = (int) Math.ceil(Runtime.getRuntime()
+      .availableProcessors() / 2.0);
+  private int consumerThreadCount = (int) Math.ceil(Runtime.getRuntime()
+      .availableProcessors() / 2.0);
 
   public Neo4jConfiguration getGraphConfiguration() {
     return graphConfiguration;
@@ -47,8 +49,16 @@ public class OwlLoadConfiguration {
     return ontologies;
   }
 
+  public void setCategories(Map<String, String> categories) {
+    this.categories = categories;
+  }
+
   public Map<String, String> getCategories() {
     return categories;
+  }
+
+  public void setMappedProperties(List<MappedProperty> mappedProperties) {
+    this.mappedProperties = mappedProperties;
   }
 
   public List<MappedProperty> getMappedProperties() {
@@ -75,7 +85,10 @@ public class OwlLoadConfiguration {
 
     String url;
 
-    Optional<ReasonerConfiguration> reasonerConfiguration = Optional.absent();
+    Optional<ReasonerConfiguration> reasonerConfiguration = Optional
+        .absent();
+
+    boolean skipImports = false;
 
     public String url() {
       return url;
@@ -89,12 +102,24 @@ public class OwlLoadConfiguration {
       return reasonerConfiguration;
     }
 
-    public void setReasonerConfiguration(ReasonerConfiguration reasonerConfiguration) {
+    public void setReasonerConfiguration(
+        ReasonerConfiguration reasonerConfiguration) {
       this.reasonerConfiguration = Optional.of(reasonerConfiguration);
+    }
+
+    public boolean isSkipImports() {
+      return skipImports;
+    }
+
+    public void setSkipImports(boolean skipImports) {
+      this.skipImports = skipImports;
     }
 
     @Override
     public String toString() {
+      if (skipImports) {
+        return url + " (skipImport)";
+      }
       return url;
     }
 
@@ -127,7 +152,8 @@ public class OwlLoadConfiguration {
       return removeUnsatisfiableClasses;
     }
 
-    public void setRemoveUnsatisfiableClasses(boolean removeUnsatisfiableClasses) {
+    public void setRemoveUnsatisfiableClasses(
+        boolean removeUnsatisfiableClasses) {
       this.removeUnsatisfiableClasses = removeUnsatisfiableClasses;
     }
 
@@ -145,7 +171,8 @@ public class OwlLoadConfiguration {
     String name;
     List<String> properties = new ArrayList<>();
 
-    public MappedProperty() { }
+    public MappedProperty() {
+    }
 
     public MappedProperty(String name) {
       this.name = name;
@@ -165,8 +192,8 @@ public class OwlLoadConfiguration {
 
     @Override
     public String toString() {
-      return MoreObjects.toStringHelper(this.getClass()).add("name", name)
-          .add("properties", properties).toString();
+      return MoreObjects.toStringHelper(this.getClass())
+          .add("name", name).add("properties", properties).toString();
     }
 
   }

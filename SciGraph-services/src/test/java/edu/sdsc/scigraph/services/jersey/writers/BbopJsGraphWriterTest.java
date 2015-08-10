@@ -15,15 +15,20 @@
  */
 package edu.sdsc.scigraph.services.jersey.writers;
 
+import java.util.Collections;
+
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import com.tinkerpop.blueprints.Graph;
+
+import edu.sdsc.scigraph.bbop.BbopGraphUtil;
+import edu.sdsc.scigraph.owlapi.curies.CurieUtil;
 
 public class BbopJsGraphWriterTest extends GraphWriterTestBase {
 
   @Override
   MessageBodyWriter<Graph> getWriter() {
-    return new BbopJsGraphWriter();
+    return new BbopJsGraphWriter(new BbopGraphUtil(new CurieUtil(Collections.<String, String>emptyMap())));
   }
 
 }

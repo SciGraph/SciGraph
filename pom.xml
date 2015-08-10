@@ -20,7 +20,7 @@
   <groupId>edu.sdsc</groupId>
   <artifactId>scigraph</artifactId>
   <name>SciGraph</name>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -54,7 +54,7 @@
     <dropwizard.version>0.8.1</dropwizard.version>
     <guice.version>4.0</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
-    <neo4j.version>2.2.1</neo4j.version>
+    <neo4j.version>2.2.3</neo4j.version>
   </properties>
 
   <build>
@@ -178,7 +178,7 @@
     <dependency>
       <groupId>nl.jqno.equalsverifier</groupId>
       <artifactId>equalsverifier</artifactId>
-      <version>1.7.2</version>
+      <version>1.7.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>

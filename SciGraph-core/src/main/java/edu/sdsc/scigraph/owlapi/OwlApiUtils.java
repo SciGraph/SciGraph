@@ -41,7 +41,12 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Resources;
 
 public class OwlApiUtils {
 
@@ -52,6 +57,10 @@ public class OwlApiUtils {
   private static final Set<String> unknownLanguages = new HashSet<>();
 
   private static final Set<OWLOntology> ontologiesWithoutIris = new HashSet<>();
+
+  private static final HashFunction HASHER = Hashing.md5();
+  
+  private static boolean silencedParser = false;
 
   /*** 
    * @param literal An OWLLiteral
@@ -85,9 +94,15 @@ public class OwlApiUtils {
     return expression.getEntity().getIRI().toString();
   }
 
+  static String hash(String input) {
+    // TODO: This may negatively impact performance but will reduce hash collisions. #150
+    HashCode code = HASHER.newHasher().putString(input, Charsets.UTF_8).hash();
+    return code.toString();
+  }
+
   public static String getIri(OWLClassExpression expression) {
     if (expression.isAnonymous()) {
-      return "_:" + expression.hashCode();
+      return "_:" + hash(expression.toString());
     } else {
       return expression.asOWLClass().getIRI().toString();
     }
@@ -95,7 +110,7 @@ public class OwlApiUtils {
 
   public static String getIri(OWLObjectPropertyExpression property) {
     if (property.isAnonymous()) {
-      return "_:" + property.hashCode();
+      return "_:" + hash(property.toString());
     } else {
       return property.asOWLObjectProperty().getIRI().toString();
     }
@@ -114,7 +129,7 @@ public class OwlApiUtils {
   }
 
   public static String getIri(OWLOntology ontology) {
-    String iri = "_:" + ontology.hashCode();
+    String iri = "_:" + hash(ontology.toString());
     if (null != ontology.getOntologyID() && null != ontology.getOntologyID().getOntologyIRI()) {
       iri = ontology.getOntologyID().getOntologyIRI().toString();
     } else {
@@ -141,17 +156,27 @@ public class OwlApiUtils {
     String origThreadName = Thread.currentThread().getName();
     Thread.currentThread().setName("read - " + ontology);
     OWLOntology ont;
+
     if (validator.isValid(ontology)) {
       ont = manager.loadOntology(IRI.create(ontology));
-    } else {
+    } else if (new File(ontology).exists()){
       ont = manager.loadOntologyFromOntologyDocument(new File(ontology));
+    } else {
+      try {
+        ont = manager.loadOntologyFromOntologyDocument(Resources.getResource(ontology).openStream());
+      } catch (Exception e) {
+        throw new OWLOntologyCreationException("Failed to find ontology: " + ontology);
+      }
     }
     logger.info(String.format("Finished loading ontology with owlapi: %s", ontology));
     Thread.currentThread().setName(origThreadName);
     return ont;
   }
 
-  public static void silenceOboParser() {
+  public static synchronized void silenceOboParser() {
+    if (silencedParser) {
+      return;
+    }
     OWLManager.createOWLOntologyManager();
     /* TODO: Why does this logging never become silent?
      * Logger logger = Logger.getLogger("org.obolibrary");
@@ -160,6 +185,7 @@ public class OwlApiUtils {
     for (Handler handler : handlers) {
       handler.setLevel(Level.SEVERE);
     }*/
+    // TODO: Why does this cause a concurrent modification exception if not synchronized
     OWLParserFactoryRegistry registry = OWLParserFactoryRegistry.getInstance();
     List<OWLParserFactory> factories = registry.getParserFactories();
     for (OWLParserFactory factory : factories) {
@@ -168,5 +194,6 @@ public class OwlApiUtils {
         registry.unregisterParserFactory(factory);
       }
     }
+    silencedParser = true;
   }
 }

@@ -23,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
@@ -61,7 +62,7 @@ public class GraphBatchImplIT {
   @Before
   public void setup() throws IOException {
     path = folder.newFolder().getAbsolutePath();
-    BatchInserter inserter = BatchInserters.inserter(path);
+    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
     graph =
         new GraphBatchImpl(inserter, CommonProperties.IRI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
@@ -70,7 +71,7 @@ public class GraphBatchImplIT {
 
   GraphDatabaseService getGraphDB() {
     graph.shutdown();
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(path.toString());
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     return graphDb;

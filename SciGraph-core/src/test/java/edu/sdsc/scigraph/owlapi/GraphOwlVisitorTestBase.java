@@ -19,6 +19,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -26,8 +27,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
@@ -108,7 +111,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, propertyMap);
     walker.walkStructure(visitor);
     graph.shutdown();
-    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(path.toString());
+    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
     tx = graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;
@@ -175,8 +178,15 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
 
   @Test
   public void anonymousClassesAreCreated() {
-    Node complement = getNode("_:-1761792206");
-    assertThat(complement.getLabels(), hasItem(OwlLabels.OWL_ANONYMOUS));
+    Iterator<Node> nodes = graphDb.findNodes(OwlLabels.OWL_ANONYMOUS);
+    assertThat(nodes.hasNext(), is(true));
+    while (nodes.hasNext()) {
+      Node node = nodes.next();
+      assertThat(GraphUtil.getProperty(node, CommonProperties.URI, String.class).get(), startsWith("_:"));
+    }
+      
+    
+    //assertThat(complement.getLabels(), hasItem(OwlLabels.OWL_ANONYMOUS));
   }
 
   @Test

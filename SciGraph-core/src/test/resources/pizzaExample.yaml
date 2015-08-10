@@ -10,6 +10,20 @@ graphConfiguration:
     exactNodeProperties:
       - label
       - synonym
+    curies:
+      'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
+      'rdfs' : 'http://www.w3.org/2000/01/rdf-schema#'
+
+    # Set Neo4j configuration options
+    neo4jConfig:
+      dump_configuration : true
+      dbms.pagecache.memory : 1G
+
+# The number of threads dedicated to reading ontologies
+producerThreadCount: 2
+
+# The number of threads dedicated to processing ontology axioms
+consumerThreadCount: 2
 
 # A list of ontologies to import.
 ontologies:
@@ -18,22 +32,24 @@ ontologies:
     # Or URIs
     #- http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine.rdf
     # And can optionally include a reasoner factory
-    reasonerConfiguration:
-      factory: org.semanticweb.elk.owlapi.ElkReasonerFactory
+    #reasonerConfiguration:
+    #  factory: org.semanticweb.elk.owlapi.ElkReasonerFactory
 
 # Categories are used for vocabulary term filtering and are inherited to
 # subclasses of their parent. They are also added as node labels for
-# convenience
+# convenience.
+# Note that previously defined curies can be used instead of IRIs.
 categories:
-    http://www.co-ode.org/ontologies/pizza/pizza.owl#NamedPizza : pizza
+    pizza:NamedPizza : pizza
     http://www.co-ode.org/ontologies/pizza/pizza.owl#PizzaTopping : topping
 
-# All properties are stored but can optionally be added to a new node property
+# All properties are stored but can optionally be added to a new node property.
+# Note that previously defined curies can be used instead of IRIs.
 mappedProperties:
   - name: label # The name of the new property
     properties: # The list of properties mapped to the new property
-    - http://www.w3.org/2000/01/rdf-schema#label
+    - rdfs:label
     - http://www.w3.org/2004/02/skos/core#prefLabel
   - name: comment
     properties:
-    - http://www.w3.org/2000/01/rdf-schema#comment
+    - rdfs:comment

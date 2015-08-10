@@ -1,0 +1,5 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:ParentOntology
+Import( <http://localhost:10000/circular_child.owl> )
+)

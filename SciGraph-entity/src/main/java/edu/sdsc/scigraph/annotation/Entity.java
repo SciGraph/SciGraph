@@ -23,24 +23,16 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 
 // TODO: Can this be replaced by Concept?
-@XmlRootElement
 public final class Entity {
 
-  @XmlValue
   private final Set<String> term;
 
-  @XmlAttribute
   private final String id;
 
-  @XmlAttribute
   private Set<String> categories;
 
   public Entity(Iterable<String> terms, String id) {

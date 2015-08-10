@@ -1,7 +1,7 @@
 Prefix(:=<http://example.org/>)
 
 Ontology(:MainOntology
-Import( <http://localhost:8080/child1.owl> )
-Import( <http://localhost:8080/child2.owl> )
+Import( <http://localhost:10000/child1.owl> )
+Import( <http://localhost:10000/child2.owl> )
 Declaration(Class(:main))
 )

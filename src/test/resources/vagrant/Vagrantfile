@@ -4,6 +4,7 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.network "forwarded_port", guest: 9000, host:9000
+  config.vm.network "forwarded_port", guest: 3333, host:3333
   config.vm.provider "virtualbox" do |vb|
      vb.name = "SciGraph Example Box"
      vb.memory = "2048"
@@ -13,5 +14,10 @@ Vagrant.configure(2) do |config|
      sudo apt-get install -y maven git openjdk-7-jdk xvfb
      echo "export DISPLAY=localhost:99" >> /home/vagrant/.profile
      Xvfb :99 &
+     wget –q -o /dev/null https://github.com/OpenRefine/OpenRefine/releases/download/2.5/google-refine-2.5-r2407.tar.gz
+     tar -zxf google-refine-2.5-r2407.tar.gz
+     rm google-refine-2.5-r2407.tar.gz
+     echo "sudo /home/vagrant/google-refine-2.5/refine -i 0.0.0.0" > /home/vagrant/runOpenRefine.sh
+     chmod ugo+x /home/vagrant/runOpenRefine.sh
   SHELL
 end

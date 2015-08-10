@@ -15,6 +15,8 @@
  */
 package edu.sdsc.scigraph.owlapi.loader;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Singleton;
 
+import org.mapdb.DB;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
@@ -49,7 +52,7 @@ import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
 import edu.sdsc.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 
-class OwlLoaderModule extends AbstractModule {
+public class OwlLoaderModule extends AbstractModule {
 
   private static final Logger logger = Logger.getLogger(OwlLoaderModule.class.getName());
 
@@ -67,9 +70,10 @@ class OwlLoaderModule extends AbstractModule {
     bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesExactIndexedProperties.class).toInstance(config.getGraphConfiguration().getExactNodeProperties());
     bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesMappedCategories.class).toInstance(config.getCategories());
     bind(new TypeLiteral<List<MappedProperty>>() {}).annotatedWith(IndicatesMappedProperties.class).toInstance(config.getMappedProperties());
+    bind(new TypeLiteral<List<OntologySetup>>() {}).toInstance(config.getOntologies());
     bind(Graph.class).to(GraphBatchImpl.class).in(Scopes.SINGLETON);
 
-    bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>(){}).in(Scopes.SINGLETON);
+    //bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>(){}).in(Scopes.SINGLETON);
     bind(new TypeLiteral<BlockingQueue<OntologySetup>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OntologySetup>>(){}).in(Scopes.SINGLETON);
 
     bind(Integer.class).annotatedWith(IndicatesNumberOfConsumerThreads.class).toInstance(config.getConsumerThreadCount());
@@ -80,15 +84,23 @@ class OwlLoaderModule extends AbstractModule {
 
   @Provides
   @Singleton
+  BlockingQueue<OWLCompositeObject> getOntologyCompositeQueue(DB mapdb) {
+    return mapdb.getQueue("OntologyCompositeQueue");
+  }
+
+  
+  @Provides
+  @Singleton
   ExecutorService provideExecutorService(@IndicatesNumberOfConsumerThreads int consumers, @IndicatesNumberOfProducerThreads int producers) {
     return Executors.newFixedThreadPool(consumers + producers);
   }
 
   @Provides
   @Singleton
-  BatchInserter getInserter() {
-    logger.info("Getting BatchInserter");
-    return BatchInserters.inserter(config.getGraphConfiguration().getLocation(), config.getGraphConfiguration().getNeo4jConfig());
+  BatchInserter getInserter() throws IOException {
+    File location = new File(config.getGraphConfiguration().getLocation());
+    logger.info("Getting BatchInserter for " + location);
+    return BatchInserters.inserter(location.toString(), config.getGraphConfiguration().getNeo4jConfig());
   }
 
 }

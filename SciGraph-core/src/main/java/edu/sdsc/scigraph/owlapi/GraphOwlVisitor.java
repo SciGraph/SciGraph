@@ -20,7 +20,6 @@ import static com.google.common.collect.Lists.transform;
 import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getIri;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +80,9 @@ import edu.sdsc.scigraph.frames.EdgeProperties;
 import edu.sdsc.scigraph.neo4j.Graph;
 import edu.sdsc.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
+/***
+ * The core of the code for translating owlapi axioms into Neo4j structure.
+ */
 public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private static final Logger logger = Logger.getLogger(GraphOwlVisitor.class.getName());
@@ -88,13 +90,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   private final Graph graph;
 
   private Optional<OWLOntology> ontology = Optional.absent();
+  
+  private String definingOntology;
 
   private Map<String, String> mappedProperties;
-
-  public GraphOwlVisitor(Graph graph,
-      @Named("owl.mappedProperties") List<MappedProperty> mappedProperties) {
-    this(new OWLOntologyWalker(Collections.<OWLOntology>emptySet()), graph, mappedProperties);
-  }
 
   @Inject
   public GraphOwlVisitor(OWLOntologyWalker walker, Graph graph,
@@ -113,13 +112,14 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     graph.shutdown();
   }
 
-  public void setOntology(OWLOntology ontology) {
-    this.ontology = Optional.of(checkNotNull(ontology));
+  public void setOntology(String ontology) {
+    this.definingOntology = checkNotNull(ontology);
   }
 
   @Override
   public Void visit(OWLOntology ontology) {
     this.ontology = Optional.of(ontology);
+    this.definingOntology = OwlApiUtils.getIri(ontology);
     OWLOntologyID id = ontology.getOntologyID();
     if (null == id.getOntologyIRI()) {
       logger.fine("Ignoring null ontology ID for " + ontology.toString());
@@ -130,7 +130,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   private long addDefinedBy(Long node) {
-    long ontologyNode = graph.getNode(OwlApiUtils.getIri(ontology.get())).get();
+    long ontologyNode = graph.getNode(definingOntology).get();
     return graph.createRelationship(node, ontologyNode, OwlRelationships.RDFS_IS_DEFINED_BY);
   }
 
@@ -149,14 +149,14 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private long getOrCreateRelationship(long start, long end, RelationshipType type) {
     long relationship = graph.createRelationship(start, end, type);
-    graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), OwlApiUtils.getIri(ontology.get()));
+    graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), definingOntology);
     return relationship;
   }
 
   private Collection<Long> getOrCreateRelationshipPairwise(Collection<Long> nodeIds, RelationshipType type) {
     Collection<Long> relationships = graph.createRelationshipsPairwise(nodeIds, type);
     for (long relationship: relationships) {
-      graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), OwlApiUtils.getIri(ontology.get()));
+      graph.addRelationshipProperty(relationship, OwlRelationships.RDFS_IS_DEFINED_BY.name(), definingOntology);
     }
     return relationships;
   }
@@ -319,10 +319,13 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long superclass = getOrCreateNode(getIri(axiom.getSuperClass()));
     long relationship = getOrCreateRelationship(subclass, superclass, OwlRelationships.RDFS_SUBCLASS_OF);
     for (OWLAnnotation annotation: axiom.getAnnotations()) {
+      // TODO: Is there a more elegant way to process these annotations?
       String property = annotation.getProperty().getIRI().toString();
-      Optional<Object> value = OwlApiUtils.getTypedLiteralValue((OWLLiteral) annotation.getValue());
-      if (value.isPresent()) {
-        graph.addRelationshipProperty(relationship, property, value.get());
+      if (annotation.getValue() instanceof OWLLiteral) {
+        Optional<Object> value = OwlApiUtils.getTypedLiteralValue((OWLLiteral) annotation.getValue());
+        if (value.isPresent()) {
+          graph.addRelationshipProperty(relationship, property, value.get());
+        }
       }
     }
     return null;

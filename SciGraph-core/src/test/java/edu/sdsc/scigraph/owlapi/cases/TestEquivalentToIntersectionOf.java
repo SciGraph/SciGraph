@@ -29,13 +29,14 @@ import com.google.common.base.Optional;
 
 import edu.sdsc.scigraph.frames.CommonProperties;
 import edu.sdsc.scigraph.neo4j.GraphUtil;
+import edu.sdsc.scigraph.owlapi.OwlLabels;
 import edu.sdsc.scigraph.owlapi.OwlRelationships;
 
 public class TestEquivalentToIntersectionOf extends OwlTestCase {
 
   @Test
   public void testEquivalentToIntersectionOf() {
-    Node anonymousClass = getNode("_:-574176990");
+    Node anonymousClass = graphDb.findNodes(OwlLabels.OWL_INTERSECTION_OF).next();
     Node fillerClass = getNode("http://example.org/fillerClass");
 
     RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
