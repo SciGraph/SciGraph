@@ -74,7 +74,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
       }
     });
     bootstrap.addBundle(GuiceBundle.builder()
-        .enableAutoConfig("edu.sdsc.scigraph.services")
+        .enableAutoConfig("io.scigraph.services")
         .injectorFactory(factory).modules(new SciGraphApplicationModule()).build());
   }
 
@@ -107,7 +107,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
   }
 
   void addWriters(JerseyEnvironment environment) throws Exception {
-    for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("edu.sdsc.scigraph.services.jersey.writers")) {
+    for (ClassInfo classInfo: ClassPath.from(getClass().getClassLoader()).getTopLevelClasses("io.scigraph.services.jersey.writers")) {
       if (!Modifier.isAbstract(classInfo.load().getModifiers())) {
         environment.register(factory.getInjector().getInstance(classInfo.load()));
       }

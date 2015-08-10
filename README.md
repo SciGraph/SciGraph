@@ -72,12 +72,12 @@ Clone and compile the project:
 Build the graph:
 
     cd SciGraph-core
-    mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c src/test/resources/pizzaExample.yaml"
+    mvn exec:java -Dexec.mainClass="io.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c src/test/resources/pizzaExample.yaml"
 
 Run the services:
 
 	cd ../SciGraph-services
-    mvn exec:java -Dexec.mainClass="edu.sdsc.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
+    mvn exec:java -Dexec.mainClass="io.scigraph.services.MainApplication" -Dexec.args="server src/test/resources/pizzaConfiguration.yaml"
 
 Check out some of the REST endpoints (the Vagrant box has port 9000 mapped so you can use your host browser to check these out):
 

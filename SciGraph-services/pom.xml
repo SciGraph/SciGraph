@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>scigraph</artifactId>
-    <groupId>edu.sdsc</groupId>
+    <groupId>io.scigraph</groupId>
     <version>1.5-SNAPSHOT</version>
   </parent>
   <artifactId>scigraph-services</artifactId>
@@ -65,7 +65,7 @@
     </dependency>
 
     <dependency>
-      <groupId>edu.sdsc</groupId>
+      <groupId>io.scigraph</groupId>
       <artifactId>scigraph-core</artifactId>
       <version>${project.version}</version>
       <exclusions>
@@ -76,14 +76,14 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>edu.sdsc</groupId>
+      <groupId>io.scigraph</groupId>
       <artifactId>scigraph-core</artifactId>
       <type>test-jar</type>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>edu.sdsc</groupId>
+      <groupId>io.scigraph</groupId>
       <artifactId>scigraph-entity</artifactId>
       <version>${project.version}</version>
       <exclusions>
@@ -94,7 +94,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>edu.sdsc</groupId>
+      <groupId>io.scigraph</groupId>
       <artifactId>scigraph-analysis</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -199,7 +199,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>edu.sdsc.scigraph.services.MainApplication</mainClass>
+              <mainClass>io.scigraph.services.MainApplication</mainClass>
               <classpathLayoutType>custom</classpathLayoutType>
               <customClasspathLayout>lib/${artifact.groupId}.${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</customClasspathLayout>
             </manifest>

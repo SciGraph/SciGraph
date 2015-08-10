@@ -17,7 +17,7 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>edu.sdsc</groupId>
+  <groupId>io.scigraph</groupId>
   <artifactId>scigraph</artifactId>
   <name>SciGraph</name>
   <version>1.5-SNAPSHOT</version>
@@ -34,18 +34,10 @@
     <maven>3.0.1</maven>
   </prerequisites>
 
-  <repositories>
-    <repository>
-      <id>CRBS</id>
-      <name>CRBS Maven Repo</name>
-      <url>http://maven.crbs.ucsd.edu/nexus/content/repositories/NIF-snapshot</url>
-    </repository>
-  </repositories>
-
   <inceptionYear>2014</inceptionYear>
 
   <scm>
-    <developerConnection>scm:git:https://github.com/SciCrunch/SciGraph.git</developerConnection>
+    <developerConnection>scm:git:https://github.com/SciGraph/SciGraph.git</developerConnection>
   </scm>
 
   <properties>
@@ -108,7 +100,7 @@
           <properties>
             <owner>Christopher Condit</owner>
             <year>${project.inceptionYear}</year>
-            <email>condit@sdsc.edu</email>
+            <email>condit@gmail.com</email>
           </properties>
           <excludes>
             <exclude>**/LICENSE</exclude>
@@ -262,18 +254,5 @@
       </plugin>
     </plugins>
   </reporting>
-
-  <distributionManagement>
-    <repository>
-      <id>releases</id>
-      <name>Internal Releases</name>
-      <url>http://maven.crbs.ucsd.edu/nexus/content/repositories/releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>NIF-MAVEN</id>
-      <name>Internal Snapshots</name>
-      <url>http://maven.crbs.ucsd.edu/nexus/content/repositories/NIF-snapshot</url>
-    </snapshotRepository>
-  </distributionManagement>
 
 </project>
