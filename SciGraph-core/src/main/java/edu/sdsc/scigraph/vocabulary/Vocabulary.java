@@ -123,7 +123,7 @@ public interface Vocabulary {
       private Collection<String> categories = new HashSet<>();
 
       /***
-       * The input could be an ID, a fragment, a CURIE, or a term.
+       * The input could be an IRI, a CURIE, or a term.
        * 
        * @param input  the relevant input for the query.
        */

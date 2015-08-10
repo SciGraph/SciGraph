@@ -141,7 +141,7 @@ public class OwlApiUtils {
     return iri;
   }
 
-  static String getFragment(OWLRDFVocabulary vocab) {
+  static String getNeo4jName(OWLRDFVocabulary vocab) {
     return XMLUtils.getNCNameSuffix(vocab.getIRI());
   }
 

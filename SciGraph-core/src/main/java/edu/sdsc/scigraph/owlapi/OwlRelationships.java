@@ -15,7 +15,7 @@
  */
 package edu.sdsc.scigraph.owlapi;
 
-import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getFragment;
+import static edu.sdsc.scigraph.owlapi.OwlApiUtils.getNeo4jName;
 
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
@@ -27,37 +27,37 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 public class OwlRelationships {
 
   public static final RelationshipType RDFS_SUBCLASS_OF = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.RDFS_SUBCLASS_OF));
+      .withName(getNeo4jName(OWLRDFVocabulary.RDFS_SUBCLASS_OF));
 
   public static final RelationshipType RDF_TYPE = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.RDF_TYPE));
+      .withName(getNeo4jName(OWLRDFVocabulary.RDF_TYPE));
 
   public static final RelationshipType OWL_SAME_AS = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.OWL_SAME_AS));
+      .withName(getNeo4jName(OWLRDFVocabulary.OWL_SAME_AS));
 
   public static final RelationshipType OWL_DIFFERENT_FROM = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.OWL_DIFFERENT_FROM));
+      .withName(getNeo4jName(OWLRDFVocabulary.OWL_DIFFERENT_FROM));
 
   public static final RelationshipType OWL_ANNOTATION = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.OWL_ANNOTATION));
+      .withName(getNeo4jName(OWLRDFVocabulary.OWL_ANNOTATION));
 
   public static final RelationshipType OWL_EQUIVALENT_CLASS = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.OWL_EQUIVALENT_CLASS));
+      .withName(getNeo4jName(OWLRDFVocabulary.OWL_EQUIVALENT_CLASS));
 
   public static final RelationshipType OWL_DISJOINT_WITH = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.OWL_DISJOINT_WITH));
+      .withName(getNeo4jName(OWLRDFVocabulary.OWL_DISJOINT_WITH));
 
   public static final RelationshipType RDFS_SUB_PROPERTY_OF = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.RDFS_SUB_PROPERTY_OF));
+      .withName(getNeo4jName(OWLRDFVocabulary.RDFS_SUB_PROPERTY_OF));
 
   public static final RelationshipType OWL_EQUIVALENT_OBJECT_PROPERTY = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.OWL_EQUIVALENT_PROPERTY));
+      .withName(getNeo4jName(OWLRDFVocabulary.OWL_EQUIVALENT_PROPERTY));
   
   public static final RelationshipType OWL_PROPERTY_CHAIN_AXIOM = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.OWL_PROPERTY_CHAIN_AXIOM));
+      .withName(getNeo4jName(OWLRDFVocabulary.OWL_PROPERTY_CHAIN_AXIOM));
   
   public static final RelationshipType RDFS_IS_DEFINED_BY = DynamicRelationshipType
-      .withName(getFragment(OWLRDFVocabulary.RDFS_IS_DEFINED_BY));
+      .withName(getNeo4jName(OWLRDFVocabulary.RDFS_IS_DEFINED_BY));
 
   public static final RelationshipType FILLER = DynamicRelationshipType.withName("filler");
 
