@@ -41,6 +41,8 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
+import ch.qos.logback.classic.Logger;
+
 import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
@@ -132,7 +134,7 @@ public class CypherUtil {
 
 
   Collection<String> resolveTypes(String types, boolean entail) {
-    Collection<String> resolvedTypes = transform(newHashSet(Splitter.on('|').split(types)), new Function<String, String>() {
+    Collection<String> resolvedTypes = transform(newHashSet(Splitter.on('|').omitEmptyStrings().split(types)), new Function<String, String>() {
       @Override
       public String apply(String type) {
         return curieUtil.getIri(type).or(type);

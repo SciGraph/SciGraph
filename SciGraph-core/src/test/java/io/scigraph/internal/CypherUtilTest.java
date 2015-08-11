@@ -66,6 +66,12 @@ public class CypherUtilTest extends GraphTestBase{
   }
 
   @Test
+  public void simpleQuery() {
+    String query = util.resolveRelationships("(a)-[r]-(b)");
+    assertThat(query, is("(a)-[r]-(b)"));
+  }
+  
+  @Test
   public void naiveInjectionPrevention() {
     Multimap<String, Object> valueMap = HashMultimap.create();
     valueMap.put("node_id", "HP_123");
