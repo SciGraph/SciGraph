@@ -152,13 +152,13 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testSearchConcepts() {
     Query query = new Vocabulary.Query.Builder("hippocampus").build();
     assertThat(vocabulary.searchConcepts(query),
-        contains(hippocampus, structureOfHippocampus, hippocampusStructure, hippocampalFormation));
+        containsInAnyOrder(hippocampus, structureOfHippocampus, hippocampusStructure, hippocampalFormation));
   }
 
   @Test
   public void testSearchConceptsWithLimit() {
     Query query = new Vocabulary.Query.Builder("hippocampus").limit(1).build();
-    assertThat(vocabulary.searchConcepts(query), contains(hippocampus));
+    assertThat(vocabulary.searchConcepts(query).size(), is(1));
   }
 
   @Test
@@ -203,7 +203,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testGetConceptsFromPrefix() {
     Query query = new Vocabulary.Query.Builder("hip").build();
     assertThat(vocabulary.getConceptsFromPrefix(query),
-        contains(hippocampus, hippocampusStructure, hippocampalFormation));
+        containsInAnyOrder(hippocampus, hippocampusStructure, hippocampalFormation));
   }
 
   @Test
@@ -223,7 +223,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetConceptFromCuriePrefix() {
     Query query = new Vocabulary.Query.Builder("HP:0008").build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
+    assertThat(vocabulary.getConceptsFromPrefix(query), containsInAnyOrder(hippocampus, hippocampusStructure));
   }
 
   @Test
@@ -248,13 +248,13 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetConceptsFromPrefixWithCuriePrefix() {
     Query query = new Vocabulary.Query.Builder("hip").prefixes(newHashSet("H")).build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
+    assertThat(vocabulary.getConceptsFromPrefix(query), containsInAnyOrder(hippocampus, hippocampusStructure));
   }
 
   @Test
   public void testGetConceptsFromPrefixWithMultipleCuriePrefixes() {
     Query query = new Vocabulary.Query.Builder("hip").prefixes(newHashSet("H", "S")).build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
+    assertThat(vocabulary.getConceptsFromPrefix(query), containsInAnyOrder(hippocampus, hippocampusStructure));
   }
 
   @Test
