@@ -63,7 +63,7 @@ public class CypherUtil {
    *   <dd>The query modifiers</dd>
    * </dl>
    */
-  private static final String ENTAILMENT_REGEX = "\\[(\\w*):?([\\w:|\\.\\/#]*)([!*]*)\\]";
+  private static final String ENTAILMENT_REGEX = "\\[(\\w*):?([\\w:|\\.\\/#]*)([!*\\.\\d]*)\\]";
   private static Pattern ENTAILMENT_PATTERN = Pattern.compile(ENTAILMENT_REGEX);
 
   private final GraphDatabaseService graphDb;
@@ -153,8 +153,9 @@ public class CypherUtil {
       String types = m.group(2);
       String modifiers = m.group(3);
       Collection<String> resolvedTypes = resolveTypes(types, modifiers.contains("!"));
+      modifiers = modifiers.replaceAll("!", "");
       String typeString = resolvedTypes.isEmpty() ? "" : ":`" + on("`|`").join(resolvedTypes) + "`";
-      m.appendReplacement(buffer, "[" + varName + typeString + (modifiers.contains("*") ? "*" : "") + "]");
+      m.appendReplacement(buffer, "[" + varName + typeString + modifiers + "]");
     }
     m.appendTail(buffer);
     return buffer.toString();
