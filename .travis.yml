@@ -3,7 +3,15 @@ jdk:
   - oraclejdk8
   - oraclejdk7
   - openjdk7
-  
+
+env:
+  - java.version=1.7
+
+matrix:
+  exclude:
+    - jdk: oraclejdk8
+      env: java.version=1.7
+
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
