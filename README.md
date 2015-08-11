@@ -56,14 +56,13 @@ Getting Started
 A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to modify your `localhost` (you'll also need [VirtualBox](https://www.virtualbox.org/)).
 You can launch a provisioned box like this and then follow the steps below:
 
-	curl https://raw.githubusercontent.com/SciCrunch/SciGraph/master/src/test/resources/vagrant/Vagrantfile -o Vagrantfile
+    curl https://raw.githubusercontent.com/SciCrunch/SciGraph/master/src/test/resources/vagrant/Vagrantfile -o Vagrantfile
     vagrant up
     vagrant ssh
 
 <em>Note that because Neo4j is using memory mapped IO the database cannot be stored in a Vagrant shared directory</em>
 
-If you're not using the vagrant box make sure you have `git`, `maven`, and `java 7` available.
-SciGraph currently has known issues with Java 8. It _should_ still work but prefer Java 7 unless you're just kicking the tires.
+If you're not using the vagrant box make sure you have `git`, `maven`, and `java` available. Java should be version 7 or better.
 
 Clone and compile the project:
 
