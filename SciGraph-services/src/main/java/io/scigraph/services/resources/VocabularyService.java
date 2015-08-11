@@ -188,7 +188,7 @@ public class VocabularyService extends BaseResource {
   @Path("/autocomplete/{term}")
   @ApiOperation(value = "Find a concept by its prefix",
   notes = "This resource is designed for autocomplete services.",
-  response = Concept.class,
+  response = Completion.class,
   responseContainer = "List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
