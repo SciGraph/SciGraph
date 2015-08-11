@@ -20,9 +20,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import io.scigraph.neo4j.bindings.IndicatesCurieMapping;
-import io.scigraph.services.jersey.dynamic.CypherInflector;
-import io.scigraph.services.jersey.dynamic.CypherInflectorFactory;
-import io.scigraph.services.jersey.dynamic.DynamicResourceModule;
 import io.scigraph.services.swagger.beans.resource.Apis;
 
 import java.util.HashMap;
@@ -46,8 +43,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 public class DynamicResourceModuleIT {
 
@@ -90,7 +87,7 @@ public class DynamicResourceModuleIT {
   public void nodesAreReturned() {
     config.setQuery("MATCH (n) RETURN n");
     CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
-    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
+    Graph graph = (Graph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(0));
   }
@@ -99,7 +96,7 @@ public class DynamicResourceModuleIT {
   public void edgesAreReturned() {
     config.setQuery("MATCH (n)-[r]-(m) RETURN n, r, m");
     CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
-    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
+    Graph graph = (Graph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(1));
   }
@@ -108,7 +105,7 @@ public class DynamicResourceModuleIT {
   public void propertiesAreSubstituted() {
     config.setQuery("MATCH (n)-[r]-(m) WHERE n.foo = {foo} RETURN n, r, m");
     CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
-    TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
+    Graph graph = (Graph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(1));
   }
