@@ -63,10 +63,10 @@ final class OwlOntologyConsumer implements Callable<Long> {
           if (null == owlObject) {
             continue;
           }
-          /* TODO: Restore this somehow
-           * if (0 == queue.size() % 100_000) {
+
+          if (0 == queue.size() % 100_000) {
             logger.info("Currently " + queue.size() + " objects remaining in the queue");
-          }*/
+          }
           try {
             visitor.setOntology(owlObject.getOntology());
             owlObject.getObject().accept(visitor);

@@ -43,7 +43,6 @@ import java.util.logging.Logger;
 
 import javax.inject.Singleton;
 
-import org.mapdb.DB;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
@@ -73,7 +72,7 @@ public class OwlLoaderModule extends AbstractModule {
     bind(new TypeLiteral<List<OntologySetup>>() {}).toInstance(config.getOntologies());
     bind(Graph.class).to(GraphBatchImpl.class).in(Scopes.SINGLETON);
 
-    //bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>(){}).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>(){}).in(Scopes.SINGLETON);
     bind(new TypeLiteral<BlockingQueue<OntologySetup>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OntologySetup>>(){}).in(Scopes.SINGLETON);
 
     bind(Integer.class).annotatedWith(IndicatesNumberOfConsumerThreads.class).toInstance(config.getConsumerThreadCount());
@@ -82,11 +81,11 @@ public class OwlLoaderModule extends AbstractModule {
     bind(AtomicInteger.class).annotatedWith(IndicatesNumberOfShutdownProducers.class).to(AtomicInteger.class).in(Scopes.SINGLETON);
   }
 
-  @Provides
+  /*@Provides
   @Singleton
   BlockingQueue<OWLCompositeObject> getOntologyCompositeQueue(DB mapdb) {
     return mapdb.getQueue("OntologyCompositeQueue");
-  }
+  }*/
 
   
   @Provides
