@@ -6,11 +6,16 @@ jdk:
 
 env:
   - java.version=1.7
+  - java.version=1.8
 
 matrix:
   exclude:
     - jdk: oraclejdk8
-      env: java.version=1.7
+        env: java.version=1.7
+    - jdk: oraclejdk7
+        env: java.version=1.8
+    - jdk: openjdk7
+        env: java.version=1.8
 
 before_install:
   - "export DISPLAY=:99.0"
