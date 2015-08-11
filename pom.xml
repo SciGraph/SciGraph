@@ -78,7 +78,7 @@
     <guice.version>4.0</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
     <neo4j.version>2.2.3</neo4j.version>
-    <java.version>1.8</java.version>
+    <env.java_version>1.8</env.java_version>
   </properties>
 
   <build>
@@ -88,8 +88,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>
         <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
+          <source>${env.java_version}</source>
+          <target>${env.java_version}</target>
         </configuration>
       </plugin>
       <plugin>
