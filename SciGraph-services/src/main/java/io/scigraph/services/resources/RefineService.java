@@ -59,6 +59,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Path("/refine") 
 @Api(value = "/refine", 
 description = "OpenRefine Reconciliation Services")
+// *NOTE* OpenRefine requires a JSONP response - don't remove it.
 @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP})
 public class RefineService extends BaseResource {
 

@@ -23,8 +23,6 @@ import io.scigraph.annotation.EntityAnnotation;
 import io.scigraph.annotation.EntityFormatConfiguration;
 import io.scigraph.annotation.EntityProcessor;
 import io.scigraph.services.jersey.BaseResource;
-import io.scigraph.services.jersey.CustomMediaTypes;
-import io.scigraph.services.jersey.JaxRsUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -53,7 +51,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -68,7 +65,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/annotations")
 @Api(value = "/annotations", description = "Annotation services")
-@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
+@Produces({ MediaType.APPLICATION_JSON })
 public class AnnotateService extends BaseResource {
 
   private static final Logger logger = Logger.getLogger(AnnotateService.class.getName());
@@ -270,10 +267,13 @@ public class AnnotateService extends BaseResource {
 
   @GET
   @Path("/entities")
-  @ApiOperation(value = "Get entities from text", response = EntityAnnotation.class, notes="Get entities from content without embedding them in the source.")
+  @ApiOperation(value = "Get entities from text",
+  response = EntityAnnotation.class,
+  responseContainer = "List",
+  notes="Get entities from content without embedding them in the source.")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getEntities(
+  public List<EntityAnnotation> getEntities(
       @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
       final @QueryParam("content") @DefaultValue("") String content,
       @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
@@ -289,9 +289,7 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @QueryParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") String callback) {
+      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers) {
     List<EntityAnnotation> entities = newArrayList();
     try {
       EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
@@ -307,14 +305,15 @@ public class AnnotateService extends BaseResource {
       logger.log(Level.WARNING, e.getMessage(), e);
       throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
-    GenericEntity<List<EntityAnnotation>> response = new GenericEntity<List<EntityAnnotation>>(entities){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+    return entities;
   }
 
   @POST
   @Path("/entities")
   @Consumes("application/x-www-form-urlencoded")
-  @ApiOperation(value = "Get entities from text", response = EntityAnnotation.class, 
+  @ApiOperation(value = "Get entities from text", 
+  response = EntityAnnotation.class, 
+  responseContainer = "List",
   notes = "Get the entities from content without embedding them in the source - only the entities are returned. " +
       DocumentationStrings.REST_ABUSE_DOC)
   @Timed
@@ -337,7 +336,7 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @FormParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers) {
     return getEntities(content, includeCategories, excludeCategories, minLength, 
-        longestOnly, includeAbbrev, includeAcronym, includeNumbers, "");
+        longestOnly, includeAbbrev, includeAcronym, includeNumbers);
   }
 
   /*** 
@@ -346,11 +345,12 @@ public class AnnotateService extends BaseResource {
   @GET
   @Path("/complete")
   @Consumes("application/x-www-form-urlencoded")
-  @ApiOperation(value = "Get embedded annotations as well as a separate list", response = Annotations.class, 
+  @ApiOperation(value = "Get embedded annotations as well as a separate list", 
+  response = Annotations.class, 
   notes="A convenience resource for retrieving both a list of entities and annotated content")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getEntitiesAndContent(
+  public Annotations getEntitiesAndContent(
       @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
       final @QueryParam("content") @DefaultValue("") String content,
       @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
@@ -366,10 +366,9 @@ public class AnnotateService extends BaseResource {
       @ApiParam( value = DocumentationStrings.INCLUDE_ACRONYMS_DOC, required = false)
       final @QueryParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
-      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") String callback) throws IOException {
-    Annotations annotation = new Annotations();
+      final @QueryParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers
+      ) throws IOException {
+    Annotations annotations = new Annotations();
     StringWriter writer = new StringWriter();
     EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
     configBuilder.includeCategories(includeCategories);
@@ -380,11 +379,10 @@ public class AnnotateService extends BaseResource {
     configBuilder.minLength(minLength.get());
     configBuilder.longestOnly(longestOnly.get());
     configBuilder.writeTo(writer);
-    annotation.delegate = processor.annotateEntities(configBuilder.get());
-    annotation.content = writer.toString();
+    annotations.delegate = processor.annotateEntities(configBuilder.get());
+    annotations.content = writer.toString();
 
-    GenericEntity<Annotations> response = new GenericEntity<Annotations>(annotation){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+    return annotations;
   }
 
 
@@ -405,11 +403,12 @@ public class AnnotateService extends BaseResource {
   @POST
   @Path("/complete")
   @Consumes("application/x-www-form-urlencoded")
-  @ApiOperation(value = "Get embedded annotations as well as a separate list", response = Annotations.class, 
+  @ApiOperation(value = "Get embedded annotations as well as a separate list", 
+  response = Annotations.class, 
   notes="A convenience resource for retrieving both a list of entities and annotated content. " + DocumentationStrings.REST_ABUSE_DOC)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object postEntitiesAndContent(
+  public Annotations postEntitiesAndContent(
       @ApiParam( value = DocumentationStrings.CONTENT_DOC, required = true)
       final @FormParam("content") @DefaultValue("") String content,
       @ApiParam( value = DocumentationStrings.INCLUDE_CATEGORIES_DOC, required = false)
@@ -426,22 +425,7 @@ public class AnnotateService extends BaseResource {
       final @FormParam("includeAcronym") @DefaultValue("false") BooleanParam includeAcronym,
       @ApiParam( value = DocumentationStrings.INCLUDE_NUMBERS_DOC, required = false)
       final @FormParam("includeNumbers") @DefaultValue("false") BooleanParam includeNumbers) throws IOException {
-    Annotations annotation = new Annotations();
-    StringWriter writer = new StringWriter();
-    EntityFormatConfiguration.Builder configBuilder = new EntityFormatConfiguration.Builder(new StringReader(content));
-    configBuilder.includeCategories(includeCategories);
-    configBuilder.excludeCategories(excludeCategories);
-    configBuilder.includeAbbreviations(includeAbbrev.get());
-    configBuilder.includeAncronyms(includeAcronym.get());
-    configBuilder.includeNumbers(includeNumbers.get());
-    configBuilder.minLength(minLength.get());
-    configBuilder.longestOnly(longestOnly.get());
-    configBuilder.writeTo(writer);
-    annotation.delegate = processor.annotateEntities(configBuilder.get());
-    annotation.content = writer.toString();
-
-    GenericEntity<Annotations> response = new GenericEntity<Annotations>(annotation){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, "fn"); 
+    return this.getEntitiesAndContent(content, includeCategories, excludeCategories, minLength, longestOnly, includeAbbrev, includeAcronym, includeNumbers);
   }
 
   /***

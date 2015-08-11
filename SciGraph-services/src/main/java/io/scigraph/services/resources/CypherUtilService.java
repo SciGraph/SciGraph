@@ -31,7 +31,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/cypher")
-@Api(value = "/cypher", description = "Cypher utils service")
+@Api(value = "/cypher", description = "Cypher utility services")
 @Produces({MediaType.TEXT_PLAIN})
 public class CypherUtilService extends BaseResource {
 

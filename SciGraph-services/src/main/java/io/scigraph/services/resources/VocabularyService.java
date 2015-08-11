@@ -29,13 +29,10 @@ import io.scigraph.services.api.graph.ConceptDTO;
 import io.scigraph.services.api.graph.ConceptDTOLite;
 import io.scigraph.services.api.vocabulary.Completion;
 import io.scigraph.services.jersey.BaseResource;
-import io.scigraph.services.jersey.CustomMediaTypes;
-import io.scigraph.services.jersey.JaxRsUtil;
 import io.scigraph.vocabulary.Vocabulary;
 import io.scigraph.vocabulary.Vocabulary.Query;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +46,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
@@ -68,7 +64,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 @Path("/vocabulary") 
 @Api(value = "/vocabulary", description = "Vocabulary services")
-@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
+@Produces({ MediaType.APPLICATION_JSON })
 public class VocabularyService extends BaseResource {
 
   private final Vocabulary vocabulary;
@@ -116,25 +112,22 @@ public class VocabularyService extends BaseResource {
   @Path("/id/{id}")
   @ApiOperation(value = "Find a concept by its ID",
   notes = "Find concepts that match either a IRI or a CURIE. ",
-      response = Concept.class)
+  response = ConceptDTO.class)
   @ApiResponses({
     @ApiResponse(code = 404, message = "Concept with ID could not be found")
   })
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object findById(
+  public ConceptDTO findById(
       @ApiParam( value = "ID to find", required = true)
-      @PathParam("id") String id,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) throws Exception {
+      @PathParam("id") String id) throws Exception {
     Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
     Optional<Concept> concept = vocabulary.getConceptFromId(query);
     if (!concept.isPresent()) {
       throw new WebApplicationException(404);
     } else {
       ConceptDTO dto = conceptDtoTransformer.apply(concept.get());
-      GenericEntity<ConceptDTO> response = new GenericEntity<ConceptDTO>(dto){};
-      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+      return dto;
     }
   }
 
@@ -195,10 +188,11 @@ public class VocabularyService extends BaseResource {
   @Path("/autocomplete/{term}")
   @ApiOperation(value = "Find a concept by its prefix",
   notes = "This resource is designed for autocomplete services.",
-  response = Concept.class)
+  response = Concept.class,
+  responseContainer = "List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object findByPrefix(
+  public List<Completion> findByPrefix(
       @ApiParam( value = "Term prefix to find", required = true )
       @PathParam("term") String termPrefix,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
@@ -214,9 +208,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
-      @QueryParam("prefix") List<String> prefixes,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
+      @QueryParam("prefix") List<String> prefixes) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(termPrefix).
         categories(categories).
         prefixes(prefixes).
@@ -231,8 +223,7 @@ public class VocabularyService extends BaseResource {
     sort(completions);
     int endIndex = limit.get() > completions.size() ? completions.size() : limit.get();
     completions = completions.subList(0, endIndex);
-    GenericEntity<List<Completion>> response = new GenericEntity<List<Completion>>(completions){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+    return completions;
   }
 
   @GET
@@ -242,13 +233,14 @@ public class VocabularyService extends BaseResource {
       "Individual tokens within multi-token labels are not matched" + 
       " (ie: \"foo bar\" would not be returned by a search for \"bar\")."
       + " Results are not guaranteed to be unique.",
-      response = Concept.class)
+      response = Concept.class,
+      responseContainer="List")
   @ApiResponses({
     @ApiResponse(code = 404, message = "Concept with term could not be found")
   })
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object findByTerm(
+  public List<ConceptDTO> findByTerm(
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
@@ -262,9 +254,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
-      @QueryParam("prefix") List<String> prefixes,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
+      @QueryParam("prefix") List<String> prefixes) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
         prefixes(prefixes).
@@ -277,8 +267,7 @@ public class VocabularyService extends BaseResource {
       throw new WebApplicationException(404);
     } else {
       List<ConceptDTO> dtos = transform(concepts, conceptDtoTransformer);
-      GenericEntity<List<ConceptDTO>> response = new GenericEntity<List<ConceptDTO>>(dtos){};
-      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+      return dtos;
     }
   }
 
@@ -288,13 +277,14 @@ public class VocabularyService extends BaseResource {
   notes = "Searches the complete text of the term. "
       + "Individual tokens within multi-token labels are matched" + 
       " (ie: \"foo bar\" would be returned by a search for \"bar\"). Results are not guaranteed to be unique.",
-      response = Concept.class)
+      response = ConceptDTO.class,
+      responseContainer= "List")
   @ApiResponses({
     @ApiResponse(code = 404, message = "Concept with term could not be found")
   })
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object searchByTerm(
+  public List<ConceptDTO> searchByTerm(
       @ApiParam( value = "Term to find", required = true )
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
@@ -308,9 +298,7 @@ public class VocabularyService extends BaseResource {
       @ApiParam( value = "Categories to search (defaults to all)", required = false )
       @QueryParam("category") List<String> categories,
       @ApiParam( value = "CURIE prefixes to search (defaults to all)", required = false )
-      @QueryParam("prefix") List<String> prefixes,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
+      @QueryParam("prefix") List<String> prefixes) {
     Vocabulary.Query.Builder builder = new Vocabulary.Query.Builder(term).
         categories(categories).
         prefixes(prefixes).
@@ -323,8 +311,7 @@ public class VocabularyService extends BaseResource {
       throw new WebApplicationException(404);
     } else {
       List<ConceptDTO> dtos = transform(concepts, conceptDtoTransformer);
-      GenericEntity<List<ConceptDTO>> response = new GenericEntity<List<ConceptDTO>>(dtos){};
-      return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+      return dtos;
     }
   }
 
@@ -332,49 +319,43 @@ public class VocabularyService extends BaseResource {
   @Path("/suggestions/{term}")
   @ApiOperation(value = "Suggest terms",
   notes = "Suggests terms based on a mispelled or mistyped term.",
-  response = String.class)
+  response = String.class,
+  responseContainer = "List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object suggestFromTerm(
       @ApiParam( value = "Mispelled term", required = true )
       @PathParam("term") String term,
       @ApiParam( value = DocumentationStrings.RESULT_LIMIT_DOC, required = false )
-      @QueryParam("limit") @DefaultValue("1") IntParam limit,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
+      @QueryParam("limit") @DefaultValue("1") IntParam limit) {
     List<String> suggestions = newArrayList(Iterables.limit(vocabulary.getSuggestions(term), limit.get()));
-    GenericEntity<List<String>> response = new GenericEntity<List<String>>(suggestions){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+    return suggestions;
   }
 
   @GET
   @Path("/categories")
   @ApiOperation(value = "Get all categories",
   notes = "Categories can be used to limit results",
-  response = String.class)
+  response = String.class,
+  responseContainer = "Set")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getCategories(
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
-    Collection<String> categories = vocabulary.getAllCategories();
-    GenericEntity<Collection<String>> response = new GenericEntity<Collection<String>>(categories){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+  public Set<String> getCategories() {
+    Set<String> categories = vocabulary.getAllCategories();
+    return categories;
   }
 
   @GET
   @Path("/prefixes")
   @ApiOperation(value = "Get all CURIE prefixes",
   notes = "CURIE prefixes can be used to limit results",
-  response = String.class)
+  response = String.class,
+  responseContainer = "Set")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getCuriePrefixes(
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
-    Collection<String> prefixes = vocabulary.getAllCuriePrefixes();
-    GenericEntity<Collection<String>> response = new GenericEntity<Collection<String>>(prefixes){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+  public Set<String> getCuriePrefixes() {
+    Set<String> prefixes = vocabulary.getAllCuriePrefixes();
+    return prefixes;
   }
 
 }

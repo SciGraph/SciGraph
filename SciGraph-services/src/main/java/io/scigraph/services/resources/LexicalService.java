@@ -20,8 +20,6 @@ import io.scigraph.annotation.Token;
 import io.scigraph.lexical.LexicalLib;
 import io.scigraph.lexical.pos.PosToken;
 import io.scigraph.services.jersey.BaseResource;
-import io.scigraph.services.jersey.CustomMediaTypes;
-import io.scigraph.services.jersey.JaxRsUtil;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +30,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
@@ -42,7 +39,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/lexical")
 @Api(value = "/lexical", description = "Lexical services")
-@Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
+@Produces({ MediaType.APPLICATION_JSON })
 public class LexicalService extends BaseResource {
 
   @Inject
@@ -57,17 +54,16 @@ public class LexicalService extends BaseResource {
    */
   @GET
   @Path("/sentences")
-  @ApiOperation(value = "Split text into sentences.", response = String.class)
+  @ApiOperation(value = "Split text into sentences.", 
+  response = String.class,
+  responseContainer = "List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getSentences(
       @ApiParam( value = "The text to split", required = true )
-      @QueryParam("text") @DefaultValue("") String text,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
+      @QueryParam("text") @DefaultValue("") String text) {
     List<String> sentences = lexicalLib.extractSentences(text);
-    GenericEntity<List<String>> response = new GenericEntity<List<String>>(sentences){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+    return sentences;
   }
 
   /***
@@ -79,17 +75,16 @@ public class LexicalService extends BaseResource {
    */
   @GET
   @Path("/pos")
-  @ApiOperation(value = "Tag parts of speech.", response = String.class)
+  @ApiOperation(value = "Tag parts of speech.", 
+  response = PosToken.class,
+  responseContainer = "List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getPos(
+  public List<PosToken> getPos(
       @ApiParam( value = "The text to tag", required = true )
-      @QueryParam("text") @DefaultValue("") String text,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
-    final List<PosToken> tokens = lexicalLib.tagPOS(text);
-    GenericEntity<List<PosToken>> response = new GenericEntity<List<PosToken>>(tokens){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+      @QueryParam("text") @DefaultValue("") String text) {
+    List<PosToken> tokens = lexicalLib.tagPOS(text);
+    return tokens;
   }
 
   /***
@@ -101,18 +96,16 @@ public class LexicalService extends BaseResource {
    */
   @GET
   @Path("/chunks")
-  @ApiOperation(value = "Extract entities from text.", response = String.class,
+  @ApiOperation(value = "Extract entities from text.", response = Token.class,
+  responseContainer = "List",
   notes = "The extracted chunks are based upon POS tagging. This may result in different results that extracting entities.")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  public Object getChunks(
+  public  List<Token<String>> getChunks(
       @ApiParam( value = "The text from which to extract chunks", required = true )
-      @QueryParam("text") @DefaultValue("") String text,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
-    final List<Token<String>> chunks = lexicalLib.getChunks(text);
-    GenericEntity<List<Token<String>>> response = new GenericEntity<List<Token<String>>>(chunks){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+      @QueryParam("text") @DefaultValue("") String text) {
+    List<Token<String>> chunks = lexicalLib.getChunks(text);
+    return chunks;
   }
 
   /***
@@ -124,18 +117,16 @@ public class LexicalService extends BaseResource {
    */
   @GET
   @Path("/entities")
-  @ApiOperation(value = "Extract entities from text.", response = String.class,
+  @ApiOperation(value = "Extract entities from text.", response = Token.class,
+  responseContainer = "List",
   notes = "The extracted entites are based upon a Hidden Markov Model. This may result in different results that extracting chunks.")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   public Object getEntities(
       @ApiParam( value = "The text from which to extract entities", required = true )
-      @QueryParam("text") @DefaultValue("") String text,
-      @ApiParam( value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
-    final List<Token<String>> chunks = lexicalLib.getEntities(text);
-    GenericEntity<List<Token<String>>> response = new GenericEntity<List<Token<String>>>(chunks){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+      @QueryParam("text") @DefaultValue("") String text) {
+    List<Token<String>> chunks = lexicalLib.getEntities(text);
+    return chunks;
   }
 
 }

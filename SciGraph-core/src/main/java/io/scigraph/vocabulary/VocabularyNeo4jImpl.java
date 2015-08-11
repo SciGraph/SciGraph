@@ -19,6 +19,7 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.limit;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.Concept;
@@ -31,7 +32,6 @@ import io.scigraph.owlapi.curies.CurieUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -307,8 +307,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   @Override
-  public Collection<String> getAllCuriePrefixes() {
-    return curieUtil.getPrefixes();
+  public Set<String> getAllCuriePrefixes() {
+    return newHashSet(curieUtil.getPrefixes());
   }
 
   @Override

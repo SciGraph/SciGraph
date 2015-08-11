@@ -19,8 +19,6 @@ import io.scigraph.analyzer.AnalyzeRequest;
 import io.scigraph.analyzer.AnalyzerResult;
 import io.scigraph.analyzer.HyperGeometricAnalyzer;
 import io.scigraph.services.jersey.BaseResource;
-import io.scigraph.services.jersey.CustomMediaTypes;
-import io.scigraph.services.jersey.JaxRsUtil;
 
 import java.util.List;
 import java.util.Set;
@@ -34,7 +32,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
@@ -44,7 +41,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/analyzer")
 @Api(value = "/analyzer", description = "Analysis services")
-@Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
+@Produces({ MediaType.APPLICATION_JSON })
 public class AnalyzerService extends BaseResource {
 
   private final Provider<HyperGeometricAnalyzer> provider;
@@ -56,11 +53,11 @@ public class AnalyzerService extends BaseResource {
 
   @GET
   @Timed
-  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP })
+  @Produces({MediaType.APPLICATION_JSON})
   @Path("/enrichment")
-  @ApiOperation(value = "Class Enrichment Service", response = String.class,
+  @ApiOperation(value = "Class Enrichment Service", response = AnalyzerResult.class,
   notes="")
-  public Object enrich(
+  public List<AnalyzerResult> enrich(
       @ApiParam( value = "A list of CURIEs for nodes whose attributes are to be tested for enrichment. For example, a list of genes.", required = true)
       @QueryParam("sample") Set<String> samples,
       @ApiParam( value = "CURIE for parent ontology class for the attribute to be tested. For example, GO biological process", required = true)
@@ -75,8 +72,7 @@ public class AnalyzerService extends BaseResource {
     analyzeRequest.setPath(path);
     analyzeRequest.setSamples(samples);
     List<AnalyzerResult> analyzeResult = hyperGeometricAnalyzer.analyze(analyzeRequest);
-    GenericEntity<List<AnalyzerResult>> response = new GenericEntity<List<AnalyzerResult>>(analyzeResult){};
-    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
+    return analyzeResult;
   }
 
   @POST

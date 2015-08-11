@@ -90,7 +90,7 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get neighbors", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
+  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
     CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
     CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
@@ -162,7 +162,7 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get neighbors", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
+  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
     CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
     CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
@@ -189,7 +189,7 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get all properties of a node", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
+  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
     CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
     CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
@@ -208,7 +208,7 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get nodes connected by an edge type", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, CustomMediaTypes.APPLICATION_GRAPHSON,
+  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
     MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
     CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
     CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
@@ -248,7 +248,7 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, MediaType.APPLICATION_XML})
+  @Produces({MediaType.APPLICATION_JSON})
   public Object getRelationships(
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {
@@ -262,7 +262,7 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get all property keys", response = String.class, responseContainer="List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP, MediaType.APPLICATION_XML})
+  @Produces({MediaType.APPLICATION_JSON})
   public Object getProperties(
       @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
       @QueryParam("callback") String callback) {

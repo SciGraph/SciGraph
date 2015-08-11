@@ -89,7 +89,7 @@ public interface Vocabulary {
   /*** 
    * @return a collection of all known CURIE prefixes
    */
-  Collection<String> getAllCuriePrefixes();
+  Set<String> getAllCuriePrefixes();
 
   /***
    * Provides "did you mean" functionality based on the labels of concepts in the vocabulary.
