@@ -41,8 +41,6 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
-import ch.qos.logback.classic.Logger;
-
 import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
