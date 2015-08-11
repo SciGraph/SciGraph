@@ -1,11 +1,16 @@
 language: java
 jdk:
-  # TODO: Investigate why this is failing - oraclejdk8
+  - oraclejdk8
   - oraclejdk7
   - openjdk7
-branches:
-  only:
-  - master
+
+env:
+  - java.version=1.7
+
+matrix:
+  exclude:
+    - jdk: oraclejdk8
+      env: java.version=1.7
 
 before_install:
   - "export DISPLAY=:99.0"
