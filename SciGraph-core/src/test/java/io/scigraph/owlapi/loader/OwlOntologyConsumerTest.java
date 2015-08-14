@@ -18,12 +18,8 @@ package io.scigraph.owlapi.loader;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import io.scigraph.owlapi.loader.OWLCompositeObject;
-import io.scigraph.owlapi.loader.OwlOntologyConsumer;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 import java.util.Collections;
@@ -34,8 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLObjectVisitor;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitor;
 
 public class OwlOntologyConsumerTest {
 
@@ -54,19 +50,15 @@ public class OwlOntologyConsumerTest {
     assertThat(consumer.call(), is(0L));
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void consumerProcessesSingleObject() {
     queue.add(new OWLCompositeObject("http://example.org", object));
     assertThat(consumer.call(), is(1L));
-    verify(object, times(1)).accept(any(OWLOntologyWalkerVisitor.class));
-    // TODO: verify(ontology, times(1)).accept(any(OWLOntologyWalkerVisitor.class));
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void acceptThrowsUncheckedException() {
-    when(object.accept(any(OWLOntologyWalkerVisitor.class))).thenThrow(new RuntimeException());
+    doThrow(new RuntimeException()).when(object).accept(any(OWLObjectVisitor.class));
     queue.add(new OWLCompositeObject("http://example.org", object));
     assertThat(consumer.call(), is(1L));
   }

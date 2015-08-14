@@ -10,8 +10,9 @@ Vagrant.configure(2) do |config|
      vb.memory = "2048"
   end
   config.vm.provision "shell", inline: <<-SHELL
+     sudo add-apt-repository ppa:openjdk-r/ppa
      sudo apt-get update
-     sudo apt-get install -y maven git openjdk-7-jdk xvfb
+     sudo apt-get install -y maven git openjdk-8-jdk xvfb
      echo "export DISPLAY=localhost:99" >> /home/vagrant/.profile
      Xvfb :99 &
      wget –q -o /dev/null https://github.com/OpenRefine/OpenRefine/releases/download/2.5/google-refine-2.5-r2407.tar.gz

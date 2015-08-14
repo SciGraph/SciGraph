@@ -20,6 +20,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.isOneOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,6 +64,18 @@ public class CypherUtilTest extends GraphTestBase{
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#fizz", "http://x.org/#fizz_equiv", OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
     addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("http://x.org/#fizz"));
+  }
+
+  @Test
+  public void simpleQuery() {
+    String query = util.resolveRelationships("(a)-[r]-(b)");
+    assertThat(query, is("(a)-[r]-(b)"));
+  }
+
+  @Test
+  public void simpleQueryWithDepth() {
+    String query = util.resolveRelationships("(a)-[:r*0..1]-(b)");
+    assertThat(query, is("(a)-[:`r`*0..1]-(b)"));
   }
 
   @Test
@@ -111,19 +124,20 @@ public class CypherUtilTest extends GraphTestBase{
     valueMap.put("rel_id", "RO_1");
     valueMap.put("rel_id", "RO_2");
     String actual = util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
-    assertThat(actual, is("({node_id})-[:RO_2|RO_1!]-(end)"));
+    // TODO: A bit of a hack to get Java 7 and Java 8 to pass tests
+    assertThat(actual, isOneOf("({node_id})-[:RO_2|RO_1!]-(end)", "({node_id})-[:RO_1|RO_2!]-(end)"));
   }
 
   @Test
   public void entailmentRegex() {
-    String result = util.resolveRelationships("MATCH (n)-[:http://x.org/#foo!]-(n2) RETURN n");
-    assertThat(result, is("MATCH (n)-[:`http://x.org/#fizz`|`http://x.org/#foo`|`http://x.org/#fizz_equiv`]-(n2) RETURN n"));
+    Collection<String> resolvedTypes = util.resolveTypes("http://x.org/#foo", true);
+    assertThat(resolvedTypes, containsInAnyOrder("http://x.org/#fizz", "http://x.org/#foo", "http://x.org/#fizz_equiv"));
   }
 
   @Test
   public void curiesAreEntailed() {
-    String result = util.resolveRelationships("MATCH (n)-[:FOO:foo!]-(n2) RETURN n");
-    assertThat(result, is("MATCH (n)-[:`http://x.org/#fizz`|`http://x.org/#foo`|`http://x.org/#fizz_equiv`]-(n2) RETURN n"));
+    Collection<String> resolvedTypes = util.resolveTypes("FOO:foo", true);
+    assertThat(resolvedTypes, containsInAnyOrder("http://x.org/#fizz", "http://x.org/#foo", "http://x.org/#fizz_equiv"));
   }
 
   @Test
@@ -149,7 +163,7 @@ public class CypherUtilTest extends GraphTestBase{
     Multimap<String, Object> multiMap = HashMultimap.create();
     multiMap.put("foo", "bar");
     multiMap.put("foo", "baz");
-    assertThat(CypherUtil.flattenMap(multiMap), IsMapContaining.<String, Object>hasEntry("foo", "baz"));
+    assertThat(CypherUtil.flattenMap(multiMap), IsMapContaining.hasKey("foo"));
   }
 
   @Test

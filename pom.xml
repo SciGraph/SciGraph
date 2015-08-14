@@ -15,8 +15,7 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.scigraph</groupId>
   <artifactId>scigraph</artifactId>
@@ -48,16 +47,16 @@
       </roles>
       <timezone>America/Los_Angeles</timezone>
     </developer>
-      <developer>
-        <id>jnguyenx</id>
-        <name>Jeremy Nguyen Xuan</name>
-        <email>jnguyenxuan@lbl.gov</email>
-          <roles>
-            <role>architect</role>
-            <role>developer</role>
-          </roles>
-          <timezone>America/Los_Angeles</timezone>
-      </developer>
+    <developer>
+      <id>jnguyenx</id>
+      <name>Jeremy Nguyen Xuan</name>
+      <email>jnguyenxuan@lbl.gov</email>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>America/Los_Angeles</timezone>
+    </developer>
   </developers>
 
   <issueManagement>
@@ -87,8 +86,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
         </configuration>
       </plugin>
       <plugin>
@@ -166,7 +165,7 @@
         <configuration>
           <format>xml</format>
           <maxmem>256m</maxmem>
-          <!-- aggregated reports for multi-module projects -->
+<!-- aggregated reports for multi-module projects -->
           <aggregate>true</aggregate>
         </configuration>
       </plugin>
@@ -285,5 +284,24 @@
       </plugin>
     </plugins>
   </reporting>
-
+  <profiles>
+    <profile>
+      <id>Java8</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+      <properties>
+        <java.version>1.8</java.version>
+      </properties>
+    </profile>
+    <profile>
+      <id>Java7</id>
+      <activation>
+        <jdk>1.7</jdk>
+      </activation>
+      <properties>
+        <java.version>1.7</java.version>
+      </properties>
+    </profile>
+  </profiles>
 </project>

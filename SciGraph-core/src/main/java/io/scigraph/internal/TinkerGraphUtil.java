@@ -88,6 +88,7 @@ public final class TinkerGraphUtil {
       Vertex outVertex = addNode(graph, relationship.getStartNode());
       Vertex inVertex = addNode(graph, relationship.getEndNode());
       String label = relationship.getType().name();
+      // TODO #152 add CurieUtil to resolve IRI to Curie
       edge = graph.addEdge(relationship.getId(), outVertex, inVertex, label);
       copyProperties(relationship, edge);
     }
