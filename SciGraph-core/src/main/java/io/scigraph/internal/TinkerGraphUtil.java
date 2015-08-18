@@ -17,6 +17,7 @@ package io.scigraph.internal;
 
 import static com.google.common.collect.Sets.newHashSet;
 import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.NodeProperties;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public final class TinkerGraphUtil {
   static final ImmutableSet<String> PROTECTED_PROPERTY_KEYS = ImmutableSet.of(CommonProperties.IRI, CommonProperties.CURIE);
 
   static void copyProperties(PropertyContainer container, Element element) {
-    for (String key: container.getPropertyKeys()) {
+    for (String key : container.getPropertyKeys()) {
       Object property = container.getProperty(key);
       if (property.getClass().isArray()) {
         List<Object> propertyList = new ArrayList<>();
@@ -74,7 +75,7 @@ public final class TinkerGraphUtil {
       vertex = graph.addVertex(node.getId());
       copyProperties(node, vertex);
       Set<String> labels = new HashSet<>();
-      for (Label label: node.getLabels()) {
+      for (Label label : node.getLabels()) {
         labels.add(label.name());
       }
       vertex.setProperty("types", labels);
@@ -104,13 +105,13 @@ public final class TinkerGraphUtil {
   }
 
   public static void addPath(Graph graph, Iterable<PropertyContainer> path) {
-    for (PropertyContainer container: path) {
+    for (PropertyContainer container : path) {
       addElement(graph, container);
     }
   }
 
   static void copyProperties(Element source, Element target) {
-    for (String key: source.getPropertyKeys()) {
+    for (String key : source.getPropertyKeys()) {
       Object property = source.getProperty(key);
       if (property.getClass().isArray()) {
         List<Object> propertyList = new ArrayList<>();
@@ -154,10 +155,10 @@ public final class TinkerGraphUtil {
   }
 
   static void addGraph(Graph graph, Graph addition) {
-    for (Vertex vertex: addition.getVertices()) {
+    for (Vertex vertex : addition.getVertices()) {
       addElement(graph, vertex);
     }
-    for (Edge edge: addition.getEdges()) {
+    for (Edge edge : addition.getEdges()) {
       addElement(graph, edge);
     }
   }
@@ -173,21 +174,29 @@ public final class TinkerGraphUtil {
     TinkerGraph graph = new TinkerGraph();
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
-      for (Object value: map.values()) {
+      for (Map.Entry<String, Object> entry : map.entrySet()) {
+        Object value = entry.getValue();
+        String key = entry.getKey();
         if (null == value) {
           continue;
         } else if (value instanceof PropertyContainer) {
-          addElement(graph, (PropertyContainer)value);
+          addElement(graph, (PropertyContainer) value);
         } else if (value instanceof Path) {
-          for (PropertyContainer container: (Path)value) {
+          for (PropertyContainer container : (Path) value) {
             addElement(graph, container);
           }
         } else if (value instanceof SeqWrapper) {
-          for (Object thing: (SeqWrapper<?>)value) {
+          for (Object thing : (SeqWrapper<?>) value) {
             if (thing instanceof PropertyContainer) {
               addElement(graph, (PropertyContainer) thing);
             }
           }
+        } else if (value instanceof Boolean) {
+          // generates a lonely node which contains the result
+          Vertex vertex = graph.addVertex(key);
+          vertex.setProperty(key, value);
+          vertex.setProperty(NodeProperties.LABEL, "Boolean result");
+          vertex.setProperty(CommonProperties.IRI, key);
         } else {
           logger.warning("Not converting " + value.getClass() + " to tinker graph");
         }
@@ -196,17 +205,15 @@ public final class TinkerGraphUtil {
     return graph;
   }
 
-  static public <T> Optional<T> getProperty(Element container, String property,
-      Class<T> type) {
-    Optional<T> value = Optional.<T> absent();
+  static public <T> Optional<T> getProperty(Element container, String property, Class<T> type) {
+    Optional<T> value = Optional.<T>absent();
     if (container.getPropertyKeys().contains(property)) {
-      value = Optional.<T> of(type.cast(container.getProperty(property)));
+      value = Optional.<T>of(type.cast(container.getProperty(property)));
     }
     return value;
   }
 
-  static public <T> Collection<T> getProperties(Element container, String property,
-      Class<T> type) {
+  static public <T> Collection<T> getProperties(Element container, String property, Class<T> type) {
     List<T> list = new ArrayList<>();
     if (container.getPropertyKeys().contains(property)) {
       return getPropertiesAsSet(container.getProperty(property), type);
@@ -218,9 +225,8 @@ public final class TinkerGraphUtil {
   static <T> Set<T> getPropertiesAsSet(Object value, Class<T> type) {
     Set<T> set = new HashSet<>();
     if (value instanceof Collection) {
-      return newHashSet((Collection<T>)value);
-    }
-    else if (value.getClass().isArray()) {
+      return newHashSet((Collection<T>) value);
+    } else if (value.getClass().isArray()) {
       List<Object> objects = new ArrayList<>();
       for (int i = 0; i < Array.getLength(value); i++) {
         objects.add(Array.get(value, i));
@@ -238,10 +244,9 @@ public final class TinkerGraphUtil {
     if (projection.contains("*")) {
       return;
     }
-    for (Vertex vertex: graph.getVertices()) {
-      for (String key: vertex.getPropertyKeys()) {
-        if (!projection.contains(key) &&
-            !PROTECTED_PROPERTY_KEYS.contains(key)) {
+    for (Vertex vertex : graph.getVertices()) {
+      for (String key : vertex.getPropertyKeys()) {
+        if (!projection.contains(key) && !PROTECTED_PROPERTY_KEYS.contains(key)) {
           vertex.removeProperty(key);
         }
       }
