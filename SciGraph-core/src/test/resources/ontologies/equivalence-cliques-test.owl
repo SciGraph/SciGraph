@@ -1,0 +1,221 @@
+Prefix: AQTL: <http://identifiers.org/animalqtl/>
+Prefix: AQTLPub: <http://www.animalgenome.org/cgi-bin/QTLdb/BT/qabstract?PUBMED_ID=>
+Prefix: AQTLTrait: <http://identifiers.org/animalqtltrait/>
+Prefix: Annotation: <http://www.w3.org/ns/oa#Annotation>
+Prefix: BFO: <http://purl.obolibrary.org/obo/BFO_>
+Prefix: BIOGRID: <http://thebiogrid.org/>
+Prefix: CCDS: <http://www.ncbi.nlm.nih.gov/CCDS/CcdsBrowse.cgi?REQUEST=CCDS&DATA=>
+Prefix: CGD: <http://ohsu.edu/cgd/>
+Prefix: CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>
+Prefix: CHR: <http://purl.obolibrary.org/obo/CHR_>
+Prefix: CID: <http://pubchem.ncbi.nlm.nih.gov/compound/>
+Prefix: CL: <http://purl.obolibrary.org/obo/CL_>
+Prefix: CLO: <http://purl.obolibrary.org/obo/CLO_>
+Prefix: CMO: <http://purl.obolibrary.org/obo/CMO_>
+Prefix: COSMIC: <http://cancer.sanger.ac.uk/cosmic/mutation/overview?id=>
+Prefix: ClinVar: <http://www.ncbi.nlm.nih.gov/clinvar/>
+Prefix: ClinVarVariant: <http://www.ncbi.nlm.nih.gov/clinvar/variation/>
+Prefix: Coriell: <https://catalog.coriell.org/0/Sections/Search/Sample_Detail.aspx?Ref=>
+Prefix: CoriellCollection: <https://catalog.coriell.org/1/>
+Prefix: CoriellFamily: <https://catalog.coriell.org/0/Sections/BrowseCatalog/FamilyTypeSubDetail.aspx?fam=>
+Prefix: CoriellIndividual: <https://catalog.coriell.org/Search?q=>
+Prefix: DATA: <http://edamontology.org/data_>
+Prefix: DECIPHER: <http://purl.obolibrary.org/obo/DECIPHER_>
+Prefix: DOI: <http://dx.doi.org/>
+Prefix: DOID: <http://purl.obolibrary.org/obo/DOID_>
+Prefix: DrugBank: <http://www.drugbank.ca/drugs/>
+Prefix: EC: <http://identifiers.org/ec-code/>
+Prefix: ECO: <http://purl.obolibrary.org/obo/ECO_>
+Prefix: EFO: <http://www.ebi.ac.uk/efo/EFO_>
+Prefix: ENSEMBL: <http://identifiers.org/ensembl/>
+Prefix: EOM: <http://purl.obolibrary.org/obo/EOM_>
+Prefix: ERO: <http://purl.obolibrary.org/obo/ERO_>
+Prefix: EcoGene: <http://ecogene.org/gene/>
+Prefix: FlyBase: <http://identifiers.org/FB:>
+Prefix: GENO: <http://purl.obolibrary.org/obo/GENO_>
+Prefix: GO: <http://purl.obolibrary.org/obo/GO_>
+Prefix: GenBank: <http://www.ncbi.nlm.nih.gov/nuccore/>
+Prefix: GeneReviews: <http://www.ncbi.nlm.nih.gov/books/>
+Prefix: HGMD: <http://identifiers.org/hgmd/>
+Prefix: HGNC: <http://identifiers.org/hgnc/HGNC:>
+Prefix: HP: <http://purl.obolibrary.org/obo/HP_>
+Prefix: HPO: <http://human-phenotype-ontology.org/>
+Prefix: HPRD: <http://www.hprd.org/protein/>
+Prefix: IAO: <http://purl.obolibrary.org/obo/IAO_>
+Prefix: IMPC: <http://www.mousephenotype.org/data/genes/>
+Prefix: ISBN: <http://www.monarchinitiative.org/ISBN_>
+Prefix: ISBN-10: <http://www.monarchinitiative.org/ISBN10_>
+Prefix: ISBN-13: <http://www.monarchinitiative.org/ISBN13_>
+Prefix: ISBN-15: <http://www.monarchinitiative.org/ISBN15_>
+Prefix: J: <http://www.informatics.jax.org/reference/J:>
+Prefix: JAX: <http://jaxmice.jax.org/strain/>
+Prefix: KEGG-ds: <http://purl.obolibrary.org/KEGG-ds_>
+Prefix: KEGG-hsa: <http://www.kegg.jp/dbget-bin/www_bget?hsa:>
+Prefix: KEGG-ko: <http://www.kegg.jp/dbget-bin/www_bget?ko:>
+Prefix: KEGG-path: <http://www.kegg.jp/dbget-bin/www_bget?path:>
+Prefix: MA: <http://purl.obolibrary.org/obo/MA_>
+Prefix: MESH: <http://purl.obolibrary.org/obo/MESH_>
+Prefix: MGI: <http://www.informatics.jax.org/accession/MGI:>
+Prefix: MONARCH: <http://www.monarchinitiative.org/MONARCH_>
+Prefix: MP: <http://purl.obolibrary.org/obo/MP_>
+Prefix: MedGen: <http://www.ncbi.nlm.nih.gov/medgen/>
+Prefix: MonarchArchive: <http://archive.monarchinitiative.org/ttl/>
+Prefix: MonarchData: <http://data.monarchinitiative.org/ttl/>
+Prefix: NCBIAssembly: <http://www.ncbi.nlm.nih.gov/assembly/>
+Prefix: NCBIGene: <http://www.ncbi.nlm.nih.gov/gene/>
+Prefix: NCBIGenome: <http://www.ncbi.nlm.nih.gov/genome/>
+Prefix: NCBIProtein: <http://www.ncbi.nlm.nih.gov/protein/>
+Prefix: NCBITaxon: <http://purl.obolibrary.org/obo/NCBITaxon_>
+Prefix: OBAN: <http://purl.org/oban/>
+Prefix: OBO: <http://purl.obolibrary.org/obo/>
+Prefix: OIO: <http://www.geneontology.org/formats/oboInOwl#>
+Prefix: OMIM: <http://purl.obolibrary.org/obo/OMIM_>
+Prefix: Orphanet: <http://www.orpha.net/ORDO/Orphanet_>
+Prefix: PANTHER: <http://www.pantherdb.org/panther/family.do?clsAccession=>
+Prefix: PATO: <http://purl.obolibrary.org/obo/PATO_>
+Prefix: PCO: <http://purl.obolibrary.org/obo/PCO_>
+Prefix: PDB: <http://identifiers.org/PDB:>
+Prefix: PMCID: <http://www.ncbi.nlm.nih.gov/pmc/>
+Prefix: PMID: <http://www.ncbi.nlm.nih.gov/pubmed/>
+Prefix: PR: <http://purl.obolibrary.org/obo/PR_>
+Prefix: PT: <http://www.animalgenome.org/cgi-bin/amido/term-details.cgi?term=PT:>
+Prefix: PW: <http://purl.obolibrary.org/obo/PW_>
+Prefix: PomBase: <http://identifiers.org/PomBase:>
+Prefix: REACT: <http://www.reactome.org/PathwayBrowser/#REACT_>
+Prefix: RGD: <http://rgd.mcw.edu/rgdweb/report/gene/main.html?id=>
+Prefix: RO: <http://purl.obolibrary.org/obo/RO_>
+Prefix: RefSeq: <http://www.ncbi.nlm.nih.gov/refseq/?term=>
+Prefix: SGD: <http://identifiers.org/SGD:>
+Prefix: SIO: <http://semanticscience.org/resource/SIO_>
+Prefix: SNOMED: <http://purl.obolibrary.org/obo/SNOMED_>
+Prefix: SO: <http://purl.obolibrary.org/obo/SO_>
+Prefix: SwissProt: <http://identifiers.org/SwissProt:>
+Prefix: TAIR: <http://identifiers.org/TAIR:>
+Prefix: TrEMBL: <http://www.uniprot.org/uniprot/>
+Prefix: UBERON: <http://purl.obolibrary.org/obo/UBERON_>
+Prefix: UCSC: <ftp://hgdownload.cse.ucsc.edu/goldenPath/>
+Prefix: UMLS: <http://purl.obolibrary.org/obo/UMLS_>
+Prefix: UO: <http://purl.obolibrary.org/obo/UO_>
+Prefix: UniProtKB: <http://identifiers.org/uniprot/>
+Prefix: VT: <http://purl.obolibrary.org/obo/VT_>
+Prefix: WormBase: <http://identifiers.org/wormbase/>
+Prefix: XCO: <http://purl.obolibrary.org/obo/XCO_>
+Prefix: Xenbase: <http://identifiers.org/xenbase/>
+Prefix: ZFA: <http://purl.obolibrary.org/obo/ZFA_>
+Prefix: ZFIN: <http://zfin.org/>
+Prefix: ZFS: <http://purl.obolibrary.org/obo/ZFS_>
+Prefix: ZP: <http://purl.obolibrary.org/obo/ZP_>
+Prefix: dbSNP: <http://www.ncbi.nlm.nih.gov/SNP/>
+Prefix: dbSNPIndividual: <http://www.ncbi.nlm.nih.gov/SNP/snp_ind.cgi?ind_id=>
+Prefix: dbVar: <http://www.ncbi.nlm.nih.gov/dbvar/>
+Prefix: dc: <http://purl.org/dc/elements/1.1/>
+Prefix: dictyBase: <http://dictybase.org/gene/>
+Prefix: faldo: <http://biohackathon.org/resource/faldo#>
+Prefix: foaf: <http://xmlns.com/foaf/0.1/>
+Prefix: miRBase: <http://identifiers.org/mirbase/>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+
+Ontology: <http://scigraph.io/equivtest.owl>
+
+ObjectProperty: RO:HOM0000020
+  Annotations: rdfs:label " in 1 to 1 orthology relationship with"
+ObjectProperty: RO:0002162
+  Annotations: rdfs:label "in taxon"
+ObjectProperty: RO:0002200
+  Annotations: rdfs:label "has phenotype"
+
+Class: NCBITaxon:7955 Annotations: rdfs:label "Danio rerio"
+Class: NCBITaxon:9606 Annotations: rdfs:label "Homo sapiens"
+Class: NCBITaxon:10090 Annotations: rdfs:label "Mus musculus"
+
+# A phenoClique
+Class: ZP:0000001 Annotations: rdfs:label "zp phenotype"
+Class: HP:0000001 Annotations: rdfs:label "hp phenotype" EquivalentTo: ZP:0000001
+Class: MP:0000001 Annotations: rdfs:label "mp phenotype" EquivalentTo: HP:0000001
+
+## Zebrafish gene pair clique
+Class: NCBIGene:ZG1
+  Annotations: rdfs:label "zg1 (ncbi)"
+ SubClassOf: RO:0002162 some NCBITaxon:7955
+ # NCBI asserts homology to NCBI (human)
+ SubClassOf: RO:HOM0000020 some NCBIGene:HG1
+Class: ZFIN:ZG1
+  Annotations: rdfs:label "zg1 (zfin)"
+ SubClassOf: RO:0002200 some ZP:0000001
+ # ZFIN asserts homology to MGI (mouse)
+ SubClassOf: RO:HOM0000020 some MGI:MG1
+ EquivalentTo: NCBIGene:ZG1
+
+
+## Mouse gene pair clique
+Class: NCBIGene:MG1
+  Annotations: rdfs:label "mg1 (ncbi)"
+ SubClassOf: RO:0002200 some MP:0000001
+Class: MGI:MG1
+  Annotations: rdfs:label "mg1 (zfin)"
+ EquivalentTo: NCBIGene:MG1
+ SubClassOf: RO:0002162 some NCBITaxon:10090
+
+## Human gene foursome;
+##  Clique asserted as chain of classes
+##  Taxon assertion on ENSEMBL
+Class: NCBIGene:HG1
+  Annotations: rdfs:label "hg1"
+Class: OMIM:HG1
+ EquivalentTo: NCBIGene:HG1
+ SubClassOf: RO:0002200 some HP:0000001
+Class: HGNC:HG1
+ EquivalentTo: OMIM:HG1
+Class: ENSEMBL:HG1
+ EquivalentTo: HGNC:HG1
+ SubClassOf: RO:0002162 some NCBITaxon:9606
+
+
+## Human gene foursome;
+##  Clique asserted using NCBI as hub node (inward)
+Class: NCBIGene:HG2
+  Annotations: rdfs:label "hg2"
+Class: OMIM:HG2
+ EquivalentTo: NCBIGene:HG2
+ SubClassOf: RO:0002200 some HP:0000001
+Class: HGNC:HG2
+ EquivalentTo: NCBIGene:HG2
+Class: ENSEMBL:HG2
+ EquivalentTo: NCBIGene:HG2
+ SubClassOf: RO:0002162 some NCBITaxon:9606
+
+
+## Human gene foursome;
+##  Clique asserted using NCBI as hub node (outward)
+Class: NCBIGene:HG3
+  Annotations: rdfs:label "hg3"
+ EquivalentTo: OMIM:HG3
+ EquivalentTo: HGNC:HG3
+ EquivalentTo: ENSEMBL:HG3
+Class: OMIM:HG3
+ SubClassOf: RO:0002200 some HP:0000001
+Class: HGNC:HG3
+Class: ENSEMBL:HG3
+ SubClassOf: RO:0002162 some NCBITaxon:9606
+
+## Non 1-1 examples
+Class: NCBIGene:HG4a
+  Annotations: rdfs:label "hg4a"
+Class: NCBIGene:HG4b
+  Annotations: rdfs:label "hg4b"
+Class: OMIM:HG4
+ SubClassOf: RO:0002200 some HP:0000001
+ EquivalentTo: HGNC:HG4
+Class: HGNC:HG4
+ EquivalentTo: NCBIGene:HG4a
+ EquivalentTo: NCBIGene:HG4b
+Class: ENSEMBL:HG4
+ EquivalentTo: OMIM:HG4
+
+
+
+
