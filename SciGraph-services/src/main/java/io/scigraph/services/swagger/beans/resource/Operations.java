@@ -31,6 +31,7 @@ public class Operations {
   private List<Parameters> parameters;
   private String summary;
   private String type;
+  // TODO add possibility to set default params
 
   @JsonProperty
   public String getMethod() {
