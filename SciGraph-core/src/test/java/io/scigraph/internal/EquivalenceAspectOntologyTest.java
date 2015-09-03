@@ -45,7 +45,7 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 public class EquivalenceAspectOntologyTest extends GraphTestBase {
 
-  EquivalenceAspect aspect = new EquivalenceAspect(graphDb, cypherUtil);
+  EquivalenceAspect aspect = new EquivalenceAspect(graphDb);
 
   @Before
   public void setup() throws Exception {

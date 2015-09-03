@@ -15,10 +15,12 @@
  */
 package io.scigraph.internal;
 
-import java.util.logging.Logger;
-
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.owlapi.OwlRelationships;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -31,7 +33,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 
 public class EquivalenceAspect implements GraphAspect {
@@ -44,12 +45,10 @@ public class EquivalenceAspect implements GraphAspect {
 
 
   private final GraphDatabaseService graphDb;
-  private final CypherUtil cypherUtil;
 
   @Inject
-  EquivalenceAspect(GraphDatabaseService graphDb, CypherUtil graphUtil) {
+  public EquivalenceAspect(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
-    this.cypherUtil = graphUtil;
   }
 
   @Override
@@ -86,11 +85,15 @@ public class EquivalenceAspect implements GraphAspect {
           }
         }
 
+        // Keep a list of equivalentNodes to move them to the leader the processing
+        List<Node> equivalentNodes = new ArrayList<Node>();
+
         // Move all the edges except the equivalences
         for (Node currentNode : graphDb.traversalDescription().relationships(IS_EQUIVALENT).uniqueness(Uniqueness.NODE_GLOBAL).traverse(baseNode)
             .nodes()) {
           logger.info("Processing underNode - " + currentNode.getProperty(NodeProperties.IRI));
           if (currentNode.getId() != baseNode.getId()) {
+            equivalentNodes.add(currentNode);
             Iterable<Relationship> rels = currentNode.getRelationships();
             for (Relationship rel : rels) {
               if (!(sourceHasAlreadyMoved(rel) && targetHasAlreadyMoved(rel)) && (rel.getType().name() != IS_EQUIVALENT.name())) {
@@ -98,6 +101,7 @@ public class EquivalenceAspect implements GraphAspect {
                   if ((rel.getEndNode().getId() == currentNode.getId()) && !targetHasAlreadyMoved(rel)) {
                     logger.info("MOVE TARGET " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
                         + baseNode.getProperty(NodeProperties.IRI));
+
                     moveRelationship(currentNode, baseNode, rel, ORIGINAL_REFERENCE_KEY_TARGET, graph);
                   } else if ((rel.getStartNode().getId() == currentNode.getId()) && !sourceHasAlreadyMoved(rel)) {
                     logger.info("MOVE SOURCE " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
@@ -111,17 +115,58 @@ public class EquivalenceAspect implements GraphAspect {
           }
         }
 
+        System.out.println("EQU: " + equivalentNodes);
+        if(((String) baseNode.getProperty("iri")).contains("HG1")){
+          System.out.println("gotcha");
+        }
         // TODO move equivalence edges
-        
+        for (Node equivalentNode : equivalentNodes) {
+          for (Relationship equivalentRel : equivalentNode.getRelationships(IS_EQUIVALENT)) {
+            if (!(sourceHasAlreadyMoved(equivalentRel) || targetHasAlreadyMoved(equivalentRel))) {
+              if (equivalentRel.getEndNode().getId() == equivalentNode.getId()) {
+                logger.info("MOVE EQU TARGET " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
+                    + baseNode.getProperty(NodeProperties.IRI));
+                moveEquivalentRelationship(equivalentNode, baseNode, equivalentRel, ORIGINAL_REFERENCE_KEY_TARGET, graph);
+              } else if (equivalentRel.getStartNode().getId() == equivalentNode.getId()) {
+                logger.info("MOVE EQU SOURCE " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
+                    + baseNode.getProperty(NodeProperties.IRI));
+                moveEquivalentRelationship(equivalentNode, baseNode, equivalentRel, ORIGINAL_REFERENCE_KEY_SOURCE, graph);
+              }
+            }
+          }
+        }
+
       }
 
       tx.success();
     }
   }
+  
+  private void moveEquivalentRelationship(Node equi, Node to, Relationship rel, String property, Graph tinkerGraph) {
+    Relationship newRel = null;
+    if (property == ORIGINAL_REFERENCE_KEY_TARGET) {
+      newRel = equi.createRelationshipTo(to, rel.getType());
+    } else {
+      newRel = to.createRelationshipTo(equi, rel.getType());
+    }
+    // Neo4J Graph
+    copyProperties(rel, newRel);
+    rel.delete();
+    newRel.setProperty(property, equi.getProperty(NodeProperties.IRI));
+
+    // TinkerGraph
+    TinkerGraphUtil.removeEdge(tinkerGraph, rel);
+    TinkerGraphUtil.addEdge(tinkerGraph, newRel);
+  }
 
   private void moveRelationship(Node from, Node to, Relationship rel, String property, Graph tinkerGraph) {
+    Relationship newRel = null;
+    if (property == ORIGINAL_REFERENCE_KEY_TARGET) {
+      newRel = rel.getOtherNode(from).createRelationshipTo(to, rel.getType());
+    } else {
+      newRel = to.createRelationshipTo(rel.getOtherNode(from), rel.getType());
+    }
     // Neo4J Graph
-    Relationship newRel = to.createRelationshipTo(rel.getOtherNode(from), rel.getType());
     copyProperties(rel, newRel);
     rel.delete();
     newRel.setProperty(property, from.getProperty(NodeProperties.IRI));
