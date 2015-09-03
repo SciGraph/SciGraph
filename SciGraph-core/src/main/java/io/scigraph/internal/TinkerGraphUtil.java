@@ -96,6 +96,17 @@ public final class TinkerGraphUtil {
     return edge;
   }
 
+  // TODO unit test that
+  static boolean removeEdge(Graph graph, Relationship relationship) {
+    Edge edge = graph.getEdge(relationship.getId());
+    if (null != edge) {
+      graph.removeEdge(edge);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   public static Element addElement(Graph graph, PropertyContainer container) {
     if (container instanceof Node) {
       return addNode(graph, (Node) container);

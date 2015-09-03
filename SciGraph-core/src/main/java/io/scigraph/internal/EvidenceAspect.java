@@ -44,9 +44,9 @@ public class EvidenceAspect implements GraphAspect {
   static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("association_has_object");
   static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("RO_0002558");
   static final RelationshipType SOURCE = DynamicRelationshipType.withName("source");
-  
-  
-  private final GraphDatabaseService graphDb; 
+
+
+  private final GraphDatabaseService graphDb;
 
   @Inject
   EvidenceAspect(GraphDatabaseService graphDb) {
@@ -58,24 +58,23 @@ public class EvidenceAspect implements GraphAspect {
     Set<Long> nodeIds = newHashSet(transform(graph.getVertices(), new Function<Vertex, Long>() {
       @Override
       public Long apply(Vertex vertex) {
-        return Long.valueOf((String)vertex.getId());
+        return Long.valueOf((String) vertex.getId());
       }
-    }
-        ));
+    }));
     try (Transaction tx = graphDb.beginTx()) {
-      for (Vertex vertex: graph.getVertices()) {
-        Node subject = graphDb.getNodeById(Long.parseLong((String)vertex.getId()));
-        for (Relationship hasSubject: subject.getRelationships(HAS_SUBJECT, Direction.INCOMING)) {
+      for (Vertex vertex : graph.getVertices()) {
+        Node subject = graphDb.getNodeById(Long.parseLong((String) vertex.getId()));
+        for (Relationship hasSubject : subject.getRelationships(HAS_SUBJECT, Direction.INCOMING)) {
           Node annotation = hasSubject.getOtherNode(subject);
-          for (Relationship hasObject: annotation.getRelationships(HAS_OBJECT, Direction.OUTGOING)) {
+          for (Relationship hasObject : annotation.getRelationships(HAS_OBJECT, Direction.OUTGOING)) {
             Node object = hasObject.getOtherNode(annotation);
             if (nodeIds.contains(object.getId())) {
               TinkerGraphUtil.addEdge(graph, hasSubject);
               TinkerGraphUtil.addEdge(graph, hasObject);
-              for (Relationship evidence: annotation.getRelationships(EVIDENCE, Direction.OUTGOING)) {
+              for (Relationship evidence : annotation.getRelationships(EVIDENCE, Direction.OUTGOING)) {
                 TinkerGraphUtil.addEdge(graph, evidence);
               }
-              for (Relationship source: annotation.getRelationships(SOURCE, Direction.OUTGOING)) {
+              for (Relationship source : annotation.getRelationships(SOURCE, Direction.OUTGOING)) {
                 TinkerGraphUtil.addEdge(graph, source);
               }
             }
