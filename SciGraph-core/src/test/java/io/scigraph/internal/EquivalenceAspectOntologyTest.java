@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -75,6 +76,7 @@ public class EquivalenceAspectOntologyTest extends GraphTestBase {
     }
   }
 
+  @Ignore
   @Test
   public void edgesAreMovedToLeader() {
     Graph tinkerGraph = new TinkerGraph();
