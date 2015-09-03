@@ -82,9 +82,9 @@ public class EquivalenceAspectTest extends GraphTestBase {
     Vertex v2 = vertices.next();
     Vertex v3 = vertices.next();
 
-    assertThat(v1.getProperty(NodeProperties.IRI), is("http://x.org/a"));
-    assertThat(v2.getProperty(NodeProperties.IRI), is("http://x.org/b"));
-    assertThat(v3.getProperty(NodeProperties.IRI), is("http://x.org/c"));
+    assertThat((String) v1.getProperty(NodeProperties.IRI), is("http://x.org/a"));
+    assertThat((String)v2.getProperty(NodeProperties.IRI), is("http://x.org/b"));
+    assertThat((String)v3.getProperty(NodeProperties.IRI), is("http://x.org/c"));
     assertThat(v1.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(0));
     assertThat(v2.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(1));
     assertThat(v3.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(1));

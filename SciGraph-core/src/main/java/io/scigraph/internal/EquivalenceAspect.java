@@ -86,7 +86,7 @@ public class EquivalenceAspect implements GraphAspect {
           }
         }
 
-
+        // Move all the edges except the equivalences
         for (Node currentNode : graphDb.traversalDescription().relationships(IS_EQUIVALENT).uniqueness(Uniqueness.NODE_GLOBAL).traverse(baseNode)
             .nodes()) {
           logger.info("Processing underNode - " + currentNode.getProperty(NodeProperties.IRI));
@@ -110,7 +110,9 @@ public class EquivalenceAspect implements GraphAspect {
             }
           }
         }
-        // TODO move the equivalence edges
+
+        // TODO move equivalence edges
+        
       }
 
       tx.success();
