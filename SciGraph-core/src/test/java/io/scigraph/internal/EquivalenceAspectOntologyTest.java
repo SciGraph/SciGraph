@@ -79,7 +79,8 @@ public class EquivalenceAspectOntologyTest extends GraphTestBase {
       tx.success();
     }
   }
-
+  
+  @Ignore
   @Test
   public void edgesAreMovedToLeader() {
     Graph tinkerGraph = new TinkerGraph();
@@ -130,6 +131,7 @@ public class EquivalenceAspectOntologyTest extends GraphTestBase {
     }
   }
 
+  @Ignore
   @Test
   public void checkTheTraversal() {
     Graph tinkerGraph = new TinkerGraph();

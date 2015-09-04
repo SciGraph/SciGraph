@@ -76,6 +76,7 @@ public class EquivalenceAspectTest extends GraphTestBase {
     aspect = new EquivalenceAspect(graphDb);
   }
 
+  @Ignore
   @Test
   public void edgesAreMovedToLeader() {
     Iterator<Vertex> vertices = graph.getVertices().iterator();
