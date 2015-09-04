@@ -31,6 +31,15 @@ public class OwlLoadConfiguration {
   private List<OntologySetup> ontologies = new ArrayList<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
+  private boolean runPostprocessor = false;
+
+  public boolean getRunPostprocessor() {
+    return runPostprocessor;
+  }
+
+  public void setRunPostprocessor(boolean runPostprocessor) {
+    this.runPostprocessor = runPostprocessor;
+  }
 
   private int producerThreadCount = (int) Math.ceil(Runtime.getRuntime()
       .availableProcessors() / 2.0);

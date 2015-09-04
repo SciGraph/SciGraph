@@ -46,9 +46,9 @@ public class CypherUtilService extends BaseResource {
   @Timed
   @Produces({MediaType.TEXT_PLAIN})
   @Path("/resolve")
-  @ApiOperation(value = "Cypher query resolver", response = String.class, notes = "")
-  public String resolve(
-      @ApiParam(value = "The cypher query to resolve", required = true) @QueryParam("cypherQuery") String cypherQuery) {
+  @ApiOperation(value = "Cypher query resolver", response = String.class,
+      notes = "Only resolves curies of the relationships, not the ones in the nodes or in the START.")
+  public String resolve(@ApiParam(value = "The cypher query to resolve", required = true) @QueryParam("cypherQuery") String cypherQuery) {
     return cypherUtil.resolveRelationships(cypherQuery);
   }
 

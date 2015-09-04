@@ -20,14 +20,7 @@ import io.scigraph.neo4j.Graph;
 import io.scigraph.neo4j.GraphBatchImpl;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
-import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
-import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
-import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
-import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
-import io.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
+import io.scigraph.owlapi.loader.bindings.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +72,8 @@ public class OwlLoaderModule extends AbstractModule {
     bind(Integer.class).annotatedWith(IndicatesNumberOfProducerThreads.class).toInstance(config.getProducerThreadCount());
 
     bind(AtomicInteger.class).annotatedWith(IndicatesNumberOfShutdownProducers.class).to(AtomicInteger.class).in(Scopes.SINGLETON);
+
+    bind(Boolean.class).annotatedWith(IndicatesRunPostprocessor.class).toInstance(config.getRunPostprocessor());
   }
 
   /*@Provides
