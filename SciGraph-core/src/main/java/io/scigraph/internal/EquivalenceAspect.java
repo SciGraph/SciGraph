@@ -111,12 +111,36 @@ public class EquivalenceAspect implements GraphAspect {
                       logger.info("MOVE TARGET " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
                           + baseNode.getProperty(NodeProperties.IRI));
 
+                      electAsCliqueLeader(baseNode);
                       moveRelationship(currentNode, baseNode, rel, ORIGINAL_REFERENCE_KEY_TARGET, graph);
+                      // TODO clean that...
+                      // Move rdfs:label if non-existing on leader
+                      if(!baseNode.hasProperty(NodeProperties.LABEL)){
+                        if(currentNode.hasProperty(NodeProperties.LABEL)){
+                          baseNode.setProperty(NodeProperties.LABEL, currentNode.getProperty(NodeProperties.LABEL));
+                        }
+                        // TODO dirty hack...
+                        if(currentNode.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")){
+                          baseNode.setProperty("http://www.w3.org/2000/01/rdf-schema#label", currentNode.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
+                        }
+                      }
                     } else if ((rel.getStartNode().getId() == currentNode.getId()) && !sourceHasAlreadyMoved(rel)) {
                       logger.info("MOVE SOURCE " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
                           + baseNode.getProperty(NodeProperties.IRI));
 
+                      electAsCliqueLeader(baseNode);
                       moveRelationship(currentNode, baseNode, rel, ORIGINAL_REFERENCE_KEY_SOURCE, graph);
+                      // TODO clean that...
+                      // Move rdfs:label if non-existing on leader
+                      if(!baseNode.hasProperty(NodeProperties.LABEL)){
+                        if(currentNode.hasProperty(NodeProperties.LABEL)){
+                          baseNode.setProperty(NodeProperties.LABEL, currentNode.getProperty(NodeProperties.LABEL));
+                        }
+                        // TODO dirty hack...
+                        if(currentNode.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")){
+                          baseNode.setProperty("http://www.w3.org/2000/01/rdf-schema#label", currentNode.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
+                        }
+                      }
                     }
                   }
                 }
@@ -137,12 +161,10 @@ public class EquivalenceAspect implements GraphAspect {
                 if (equivalentRel.getEndNode().getId() == equivalentNode.getId()) {
                   logger.info("MOVE EQU TARGET " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
                       + baseNode.getProperty(NodeProperties.IRI));
-                  electAsCliqueLeader(baseNode);
                   moveRelationship(equivalentNode, baseNode, equivalentRel, ORIGINAL_REFERENCE_KEY_TARGET, graph);
                 } else if (equivalentRel.getStartNode().getId() == equivalentNode.getId()) {
                   logger.info("MOVE EQU SOURCE " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
                       + baseNode.getProperty(NodeProperties.IRI));
-                  electAsCliqueLeader(baseNode);
                   moveRelationship(equivalentNode, baseNode, equivalentRel, ORIGINAL_REFERENCE_KEY_SOURCE, graph);
                 }
               }

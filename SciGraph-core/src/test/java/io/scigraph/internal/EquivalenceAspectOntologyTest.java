@@ -113,6 +113,7 @@ public class EquivalenceAspectOntologyTest extends GraphTestBase {
       assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(6));
 
       aspect.invoke(tinkerGraph);
+      System.out.println(zfin1.getProperty(NodeProperties.LABEL));
 
       System.out.println("===============================");
       for (Node n : globalGraphOperations.getAllNodes()) {
