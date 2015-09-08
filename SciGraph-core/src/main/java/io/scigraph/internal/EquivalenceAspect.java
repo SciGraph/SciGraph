@@ -33,10 +33,12 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import com.google.common.collect.Iterators;
 import com.tinkerpop.blueprints.Graph;
 
 public class EquivalenceAspect implements GraphAspect {
@@ -58,33 +60,36 @@ public class EquivalenceAspect implements GraphAspect {
 
   @Override
   public void invoke(Graph graph) {
-    try (Transaction tx = graphDb.beginTx()) {
-      // Set<Long> nodeIds = newHashSet(transform(graph.getVertices(), new Function<Vertex, Long>()
-      // {
-      // @Override
-      // public Long apply(Vertex vertex) {
-      // return Long.valueOf((String) vertex.getId());
-      // }
-      // }));
-      // Long nodeId = nodeIds.iterator().next();
-      // String query = "MATCH path = (n)-[:equivalentClass*]->(e) where id(n) = " + nodeId +
-      // " return path";
-      // Result result = cypherUtil.execute(query);
-      // while (result.hasNext()) {
-      // Map<String, Object> map = result.next();
-      // System.out.println(((Path) map.get("path")));
-      // }
-      GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
-      // Iterator<Node> iterator = globalGraphOperations.getAllNodes().iterator();
-      // iterator.next();
-      // Node firstNode = iterator.next();
+    GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
 
-      for (Node baseNode : globalGraphOperations.getAllNodes()) {
+    Transaction tx = graphDb.beginTx();
+    ResourceIterable<Node> allNodes = globalGraphOperations.getAllNodes();
+    int size = Iterators.size(allNodes.iterator());
+    tx.success();
 
-        // Skip anonymous node, they cannot be leader
-        if (!baseNode.hasLabel(OwlLabels.OWL_ANONYMOUS)) {
+    logger.info(size + " nodes left to process");
 
-          logger.info("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
+    for (Node baseNode : allNodes) {
+
+      size -= 1;
+      if (size % 1000 == 0) {
+        logger.info(size + " nodes left to process");
+        // Committing the batch
+        tx.success();
+        tx.close();
+        tx = graphDb.beginTx();
+      }
+
+      // Skip anonymous node, they cannot be leader
+      if (!baseNode.hasLabel(OwlLabels.OWL_ANONYMOUS)) {
+
+        logger.info("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
+
+        // No equivalent, defacto CliqueLeader
+        if (!baseNode.hasRelationship(IS_EQUIVALENT)) {
+          electAsCliqueLeader(baseNode);
+        } else {
+
           // Marking the edges as not movable
           for (Relationship r : baseNode.getRelationships()) {
             if (r.getStartNode().getId() == baseNode.getId()) {
@@ -115,13 +120,14 @@ public class EquivalenceAspect implements GraphAspect {
                       moveRelationship(currentNode, baseNode, rel, ORIGINAL_REFERENCE_KEY_TARGET, graph);
                       // TODO clean that...
                       // Move rdfs:label if non-existing on leader
-                      if(!baseNode.hasProperty(NodeProperties.LABEL)){
-                        if(currentNode.hasProperty(NodeProperties.LABEL)){
+                      if (!baseNode.hasProperty(NodeProperties.LABEL)) {
+                        if (currentNode.hasProperty(NodeProperties.LABEL)) {
                           baseNode.setProperty(NodeProperties.LABEL, currentNode.getProperty(NodeProperties.LABEL));
                         }
                         // TODO dirty hack...
-                        if(currentNode.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")){
-                          baseNode.setProperty("http://www.w3.org/2000/01/rdf-schema#label", currentNode.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
+                        if (currentNode.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")) {
+                          baseNode.setProperty("http://www.w3.org/2000/01/rdf-schema#label",
+                              currentNode.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
                         }
                       }
                     } else if ((rel.getStartNode().getId() == currentNode.getId()) && !sourceHasAlreadyMoved(rel)) {
@@ -132,13 +138,14 @@ public class EquivalenceAspect implements GraphAspect {
                       moveRelationship(currentNode, baseNode, rel, ORIGINAL_REFERENCE_KEY_SOURCE, graph);
                       // TODO clean that...
                       // Move rdfs:label if non-existing on leader
-                      if(!baseNode.hasProperty(NodeProperties.LABEL)){
-                        if(currentNode.hasProperty(NodeProperties.LABEL)){
+                      if (!baseNode.hasProperty(NodeProperties.LABEL)) {
+                        if (currentNode.hasProperty(NodeProperties.LABEL)) {
                           baseNode.setProperty(NodeProperties.LABEL, currentNode.getProperty(NodeProperties.LABEL));
                         }
                         // TODO dirty hack...
-                        if(currentNode.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")){
-                          baseNode.setProperty("http://www.w3.org/2000/01/rdf-schema#label", currentNode.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
+                        if (currentNode.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")) {
+                          baseNode.setProperty("http://www.w3.org/2000/01/rdf-schema#label",
+                              currentNode.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
                         }
                       }
                     }
@@ -146,11 +153,6 @@ public class EquivalenceAspect implements GraphAspect {
                 }
               }
             }
-          }
-          
-          // No equivalent so elected as CliqueLeader
-          if(!baseNode.hasRelationship(IS_EQUIVALENT)){
-            electAsCliqueLeader(baseNode);
           }
 
           logger.info("EQUIVALENT NODES: " + equivalentNodes);
@@ -173,13 +175,14 @@ public class EquivalenceAspect implements GraphAspect {
 
         }
 
-        tx.success();
       }
     }
+
+    tx.success();
   }
-  
-  private void electAsCliqueLeader(Node n){
-    if(!n.hasLabel(CLIQUE_LEADER_LABEL)){
+
+  private void electAsCliqueLeader(Node n) {
+    if (!n.hasLabel(CLIQUE_LEADER_LABEL)) {
       n.addLabel(CLIQUE_LEADER_LABEL);
     }
   }
