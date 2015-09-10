@@ -72,7 +72,7 @@ public class EquivalenceAspect implements GraphAspect {
     for (Node baseNode : allNodes) {
 
       size -= 1;
-      if (size % 1000 == 0) {
+      if (size % 100 == 0) {
         logger.info(size + " nodes left to process");
         // Committing the batch
         tx.success();
