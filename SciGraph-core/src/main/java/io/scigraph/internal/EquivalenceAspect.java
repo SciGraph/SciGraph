@@ -201,8 +201,8 @@ public class EquivalenceAspect implements GraphAspect {
     newRel.setProperty(property, from.getProperty(NodeProperties.IRI));
 
     // TinkerGraph
-    TinkerGraphUtil.removeEdge(tinkerGraph, rel);
-    TinkerGraphUtil.addEdge(tinkerGraph, newRel);
+//    TinkerGraphUtil.removeEdge(tinkerGraph, rel);
+//    TinkerGraphUtil.addEdge(tinkerGraph, newRel);
   }
 
   private boolean targetHasAlreadyMoved(Relationship rel) {
