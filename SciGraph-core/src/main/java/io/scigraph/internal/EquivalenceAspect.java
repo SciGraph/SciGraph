@@ -67,23 +67,26 @@ public class EquivalenceAspect implements GraphAspect {
     int size = Iterators.size(allNodes.iterator());
     tx.success();
 
-    logger.info(size + " nodes left to process");
+    logger.fine(size + " nodes left to process");
 
     for (Node baseNode : allNodes) {
 
       size -= 1;
-      if (size % 100 == 0) {
-        logger.info(size + " nodes left to process");
+      if (size % 10 == 0) {
         // Committing the batch
         tx.success();
         tx.close();
         tx = graphDb.beginTx();
       }
+      
+      if (size % 1000 == 0) {
+        logger.info(size + " nodes left to process");
+      }
 
       // Skip anonymous node, they cannot be leader
       if (!baseNode.hasLabel(OwlLabels.OWL_ANONYMOUS)) {
 
-        logger.info("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
+        logger.fine("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
 
         // No equivalent, defacto CliqueLeader
         if (!baseNode.hasRelationship(IS_EQUIVALENT)) {
@@ -106,14 +109,14 @@ public class EquivalenceAspect implements GraphAspect {
           for (Node currentNode : graphDb.traversalDescription().relationships(IS_EQUIVALENT, Direction.BOTH).uniqueness(Uniqueness.NODE_GLOBAL)
               .traverse(baseNode).nodes()) {
             if (currentNode.getId() != baseNode.getId()) {
-              logger.info("Processing underNode - " + currentNode.getProperty(NodeProperties.IRI));
+              logger.fine("Processing underNode - " + currentNode.getProperty(NodeProperties.IRI));
               equivalentNodes.add(currentNode);
               Iterable<Relationship> rels = currentNode.getRelationships();
               for (Relationship rel : rels) {
                 if (!(sourceHasAlreadyMoved(rel) && targetHasAlreadyMoved(rel)) && !(rel.getType().name().equals(IS_EQUIVALENT.name()))) {
                   if (rel.getOtherNode(currentNode).getId() != baseNode.getId()) {
                     if ((rel.getEndNode().getId() == currentNode.getId()) && !targetHasAlreadyMoved(rel)) {
-                      logger.info("MOVE TARGET " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
+                      logger.fine("MOVE TARGET " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
                           + baseNode.getProperty(NodeProperties.IRI));
 
                       electAsCliqueLeader(baseNode);
@@ -131,7 +134,7 @@ public class EquivalenceAspect implements GraphAspect {
                         }
                       }
                     } else if ((rel.getStartNode().getId() == currentNode.getId()) && !sourceHasAlreadyMoved(rel)) {
-                      logger.info("MOVE SOURCE " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
+                      logger.fine("MOVE SOURCE " + rel.getType() + " FROM " + currentNode.getProperty(NodeProperties.IRI) + " TO "
                           + baseNode.getProperty(NodeProperties.IRI));
 
                       electAsCliqueLeader(baseNode);
@@ -155,17 +158,17 @@ public class EquivalenceAspect implements GraphAspect {
             }
           }
 
-          logger.info("EQUIVALENT NODES: " + equivalentNodes);
+          logger.fine("EQUIVALENT NODES: " + equivalentNodes);
           // move equivalence edges
           for (Node equivalentNode : equivalentNodes) {
             for (Relationship equivalentRel : equivalentNode.getRelationships(IS_EQUIVALENT)) {
               if (!(sourceHasAlreadyMoved(equivalentRel) || targetHasAlreadyMoved(equivalentRel))) {
                 if (equivalentRel.getEndNode().getId() == equivalentNode.getId()) {
-                  logger.info("MOVE EQU TARGET " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
+                  logger.fine("MOVE EQU TARGET " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
                       + baseNode.getProperty(NodeProperties.IRI));
                   moveRelationship(equivalentNode, baseNode, equivalentRel, ORIGINAL_REFERENCE_KEY_TARGET, graph);
                 } else if (equivalentRel.getStartNode().getId() == equivalentNode.getId()) {
-                  logger.info("MOVE EQU SOURCE " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
+                  logger.fine("MOVE EQU SOURCE " + equivalentRel.getType() + " FROM " + equivalentNode.getProperty(NodeProperties.IRI) + " TO "
                       + baseNode.getProperty(NodeProperties.IRI));
                   moveRelationship(equivalentNode, baseNode, equivalentRel, ORIGINAL_REFERENCE_KEY_SOURCE, graph);
                 }
