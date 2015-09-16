@@ -19,7 +19,7 @@ public class LoadIndex {
     // on startup
     System.out.println("Starting indexing...");
 
-    Client client = new TransportClient().addTransportAddress(new InetSocketTransportAddress("localhost", 9300));
+    Client client = new TransportClient().addTransportAddress(new InetSocketTransportAddress("127.0.0.1", 9300));
 
     File directory = new File(superclassPath);
     File[] fList = directory.listFiles();
