@@ -22,8 +22,11 @@ import io.scigraph.neo4j.GraphUtil;
 import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.util.GraphTestBase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.hamcrest.collection.IsIterableWithSize;
@@ -74,22 +77,28 @@ public class EquivalenceAspectTest extends GraphTestBase {
   public void edgesAreMovedToLeader() {
 
 
-//    Iterator<Vertex> vertices = graph.getVertices().iterator();
-//    Vertex v1 = vertices.next();
-//    Vertex v2 = vertices.next();
-//    Vertex v3 = vertices.next();
-//
-//    assertThat((String) v1.getProperty(NodeProperties.IRI), is("http://x.org/a"));
-//    assertThat((String) v2.getProperty(NodeProperties.IRI), is("http://x.org/b"));
-//    assertThat((String) v3.getProperty(NodeProperties.IRI), is("http://x.org/c"));
-//    assertThat(v1.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(0));
-//    assertThat(v2.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(1));
-//    assertThat(v3.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(1));
-//    aspect.invoke(graph);
-//    assertThat(v1.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(2));
-//    assertThat(v2.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(0));
-//    assertThat(v3.getVertices(Direction.BOTH, "hasPhenotype"), IsIterableWithSize.<Vertex>iterableWithSize(0));
-//
+    // Iterator<Vertex> vertices = graph.getVertices().iterator();
+    // Vertex v1 = vertices.next();
+    // Vertex v2 = vertices.next();
+    // Vertex v3 = vertices.next();
+    //
+    // assertThat((String) v1.getProperty(NodeProperties.IRI), is("http://x.org/a"));
+    // assertThat((String) v2.getProperty(NodeProperties.IRI), is("http://x.org/b"));
+    // assertThat((String) v3.getProperty(NodeProperties.IRI), is("http://x.org/c"));
+    // assertThat(v1.getVertices(Direction.BOTH, "hasPhenotype"),
+    // IsIterableWithSize.<Vertex>iterableWithSize(0));
+    // assertThat(v2.getVertices(Direction.BOTH, "hasPhenotype"),
+    // IsIterableWithSize.<Vertex>iterableWithSize(1));
+    // assertThat(v3.getVertices(Direction.BOTH, "hasPhenotype"),
+    // IsIterableWithSize.<Vertex>iterableWithSize(1));
+    // aspect.invoke(graph);
+    // assertThat(v1.getVertices(Direction.BOTH, "hasPhenotype"),
+    // IsIterableWithSize.<Vertex>iterableWithSize(2));
+    // assertThat(v2.getVertices(Direction.BOTH, "hasPhenotype"),
+    // IsIterableWithSize.<Vertex>iterableWithSize(0));
+    // assertThat(v3.getVertices(Direction.BOTH, "hasPhenotype"),
+    // IsIterableWithSize.<Vertex>iterableWithSize(0));
+    //
 
 
     GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
@@ -105,9 +114,9 @@ public class EquivalenceAspectTest extends GraphTestBase {
     assertThat(n1.getDegree(EquivalenceAspect.IS_EQUIVALENT), is(1));
     assertThat(n2.getDegree(EquivalenceAspect.IS_EQUIVALENT), is(2));
     assertThat(n3.getDegree(EquivalenceAspect.IS_EQUIVALENT), is(1));
-    
+
     aspect.invoke(graph);
-    
+
     assertThat(n1.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(2));
     assertThat(n2.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(0));
     assertThat(n3.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(0));
@@ -131,6 +140,19 @@ public class EquivalenceAspectTest extends GraphTestBase {
     // equivalentOriginalNodeTarget.equals("http://x.org/d"), is(true));
     // }
     // }
+  }
+
+  @Test
+  public void leaderPrioritizer() {
+    Node a = createNode("http://x.org/a");
+    Node c = createNode("http://y.org/c");
+    Node d = createNode("http://z.org/d");
+    List<Node> clique = Arrays.asList(a, createNode("http://x.org/b"), c, d, createNode("http://x.org/e"));
+    assertThat(aspect.electCliqueLeader(clique, new ArrayList<String>()).getId(), is(a.getId()));
+    assertThat(aspect.electCliqueLeader(clique, Arrays.asList("http://z.org/", "http://x.org/", "http://y.org/")).getId(), is(d.getId()));
+    assertThat(aspect.electCliqueLeader(clique, Arrays.asList("fake", "fake", "fake")).getId(), is(a.getId()));
+    assertThat(aspect.electCliqueLeader(clique, Arrays.asList("http://y.org/", "http://x.org/", "http://y.org/")).getId(), is(c.getId()));
+    assertThat(aspect.electCliqueLeader(clique, Arrays.asList("http://x.org/", "http://x.org/", "http://y.org/")).getId(), is(a.getId()));
   }
 
   private Node getNode(String iri, Iterator<Node> allNodes) {

@@ -16,10 +16,14 @@
 package io.scigraph.internal;
 
 import io.scigraph.frames.NodeProperties;
+import io.scigraph.neo4j.GraphUtil;
 import io.scigraph.owlapi.OwlLabels;
 import io.scigraph.owlapi.OwlRelationships;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -38,6 +42,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 import com.tinkerpop.blueprints.Graph;
 
@@ -51,12 +56,20 @@ public class EquivalenceAspect implements GraphAspect {
   static final Label CLIQUE_LEADER_LABEL = DynamicLabel.label("cliqueLeader");
   static final String CLIQUE_LEADER_PROPERTY = "cliqueLeader";
 
+  private List<String> prefixLeaderPriority; // TODO temporary
 
   private final GraphDatabaseService graphDb;
 
   @Inject
   public EquivalenceAspect(GraphDatabaseService graphDb) {
     this.graphDb = graphDb;
+    tmpInitLeaderPriority();
+  }
+
+  private void tmpInitLeaderPriority() {
+    prefixLeaderPriority =
+        Arrays.asList("http://purl.obolibrary.org/obo/NCBITaxon_", "http://identifiers.org/ensembl/", "http://purl.obolibrary.org/obo/DOID_",
+            "http://purl.obolibrary.org/obo/HP_");
   }
 
   @Override
@@ -103,7 +116,7 @@ public class EquivalenceAspect implements GraphAspect {
           }
 
           if (!hasLeader(clique)) {
-            Node leader = electCliqueLeader(clique);
+            Node leader = electCliqueLeader(clique, prefixLeaderPriority);
             markAsCliqueLeader(leader);
             clique.remove(leader); // keep only the peasants
             markLeaderEdges(leader);
@@ -119,6 +132,7 @@ public class EquivalenceAspect implements GraphAspect {
     tx.success();
   }
 
+  // TODO that's hacky
   private void ensureLabel(Node leader, List<Node> clique) {
     // Move rdfs:label if non-existing on leader
     if (!leader.hasProperty(NodeProperties.LABEL)) {
@@ -182,11 +196,39 @@ public class EquivalenceAspect implements GraphAspect {
     }
   }
 
-  private Node electCliqueLeader(List<Node> clique) {
-    // TODO
-    return clique.get(0);
+  public Node electCliqueLeader(List<Node> clique, List<String> prefixLeaderPriority) {
+    return filterByIri(clique, prefixLeaderPriority);
   }
 
+  private Node filterByIri(List<Node> clique, List<String> leaderPriorityIri) {
+    List<Node> filteredByIriNodes = new ArrayList<Node>();
+    if (!leaderPriorityIri.isEmpty()) {
+      String iriPriority = leaderPriorityIri.get(0);
+      for (Node n : clique) {
+        Optional<String> iri = GraphUtil.getProperty(n, NodeProperties.IRI, String.class);
+        if (iri.isPresent() && iri.get().contains(iriPriority)) {
+          filteredByIriNodes.add(n);
+        }
+      }
+      if (filteredByIriNodes.isEmpty()) {
+        filterByIri(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size()));
+      }
+    }
+
+    if (filteredByIriNodes.isEmpty()) {
+      filteredByIriNodes = clique;
+    }
+    Collections.sort(filteredByIriNodes, new Comparator<Node>() {
+      @Override
+      public int compare(Node node1, Node node2) {
+        Optional<String> iri1 = GraphUtil.getProperty(node1, NodeProperties.IRI, String.class);
+        Optional<String> iri2 = GraphUtil.getProperty(node2, NodeProperties.IRI, String.class);
+        return iri1.get().compareTo(iri2.get());
+      }
+    });
+    return filteredByIriNodes.get(0);
+
+  }
 
   private void moveRelationship(Node from, Node to, Relationship rel, String property) {
     Relationship newRel = null;
