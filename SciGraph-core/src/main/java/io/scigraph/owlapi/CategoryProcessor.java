@@ -48,7 +48,7 @@ class CategoryProcessor implements Callable<Long> {
   @Override
   public Long call() throws Exception {
     long count = 0;
-    int batchSize = 10_000;
+    int batchSize = 10;
     Label label = DynamicLabel.label(category);
     Transaction tx = graphDb.beginTx();
     for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL)

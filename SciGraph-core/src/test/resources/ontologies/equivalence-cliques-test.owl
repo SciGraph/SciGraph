@@ -121,6 +121,8 @@ Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
 
 Ontology: <http://scigraph.io/equivtest.owl>
 
+AnnotationProperty: MONARCH:cliqueLeader
+
 ObjectProperty: RO:HOM0000020
   Annotations: rdfs:label " in 1 to 1 orthology relationship with"
 ObjectProperty: RO:0002162
@@ -144,7 +146,7 @@ Class: NCBIGene:ZG1
  # NCBI asserts homology to NCBI (human)
  SubClassOf: RO:HOM0000020 some NCBIGene:HG1
 Class: ZFIN:ZG1
-  Annotations: rdfs:label "zg1 (zfin)"
+  Annotations: rdfs:label "zg1 (zfin)", MONARCH:cliqueLeader true
  SubClassOf: RO:0002200 some ZP:0000001
  # ZFIN asserts homology to MGI (mouse)
  SubClassOf: RO:HOM0000020 some MGI:MG1
@@ -215,7 +217,3 @@ Class: HGNC:HG4
  EquivalentTo: NCBIGene:HG4b
 Class: ENSEMBL:HG4
  EquivalentTo: OMIM:HG4
-
-
-
-

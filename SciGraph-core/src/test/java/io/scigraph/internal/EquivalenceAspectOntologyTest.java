@@ -29,13 +29,10 @@ import java.util.Map;
 
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.traversal.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -43,10 +40,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-
-import static org.hamcrest.Matchers.is;
 
 public class EquivalenceAspectOntologyTest extends GraphTestBase {
 
@@ -79,42 +72,27 @@ public class EquivalenceAspectOntologyTest extends GraphTestBase {
       tx.success();
     }
   }
-  
-  @Ignore
+
   @Test
   public void edgesAreMovedToLeader() {
-    Graph tinkerGraph = new TinkerGraph();
     GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
     Node zfin1 = null;
     Node zfin2 = null;
     try (Transaction tx = graphDb.beginTx()) {
       for (Node n : globalGraphOperations.getAllNodes()) {
-        tinkerGraph.addVertex(n);
         if (n.getProperty(NodeProperties.IRI).equals("http://www.ncbi.nlm.nih.gov/gene/ZG1")) {
           zfin1 = n;
         }
         if (n.getProperty(NodeProperties.IRI).equals("http://zfin.org/ZG1")) {
           zfin2 = n;
         }
-        System.out.println(n);
-        System.out.println(n.getProperty(NodeProperties.IRI));
-        for (Relationship relationship : n.getRelationships()) {
-          try {
-            tinkerGraph.addVertex(relationship);
-          } catch (Exception ex) {
-            // ignore doublons
-            // System.out.println(ex);
-          }
-          System.out.println("--- " + relationship.getType() + " to " + relationship.getOtherNode(n).getProperty(NodeProperties.IRI));
-        }
       }
 
       assertThat(zfin1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(6));
       assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(6));
 
-      aspect.invoke(tinkerGraph);
-      System.out.println(zfin1.getProperty(NodeProperties.LABEL));
-
+      aspect.invoke(null);
+      
       System.out.println("===============================");
       for (Node n : globalGraphOperations.getAllNodes()) {
         System.out.println(n);
@@ -124,40 +102,8 @@ public class EquivalenceAspectOntologyTest extends GraphTestBase {
         }
       }
 
-      assertThat(zfin1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(11));
-      assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(1));
-
-
-      tx.success();
-    }
-  }
-
-  @Ignore
-  @Test
-  public void checkTheTraversal() {
-    Graph tinkerGraph = new TinkerGraph();
-    GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
-    Node hg1 = null;
-    try (Transaction tx = graphDb.beginTx()) {
-      for (Node n : globalGraphOperations.getAllNodes()) {
-        tinkerGraph.addVertex(n);
-        if (n.getProperty(NodeProperties.IRI).equals("http://www.ncbi.nlm.nih.gov/gene/HG1")) {
-          hg1 = n;
-        }
-      }
-
-      List<Node> equivalentNodes = new ArrayList<Node>();
-
-      // Move all the edges except the equivalences
-      for (Node currentNode : graphDb.traversalDescription().relationships(EquivalenceAspect.IS_EQUIVALENT, Direction.BOTH).uniqueness(Uniqueness.NODE_GLOBAL)
-          .traverse(hg1).nodes()) {
-        if (currentNode.getId() != hg1.getId()) {
-          System.out.println("COUNT ME - " + currentNode.getProperty(NodeProperties.IRI));
-          equivalentNodes.add(currentNode);
-        }
-      }
-
-      assertThat(equivalentNodes.size(), is(3));
+      assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(11));
+      assertThat(zfin1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(1));
 
 
       tx.success();

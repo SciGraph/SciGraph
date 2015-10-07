@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import org.eclipse.jetty.security.MappedLoginService.KnownUser;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -57,6 +58,7 @@ public class EquivalenceAspect implements GraphAspect {
   static final String CLIQUE_LEADER_PROPERTY = "cliqueLeader";
 
   private List<String> prefixLeaderPriority; // TODO temporary
+  private String leaderAnnotationProperty = "http://www.monarchinitiative.org/MONARCH_cliqueLeader"; // TODO temporary
 
   private final GraphDatabaseService graphDb;
 
@@ -197,7 +199,27 @@ public class EquivalenceAspect implements GraphAspect {
   }
 
   public Node electCliqueLeader(List<Node> clique, List<String> prefixLeaderPriority) {
-    return filterByIri(clique, prefixLeaderPriority);
+    List<Node> designatedLeaders = designatedLeader(clique);
+    if (designatedLeaders.size() > 1) {
+      logger.severe("More than one node in a clique designated as leader: " + designatedLeaders + ". Using failover strategy to design leader.");
+      return filterByIri(designatedLeaders, prefixLeaderPriority);
+    } else if (designatedLeaders.size() == 1) {
+      return designatedLeaders.get(0);
+    } else {
+      return filterByIri(clique, prefixLeaderPriority);
+    }
+  }
+
+  private List<Node> designatedLeader(List<Node> clique) {
+    List<Node> designatedNodes = new ArrayList<Node>();
+    for (Node n : clique) {
+      for (String k : n.getPropertyKeys()) {
+        if (leaderAnnotationProperty.equals(k)) {
+          designatedNodes.add(n);
+        }
+      }
+    }
+    return designatedNodes;
   }
 
   private Node filterByIri(List<Node> clique, List<String> leaderPriorityIri) {

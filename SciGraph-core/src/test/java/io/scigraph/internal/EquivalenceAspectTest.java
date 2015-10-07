@@ -143,7 +143,7 @@ public class EquivalenceAspectTest extends GraphTestBase {
   }
 
   @Test
-  public void leaderPrioritizer() {
+  public void prefixLeaderPrioritizer() {
     Node a = createNode("http://x.org/a");
     Node c = createNode("http://y.org/c");
     Node d = createNode("http://z.org/d");
@@ -153,6 +153,17 @@ public class EquivalenceAspectTest extends GraphTestBase {
     assertThat(aspect.electCliqueLeader(clique, Arrays.asList("fake", "fake", "fake")).getId(), is(a.getId()));
     assertThat(aspect.electCliqueLeader(clique, Arrays.asList("http://y.org/", "http://x.org/", "http://y.org/")).getId(), is(c.getId()));
     assertThat(aspect.electCliqueLeader(clique, Arrays.asList("http://x.org/", "http://x.org/", "http://y.org/")).getId(), is(a.getId()));
+  }
+
+  @Test
+  public void designatedLeaderPrioritizer() {
+    Node a = createNode("http://x.org/a");
+    Node b = createNode("http://x.org/b");
+    Node c = createNode("http://y.org/c");
+    Node d = createNode("http://z.org/d");
+    c.setProperty("http://www.monarchinitiative.org/MONARCH_cliqueLeader", true);
+    List<Node> clique = Arrays.asList(a, b, c, d);
+    assertThat(aspect.electCliqueLeader(clique, new ArrayList<String>()).getId(), is(c.getId()));
   }
 
   private Node getNode(String iri, Iterator<Node> allNodes) {
