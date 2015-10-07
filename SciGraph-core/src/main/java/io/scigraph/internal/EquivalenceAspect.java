@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import org.eclipse.jetty.security.MappedLoginService.KnownUser;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
