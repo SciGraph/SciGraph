@@ -57,7 +57,8 @@ public class EquivalenceAspect implements GraphAspect {
   static final String CLIQUE_LEADER_PROPERTY = "cliqueLeader";
 
   private List<String> prefixLeaderPriority; // TODO temporary
-  private String leaderAnnotationProperty = "http://www.monarchinitiative.org/MONARCH_cliqueLeader"; // TODO temporary
+  private String leaderAnnotationProperty = "http://www.monarchinitiative.org/MONARCH_cliqueLeader"; // TODO
+                                                                                                     // temporary
 
   private final GraphDatabaseService graphDb;
 
@@ -69,8 +70,8 @@ public class EquivalenceAspect implements GraphAspect {
 
   private void tmpInitLeaderPriority() {
     prefixLeaderPriority =
-        Arrays.asList("http://purl.obolibrary.org/obo/NCBITaxon_", "http://identifiers.org/ensembl/", "http://purl.obolibrary.org/obo/DOID_",
-            "http://purl.obolibrary.org/obo/HP_");
+        Arrays.asList("http://www.ncbi.nlm.nih.gov/gene/", "http://www.ncbi.nlm.nih.gov/pubmed/", "http://purl.obolibrary.org/obo/NCBITaxon_",
+            "http://identifiers.org/ensembl/", "http://purl.obolibrary.org/obo/DOID_", "http://purl.obolibrary.org/obo/HP_");
   }
 
   @Override
