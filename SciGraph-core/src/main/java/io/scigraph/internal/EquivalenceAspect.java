@@ -76,6 +76,7 @@ public class EquivalenceAspect implements GraphAspect {
 
   @Override
   public void invoke(Graph graph) {
+    logger.info("Starting clique merge");
     GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
 
     Transaction tx = graphDb.beginTx();
@@ -83,7 +84,7 @@ public class EquivalenceAspect implements GraphAspect {
     int size = Iterators.size(allNodes.iterator());
     tx.success();
 
-    logger.fine(size + " nodes left to process");
+    logger.info(size + " nodes left to process");
 
     for (Node baseNode : allNodes) {
 
@@ -197,7 +198,10 @@ public class EquivalenceAspect implements GraphAspect {
   public Node electCliqueLeader(List<Node> clique, List<String> prefixLeaderPriority) {
     List<Node> designatedLeaders = designatedLeader(clique);
     if (designatedLeaders.size() > 1) {
-      logger.severe("More than one node in a clique designated as leader: " + designatedLeaders + ". Using failover strategy to design leader.");
+      logger.severe("More than one node in a clique designated as leader. Using failover strategy to design leader.");
+      for (Node n : designatedLeaders) {
+        logger.severe(n.getProperty(NodeProperties.IRI).toString());
+      }
       return filterByIri(designatedLeaders, prefixLeaderPriority);
     } else if (designatedLeaders.size() == 1) {
       return designatedLeaders.get(0);
