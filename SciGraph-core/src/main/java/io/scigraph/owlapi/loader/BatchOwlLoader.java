@@ -175,7 +175,7 @@ public class BatchOwlLoader {
       return new OwlPostprocessor(graphDb, config.getCategories());
     }
     
-    public void morePostprocessors(){
+    public void morePostprocessors() {
       // TODO put that in a better place
       EquivalenceAspect aspect = new EquivalenceAspect(graphDb);
       aspect.invoke(new TinkerGraph());

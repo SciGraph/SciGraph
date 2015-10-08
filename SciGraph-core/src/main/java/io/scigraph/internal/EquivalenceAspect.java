@@ -99,36 +99,32 @@ public class EquivalenceAspect implements GraphAspect {
         logger.info(size + " nodes left to process");
       }
 
-      // Skip anonymous node, they cannot be leader
-      if (!baseNode.hasLabel(OwlLabels.OWL_ANONYMOUS)) {
+      logger.fine("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
 
-        logger.fine("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
+      // No equivalent, defacto CliqueLeader
+      if (!baseNode.hasRelationship(IS_EQUIVALENT) && !baseNode.hasRelationship(SAME_AS)) {
+        markAsCliqueLeader(baseNode);
+      } else {
+        // Keep a list of equivalentNodes
+        List<Node> clique = new ArrayList<Node>();
 
-        // No equivalent, defacto CliqueLeader
-        if (!baseNode.hasRelationship(IS_EQUIVALENT) && !baseNode.hasRelationship(SAME_AS)) {
-          markAsCliqueLeader(baseNode);
-        } else {
-          // Keep a list of equivalentNodes
-          List<Node> clique = new ArrayList<Node>();
+        // Move all the edges except the equivalences
+        for (Node currentNode : graphDb.traversalDescription().relationships(IS_EQUIVALENT, Direction.BOTH).relationships(SAME_AS, Direction.BOTH)
+            .uniqueness(Uniqueness.NODE_GLOBAL).traverse(baseNode).nodes()) {
+          clique.add(currentNode); // this will include the baseNode
+        }
 
-          // Move all the edges except the equivalences
-          for (Node currentNode : graphDb.traversalDescription().relationships(IS_EQUIVALENT, Direction.BOTH).relationships(SAME_AS, Direction.BOTH)
-              .uniqueness(Uniqueness.NODE_GLOBAL).traverse(baseNode).nodes()) {
-            clique.add(currentNode); // this will include the baseNode
-          }
-
-          if (!hasLeader(clique)) {
-            Node leader = electCliqueLeader(clique, prefixLeaderPriority);
-            markAsCliqueLeader(leader);
-            clique.remove(leader); // keep only the peasants
-            markLeaderEdges(leader);
-            moveEdgesToLeader(leader, clique);
-            ensureLabel(leader, clique);
-          }
-
+        if (!hasLeader(clique)) {
+          Node leader = electCliqueLeader(clique, prefixLeaderPriority);
+          markAsCliqueLeader(leader);
+          clique.remove(leader); // keep only the peasants
+          markLeaderEdges(leader);
+          moveEdgesToLeader(leader, clique);
+          ensureLabel(leader, clique);
         }
 
       }
+
     }
 
     tx.success();
@@ -248,7 +244,21 @@ public class EquivalenceAspect implements GraphAspect {
         return iri1.get().compareTo(iri2.get());
       }
     });
-    return filteredByIriNodes.get(0);
+
+    // Anonymous nodes should be avoided as cliqueLeaders
+    List<Node> filteredByIriNodesWithoutAnonymousNodes = new ArrayList<Node>();
+    for (Node n : filteredByIriNodes) {
+      if (!n.hasLabel(OwlLabels.OWL_ANONYMOUS)) {
+        filteredByIriNodesWithoutAnonymousNodes.add(n);
+      }
+    }
+
+    if (filteredByIriNodesWithoutAnonymousNodes.isEmpty()) {
+      return filteredByIriNodes.get(0);
+    } else {
+      return filteredByIriNodesWithoutAnonymousNodes.get(0);
+    }
+
 
   }
 

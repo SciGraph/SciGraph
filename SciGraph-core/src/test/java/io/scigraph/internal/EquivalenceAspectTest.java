@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.neo4j.GraphUtil;
+import io.scigraph.owlapi.OwlLabels;
 import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.util.GraphTestBase;
 
@@ -164,6 +165,18 @@ public class EquivalenceAspectTest extends GraphTestBase {
     c.setProperty("http://www.monarchinitiative.org/MONARCH_cliqueLeader", true);
     List<Node> clique = Arrays.asList(a, b, c, d);
     assertThat(aspect.electCliqueLeader(clique, new ArrayList<String>()).getId(), is(c.getId()));
+  }
+
+  @Test
+  public void anonymousLeader() {
+    Node a = createNode("http://x.org/a");
+    Node b = createNode("http://x.org/b");
+    Node c = createNode("http://x.org/c");
+    a.addLabel(OwlLabels.OWL_ANONYMOUS);
+    b.addLabel(OwlLabels.OWL_ANONYMOUS);
+    List<Node> clique = Arrays.asList(a, b, c);
+    assertThat(aspect.electCliqueLeader(clique, new ArrayList<String>()).getId(), is(c.getId()));
+    assertThat(aspect.electCliqueLeader(Arrays.asList(a, b), new ArrayList<String>()).getId(), is(a.getId()));
   }
 
   private Node getNode(String iri, Iterator<Node> allNodes) {
