@@ -17,18 +17,18 @@ package io.scigraph.owlapi.loader;
 
 import static com.google.common.collect.Iterables.size;
 import static java.lang.String.format;
-import io.scigraph.internal.EquivalenceAspect;
 import io.scigraph.neo4j.Graph;
 import io.scigraph.neo4j.Neo4jModule;
 import io.scigraph.owlapi.OwlApiUtils;
 import io.scigraph.owlapi.OwlPostprocessor;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
+import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
 import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
-import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
-import io.scigraph.owlapi.loader.bindings.IndicatesRunPostprocessor;
+import io.scigraph.owlapi.postprocessors.Clique;
+import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 
 import java.io.File;
 import java.util.HashSet;
@@ -59,11 +59,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.assistedinject.Assisted;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 public class BatchOwlLoader {
 
@@ -108,8 +107,8 @@ public class BatchOwlLoader {
   ExecutorService exec;
   
   @Inject
-  @IndicatesRunPostprocessor
-  boolean runPostprocessor;
+  @IndicatesCliqueConfiguration
+  Optional<CliqueConfiguration> cliqueConfiguration;
 
   static {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
@@ -152,9 +151,11 @@ public class BatchOwlLoader {
     graph.shutdown();
     logger.info("Postprocessing...");
     postprocessorProvider.get().postprocess();
-    if(runPostprocessor){
-      postprocessorProvider.morePostprocessors();
+    
+    if(cliqueConfiguration.isPresent()) {
+      postprocessorProvider.runCliquePostprocessor(cliqueConfiguration.get());
     }
+    
     postprocessorProvider.shutdown();
     
   }
@@ -175,12 +176,11 @@ public class BatchOwlLoader {
       return new OwlPostprocessor(graphDb, config.getCategories());
     }
     
-    public void morePostprocessors() {
-      // TODO put that in a better place
-      EquivalenceAspect aspect = new EquivalenceAspect(graphDb);
-      aspect.invoke(new TinkerGraph());
+    public void runCliquePostprocessor(CliqueConfiguration cliqueConfiguration) {
+      Clique clique = new Clique(graphDb, cliqueConfiguration);
+      clique.run();
     }
-
+    
     public void shutdown() {
       try (Transaction tx = graphDb.beginTx()) {
         logger.info(size(GlobalGraphOperations.at(graphDb).getAllNodes()) + " nodes");

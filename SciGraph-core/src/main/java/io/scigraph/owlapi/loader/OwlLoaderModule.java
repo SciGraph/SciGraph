@@ -20,7 +20,16 @@ import io.scigraph.neo4j.Graph;
 import io.scigraph.neo4j.GraphBatchImpl;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
-import io.scigraph.owlapi.loader.bindings.*;
+import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
+import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
+import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
+import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
+import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
+import io.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
+import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +48,7 @@ import javax.inject.Singleton;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
+import com.google.common.base.Optional;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -73,7 +83,7 @@ public class OwlLoaderModule extends AbstractModule {
 
     bind(AtomicInteger.class).annotatedWith(IndicatesNumberOfShutdownProducers.class).to(AtomicInteger.class).in(Scopes.SINGLETON);
 
-    bind(Boolean.class).annotatedWith(IndicatesRunPostprocessor.class).toInstance(config.getRunPostprocessor());
+    bind(new TypeLiteral<Optional<CliqueConfiguration>>() {}).annotatedWith(IndicatesCliqueConfiguration.class).toInstance(config.getCliqueConfiguration());
   }
 
   /*@Provides

@@ -61,7 +61,7 @@ public class OwlLoadConfigurationLoaderTest {
 
 	@Test
 	public void supportCuriesForCategories() {
-		// asser that there's a curie to resolve
+		// assert that there's a curie to resolve
 		String unresolvedCurie = rawConfig.getCategories().get(
 				"pizza:NamedPizza");
 		assertThat(unresolvedCurie, equalTo("pizza"));

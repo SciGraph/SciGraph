@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.scigraph.internal;
+package io.scigraph.owlapi.postprocessors;
 
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.owlapi.OwlLabels;
-import io.scigraph.owlapi.OwlRelationships;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -39,43 +39,49 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
-import com.tinkerpop.blueprints.Graph;
 
-public class EquivalenceAspect implements GraphAspect {
-  private static final Logger logger = Logger.getLogger(EquivalenceAspect.class.getName());
+public class Clique implements Postprocessor {
+  private static final Logger logger = Logger.getLogger(Clique.class.getName());
 
-  static final RelationshipType IS_EQUIVALENT = OwlRelationships.OWL_EQUIVALENT_CLASS;
-  static final RelationshipType SAME_AS = OwlRelationships.OWL_SAME_AS;
   static final String ORIGINAL_REFERENCE_KEY_SOURCE = "equivalentOriginalNodeSource";
   static final String ORIGINAL_REFERENCE_KEY_TARGET = "equivalentOriginalNodeTarget";
-  static final Label CLIQUE_LEADER_LABEL = DynamicLabel.label("cliqueLeader");
   static final String CLIQUE_LEADER_PROPERTY = "cliqueLeader";
+  static final Label CLIQUE_LEADER_LABEL = DynamicLabel.label(CLIQUE_LEADER_PROPERTY);
 
-  private List<String> prefixLeaderPriority; // TODO temporary
-  private String leaderAnnotationProperty = "http://www.monarchinitiative.org/MONARCH_cliqueLeader"; // TODO
-                                                                                                     // temporary
+  private List<String> prefixLeaderPriority;
+  private String leaderAnnotationProperty;
+  private Set<Label> forbiddenLabels;
+  private Set<RelationshipType> relationships;
 
   private final GraphDatabaseService graphDb;
 
   @Inject
-  public EquivalenceAspect(GraphDatabaseService graphDb) {
+  public Clique(GraphDatabaseService graphDb, CliqueConfiguration cliqueConfiguration) {
     this.graphDb = graphDb;
-    tmpInitLeaderPriority();
-  }
+    this.prefixLeaderPriority = cliqueConfiguration.getLeaderPriority();
+    this.leaderAnnotationProperty = cliqueConfiguration.getLeaderAnnotation();
 
-  private void tmpInitLeaderPriority() {
-    prefixLeaderPriority =
-        Arrays.asList("http://www.ncbi.nlm.nih.gov/gene/", "http://www.ncbi.nlm.nih.gov/pubmed/", "http://purl.obolibrary.org/obo/NCBITaxon_",
-            "http://identifiers.org/ensembl/", "http://purl.obolibrary.org/obo/DOID_", "http://purl.obolibrary.org/obo/HP_");
+    Set<Label> tmpLabels = new HashSet<Label>();
+    for (String l : cliqueConfiguration.getLeaderForbiddenLabels()) {
+      tmpLabels.add(DynamicLabel.label(l));
+    }
+    this.forbiddenLabels = tmpLabels;
+
+    Set<RelationshipType> tmpRelationships = new HashSet<RelationshipType>();
+    for (String r : cliqueConfiguration.getRelationships()) {
+      tmpRelationships.add(DynamicRelationshipType.withName(r));
+    }
+    this.relationships = tmpRelationships;
   }
 
   @Override
-  public void invoke(Graph graph) {
+  public void run() {
     logger.info("Starting clique merge");
     GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
 
@@ -103,15 +109,20 @@ public class EquivalenceAspect implements GraphAspect {
       logger.fine("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
 
       // No equivalent, defacto CliqueLeader
-      if (!baseNode.hasRelationship(IS_EQUIVALENT) && !baseNode.hasRelationship(SAME_AS)) {
+      if (!containsOneRelationship(baseNode, relationships)) {
         markAsCliqueLeader(baseNode);
       } else {
         // Keep a list of equivalentNodes
         List<Node> clique = new ArrayList<Node>();
 
+        TraversalDescription traversalDescription = graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL);
+
+        for (RelationshipType rel : relationships) {
+          traversalDescription = traversalDescription.relationships(rel, Direction.BOTH);
+        }
+
         // Move all the edges except the equivalences
-        for (Node currentNode : graphDb.traversalDescription().relationships(IS_EQUIVALENT, Direction.BOTH).relationships(SAME_AS, Direction.BOTH)
-            .uniqueness(Uniqueness.NODE_GLOBAL).traverse(baseNode).nodes()) {
+        for (Node currentNode : traversalDescription.traverse(baseNode).nodes()) {
           clique.add(currentNode); // this will include the baseNode
         }
 
@@ -150,7 +161,7 @@ public class EquivalenceAspect implements GraphAspect {
       logger.fine("Processing underNode - " + n.getProperty(NodeProperties.IRI));
       Iterable<Relationship> rels = n.getRelationships();
       for (Relationship rel : rels) {
-        if ((rel.isType(IS_EQUIVALENT) || rel.isType(SAME_AS))
+        if ((hasType(rel, relationships))
             && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader.getId())) {
           logger.fine("equivalence relation which is already attached to the leader, do nothing");
         } else {
@@ -202,11 +213,11 @@ public class EquivalenceAspect implements GraphAspect {
       for (Node n : designatedLeaders) {
         logger.severe(n.getProperty(NodeProperties.IRI).toString());
       }
-      return filterByIri(designatedLeaders, prefixLeaderPriority);
+      return filterByPrefix(designatedLeaders, prefixLeaderPriority);
     } else if (designatedLeaders.size() == 1) {
       return designatedLeaders.get(0);
     } else {
-      return filterByIri(clique, prefixLeaderPriority);
+      return filterByPrefix(clique, prefixLeaderPriority);
     }
   }
 
@@ -222,25 +233,25 @@ public class EquivalenceAspect implements GraphAspect {
     return designatedNodes;
   }
 
-  private Node filterByIri(List<Node> clique, List<String> leaderPriorityIri) {
-    List<Node> filteredByIriNodes = new ArrayList<Node>();
+  private Node filterByPrefix(List<Node> clique, List<String> leaderPriorityIri) {
+    List<Node> filteredByPrefix = new ArrayList<Node>();
     if (!leaderPriorityIri.isEmpty()) {
       String iriPriority = leaderPriorityIri.get(0);
       for (Node n : clique) {
         Optional<String> iri = GraphUtil.getProperty(n, NodeProperties.IRI, String.class);
         if (iri.isPresent() && iri.get().contains(iriPriority)) {
-          filteredByIriNodes.add(n);
+          filteredByPrefix.add(n);
         }
       }
-      if (filteredByIriNodes.isEmpty()) {
-        filterByIri(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size()));
+      if (filteredByPrefix.isEmpty()) {
+        filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size()));
       }
     }
 
-    if (filteredByIriNodes.isEmpty()) {
-      filteredByIriNodes = clique;
+    if (filteredByPrefix.isEmpty()) {
+      filteredByPrefix = clique;
     }
-    Collections.sort(filteredByIriNodes, new Comparator<Node>() {
+    Collections.sort(filteredByPrefix, new Comparator<Node>() {
       @Override
       public int compare(Node node1, Node node2) {
         Optional<String> iri1 = GraphUtil.getProperty(node1, NodeProperties.IRI, String.class);
@@ -249,21 +260,45 @@ public class EquivalenceAspect implements GraphAspect {
       }
     });
 
-    // Anonymous nodes should be avoided as cliqueLeaders
-    List<Node> filteredByIriNodesWithoutAnonymousNodes = new ArrayList<Node>();
-    for (Node n : filteredByIriNodes) {
-      if (!n.hasLabel(OwlLabels.OWL_ANONYMOUS)) {
-        filteredByIriNodesWithoutAnonymousNodes.add(n);
+    List<Node> filteredByPrefixAndForbiddenLabels = new ArrayList<Node>();
+    for (Node n : filteredByPrefix) {
+      if (!containsOneLabels(n, forbiddenLabels)) {
+        filteredByPrefixAndForbiddenLabels.add(n);
       }
     }
 
-    if (filteredByIriNodesWithoutAnonymousNodes.isEmpty()) {
-      return filteredByIriNodes.get(0);
+    if (filteredByPrefixAndForbiddenLabels.isEmpty()) {
+      return filteredByPrefix.get(0);
     } else {
-      return filteredByIriNodesWithoutAnonymousNodes.get(0);
+      return filteredByPrefixAndForbiddenLabels.get(0);
     }
+  }
 
+  private boolean hasType(Relationship r, Set<RelationshipType> relationships) {
+    for (RelationshipType rel : relationships) {
+      if (r.isType(rel)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
+  private boolean containsOneRelationship(Node n, Set<RelationshipType> relationships) {
+    for (RelationshipType rel : relationships) {
+      if (n.hasRelationship(rel)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean containsOneLabels(Node n, Set<Label> labels) {
+    for (Label l : labels) {
+      if (n.hasLabel(l)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void moveRelationship(Node from, Node to, Relationship rel, String property) {
@@ -276,14 +311,6 @@ public class EquivalenceAspect implements GraphAspect {
     copyProperties(rel, newRel);
     rel.delete();
     newRel.setProperty(property, from.getProperty(NodeProperties.IRI));
-  }
-
-  private boolean targetHasAlreadyMoved(Relationship rel) {
-    return rel.getProperty(ORIGINAL_REFERENCE_KEY_TARGET, null) != null;
-  }
-
-  private boolean sourceHasAlreadyMoved(Relationship rel) {
-    return rel.getProperty(ORIGINAL_REFERENCE_KEY_SOURCE, null) != null;
   }
 
   private void copyProperties(PropertyContainer source, PropertyContainer target) {

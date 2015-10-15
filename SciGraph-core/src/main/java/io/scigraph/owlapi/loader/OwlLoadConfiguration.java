@@ -16,6 +16,7 @@
 package io.scigraph.owlapi.loader;
 
 import io.scigraph.neo4j.Neo4jConfiguration;
+import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,14 +32,14 @@ public class OwlLoadConfiguration {
   private List<OntologySetup> ontologies = new ArrayList<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
-  private boolean runPostprocessor = false;
-
-  public boolean getRunPostprocessor() {
-    return runPostprocessor;
+  private Optional<CliqueConfiguration> cliqueConfiguration = Optional.absent();
+  
+  public Optional<CliqueConfiguration> getCliqueConfiguration() {
+    return cliqueConfiguration;
   }
 
-  public void setRunPostprocessor(boolean runPostprocessor) {
-    this.runPostprocessor = runPostprocessor;
+  public void setCliqueConfiguration(CliqueConfiguration cliqueConfiguration) {
+    this.cliqueConfiguration = Optional.of(cliqueConfiguration);
   }
 
   private int producerThreadCount = (int) Math.ceil(Runtime.getRuntime()

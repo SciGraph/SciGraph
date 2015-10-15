@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.scigraph.internal;
+package io.scigraph.owlapi.postprocessors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.owlapi.GraphOwlVisitor;
 import io.scigraph.owlapi.OwlPostprocessor;
+import io.scigraph.owlapi.OwlRelationships;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.util.GraphTestBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
@@ -41,12 +44,19 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 
 import com.google.common.io.Resources;
 
-public class EquivalenceAspectOntologyTest extends GraphTestBase {
+public class CliqueOntologyTest extends GraphTestBase {
 
-  EquivalenceAspect aspect = new EquivalenceAspect(graphDb);
+  Clique clique;
 
   @Before
   public void setup() throws Exception {
+    CliqueConfiguration cliqueConfiguration = new CliqueConfiguration();
+    Set<String> rel = new HashSet<String>();
+    rel.add(OwlRelationships.OWL_EQUIVALENT_CLASS.name());
+    cliqueConfiguration.setRelationships(rel);
+    cliqueConfiguration.setLeaderAnnotation("http://www.monarchinitiative.org/MONARCH_cliqueLeader");
+    clique = new Clique(graphDb, cliqueConfiguration);
+
     OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     String uri = Resources.getResource("ontologies/equivalence-cliques-test.owl").toURI().toString();
     IRI iri = IRI.create(uri);
@@ -91,16 +101,7 @@ public class EquivalenceAspectOntologyTest extends GraphTestBase {
       assertThat(zfin1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(6));
       assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(6));
 
-      aspect.invoke(null);
-      
-      System.out.println("===============================");
-      for (Node n : globalGraphOperations.getAllNodes()) {
-        System.out.println(n);
-        System.out.println(n.getProperty(NodeProperties.IRI));
-        for (Relationship relationship : n.getRelationships()) {
-          System.out.println("--- " + relationship.getType() + " to " + relationship.getOtherNode(n).getProperty(NodeProperties.IRI));
-        }
-      }
+      clique.run();
 
       assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(11));
       assertThat(zfin1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(1));
