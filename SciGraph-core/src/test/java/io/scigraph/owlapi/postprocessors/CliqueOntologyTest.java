@@ -16,6 +16,7 @@
 package io.scigraph.owlapi.postprocessors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.owlapi.GraphOwlVisitor;
 import io.scigraph.owlapi.OwlPostprocessor;
@@ -88,6 +89,9 @@ public class CliqueOntologyTest extends GraphTestBase {
     GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
     Node zfin1 = null;
     Node zfin2 = null;
+    Node phenotype1 = null;
+    Node phenotype2 = null;
+    Node phenotype3 = null;
     try (Transaction tx = graphDb.beginTx()) {
       for (Node n : globalGraphOperations.getAllNodes()) {
         if (n.getProperty(NodeProperties.IRI).equals("http://www.ncbi.nlm.nih.gov/gene/ZG1")) {
@@ -96,15 +100,36 @@ public class CliqueOntologyTest extends GraphTestBase {
         if (n.getProperty(NodeProperties.IRI).equals("http://zfin.org/ZG1")) {
           zfin2 = n;
         }
+        if (n.getProperty(NodeProperties.IRI).equals("http://purl.obolibrary.org/obo/ZP_0000001")) {
+          phenotype1 = n;
+        }
+        if (n.getProperty(NodeProperties.IRI).equals("http://purl.obolibrary.org/obo/MP_0000001")) {
+          phenotype2 = n;
+        }
+        if (n.getProperty(NodeProperties.IRI).equals("http://purl.obolibrary.org/obo/HP_0000001")) {
+          phenotype3 = n;
+        }
       }
 
       assertThat(zfin1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(6));
       assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(6));
+      assertThat(phenotype1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(4));
+      assertThat(phenotype2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(4));
+      assertThat(phenotype3.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(8));
 
       clique.run();
 
       assertThat(zfin2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(11));
       assertThat(zfin1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(1));
+      assertThat(phenotype1.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(1));
+      assertThat(phenotype2.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(1));
+      assertThat(phenotype3.getRelationships(), IsIterableWithSize.<Relationship>iterableWithSize(14));
+      assertThat(zfin2.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(true));
+      assertThat(zfin1.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(false));
+      assertThat(phenotype1.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(false));
+      assertThat(phenotype2.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(false));
+      assertThat(phenotype3.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(true));
+      
 
 
       tx.success();

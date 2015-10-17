@@ -161,7 +161,7 @@ public class Clique implements Postprocessor {
       logger.fine("Processing underNode - " + n.getProperty(NodeProperties.IRI));
       Iterable<Relationship> rels = n.getRelationships();
       for (Relationship rel : rels) {
-        if ((hasType(rel, relationships))
+        if ((isOneOfType(rel, relationships))
             && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader.getId())) {
           logger.fine("equivalence relation which is already attached to the leader, do nothing");
         } else {
@@ -262,7 +262,7 @@ public class Clique implements Postprocessor {
 
     List<Node> filteredByPrefixAndForbiddenLabels = new ArrayList<Node>();
     for (Node n : filteredByPrefix) {
-      if (!containsOneLabels(n, forbiddenLabels)) {
+      if (!containsOneLabel(n, forbiddenLabels)) {
         filteredByPrefixAndForbiddenLabels.add(n);
       }
     }
@@ -274,7 +274,7 @@ public class Clique implements Postprocessor {
     }
   }
 
-  private boolean hasType(Relationship r, Set<RelationshipType> relationships) {
+  private boolean isOneOfType(Relationship r, Set<RelationshipType> relationships) {
     for (RelationshipType rel : relationships) {
       if (r.isType(rel)) {
         return true;
@@ -292,7 +292,7 @@ public class Clique implements Postprocessor {
     return false;
   }
 
-  private boolean containsOneLabels(Node n, Set<Label> labels) {
+  private boolean containsOneLabel(Node n, Set<Label> labels) {
     for (Label l : labels) {
       if (n.hasLabel(l)) {
         return true;

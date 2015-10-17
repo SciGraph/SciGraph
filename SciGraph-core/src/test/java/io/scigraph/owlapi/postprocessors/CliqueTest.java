@@ -83,12 +83,16 @@ public class CliqueTest extends GraphTestBase {
     Node n1 = getNode("http://x.org/a", allNodes);
     Node n2 = getNode("http://x.org/b", allNodes);
     Node n3 = getNode("http://x.org/c", allNodes);
+    Node n4 = getNode("http://x.org/d", allNodes);
+    Node n5 = getNode("http://x.org/e", allNodes);
     assertThat(n1.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(0));
     assertThat(n2.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(1));
     assertThat(n3.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(1));
     assertThat(n1.getDegree(IS_EQUIVALENT), is(1));
     assertThat(n2.getDegree(IS_EQUIVALENT), is(2));
     assertThat(n3.getDegree(IS_EQUIVALENT), is(1));
+    assertThat(n4.getDegree(), is(2));
+    assertThat(n5.getDegree(), is(2));
 
     clique.run();
 
@@ -98,8 +102,15 @@ public class CliqueTest extends GraphTestBase {
     assertThat(n1.getDegree(IS_EQUIVALENT), is(2));
     assertThat(n2.getDegree(IS_EQUIVALENT), is(1));
     assertThat(n3.getDegree(IS_EQUIVALENT), is(1));
+    assertThat(n4.getDegree(), is(3));
+    assertThat(n5.getDegree(), is(1));
+    assertThat(n1.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(true));
+    assertThat(n2.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(false));
+    assertThat(n3.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(false));
+    assertThat(n4.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(true));
+    assertThat(n5.hasLabel(Clique.CLIQUE_LEADER_LABEL), is(false));
   }
-
+  
   @Test
   public void prefixLeaderPrioritizer() {
     Node a = createNode("http://x.org/a");
