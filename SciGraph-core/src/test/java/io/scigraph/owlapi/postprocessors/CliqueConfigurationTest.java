@@ -56,7 +56,7 @@ public class CliqueConfigurationTest {
   @Test
   public void parseRelationships() {
     Set<String> relationships = cliqueConfiguration.getRelationships();
-    assertThat(relationships, containsInAnyOrder("http://www.w3.org/2002/07/owl#sameAs", "http://www.w3.org/2002/07/owl#equivalentClass"));
+    assertThat(relationships, containsInAnyOrder("sameAs", "equivalentClass"));
   }
 
   @Test

@@ -56,8 +56,8 @@ mappedProperties:
 
 cliqueConfiguration:
   relationships:
-    - http://www.w3.org/2002/07/owl#sameAs
-    - http://www.w3.org/2002/07/owl#equivalentClass
+    - sameAs
+    - equivalentClass
   leaderAnnotation: http://www.monarchinitiative.org/MONARCH_cliqueLeader
   leaderPriority:
     - http://www.ncbi.nlm.nih.gov/gene/
