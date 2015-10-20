@@ -95,12 +95,6 @@ public class Clique implements Postprocessor {
     for (Node baseNode : allNodes) {
 
       size -= 1;
-      if (size % 10 == 0) {
-        // Committing the batch
-        tx.success();
-        tx.close();
-        tx = graphDb.beginTx();
-      }
 
       if (size % 100000 == 0) {
         logger.info(size + " nodes left to process");
@@ -137,6 +131,10 @@ public class Clique implements Postprocessor {
 
       }
 
+      // commit after each processed node
+      tx.success();
+      tx.close();
+      tx = graphDb.beginTx();
     }
 
     tx.success();
@@ -161,8 +159,7 @@ public class Clique implements Postprocessor {
       logger.fine("Processing underNode - " + n.getProperty(NodeProperties.IRI));
       Iterable<Relationship> rels = n.getRelationships();
       for (Relationship rel : rels) {
-        if ((isOneOfType(rel, relationships))
-            && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader.getId())) {
+        if ((isOneOfType(rel, relationships)) && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader.getId())) {
           logger.fine("equivalence relation which is already attached to the leader, do nothing");
         } else {
           if ((rel.getEndNode().getId() == n.getId())) {
