@@ -50,6 +50,7 @@ class CategoryProcessor implements Callable<Long> {
     long count = 0;
     int batchSize = 10;
     Label label = DynamicLabel.label(category);
+    logger.info("Processsing " + category);
     Transaction tx = graphDb.beginTx();
     for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL)
         .depthFirst().relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING)

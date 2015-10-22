@@ -26,6 +26,7 @@ import io.scigraph.owlapi.OwlRelationships;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,7 @@ public class OwlPostprocessorTest {
   }
 
   @Before
-  public void setup() {
+  public void setup() throws InterruptedException, ExecutionException {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     Transaction tx = graphDb.beginTx();
     enableIndexing();
@@ -71,6 +72,7 @@ public class OwlPostprocessorTest {
     postprocessor = new OwlPostprocessor(graphDb, Collections.<String, String>emptyMap());
     Map<String, String> categoryMap = new HashMap<>();
     categoryMap.put("http://example.org/a", "foo");
+    tx.close();
     postprocessor.processCategories(categoryMap);
   }
 
