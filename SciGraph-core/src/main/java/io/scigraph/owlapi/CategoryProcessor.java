@@ -55,7 +55,8 @@ class CategoryProcessor implements Callable<Long> {
     for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL)
         .depthFirst().relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING)
         .relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
-        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).traverse(root)) {
+        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH)
+        .relationships(OwlRelationships.OWL_SAME_AS, Direction.BOTH).traverse(root)) {
       Node end = position.endNode();
       GraphUtil.addProperty(end, Concept.CATEGORY, category);
       end.addLabel(label);
