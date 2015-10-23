@@ -111,36 +111,6 @@ public class OwlPostprocessor {
     return count;
   }
 
-  // public void processCategories(Map<String, String> categories) {
-  // logger.info("Processing categories");
-  // for (Entry<String, String> category : categories.entrySet()) {
-  // Set<Node> roots = new HashSet<>();
-  // try (Transaction tx = graphDb.beginTx()) {
-  // ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-  // Node root = nodeIndex.get(CommonProperties.IRI, category.getKey()).getSingle();
-  // if (null == root) {
-  // logger.warning("Failed to locate " + category.getKey() + " while processing categories");
-  // continue;
-  // }
-  // roots.add(root);
-  // for (Relationship equiv: root.getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
-  // roots.add(equiv.getOtherNode(root));
-  // }
-  // tx.success();
-  // }
-  // if (roots.isEmpty()) {
-  // logger.warning("Failed to locate " + category.getKey() + " while processing categories");
-  // } else {
-  // for (Node root: roots) {
-  // logger.info("Processing category: " + category);
-  // long count = processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
-  // category.getValue());
-  // logger.info("Processsed " + count + " nodes for " + category);
-  // }
-  // }
-  // }
-  // }
-
   public void processCategories(Map<String, String> categories) throws InterruptedException, ExecutionException {
     logger.info("Processing categories");
     final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -156,7 +126,6 @@ public class OwlPostprocessor {
 
     for (Future<Long> contentFuture : contentsFutures) {
       final Long content = contentFuture.get();
-      // ...process contents
       logger.fine("Processed: " + content);
     }
     tx.success();
