@@ -115,12 +115,13 @@ public class OwlPostprocessor {
     logger.info("Processing categories");
     final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     List<Future<Long>> contentsFutures = new ArrayList<>();
+    final Object graphLock = new Object();
 
     Transaction tx = graphDb.beginTx();
     for (Entry<String, String> category : categories.entrySet()) {
       ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
       Node root = nodeIndex.get(CommonProperties.IRI, category.getKey()).getSingle();
-      final Future<Long> contentFuture = pool.submit(new CategoryProcessor(graphDb, root, category.getValue()));
+      final Future<Long> contentFuture = pool.submit(new CategoryProcessor(graphDb, root, category.getValue(), graphLock));
       contentsFutures.add(contentFuture);
     }
 

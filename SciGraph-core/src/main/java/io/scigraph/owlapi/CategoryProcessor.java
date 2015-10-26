@@ -37,11 +37,13 @@ class CategoryProcessor implements Callable<Long> {
   private final GraphDatabaseService graphDb;
   private final Node root;
   private final String category;
+  private final Object graphLock;
 
-  CategoryProcessor(GraphDatabaseService graphDb, Node root, String category) {
+  CategoryProcessor(GraphDatabaseService graphDb, Node root, String category, Object graphLock) {
     this.graphDb = graphDb;
     this.root = root;
     this.category = category;
+    this.graphLock = graphLock;
     Thread.currentThread().setName("category processor - " + category);
   }
 
@@ -52,14 +54,15 @@ class CategoryProcessor implements Callable<Long> {
     Label label = DynamicLabel.label(category);
     logger.info("Processsing " + category);
     Transaction tx = graphDb.beginTx();
-    for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL)
-        .depthFirst().relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING)
-        .relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
-        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH)
-        .relationships(OwlRelationships.OWL_SAME_AS, Direction.BOTH).traverse(root)) {
+    for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst()
+        .relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING).relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
+        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).relationships(OwlRelationships.OWL_SAME_AS, Direction.BOTH)
+        .traverse(root)) {
       Node end = position.endNode();
-      GraphUtil.addProperty(end, Concept.CATEGORY, category);
-      end.addLabel(label);
+      synchronized (graphLock) {
+        GraphUtil.addProperty(end, Concept.CATEGORY, category);
+        end.addLabel(label);
+      }
       if (0 == ++count % batchSize) {
         logger.fine("Commiting " + count);
         tx.success();
