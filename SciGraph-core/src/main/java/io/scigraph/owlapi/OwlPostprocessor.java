@@ -20,6 +20,7 @@ import io.scigraph.frames.Concept;
 import io.scigraph.neo4j.GraphUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -114,21 +116,42 @@ public class OwlPostprocessor {
   public void processCategories(Map<String, String> categories) throws InterruptedException, ExecutionException {
     logger.info("Processing categories");
     final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    List<Future<Long>> contentsFutures = new ArrayList<>();
-    final Object graphLock = new Object();
+    List<Future<Map<String, List<Long>>>> contentsFutures = new ArrayList<>();
 
     Transaction tx = graphDb.beginTx();
     for (Entry<String, String> category : categories.entrySet()) {
       ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
       Node root = nodeIndex.get(CommonProperties.IRI, category.getKey()).getSingle();
-      final Future<Long> contentFuture = pool.submit(new CategoryProcessor(graphDb, root, category.getValue(), graphLock));
+      final Future<Map<String, List<Long>>> contentFuture = pool.submit(new CategoryProcessor(graphDb, root, category.getValue()));
       contentsFutures.add(contentFuture);
     }
-
-    for (Future<Long> contentFuture : contentsFutures) {
-      final Long content = contentFuture.get();
-      logger.fine("Processed: " + content);
+    Map<String, List<Long>> toTag = new HashMap<String, List<Long>>();
+    for (Future<Map<String, List<Long>>> contentFuture : contentsFutures) {
+      final Map<String, List<Long>> resolved = contentFuture.get();
+      toTag.putAll(resolved);
     }
+
+    pool.shutdown();
+    pool.awaitTermination(10, TimeUnit.DAYS);
     tx.success();
+
+
+    for (Entry<String, List<Long>> t : toTag.entrySet()) {
+      String category = t.getKey();
+      logger.info("Tagging " + t.getValue().size() + " for " + category);
+      final ExecutorService taggingPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+      List<Future<Boolean>> taggedFutures = new ArrayList<>();
+      for (Long id : t.getValue()) {
+        Node node = graphDb.getNodeById(id);
+        final Future<Boolean> contentFuture = taggingPool.submit(new CategoryLabeler(graphDb, node, category));
+        taggedFutures.add(contentFuture);
+      }
+
+      for (Future<Boolean> taggedFuture : taggedFutures) {
+        final Boolean resolved = taggedFuture.get();
+      }
+      taggingPool.shutdown();
+      taggingPool.awaitTermination(10, TimeUnit.DAYS);
+    }
   }
 }
