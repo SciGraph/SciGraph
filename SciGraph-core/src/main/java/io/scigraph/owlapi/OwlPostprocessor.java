@@ -21,6 +21,7 @@ import io.scigraph.neo4j.GraphUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -141,14 +142,20 @@ public class OwlPostprocessor {
       logger.info("Tagging " + t.getValue().size() + " for " + category);
       final ExecutorService taggingPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
       List<Future<Boolean>> taggedFutures = new ArrayList<>();
-      for (Long id : t.getValue()) {
-        Node node = graphDb.getNodeById(id);
-        final Future<Boolean> contentFuture = taggingPool.submit(new CategoryLabeler(graphDb, node, category));
+
+      int partitionSize = 1000;
+      List<List<Long>> partitions = new LinkedList<List<Long>>();
+      for (int i = 0; i < t.getValue().size(); i += partitionSize) {
+        partitions.add(t.getValue().subList(i, Math.min(i + partitionSize, t.getValue().size())));
+      }
+
+      for (List<Long> ids : partitions) {
+        final Future<Boolean> contentFuture = taggingPool.submit(new CategoryLabeler(graphDb, ids, category));
         taggedFutures.add(contentFuture);
       }
 
       for (Future<Boolean> taggedFuture : taggedFutures) {
-        final Boolean resolved = taggedFuture.get();
+        taggedFuture.get();
       }
       taggingPool.shutdown();
       taggingPool.awaitTermination(10, TimeUnit.DAYS);

@@ -18,6 +18,7 @@ package io.scigraph.owlapi;
 import io.scigraph.frames.Concept;
 import io.scigraph.neo4j.GraphUtil;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.neo4j.graphdb.DynamicLabel;
@@ -29,12 +30,12 @@ import org.neo4j.graphdb.Transaction;
 public class CategoryLabeler implements Callable<Boolean> {
 
   private final GraphDatabaseService graphDb;
-  private final Node node;
+  private final List<Long> ids;
   private final String category;
 
-  public CategoryLabeler(GraphDatabaseService graphDb, Node node, String category) {
+  public CategoryLabeler(GraphDatabaseService graphDb, List<Long> ids, String category) {
     this.graphDb = graphDb;
-    this.node = node;
+    this.ids = ids;
     this.category = category;
   }
 
@@ -42,8 +43,11 @@ public class CategoryLabeler implements Callable<Boolean> {
   public Boolean call() throws Exception {
     Label label = DynamicLabel.label(category);
     try (Transaction tx = graphDb.beginTx()) {
-      GraphUtil.addProperty(node, Concept.CATEGORY, category);
-      node.addLabel(label);
+      for (Long id : ids) {
+        Node node = graphDb.getNodeById(id);
+        GraphUtil.addProperty(node, Concept.CATEGORY, category);
+        node.addLabel(label);
+      }
       tx.success();
       tx.close();
     }
