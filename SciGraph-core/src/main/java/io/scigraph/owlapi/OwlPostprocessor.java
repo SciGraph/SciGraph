@@ -19,10 +19,17 @@ import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.Concept;
 import io.scigraph.neo4j.GraphUtil;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -49,13 +56,12 @@ public class OwlPostprocessor {
 
   private final Map<String, String> categoryMap;
 
-  public OwlPostprocessor(GraphDatabaseService graphDb,
-      @Named("owl.categories") Map<String, String> categoryMap) {
+  public OwlPostprocessor(GraphDatabaseService graphDb, @Named("owl.categories") Map<String, String> categoryMap) {
     this.graphDb = graphDb;
     this.categoryMap = categoryMap;
   }
 
-  public void postprocess() {
+  public void postprocess() throws InterruptedException, ExecutionException {
     processSomeValuesFrom();
     processCategories(categoryMap);
   }
@@ -63,10 +69,7 @@ public class OwlPostprocessor {
   public void processSomeValuesFrom() {
     logger.info("Processing someValuesFrom classes");
     try (Transaction tx = graphDb.beginTx()) {
-      Result results =
-          graphDb.execute(
-              "MATCH (n)-[relationship]->(svf:someValuesFrom)-[:property]->(p) "
-                  + "RETURN n, relationship, svf, p");
+      Result results = graphDb.execute("MATCH (n)-[relationship]->(svf:someValuesFrom)-[:property]->(p) " + "RETURN n, relationship, svf, p");
       while (results.hasNext()) {
         Map<String, Object> result = results.next();
         Node subject = (Node) result.get("n");
@@ -77,8 +80,7 @@ public class OwlPostprocessor {
           Node object = r.getEndNode();
           String relationshipName = GraphUtil.getProperty(property, CommonProperties.IRI, String.class).get();
           RelationshipType type = DynamicRelationshipType.withName(relationshipName);
-          String propertyUri =
-              GraphUtil.getProperty(property, CommonProperties.IRI, String.class).get();
+          String propertyUri = GraphUtil.getProperty(property, CommonProperties.IRI, String.class).get();
           Relationship inferred = subject.createRelationshipTo(object, type);
           inferred.setProperty(CommonProperties.IRI, propertyUri);
           inferred.setProperty(CommonProperties.CONVENIENCE, true);
@@ -94,10 +96,9 @@ public class OwlPostprocessor {
     int batchSize = 100;
     Label label = DynamicLabel.label(category);
     Transaction tx = graphDb.beginTx();
-    for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL)
-        .depthFirst().relationships(type, direction)
-        .relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
-        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).traverse(root)) {
+    for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst().relationships(type, direction)
+        .relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING).relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH)
+        .traverse(root)) {
       Node end = position.endNode();
       GraphUtil.addProperty(end, Concept.CATEGORY, category);
       end.addLabel(label);
@@ -113,34 +114,51 @@ public class OwlPostprocessor {
     return count;
   }
 
-  public void processCategories(Map<String, String> categories) {
+  public void processCategories(Map<String, String> categories) throws InterruptedException, ExecutionException {
     logger.info("Processing categories");
+    final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    List<Future<Map<String, List<Long>>>> contentsFutures = new ArrayList<>();
+
+    Transaction tx = graphDb.beginTx();
     for (Entry<String, String> category : categories.entrySet()) {
-      Set<Node> roots = new HashSet<>();
-      try (Transaction tx = graphDb.beginTx()) {
-        ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-        Node root = nodeIndex.get(CommonProperties.IRI, category.getKey()).getSingle();
-        if (null == root) {
-          logger.warning("Failed to locate " + category.getKey() + " while processing categories");
-          continue;
-        }
-        roots.add(root);
-        for (Relationship equiv: root.getRelationships(OwlRelationships.OWL_EQUIVALENT_CLASS)) {
-          roots.add(equiv.getOtherNode(root));
-        }
-        tx.success();
+      ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
+      Node root = nodeIndex.get(CommonProperties.IRI, category.getKey()).getSingle();
+      final Future<Map<String, List<Long>>> contentFuture = pool.submit(new CategoryProcessor(graphDb, root, category.getValue()));
+      contentsFutures.add(contentFuture);
+    }
+    Map<String, List<Long>> toTag = new HashMap<String, List<Long>>();
+    for (Future<Map<String, List<Long>>> contentFuture : contentsFutures) {
+      final Map<String, List<Long>> resolved = contentFuture.get();
+      toTag.putAll(resolved);
+    }
+
+    pool.shutdown();
+    pool.awaitTermination(10, TimeUnit.DAYS);
+    tx.success();
+
+
+    for (Entry<String, List<Long>> t : toTag.entrySet()) {
+      String category = t.getKey();
+      logger.info("Tagging " + t.getValue().size() + " for " + category);
+      final ExecutorService taggingPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+      List<Future<Boolean>> taggedFutures = new ArrayList<>();
+
+      int partitionSize = 1000;
+      List<List<Long>> partitions = new LinkedList<List<Long>>();
+      for (int i = 0; i < t.getValue().size(); i += partitionSize) {
+        partitions.add(t.getValue().subList(i, Math.min(i + partitionSize, t.getValue().size())));
       }
-      if (roots.isEmpty()) {
-        logger.warning("Failed to locate " + category.getKey() + " while processing categories");
-      } else {
-        for (Node root: roots) {
-          logger.info("Processing category: " + category);
-          long count = processCategory(root, OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING,
-              category.getValue());
-          logger.info("Processsed " + count + " nodes for " + category);
-        }
+
+      for (List<Long> ids : partitions) {
+        final Future<Boolean> contentFuture = taggingPool.submit(new CategoryLabeler(graphDb, ids, category));
+        taggedFutures.add(contentFuture);
       }
+
+      for (Future<Boolean> taggedFuture : taggedFutures) {
+        taggedFuture.get();
+      }
+      taggingPool.shutdown();
+      taggingPool.awaitTermination(10, TimeUnit.DAYS);
     }
   }
-
 }

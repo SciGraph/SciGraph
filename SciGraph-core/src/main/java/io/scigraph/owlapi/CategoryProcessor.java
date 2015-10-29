@@ -15,22 +15,21 @@
  */
 package io.scigraph.owlapi;
 
-import io.scigraph.frames.Concept;
-import io.scigraph.neo4j.GraphUtil;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Uniqueness;
 
-class CategoryProcessor implements Callable<Long> {
+class CategoryProcessor implements Callable<Map<String, List<Long>>> {
 
   private static final Logger logger = Logger.getLogger(CategoryProcessor.class.getName());
 
@@ -46,29 +45,23 @@ class CategoryProcessor implements Callable<Long> {
   }
 
   @Override
-  public Long call() throws Exception {
-    long count = 0;
-    int batchSize = 10;
-    Label label = DynamicLabel.label(category);
+  public Map<String, List<Long>> call() throws Exception {
+    logger.info("Processsing " + category);
+    Map<String, List<Long>> map = new HashMap<String, List<Long>>();
+    List<Long> nodeList = new ArrayList<Long>();
     Transaction tx = graphDb.beginTx();
-    for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL)
-        .depthFirst().relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING)
-        .relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
-        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).traverse(root)) {
+    for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst()
+        .relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING).relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
+        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).relationships(OwlRelationships.OWL_SAME_AS, Direction.BOTH)
+        .traverse(root)) {
       Node end = position.endNode();
-      GraphUtil.addProperty(end, Concept.CATEGORY, category);
-      end.addLabel(label);
-      if (0 == ++count % batchSize) {
-        logger.fine("Commiting " + count);
-        tx.success();
-        tx.close();
-        tx = graphDb.beginTx();
-      }
+      nodeList.add(end.getId());
     }
     tx.success();
     tx.close();
-    logger.info("Processsed " + count + " nodes for " + category);
-    return count;
+    logger.info("Discovered " + nodeList.size() + " nodes for " + category);
+    map.put(category, nodeList);
+    return map;
   }
 
 }

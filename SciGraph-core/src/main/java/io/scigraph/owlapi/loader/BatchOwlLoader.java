@@ -115,7 +115,7 @@ public class BatchOwlLoader {
     OwlApiUtils.silenceOboParser();
   }
 
-  public void loadOntology() throws InterruptedException {
+  public void loadOntology() throws InterruptedException, ExecutionException {
     CompletionService<Long> completionService = new ExecutorCompletionService<Long>(exec);
     Set<Future<?>> futures = new HashSet<>();
     if (!ontologies.isEmpty()) {
@@ -193,7 +193,7 @@ public class BatchOwlLoader {
 
   }
 
-  public static void load(OwlLoadConfiguration config) throws InterruptedException {
+  public static void load(OwlLoadConfiguration config) throws InterruptedException, ExecutionException {
     Injector i =
         Guice.createInjector(new OwlLoaderModule(config),
             new Neo4jModule(config.getGraphConfiguration()));

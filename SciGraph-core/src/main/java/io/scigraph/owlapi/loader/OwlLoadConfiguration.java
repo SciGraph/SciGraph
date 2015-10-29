@@ -43,9 +43,9 @@ public class OwlLoadConfiguration {
   }
 
   private int producerThreadCount = (int) Math.ceil(Runtime.getRuntime()
-      .availableProcessors() / 2.0);
+      .availableProcessors() * 0.25);
   private int consumerThreadCount = (int) Math.ceil(Runtime.getRuntime()
-      .availableProcessors() / 2.0);
+      .availableProcessors() * 0.75);
 
   public Neo4jConfiguration getGraphConfiguration() {
     return graphConfiguration;
