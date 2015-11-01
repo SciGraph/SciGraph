@@ -88,6 +88,7 @@ public class OwlPostprocessor {
         }
       }
       tx.success();
+      tx.close();
     }
   }
 
@@ -135,8 +136,9 @@ public class OwlPostprocessor {
     pool.shutdown();
     pool.awaitTermination(10, TimeUnit.DAYS);
     tx.success();
+    tx.close();
 
-
+    tx = graphDb.beginTx();
     for (Entry<String, List<Long>> t : toTag.entrySet()) {
       String category = t.getKey();
       logger.info("Tagging " + t.getValue().size() + " for " + category);
@@ -160,5 +162,7 @@ public class OwlPostprocessor {
       taggingPool.shutdown();
       taggingPool.awaitTermination(10, TimeUnit.DAYS);
     }
+    tx.success();
+    tx.close();
   }
 }

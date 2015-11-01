@@ -38,6 +38,7 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterable;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
@@ -89,9 +90,11 @@ public class Clique implements Postprocessor {
     ResourceIterable<Node> allNodes = globalGraphOperations.getAllNodes();
     int size = Iterators.size(allNodes.iterator());
     tx.success();
+    tx.close();
 
-    logger.info(size + " nodes left to process");
+    logger.info(size + " nodes to process");
 
+    tx = graphDb.beginTx();
     for (Node baseNode : allNodes) {
 
       size -= 1;
@@ -110,15 +113,18 @@ public class Clique implements Postprocessor {
         List<Node> clique = new ArrayList<Node>();
 
         TraversalDescription traversalDescription = graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL);
-
         for (RelationshipType rel : relationships) {
           traversalDescription = traversalDescription.relationships(rel, Direction.BOTH);
         }
 
-        // Move all the edges except the equivalences
-        for (Node currentNode : traversalDescription.traverse(baseNode).nodes()) {
-          clique.add(currentNode); // this will include the baseNode
+        ResourceIterator<Node> nodesIterator = traversalDescription.traverse(baseNode).nodes().iterator();
+        while (nodesIterator.hasNext()) {
+          clique.add(nodesIterator.next());
         }
+
+        // for (Node currentNode : traversalDescription.traverse(baseNode).nodes()) {
+        // clique.add(currentNode); // this will include the baseNode
+        // }
 
         if (!hasLeader(clique)) {
           Node leader = electCliqueLeader(clique, prefixLeaderPriority);
@@ -131,13 +137,14 @@ public class Clique implements Postprocessor {
 
       }
 
-      // commit after each processed node
-      tx.success();
-      tx.close();
-      tx = graphDb.beginTx();
+       // commit after each processed node
+       tx.success();
+       tx.close();
+       tx = graphDb.beginTx();
     }
 
     tx.success();
+    tx.close();
   }
 
   // TODO that's hacky

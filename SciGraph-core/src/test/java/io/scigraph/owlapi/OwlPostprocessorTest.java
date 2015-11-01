@@ -74,6 +74,7 @@ public class OwlPostprocessorTest {
     categoryMap.put("http://example.org/a", "foo");
     tx.close();
     postprocessor.processCategories(categoryMap);
+    tx = graphDb.beginTx();
   }
 
   @Test
