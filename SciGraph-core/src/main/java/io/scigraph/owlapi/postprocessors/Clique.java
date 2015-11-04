@@ -110,7 +110,7 @@ public class Clique implements Postprocessor {
         logger.info(size + " nodes left to process");
       }
       
-      if (size % 5 == 0) {
+      if (size % 10 == 0) {
         tx.success();
         tx.close();
         tx = graphDb.beginTx();
