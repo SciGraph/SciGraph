@@ -38,7 +38,6 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterable;
-import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
@@ -48,7 +47,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 
 public class Clique implements Postprocessor {
-  private static final Logger logger = Logger.getLogger(Clique.class.getName());
+  private static final Logger logger = Logger.getLogger(CliqueDrei.class.getName());
+
 
   static final String ORIGINAL_REFERENCE_KEY_SOURCE = "equivalentOriginalNodeSource";
   static final String ORIGINAL_REFERENCE_KEY_TARGET = "equivalentOriginalNodeTarget";
@@ -92,9 +92,16 @@ public class Clique implements Postprocessor {
     tx.success();
     tx.close();
 
-    logger.info(size + " nodes to process");
+    logger.info(size + " nodes left to process");
 
     tx = graphDb.beginTx();
+    TraversalDescription traversalDescription = graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL);
+    for (RelationshipType rel : relationships) {
+      traversalDescription = traversalDescription.relationships(rel, Direction.BOTH);
+    }
+
+    Set<Long> processedNodes = new HashSet<Long>();
+
     for (Node baseNode : allNodes) {
 
       size -= 1;
@@ -102,63 +109,68 @@ public class Clique implements Postprocessor {
       if (size % 100000 == 0) {
         logger.info(size + " nodes left to process");
       }
+      
+      if (size % 5 == 0) {
+        tx.success();
+        tx.close();
+        tx = graphDb.beginTx();
+      }
 
       logger.fine("Processing Node - " + baseNode.getProperty(NodeProperties.IRI));
 
-      // No equivalent, defacto CliqueLeader
-      if (!containsOneRelationship(baseNode, relationships)) {
-        markAsCliqueLeader(baseNode);
-      } else {
+      if (!processedNodes.contains(baseNode.getId())) {
         // Keep a list of equivalentNodes
         List<Node> clique = new ArrayList<Node>();
-
-        TraversalDescription traversalDescription = graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL);
-        for (RelationshipType rel : relationships) {
-          traversalDescription = traversalDescription.relationships(rel, Direction.BOTH);
+        for (Node node : traversalDescription.traverse(baseNode).nodes()) {
+          clique.add(node);
+          processedNodes.add(node.getId());
         }
-
-        ResourceIterator<Node> nodesIterator = traversalDescription.traverse(baseNode).nodes().iterator();
-        while (nodesIterator.hasNext()) {
-          clique.add(nodesIterator.next());
-        }
-
-        // for (Node currentNode : traversalDescription.traverse(baseNode).nodes()) {
-        // clique.add(currentNode); // this will include the baseNode
-        // }
-
-        if (!hasLeader(clique)) {
+        
+        if (clique.size() == 1) {
+          Node defactoLeader = clique.get(0);
+          markAsCliqueLeader(defactoLeader);
+          markLeaderEdges(defactoLeader);
+        } else {
           Node leader = electCliqueLeader(clique, prefixLeaderPriority);
           markAsCliqueLeader(leader);
           clique.remove(leader); // keep only the peasants
           markLeaderEdges(leader);
-          moveEdgesToLeader(leader, clique);
           ensureLabel(leader, clique);
+          moveEdgesToLeader(leader, clique);
         }
-
+        
       }
-
-       // commit after each processed node
-       tx.success();
-       tx.close();
-       tx = graphDb.beginTx();
+      
     }
 
     tx.success();
     tx.close();
   }
 
-  // TODO that's hacky
-  private void ensureLabel(Node leader, List<Node> clique) {
-    // Move rdfs:label if non-existing on leader
-    if (!leader.hasProperty(NodeProperties.LABEL)) {
-      for (Node n : clique) {
-        if (n.hasProperty(NodeProperties.LABEL) && n.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")) {
-          leader.setProperty(NodeProperties.LABEL, n.getProperty(NodeProperties.LABEL));
-          leader.setProperty("http://www.w3.org/2000/01/rdf-schema#label", n.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
-          return;
-        }
+  private void moveRelationship(Node from, Node to, Relationship rel, String property) {
+    Relationship newRel = null;
+    if (property == ORIGINAL_REFERENCE_KEY_TARGET) {
+      newRel = rel.getOtherNode(from).createRelationshipTo(to, rel.getType());
+    } else {
+      newRel = to.createRelationshipTo(rel.getOtherNode(from), rel.getType());
+    }
+    copyProperties(rel, newRel);
+    rel.delete();
+    newRel.setProperty(property, from.getProperty(NodeProperties.IRI));
+  }
+
+  private void copyProperties(PropertyContainer source, PropertyContainer target) {
+    for (String key : source.getPropertyKeys())
+      target.setProperty(key, source.getProperty(key));
+  }
+
+  private boolean isOneOfType(Relationship r, Set<RelationshipType> relationships) {
+    for (RelationshipType rel : relationships) {
+      if (r.isType(rel)) {
+        return true;
       }
     }
+    return false;
   }
 
   private void moveEdgesToLeader(Node leader, List<Node> clique) {
@@ -185,6 +197,20 @@ public class Clique implements Postprocessor {
     }
   }
 
+  // TODO that's hacky
+  private void ensureLabel(Node leader, List<Node> clique) {
+    // Move rdfs:label if non-existing on leader
+    if (!leader.hasProperty(NodeProperties.LABEL)) {
+      for (Node n : clique) {
+        if (n.hasProperty(NodeProperties.LABEL) && n.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")) {
+          leader.setProperty(NodeProperties.LABEL, n.getProperty(NodeProperties.LABEL));
+          leader.setProperty("http://www.w3.org/2000/01/rdf-schema#label", n.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
+          return;
+        }
+      }
+    }
+  }
+
   private void markLeaderEdges(Node leader) {
     for (Relationship r : leader.getRelationships()) {
       if (r.getStartNode().getId() == leader.getId()) {
@@ -193,15 +219,6 @@ public class Clique implements Postprocessor {
         r.setProperty(ORIGINAL_REFERENCE_KEY_TARGET, CLIQUE_LEADER_PROPERTY);
       }
     }
-  }
-
-  private boolean hasLeader(List<Node> clique) {
-    for (Node n : clique) {
-      if (n.hasLabel(CLIQUE_LEADER_LABEL)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private void markAsCliqueLeader(Node n) {
@@ -278,24 +295,6 @@ public class Clique implements Postprocessor {
     }
   }
 
-  private boolean isOneOfType(Relationship r, Set<RelationshipType> relationships) {
-    for (RelationshipType rel : relationships) {
-      if (r.isType(rel)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean containsOneRelationship(Node n, Set<RelationshipType> relationships) {
-    for (RelationshipType rel : relationships) {
-      if (n.hasRelationship(rel)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private boolean containsOneLabel(Node n, Set<Label> labels) {
     for (Label l : labels) {
       if (n.hasLabel(l)) {
@@ -305,20 +304,4 @@ public class Clique implements Postprocessor {
     return false;
   }
 
-  private void moveRelationship(Node from, Node to, Relationship rel, String property) {
-    Relationship newRel = null;
-    if (property == ORIGINAL_REFERENCE_KEY_TARGET) {
-      newRel = rel.getOtherNode(from).createRelationshipTo(to, rel.getType());
-    } else {
-      newRel = to.createRelationshipTo(rel.getOtherNode(from), rel.getType());
-    }
-    copyProperties(rel, newRel);
-    rel.delete();
-    newRel.setProperty(property, from.getProperty(NodeProperties.IRI));
-  }
-
-  private void copyProperties(PropertyContainer source, PropertyContainer target) {
-    for (String key : source.getPropertyKeys())
-      target.setProperty(key, source.getProperty(key));
-  }
 }

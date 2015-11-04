@@ -28,7 +28,6 @@ import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
 import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
-//import io.scigraph.owlapi.postprocessors.CliqueZwei;
 import io.scigraph.owlapi.postprocessors.Clique;
 
 import java.io.File;
@@ -179,7 +178,6 @@ public class BatchOwlLoader {
     
     public void runCliquePostprocessor(CliqueConfiguration cliqueConfiguration) {
       Clique clique = new Clique(graphDb, cliqueConfiguration);
-      //CliqueZwei clique = new CliqueZwei(graphDb, cliqueConfiguration);
       clique.run();
     }
     
