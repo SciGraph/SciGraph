@@ -47,7 +47,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 
 public class Clique implements Postprocessor {
-  private static final Logger logger = Logger.getLogger(CliqueDrei.class.getName());
+  private static final Logger logger = Logger.getLogger(Clique.class.getName());
 
 
   static final String ORIGINAL_REFERENCE_KEY_SOURCE = "equivalentOriginalNodeSource";
