@@ -95,7 +95,7 @@ public class Clique implements Postprocessor {
     logger.info(size + " nodes left to process");
 
     tx = graphDb.beginTx();
-    TraversalDescription traversalDescription = graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL);
+    TraversalDescription traversalDescription = graphDb.traversalDescription().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL);
     for (RelationshipType rel : relationships) {
       traversalDescription = traversalDescription.relationships(rel, Direction.BOTH);
     }
@@ -110,7 +110,7 @@ public class Clique implements Postprocessor {
         logger.info(size + " nodes left to process");
       }
       
-      if (size % 10 == 0) {
+      if (size % 3 == 0) {
         tx.success();
         tx.close();
         tx = graphDb.beginTx();
