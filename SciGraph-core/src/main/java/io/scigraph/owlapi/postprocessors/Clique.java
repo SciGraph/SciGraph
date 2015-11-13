@@ -215,7 +215,7 @@ public class Clique implements Postprocessor {
         edgesMoved += 1;
       }
 
-      if (edgesMoved > 50) { // Commit for nodes with many edges
+      if (edgesMoved > 10) { // Commit for nodes with many edges
         logger.fine("commit edges");
         tx.success();
         tx.close();
