@@ -109,8 +109,12 @@ public class Clique implements Postprocessor {
       if (size % 100000 == 0) {
         logger.info(size + " nodes left to process");
       }
-      
-      if (size % 3 == 0) {
+
+      if (size % 10 == 0) {
+        Runtime runtime = Runtime.getRuntime();
+        int mb = 1024 * 1024;
+        logger.fine("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb);
+        logger.fine("Total Memory:" + runtime.totalMemory() / mb);
         tx.success();
         tx.close();
         tx = graphDb.beginTx();
@@ -122,25 +126,35 @@ public class Clique implements Postprocessor {
         // Keep a list of equivalentNodes
         List<Node> clique = new ArrayList<Node>();
         for (Node node : traversalDescription.traverse(baseNode).nodes()) {
+          logger.fine("-- " + node.getProperty(NodeProperties.IRI));
           clique.add(node);
           processedNodes.add(node.getId());
         }
-        
+
+        logger.fine("clique size: " + clique.size());
         if (clique.size() == 1) {
           Node defactoLeader = clique.get(0);
+          logger.fine("mark as clique leader");
           markAsCliqueLeader(defactoLeader);
-          markLeaderEdges(defactoLeader);
+          // logger.fine("mark leader edges");
+          // markLeaderEdges(defactoLeader);
         } else {
+          logger.fine("Elect clique leader");
           Node leader = electCliqueLeader(clique, prefixLeaderPriority);
+          logger.fine("mark as clique leader");
           markAsCliqueLeader(leader);
+          logger.fine("remove leader from clique");
           clique.remove(leader); // keep only the peasants
-          markLeaderEdges(leader);
+          // logger.fine("mark leader edges");
+          // markLeaderEdges(leader);
+          logger.fine("ensure label");
           ensureLabel(leader, clique);
-          moveEdgesToLeader(leader, clique);
+          logger.fine("move edges to leader");
+          moveEdgesToLeader(leader, clique, tx);
         }
-        
+
       }
-      
+
     }
 
     tx.success();
@@ -149,13 +163,17 @@ public class Clique implements Postprocessor {
 
   private void moveRelationship(Node from, Node to, Relationship rel, String property) {
     Relationship newRel = null;
+    logger.fine("create relation");
     if (property == ORIGINAL_REFERENCE_KEY_TARGET) {
       newRel = rel.getOtherNode(from).createRelationshipTo(to, rel.getType());
     } else {
       newRel = to.createRelationshipTo(rel.getOtherNode(from), rel.getType());
     }
+    logger.fine("copy properties");
     copyProperties(rel, newRel);
+    logger.fine("delete relation");
     rel.delete();
+    logger.fine("set original property");
     newRel.setProperty(property, from.getProperty(NodeProperties.IRI));
   }
 
@@ -173,26 +191,35 @@ public class Clique implements Postprocessor {
     return false;
   }
 
-  private void moveEdgesToLeader(Node leader, List<Node> clique) {
+  private void moveEdgesToLeader(Node leader, List<Node> clique, Transaction tx) {
     for (Node n : clique) {
       logger.fine("Processing underNode - " + n.getProperty(NodeProperties.IRI));
+      int edgesMoved = 0;
       Iterable<Relationship> rels = n.getRelationships();
       for (Relationship rel : rels) {
         if ((isOneOfType(rel, relationships)) && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader.getId())) {
           logger.fine("equivalence relation which is already attached to the leader, do nothing");
         } else {
           if ((rel.getEndNode().getId() == n.getId())) {
-            logger.fine("MOVE TARGET " + rel.getType() + " FROM " + n.getProperty(NodeProperties.IRI) + " TO "
-                + leader.getProperty(NodeProperties.IRI));
+            logger
+                .fine("MOVE TARGET " + rel.getId() + " FROM " + n.getProperty(NodeProperties.IRI) + " TO " + leader.getProperty(NodeProperties.IRI));
 
             moveRelationship(n, leader, rel, ORIGINAL_REFERENCE_KEY_TARGET);
           } else if ((rel.getStartNode().getId() == n.getId())) {
-            logger.fine("MOVE SOURCE " + rel.getType() + " FROM " + n.getProperty(NodeProperties.IRI) + " TO "
-                + leader.getProperty(NodeProperties.IRI));
+            logger
+                .fine("MOVE SOURCE " + rel.getId() + " FROM " + n.getProperty(NodeProperties.IRI) + " TO " + leader.getProperty(NodeProperties.IRI));
 
             moveRelationship(n, leader, rel, ORIGINAL_REFERENCE_KEY_SOURCE);
           }
         }
+        edgesMoved += 1;
+      }
+
+      if (edgesMoved > 50) { // Commit for nodes with many edges
+        logger.fine("commit edges");
+        tx.success();
+        tx.close();
+        tx = graphDb.beginTx();
       }
     }
   }
@@ -211,15 +238,15 @@ public class Clique implements Postprocessor {
     }
   }
 
-  private void markLeaderEdges(Node leader) {
-    for (Relationship r : leader.getRelationships()) {
-      if (r.getStartNode().getId() == leader.getId()) {
-        r.setProperty(ORIGINAL_REFERENCE_KEY_SOURCE, CLIQUE_LEADER_PROPERTY);
-      } else {
-        r.setProperty(ORIGINAL_REFERENCE_KEY_TARGET, CLIQUE_LEADER_PROPERTY);
-      }
-    }
-  }
+  // private void markLeaderEdges(Node leader) {
+  // for (Relationship r : leader.getRelationships()) {
+  // if (r.getStartNode().getId() == leader.getId()) {
+  // r.setProperty(ORIGINAL_REFERENCE_KEY_SOURCE, CLIQUE_LEADER_PROPERTY);
+  // } else {
+  // r.setProperty(ORIGINAL_REFERENCE_KEY_TARGET, CLIQUE_LEADER_PROPERTY);
+  // }
+  // }
+  // }
 
   private void markAsCliqueLeader(Node n) {
     if (!n.hasLabel(CLIQUE_LEADER_LABEL)) {
