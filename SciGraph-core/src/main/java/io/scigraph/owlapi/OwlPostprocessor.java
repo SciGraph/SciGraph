@@ -130,7 +130,15 @@ public class OwlPostprocessor {
     Map<String, List<Long>> toTag = new HashMap<String, List<Long>>();
     for (Future<Map<String, List<Long>>> contentFuture : contentsFutures) {
       final Map<String, List<Long>> resolved = contentFuture.get();
-      toTag.putAll(resolved);
+
+      String key = resolved.keySet().iterator().next();
+      if (toTag.containsKey(key)) { // in case of many IRIs map to the same category
+        List<Long> acc = toTag.get(key);
+        acc.addAll(resolved.get(key));
+        toTag.put(key, acc);
+      } else {
+        toTag.putAll(resolved);
+      }
     }
 
     pool.shutdown();
