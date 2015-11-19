@@ -54,6 +54,7 @@ public class Clique implements Postprocessor {
   static final String ORIGINAL_REFERENCE_KEY_TARGET = "equivalentOriginalNodeTarget";
   static final String CLIQUE_LEADER_PROPERTY = "cliqueLeader";
   static final Label CLIQUE_LEADER_LABEL = DynamicLabel.label(CLIQUE_LEADER_PROPERTY);
+  static final String REL_TO_REMOVE = "edgeToBeRemoved";
 
   private List<String> prefixLeaderPriority;
   private String leaderAnnotationProperty;
@@ -105,12 +106,13 @@ public class Clique implements Postprocessor {
     for (Node baseNode : allNodes) {
 
       size -= 1;
-
+      
       if (size % 100000 == 0) {
         logger.info(size + " nodes left to process");
       }
 
       if (size % 10 == 0) {
+        logger.fine("Node batch commit");
         tx.success();
         tx.close();
         tx = graphDb.beginTx();
@@ -135,8 +137,8 @@ public class Clique implements Postprocessor {
           Node leader = electCliqueLeader(clique, prefixLeaderPriority);
           markAsCliqueLeader(leader);
           clique.remove(leader); // keep only the peasants
-          ensureLabel(leader, clique);
           moveEdgesToLeader(leader, clique, tx);
+          ensureLabel(leader, clique);
         }
 
       }
@@ -149,13 +151,14 @@ public class Clique implements Postprocessor {
 
   private void moveRelationship(Node from, Node to, Relationship rel, String property) {
     Relationship newRel = null;
+    logger.fine("create new rel between "  + rel.getOtherNode(from).getId() + " and " + to.getId());
     if (property == ORIGINAL_REFERENCE_KEY_TARGET) {
       newRel = rel.getOtherNode(from).createRelationshipTo(to, rel.getType());
     } else {
       newRel = to.createRelationshipTo(rel.getOtherNode(from), rel.getType());
     }
     copyProperties(rel, newRel);
-    rel.delete();
+    rel.setProperty(REL_TO_REMOVE, true); // mark for deletion
     newRel.setProperty(property, from.getProperty(NodeProperties.IRI));
   }
 
@@ -197,11 +200,32 @@ public class Clique implements Postprocessor {
         edgesMoved += 1;
 
         if (edgesMoved >= 100) { // Commit for nodes with many edges
+          logger.fine("rel batch commit for leader " + leader.getProperty(NodeProperties.IRI) + " and peasant " + n.getProperty(NodeProperties.IRI));
           tx.success();
           tx.close();
           tx = graphDb.beginTx();
           edgesMoved = 0;
         }
+      }
+      deleteEdges(n, tx);
+    }
+  }
+  
+  private void deleteEdges(Node n, Transaction tx) {
+    int edgesDeleted = 0;
+    Iterable<Relationship> rels = n.getRelationships();
+    for (Relationship rel : rels) {
+      if(rel.hasProperty(REL_TO_REMOVE)){
+        rel.delete();
+        edgesDeleted += 1;
+      }
+      
+      if (edgesDeleted >= 100) { // Commit for nodes with many edges
+        logger.fine("rel delete batch commit for " + n.getProperty(NodeProperties.IRI));
+        tx.success();
+        tx.close();
+        tx = graphDb.beginTx();
+        edgesDeleted = 0;
       }
     }
   }
@@ -265,6 +289,7 @@ public class Clique implements Postprocessor {
       }
       if (filteredByPrefix.isEmpty()) {
         filteredByPrefix.add(filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())));
+        //filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())); // TODO handle this case
       }
     }
 
