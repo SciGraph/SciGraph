@@ -123,6 +123,15 @@ public class CliqueTest extends GraphTestBase {
     assertThat(clique.electCliqueLeader(cliqueNode, Arrays.asList("http://y.org/", "http://x.org/", "http://y.org/")).getId(), is(c.getId()));
     assertThat(clique.electCliqueLeader(cliqueNode, Arrays.asList("http://x.org/", "http://x.org/", "http://y.org/")).getId(), is(a.getId()));
   }
+  
+  @Test
+  public void prefixLeaderPrioritizerWithReaIris() {
+    Node a = createNode("http://purl.obolibrary.org/obo/NCBITaxon_10116");
+    Node b = createNode("http://identifiers.org/FB:FBsp00000020");
+    List<Node> cliqueNode = Arrays.asList(a, b);
+    assertThat(clique.electCliqueLeader(cliqueNode, Arrays.asList("http://www.ncbi.nlm.nih.gov/gene/", "http://www.ncbi.nlm.nih.gov/pubmed/",  "http://purl.obolibrary.org/obo/NCBITaxon_",
+        "http://identifiers.org/ensembl/", "http://purl.obolibrary.org/obo/DOID_", "http://purl.obolibrary.org/obo/HP_")).getId(), is(a.getId()));
+  }
 
   @Test
   public void designatedLeaderPrioritizer() {

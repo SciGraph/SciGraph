@@ -196,7 +196,7 @@ public class Clique implements Postprocessor {
         }
         edgesMoved += 1;
 
-        if (edgesMoved > 1000) { // Commit for nodes with many edges
+        if (edgesMoved >= 100) { // Commit for nodes with many edges
           tx.success();
           tx.close();
           tx = graphDb.beginTx();
@@ -264,7 +264,7 @@ public class Clique implements Postprocessor {
         }
       }
       if (filteredByPrefix.isEmpty()) {
-        filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size()));
+        filteredByPrefix.add(filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())));
       }
     }
 
