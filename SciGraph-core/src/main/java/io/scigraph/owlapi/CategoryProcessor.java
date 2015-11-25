@@ -15,10 +15,10 @@
  */
 package io.scigraph.owlapi;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
@@ -29,7 +29,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.Uniqueness;
 
-class CategoryProcessor implements Callable<Map<String, List<Long>>> {
+class CategoryProcessor implements Callable<Map<String, Set<Long>>> {
 
   private static final Logger logger = Logger.getLogger(CategoryProcessor.class.getName());
 
@@ -45,22 +45,22 @@ class CategoryProcessor implements Callable<Map<String, List<Long>>> {
   }
 
   @Override
-  public Map<String, List<Long>> call() throws Exception {
+  public Map<String, Set<Long>> call() throws Exception {
     logger.info("Processsing " + category);
-    Map<String, List<Long>> map = new HashMap<String, List<Long>>();
-    List<Long> nodeList = new ArrayList<Long>();
+    Map<String, Set<Long>> map = new HashMap<String, Set<Long>>();
+    Set<Long> nodeSet = new HashSet<Long>();
     Transaction tx = graphDb.beginTx();
     for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst()
         .relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING).relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
         .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).relationships(OwlRelationships.OWL_SAME_AS, Direction.BOTH)
         .traverse(root)) {
       Node end = position.endNode();
-      nodeList.add(end.getId());
+      nodeSet.add(end.getId());
     }
     tx.success();
     tx.close();
-    logger.info("Discovered " + nodeList.size() + " nodes for " + category);
-    map.put(category, nodeList);
+    logger.info("Discovered " + nodeSet.size() + " nodes for " + category);
+    map.put(category, nodeSet);
     return map;
   }
 

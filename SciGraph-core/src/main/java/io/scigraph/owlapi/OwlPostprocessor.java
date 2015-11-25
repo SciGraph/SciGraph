@@ -21,10 +21,10 @@ import io.scigraph.neo4j.GraphUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,6 +47,8 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.traversal.Uniqueness;
+
+import com.google.common.collect.Iterables;
 
 public class OwlPostprocessor {
 
@@ -118,22 +120,22 @@ public class OwlPostprocessor {
   public void processCategories(Map<String, String> categories) throws InterruptedException, ExecutionException {
     logger.info("Processing categories");
     final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    List<Future<Map<String, List<Long>>>> contentsFutures = new ArrayList<>();
+    List<Future<Map<String, Set<Long>>>> contentsFutures = new ArrayList<>();
 
     Transaction tx = graphDb.beginTx();
     for (Entry<String, String> category : categories.entrySet()) {
       ReadableIndex<Node> nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
       Node root = nodeIndex.get(CommonProperties.IRI, category.getKey()).getSingle();
-      final Future<Map<String, List<Long>>> contentFuture = pool.submit(new CategoryProcessor(graphDb, root, category.getValue()));
+      final Future<Map<String, Set<Long>>> contentFuture = pool.submit(new CategoryProcessor(graphDb, root, category.getValue()));
       contentsFutures.add(contentFuture);
     }
-    Map<String, List<Long>> toTag = new HashMap<String, List<Long>>();
-    for (Future<Map<String, List<Long>>> contentFuture : contentsFutures) {
-      final Map<String, List<Long>> resolved = contentFuture.get();
+    Map<String, Set<Long>> toTag = new HashMap<String, Set<Long>>();
+    for (Future<Map<String, Set<Long>>> contentFuture : contentsFutures) {
+      final Map<String, Set<Long>> resolved = contentFuture.get();
 
       String key = resolved.keySet().iterator().next();
       if (toTag.containsKey(key)) { // in case of many IRIs map to the same category
-        List<Long> acc = toTag.get(key);
+        Set<Long> acc = toTag.get(key);
         acc.addAll(resolved.get(key));
         toTag.put(key, acc);
       } else {
@@ -147,19 +149,13 @@ public class OwlPostprocessor {
     tx.close();
 
     tx = graphDb.beginTx();
-    for (Entry<String, List<Long>> t : toTag.entrySet()) {
+    for (Entry<String, Set<Long>> t : toTag.entrySet()) {
       String category = t.getKey();
       logger.info("Tagging " + t.getValue().size() + " for " + category);
       final ExecutorService taggingPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
       List<Future<Boolean>> taggedFutures = new ArrayList<>();
 
-      int partitionSize = 1000;
-      List<List<Long>> partitions = new LinkedList<List<Long>>();
-      for (int i = 0; i < t.getValue().size(); i += partitionSize) {
-        partitions.add(t.getValue().subList(i, Math.min(i + partitionSize, t.getValue().size())));
-      }
-
-      for (List<Long> ids : partitions) {
+      for (List<Long> ids : Iterables.partition(t.getValue(), 1000)) {
         final Future<Boolean> contentFuture = taggingPool.submit(new CategoryLabeler(graphDb, ids, category));
         taggedFutures.add(contentFuture);
       }
