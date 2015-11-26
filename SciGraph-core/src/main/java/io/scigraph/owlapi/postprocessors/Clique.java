@@ -197,15 +197,15 @@ public class Clique implements Postprocessor {
             moveRelationship(n, leader, rel, ORIGINAL_REFERENCE_KEY_SOURCE);
           }
         }
-        edgesMoved += 1;
-
-        if (edgesMoved >= 100) { // Commit for nodes with many edges
-          logger.fine("rel batch commit for leader " + leader.getProperty(NodeProperties.IRI) + " and peasant " + n.getProperty(NodeProperties.IRI));
-          tx.success();
-          tx.close();
-          tx = graphDb.beginTx();
-          edgesMoved = 0;
-        }
+//        edgesMoved += 1;
+//
+//        if (edgesMoved >= 100) { // Commit for nodes with many edges
+//          logger.fine("rel batch commit for leader " + leader.getProperty(NodeProperties.IRI) + " and peasant " + n.getProperty(NodeProperties.IRI));
+//          tx.success();
+//          tx.close();
+//          tx = graphDb.beginTx();
+//          edgesMoved = 0;
+//        }
       }
       deleteEdges(n, tx);
     }
