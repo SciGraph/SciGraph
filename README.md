@@ -54,7 +54,7 @@ Applications
 Additional Documentation
 ------------------------
 
- * (Overview of SciGraph in NIF and Monarch)[http://j.mp/SciGraph] (google slides)
+ * (Overview of SciGraph in NIF and Monarch)[https://github.com/SciGraph/SciGraph/raw/master/docs/presentation/20150801%20SciGraph.pptx]
 
 Getting Started
 ---------------
