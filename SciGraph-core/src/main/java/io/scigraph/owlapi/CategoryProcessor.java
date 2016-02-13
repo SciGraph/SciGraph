@@ -50,17 +50,22 @@ class CategoryProcessor implements Callable<Map<String, Set<Long>>> {
     Map<String, Set<Long>> map = new HashMap<String, Set<Long>>();
     Set<Long> nodeSet = new HashSet<Long>();
     Transaction tx = graphDb.beginTx();
-    for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst()
-        .relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING).relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
-        .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).relationships(OwlRelationships.OWL_SAME_AS, Direction.BOTH)
-        .traverse(root)) {
-      Node end = position.endNode();
-      nodeSet.add(end.getId());
+    try {
+      for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst()
+          .relationships(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING).relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING)
+          .relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH).relationships(OwlRelationships.OWL_SAME_AS, Direction.BOTH)
+          .traverse(root)) {
+        Node end = position.endNode();
+        nodeSet.add(end.getId());
+      }
+      logger.info("Discovered " + nodeSet.size() + " nodes for " + category);
+      map.put(category, nodeSet);
+    } catch (Exception e) {
+      logger.warning("IRI not found for category: " + category);
+    } finally {
+      tx.success();
+      tx.close();
     }
-    tx.success();
-    tx.close();
-    logger.info("Discovered " + nodeSet.size() + " nodes for " + category);
-    map.put(category, nodeSet);
     return map;
   }
 

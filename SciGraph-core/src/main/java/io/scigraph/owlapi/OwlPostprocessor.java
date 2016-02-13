@@ -21,6 +21,7 @@ import io.scigraph.neo4j.GraphUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -133,13 +134,16 @@ public class OwlPostprocessor {
     for (Future<Map<String, Set<Long>>> contentFuture : contentsFutures) {
       final Map<String, Set<Long>> resolved = contentFuture.get();
 
-      String key = resolved.keySet().iterator().next();
-      if (toTag.containsKey(key)) { // in case of many IRIs map to the same category
-        Set<Long> acc = toTag.get(key);
-        acc.addAll(resolved.get(key));
-        toTag.put(key, acc);
-      } else {
-        toTag.putAll(resolved);
+      Iterator<String> iter = resolved.keySet().iterator();
+      if (iter.hasNext()) { // is empty if the provided IRI does not exist
+        String key = resolved.keySet().iterator().next();
+        if (toTag.containsKey(key)) { // in case of many IRIs map to the same category
+          Set<Long> acc = toTag.get(key);
+          acc.addAll(resolved.get(key));
+          toTag.put(key, acc);
+        } else {
+          toTag.putAll(resolved);
+        }
       }
     }
 
