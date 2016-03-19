@@ -76,7 +76,7 @@
     <dropwizard.version>0.8.1</dropwizard.version>
     <guice.version>4.0</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
-    <neo4j.version>2.2.7</neo4j.version>
+    <neo4j.version>2.2.8</neo4j.version>
   </properties>
 
   <build>

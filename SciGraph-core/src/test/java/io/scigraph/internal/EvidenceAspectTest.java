@@ -16,12 +16,11 @@
 package io.scigraph.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import io.scigraph.internal.EvidenceAspect;
-import io.scigraph.internal.TinkerGraphUtil;
 import io.scigraph.util.GraphTestBase;
 
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 
@@ -60,6 +59,7 @@ public class EvidenceAspectTest extends GraphTestBase {
     aspect = new EvidenceAspect(graphDb);
   }
 
+  @Ignore
   @Test
   public void evidenceIsAdded() {
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(3));

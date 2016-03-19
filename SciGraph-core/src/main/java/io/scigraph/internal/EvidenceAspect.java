@@ -17,7 +17,11 @@ package io.scigraph.internal;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.newHashSet;
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.neo4j.GraphUtil;
+import io.scigraph.owlapi.OwlRelationships;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -31,6 +35,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Function;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
@@ -43,7 +48,7 @@ public class EvidenceAspect implements GraphAspect {
   static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("http://purl.org/oban/association_has_object");
   static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("http://purl.obolibrary.org/obo/RO_0002558");
   static final RelationshipType SOURCE = DynamicRelationshipType.withName("http://purl.org/dc/elements/1.1/source");
-
+  static final RelationshipType OBJECT_PROPERTY = DynamicRelationshipType.withName("http://purl.org/oban/association_has_object_property");
 
   private final GraphDatabaseService graphDb;
 
@@ -64,17 +69,34 @@ public class EvidenceAspect implements GraphAspect {
       for (Vertex vertex : graph.getVertices()) {
         Node subject = graphDb.getNodeById(Long.parseLong((String) vertex.getId()));
         for (Relationship hasSubject : subject.getRelationships(HAS_SUBJECT, Direction.INCOMING)) {
-          Node annotation = hasSubject.getOtherNode(subject);
-          for (Relationship hasObject : annotation.getRelationships(HAS_OBJECT, Direction.OUTGOING)) {
-            Node object = hasObject.getOtherNode(annotation);
+          Node association = hasSubject.getOtherNode(subject);
+          for (Relationship hasObject : association.getRelationships(HAS_OBJECT, Direction.OUTGOING)) {
+            Node object = hasObject.getOtherNode(association);
             if (nodeIds.contains(object.getId())) {
-              TinkerGraphUtil.addEdge(graph, hasSubject);
-              TinkerGraphUtil.addEdge(graph, hasObject);
-              for (Relationship evidence : annotation.getRelationships(EVIDENCE, Direction.OUTGOING)) {
-                TinkerGraphUtil.addEdge(graph, evidence);
+              // check of the relationship is in the graph
+              Iterator<Relationship> objectProperty = association.getRelationships(OBJECT_PROPERTY, Direction.OUTGOING).iterator();
+              // an association has to have at least and only 1 object property
+              Node relationshipNode = objectProperty.next().getOtherNode(association);
+              String objectPropertyRelationship = GraphUtil.getProperty(relationshipNode, NodeProperties.IRI, String.class).get();
+
+              boolean isEdgeInGraph = false;
+              Iterator<Vertex> connectedVertices = vertex.getVertices(com.tinkerpop.blueprints.Direction.BOTH, objectPropertyRelationship).iterator();
+              while (connectedVertices.hasNext()) {
+                if (Long.parseLong((String) connectedVertices.next().getId()) == object.getId()) {
+                  isEdgeInGraph = true;
+                }
               }
-              for (Relationship source : annotation.getRelationships(SOURCE, Direction.OUTGOING)) {
-                TinkerGraphUtil.addEdge(graph, source);
+
+              if (isEdgeInGraph) { // means that the relationship exists between the subject and
+                                   // object
+                TinkerGraphUtil.addEdge(graph, hasSubject);
+                TinkerGraphUtil.addEdge(graph, hasObject);
+                for (Relationship evidence : association.getRelationships(EVIDENCE, Direction.OUTGOING)) {
+                  TinkerGraphUtil.addEdge(graph, evidence);
+                }
+                for (Relationship source : association.getRelationships(SOURCE, Direction.OUTGOING)) {
+                  TinkerGraphUtil.addEdge(graph, source);
+                }
               }
             }
           }
