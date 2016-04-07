@@ -270,5 +270,5 @@ public class GraphService extends BaseResource {
     sort(propertyKeys);
     return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(propertyKeys) {}, callback);
   }
-
+  
 }

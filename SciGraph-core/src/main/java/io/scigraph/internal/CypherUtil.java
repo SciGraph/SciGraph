@@ -54,13 +54,14 @@ import com.google.common.collect.Multimap;
 public class CypherUtil {
 
   /***
-   * <dl><b>REGEX Groupings</b>
-   *   <dt>1</dt>
-   *   <dd>The variable name</dd>
-   *   <dt>2</dt>
-   *   <dd>The relationship type(s)</dd>
-   *   <dt>3</dt>
-   *   <dd>The query modifiers</dd>
+   * <dl>
+   * <b>REGEX Groupings</b>
+   * <dt>1</dt>
+   * <dd>The variable name</dd>
+   * <dt>2</dt>
+   * <dd>The relationship type(s)</dd>
+   * <dt>3</dt>
+   * <dd>The query modifiers</dd>
    * </dl>
    */
   private static final String ENTAILMENT_REGEX = "\\[(\\w*):?([\\w:|\\.\\/#]*)([!*\\.\\d]*)\\]";
@@ -87,7 +88,7 @@ public class CypherUtil {
 
   static Map<String, Object> flattenMap(Multimap<String, Object> paramMap) {
     Map<String, Object> flatMap = new HashMap<>();
-    for (Entry<String, Collection<Object>> entry: paramMap.asMap().entrySet()) {
+    for (Entry<String, Collection<Object>> entry : paramMap.asMap().entrySet()) {
       flatMap.put(entry.getKey(), getFirst(entry.getValue(), null));
     }
     return flatMap;
@@ -110,15 +111,15 @@ public class CypherUtil {
 
   Set<String> getEntailedRelationshipNames(Collection<String> parents) {
     Set<String> entailedTypes = new HashSet<>();
-    for (String parent: parents) {
+    for (String parent : parents) {
       entailedTypes.add(parent);
       Map<String, Object> params = new HashMap<>();
       params.put("iri", parent);
       try (Transaction tx = graphDb.beginTx()) {
-        Result result = graphDb.execute(
-            "START parent=node:node_auto_index(iri={iri}) " +
-                "MATCH (parent)<-[:subPropertyOf|equivalentProperty*]-(subProperty) " +
-                "RETURN distinct subProperty.iri as subProperty", params);
+        Result result =
+            graphDb.execute("START parent=node:node_auto_index(iri={iri}) "
+                + "MATCH (parent)<-[:subPropertyOf|equivalentProperty*]-(subProperty) "
+                + "RETURN distinct subProperty.iri as subProperty", params);
         while (result.hasNext()) {
           Map<String, Object> map = result.next();
           entailedTypes.add((String) map.get("subProperty"));
@@ -129,15 +130,15 @@ public class CypherUtil {
     return entailedTypes;
   }
 
-
-
   Collection<String> resolveTypes(String types, boolean entail) {
-    Collection<String> resolvedTypes = transform(newHashSet(Splitter.on('|').omitEmptyStrings().split(types)), new Function<String, String>() {
-      @Override
-      public String apply(String type) {
-        return curieUtil.getIri(type).or(type);
-      }
-    });
+    Collection<String> resolvedTypes =
+        transform(newHashSet(Splitter.on('|').omitEmptyStrings().split(types)),
+            new Function<String, String>() {
+              @Override
+              public String apply(String type) {
+                return curieUtil.getIri(type).or(type);
+              }
+            });
     if (entail) {
       return getEntailedRelationshipNames(resolvedTypes);
     } else {
@@ -165,20 +166,26 @@ public class CypherUtil {
     StrSubstitutor substitutor = new StrSubstitutor(new StrLookup<String>() {
       @Override
       public String lookup(String key) {
-        Collection<String> resolvedRelationshipTypes = transform(valueMap.get(key), new Function<Object, String>() {
-          @Override
-          public String apply(Object input) {
-            if (input.toString().matches(".*(\\s).*")) {
-              throw new IllegalArgumentException("Cypher relationship templates must not contain spaces");
-            }
-            return curieUtil.getIri(input.toString()).or(input.toString());
-          }
+        Collection<String> resolvedRelationshipTypes =
+            transform(valueMap.get(key), new Function<Object, String>() {
+              @Override
+              public String apply(Object input) {
+                if (input.toString().matches(".*(\\s).*")) {
+                  throw new IllegalArgumentException(
+                      "Cypher relationship templates must not contain spaces");
+                }
+                return curieUtil.getIri(input.toString()).or(input.toString());
+              }
 
-        });
+            });
         return on("|").join(resolvedRelationshipTypes);
       }
     });
     return substitutor.replace(query);
+  }
+  
+  public Map<String, String> getCurieMap() {
+    return curieUtil.getCurieMap();
   }
 
 }

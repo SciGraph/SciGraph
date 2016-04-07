@@ -31,10 +31,10 @@ import com.google.common.base.Optional;
 public class CurieUtilTest {
 
   CurieUtil util;
+  Map<String, String> map = new HashMap<>();
 
   @Before
   public void setup() {
-    Map<String, String> map = new HashMap<>();
     map.put("", "http://x.org/");
     map.put("A", "http://x.org/a_");
     map.put("B", "http://x.org/B_");
@@ -74,6 +74,11 @@ public class CurieUtilTest {
   @Test
   public void noCurie_whenMappingIsNotPresent() {
     assertThat(util.getCurie("http://none.org/none"), is(Optional.<String>absent()));
+  }
+
+  @Test
+  public void getMap() {
+    assertThat(util.getCurieMap(), is(map));
   }
 
 }

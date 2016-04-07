@@ -95,5 +95,14 @@ public class CurieUtil {
     }
     return Optional.absent();
   }
+  
+  /***
+   * Returns the curie map.
+   * 
+   * @return the curie map
+   */
+  public Map<String, String> getCurieMap() {
+    return curieMap;
+  } 
 
 }
