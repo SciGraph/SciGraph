@@ -10,3 +10,7 @@ before_install:
 
 after_success:
   - mvn test cobertura:cobertura coveralls:report
+
+addons:
+  # workaround for openjdk buffer overflow https://github.com/travis-ci/travis-ci/issues/5227
+  hostname: dummy
