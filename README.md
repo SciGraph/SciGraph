@@ -54,14 +54,14 @@ Applications
 Additional Documentation
 ------------------------
 
- * (Overview of SciGraph in NIF and Monarch)[https://github.com/SciGraph/SciGraph/raw/master/docs/presentation/20150801%20SciGraph.pptx]
+ * [Overview of SciGraph in NIF and Monarch](https://github.com/SciGraph/SciGraph/raw/master/docs/presentation/20150801%20SciGraph.pptx)
 
 Getting Started
 ---------------
 A [Vagrant](https://www.vagrantup.com/) box is included if you don't want to modify your `localhost` (you'll also need [VirtualBox](https://www.virtualbox.org/)).
 You can launch a provisioned box like this and then follow the steps below:
 
-    curl https://raw.githubusercontent.com/SciCrunch/SciGraph/master/src/test/resources/vagrant/Vagrantfile -o Vagrantfile
+    curl https://raw.githubusercontent.com/SciGraph/SciGraph/master/src/test/resources/vagrant/Vagrantfile -o Vagrantfile
     vagrant up
     vagrant ssh
 
