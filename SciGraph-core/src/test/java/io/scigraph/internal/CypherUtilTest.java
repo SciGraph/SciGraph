@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.hamcrest.collection.IsMapContaining;
+import org.hamcrest.core.IsEqual;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,7 +47,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-public class CypherUtilTest extends GraphTestBase{
+public class CypherUtilTest extends GraphTestBase {
 
   CypherUtil util;
 
@@ -60,10 +61,13 @@ public class CypherUtilTest extends GraphTestBase{
     when(curieUtil.getIri("FOO:foo")).thenReturn(Optional.of("http://x.org/#foo"));
     when(curieUtil.getIri("FOO:fizz")).thenReturn(Optional.of("http://x.org/#fizz"));
     util = new CypherUtil(graphDb, curieUtil);
-    addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
+    addRelationship("http://x.org/#foo", "http://x.org/#fizz",
+        OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
-    addRelationship("http://x.org/#fizz", "http://x.org/#fizz_equiv", OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
-    addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("http://x.org/#fizz"));
+    addRelationship("http://x.org/#fizz", "http://x.org/#fizz_equiv",
+        OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
+    addRelationship("http://x.org/#1", "http://x.org/#2",
+        DynamicRelationshipType.withName("http://x.org/#fizz"));
   }
 
   @Test
@@ -125,37 +129,48 @@ public class CypherUtilTest extends GraphTestBase{
     valueMap.put("rel_id", "RO_2");
     String actual = util.substituteRelationships("({node_id})-[:${rel_id}!]-(end)", valueMap);
     // TODO: A bit of a hack to get Java 7 and Java 8 to pass tests
-    assertThat(actual, isOneOf("({node_id})-[:RO_2|RO_1!]-(end)", "({node_id})-[:RO_1|RO_2!]-(end)"));
+    assertThat(actual,
+        isOneOf("({node_id})-[:RO_2|RO_1!]-(end)", "({node_id})-[:RO_1|RO_2!]-(end)"));
   }
 
   @Test
   public void entailmentRegex() {
     Collection<String> resolvedTypes = util.resolveTypes("http://x.org/#foo", true);
-    assertThat(resolvedTypes, containsInAnyOrder("http://x.org/#fizz", "http://x.org/#foo", "http://x.org/#fizz_equiv"));
+    assertThat(resolvedTypes,
+        containsInAnyOrder("http://x.org/#fizz", "http://x.org/#foo", "http://x.org/#fizz_equiv"));
   }
 
   @Test
   public void curiesAreEntailed() {
     Collection<String> resolvedTypes = util.resolveTypes("FOO:foo", true);
-    assertThat(resolvedTypes, containsInAnyOrder("http://x.org/#fizz", "http://x.org/#foo", "http://x.org/#fizz_equiv"));
+    assertThat(resolvedTypes,
+        containsInAnyOrder("http://x.org/#fizz", "http://x.org/#foo", "http://x.org/#fizz_equiv"));
   }
 
   @Test
   public void multipleEntailmentRegex() {
-    Set<String> types = util.getEntailedRelationshipNames(newHashSet("http://x.org/#fizz", "http://x.org/#bar"));
-    assertThat(types, containsInAnyOrder("http://x.org/#bar", "http://x.org/#fizz", "http://x.org/#fizz_equiv", "http://x.org/#baz"));
+    Set<String> types =
+        util.getEntailedRelationshipNames(newHashSet("http://x.org/#fizz", "http://x.org/#bar"));
+    assertThat(
+        types,
+        containsInAnyOrder("http://x.org/#bar", "http://x.org/#fizz", "http://x.org/#fizz_equiv",
+            "http://x.org/#baz"));
   }
 
   @Test
   public void multipleEntailmentRegex_types() {
-    Set<RelationshipType> types = util.getEntailedRelationshipTypes(newHashSet("http://x.org/#foo", "http://x.org/#bar"));
+    Set<RelationshipType> types =
+        util.getEntailedRelationshipTypes(newHashSet("http://x.org/#foo", "http://x.org/#bar"));
     Collection<String> typeNames = transform(types, new Function<RelationshipType, String>() {
       @Override
       public String apply(RelationshipType arg0) {
         return arg0.name();
       }
     });
-    assertThat(typeNames, containsInAnyOrder("http://x.org/#foo", "http://x.org/#bar", "http://x.org/#fizz", "http://x.org/#fizz_equiv", "http://x.org/#baz"));
+    assertThat(
+        typeNames,
+        containsInAnyOrder("http://x.org/#foo", "http://x.org/#bar", "http://x.org/#fizz",
+            "http://x.org/#fizz_equiv", "http://x.org/#baz"));
   }
 
   @Test
@@ -175,4 +190,38 @@ public class CypherUtilTest extends GraphTestBase{
     assertThat(result.next().size(), is(1));
   }
 
+  @Test
+  public void resolveStartQueryWithSingleMatch() {
+    String cypher = "START n = node:node_auto_index(iri='FOO:foo') match (n) return n";
+    assertThat(util.resolveStartQuery(cypher),
+        IsEqual
+            .equalTo("START n = node:node_auto_index(iri='http://x.org/#foo') match (n) return n"));
+  }
+
+  @Test
+  public void resolveStartQueryWithMultipleMatches() {
+    String cypher =
+        "START n = node:node_auto_index(iri='FOO:foo') match (n) UNION START m = node:node_auto_index(iri='FOO:fizz') match (m) return n,m";
+    System.out.println(util.resolveStartQuery(cypher));
+    assertThat(
+        util.resolveStartQuery(cypher),
+        IsEqual
+            .equalTo("START n = node:node_auto_index(iri='http://x.org/#foo') match (n) UNION START m = node:node_auto_index(iri='http://x.org/#fizz') match (m) return n,m"));
+  }
+
+  @Test
+  public void notResolveStartQueryWithIris() {
+    String cypher =
+        "START n = node:node_auto_index(iri='http://x.org/#foo') match (n) UNION START m = node:node_auto_index(iri='http://x.org/#fizz') match (m) return n,m";
+    assertThat(
+        util.resolveStartQuery(cypher),
+        IsEqual
+            .equalTo("START n = node:node_auto_index(iri='http://x.org/#foo') match (n) UNION START m = node:node_auto_index(iri='http://x.org/#fizz') match (m) return n,m"));
+  }
+
+  @Test
+  public void unalterRandomString() {
+    String cypher = "foo";
+    assertThat(util.resolveStartQuery(cypher), IsEqual.equalTo("foo"));
+  }
 }

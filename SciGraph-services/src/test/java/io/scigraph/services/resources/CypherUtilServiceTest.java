@@ -26,23 +26,26 @@ import io.scigraph.services.resources.CypherUtilService;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public class CypherUtilServiceTest {
 
   private static final CypherUtil cypherUtil = mock(CypherUtil.class);
+  private static final GraphDatabaseService graphDb = mock(GraphDatabaseService.class);
 
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
-      .addResource(new CypherUtilService(cypherUtil)).build();
+      .addResource(new CypherUtilService(cypherUtil, graphDb)).build();
 
   @Before
   public void setup() {
     when(cypherUtil.resolveRelationships("foo!")).thenReturn("foo");
+    when(cypherUtil.resolveStartQuery("foo!")).thenReturn("foo!");
   }
 
   @Test
   public void smokeConstructor() {
-    new CypherUtilService(cypherUtil);
+    new CypherUtilService(cypherUtil, graphDb);
   }
 
   @Test

@@ -39,7 +39,9 @@ import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.graphdb.index.AutoIndexer;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.MapUtil;
@@ -53,17 +55,28 @@ import com.google.inject.TypeLiteral;
 public class Neo4jModule extends AbstractModule {
 
   private final Neo4jConfiguration configuration;
+  private boolean readOnly = false;
+  private boolean enableGuard = false;
 
   public Neo4jModule(Neo4jConfiguration configuration) {
     this.configuration = configuration;
   }
 
+  public Neo4jModule(Neo4jConfiguration configuration, boolean readOnly, boolean enableGuard) {
+    this.configuration = configuration;
+    this.readOnly = readOnly;
+    this.enableGuard = enableGuard;
+
+  }
+
   @Override
   protected void configure() {
-    bind(String.class).annotatedWith(IndicatesNeo4jGraphLocation.class).toInstance(configuration.getLocation());
-    bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(IndicatesCurieMapping.class).toInstance(configuration.getCuries());
+    bind(String.class).annotatedWith(IndicatesNeo4jGraphLocation.class).toInstance(
+        configuration.getLocation());
+    bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesCurieMapping.class)
+        .toInstance(configuration.getCuries());
     bind(Vocabulary.class).to(VocabularyNeo4jImpl.class).in(Singleton.class);
-    bind(new TypeLiteral<ConcurrentMap<String, Long>>(){}).to(IdMap.class).in(Singleton.class);
+    bind(new TypeLiteral<ConcurrentMap<String, Long>>() {}).to(IdMap.class).in(Singleton.class);
   }
 
   private static final Map<String, String> INDEX_CONFIG = MapUtil.stringMap(IndexManager.PROVIDER,
@@ -81,12 +94,13 @@ public class Neo4jModule extends AbstractModule {
       graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
       Set<String> indexProperties = newHashSet(CommonProperties.IRI);
       indexProperties.addAll(config.getIndexedNodeProperties());
-      indexProperties.addAll(transform(config.getExactNodeProperties(), new Function<String, String>() {
-        @Override
-        public String apply(String index) {
-          return index + LuceneUtils.EXACT_SUFFIX;
-        }
-      }));
+      indexProperties.addAll(transform(config.getExactNodeProperties(),
+          new Function<String, String>() {
+            @Override
+            public String apply(String index) {
+              return index + LuceneUtils.EXACT_SUFFIX;
+            }
+          }));
       setupIndex(graphDb.index().getNodeAutoIndexer(), indexProperties);
       tx.success();
     }
@@ -96,7 +110,8 @@ public class Neo4jModule extends AbstractModule {
   @Singleton
   DB getMaker() {
     File dbLocation = new File(configuration.getLocation(), "SciGraphIdMap");
-    return DBMaker.newFileDB(dbLocation).closeOnJvmShutdown().transactionDisable().mmapFileEnable().make();
+    return DBMaker.newFileDB(dbLocation).closeOnJvmShutdown().transactionDisable().mmapFileEnable()
+        .make();
   }
 
   @SuppressWarnings("deprecation")
@@ -104,20 +119,32 @@ public class Neo4jModule extends AbstractModule {
   @Singleton
   GraphDatabaseService getGraphDatabaseService() throws IOException {
     try {
-      final GraphDatabaseService graphDb = new GraphDatabaseFactory()
-      .newEmbeddedDatabaseBuilder(configuration.getLocation())
-      .setConfig(configuration.getNeo4jConfig())
-      .newGraphDatabase();
+      GraphDatabaseBuilder graphDatabaseBuilder =
+          new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(configuration.getLocation())
+              .setConfig(configuration.getNeo4jConfig());
+      if (readOnly) {
+        graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, "true");
+      }
+      if (enableGuard) {
+        graphDatabaseBuilder.setConfig("execution_guard_enabled", "true");
+      }
+      final GraphDatabaseService graphDb = graphDatabaseBuilder.newGraphDatabase();
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override
-        public void run() { graphDb.shutdown(); }
+        public void run() {
+          graphDb.shutdown();
+        }
       });
 
-      setupAutoIndexing(graphDb, configuration);
+      if (!readOnly) { // No need of auto-indexing in read-only mode
+        setupAutoIndexing(graphDb, configuration);
+
+      }
       return graphDb;
     } catch (Exception e) {
       if (Throwables.getRootCause(e).getMessage().contains("lock file")) {
-        throw new IOException(format("The graph at \"%s\" is locked by another process", configuration.getLocation()));
+        throw new IOException(format("The graph at \"%s\" is locked by another process",
+            configuration.getLocation()));
       }
       throw e;
     }

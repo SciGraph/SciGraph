@@ -45,7 +45,7 @@ class SciGraphApplicationModule extends AbstractModule implements ConfigurationA
 
   @Override
   protected void configure() {
-    install(new Neo4jModule(configuration.getGraphConfiguration()));
+    install(new Neo4jModule(configuration.getGraphConfiguration(), true, true));
     bind(Graph.class).to(GraphTransactionalImpl.class);
     install(new EntityModule());
     install(new LexicalLibModule());

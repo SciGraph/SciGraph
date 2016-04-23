@@ -17,14 +17,15 @@ package io.scigraph.neo4j;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import io.scigraph.neo4j.Neo4jConfiguration;
-import io.scigraph.neo4j.Neo4jModule;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.TransactionFailureException;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -35,6 +36,7 @@ public class Neo4jModuleTest {
   public TemporaryFolder graphPath = new TemporaryFolder();
 
   Injector injector;
+  Injector injectorReadOnly;
 
   @Before
   public void setupModule() {
@@ -42,11 +44,33 @@ public class Neo4jModuleTest {
     configuration.setLocation(graphPath.getRoot().getAbsolutePath());
 
     injector = Guice.createInjector(new Neo4jModule(configuration));
+    injectorReadOnly = Guice.createInjector(new Neo4jModule(configuration, true, true));
   }
 
   @Test
   public void graphDb_isSingleton() {
-    assertThat(injector.getInstance(GraphDatabaseService.class), is(injector.getInstance(GraphDatabaseService.class)));
+    assertThat(injector.getInstance(GraphDatabaseService.class),
+        is(injector.getInstance(GraphDatabaseService.class)));
   }
 
+  @Test(expected = TransactionFailureException.class)
+  public void graphDbReadOnlyWithApi() {
+    GraphDatabaseService graphDb = injectorReadOnly.getInstance(GraphDatabaseService.class);
+    Transaction tx = graphDb.beginTx();
+    try {
+      graphDb.createNode(DynamicLabel.label("test"));
+    } finally {
+      tx.close();
+    }
+  }
+  @Test(expected = TransactionFailureException.class)
+  public void graphDbReadOnlyWithCypher() {
+    GraphDatabaseService graphDb = injectorReadOnly.getInstance(GraphDatabaseService.class);
+    Transaction tx = graphDb.beginTx();
+    try {
+      graphDb.execute("CREATE (n: test)");
+    } finally {
+      tx.close();
+    }
+  }
 }
