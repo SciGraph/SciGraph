@@ -16,7 +16,9 @@
 package io.scigraph.bbop;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /***
  * A bean representation of the <a href="https://github.com/berkeleybop/bbop-js/wiki/Graph">bbop-js</a>
@@ -26,6 +28,7 @@ public final class BbopGraph {
 
   List<BbopNode> nodes = new ArrayList<>();
   List<BbopEdge> edges = new ArrayList<>();
+  Map<String, Object> meta = new HashMap<>();
 
   public List<BbopNode> getNodes() {
     return nodes;
@@ -43,4 +46,11 @@ public final class BbopGraph {
     this.edges = edges;
   }
 
+  public Map<String, Object> getMeta() {
+    return meta;
+  }
+
+  public void setMeta(Map<String, Object> meta) {
+    this.meta = meta;
+  }
 }
