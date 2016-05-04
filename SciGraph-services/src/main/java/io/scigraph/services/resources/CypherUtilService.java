@@ -21,7 +21,13 @@ import io.scigraph.internal.CypherUtil;
 import io.scigraph.services.jersey.BaseResource;
 import io.scigraph.services.jersey.JaxRsUtil;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -34,11 +40,19 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.PropertyContainer;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.GraphDatabaseAPI;
 import org.neo4j.kernel.guard.Guard;
 import org.neo4j.kernel.guard.GuardException;
 
 import com.codahale.metrics.annotation.Timed;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -89,11 +103,13 @@ public class CypherUtilService extends BaseResource {
       notes = "The graph is in read-only mode, this service will fail with queries which alter the graph, like CREATE, DELETE or REMOVE. Example: START n = node:node_auto_index(iri='DOID:4') match (n) return n")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({MediaType.TEXT_PLAIN})
+  @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
   public String execute(
       @ApiParam(value = "The cypher query to execute", required = true) @QueryParam("cypherQuery") String cypherQuery,
-      @ApiParam(value = "Limit", required = true) @QueryParam("limit") @DefaultValue("10") IntParam limit) {
+      @ApiParam(value = "Limit", required = true) @QueryParam("limit") @DefaultValue("10") IntParam limit)
+      throws IOException {
     int timeoutMinutes = 5;
+
 
     String sanitizedCypherQuery = cypherQuery.replaceAll(";", "") + " LIMIT " + limit;
     String replacedStartCurie = cypherUtil.resolveStartQuery(sanitizedCypherQuery);
@@ -103,12 +119,119 @@ public class CypherUtilService extends BaseResource {
     guard.startTimeout(timeoutMinutes * 60 * 1000);
 
     try {
-      return cypherUtil.execute(replacedStartCurie).resultAsString();
+      if (JaxRsUtil.getVariant(request.get()).getMediaType() == MediaType.APPLICATION_JSON_TYPE) {
+        try (Transaction tx = graphDb.beginTx()) {
+          Result result = cypherUtil.execute(replacedStartCurie);
+          // System.out.println(result.resultAsString());
+          StringWriter writer = new StringWriter();
+          JsonGenerator generator = new JsonFactory().createGenerator(writer);
+          generator.writeStartArray();
+          while (result.hasNext()) {
+            Map<String, Object> row = result.next();
+            generator.writeStartObject();
+            for (Entry<String, Object> entry : row.entrySet()) {
+              String key = entry.getKey();
+              Object value = entry.getValue();
+              resultSerializer(generator, key, value);
+            }
+            generator.writeEndObject();
+          }
+          generator.writeEndArray();
+          generator.close();
+
+          tx.close();
+          return writer.toString();
+        }
+      } else {
+        return cypherUtil.execute(replacedStartCurie).resultAsString();
+      }
     } catch (GuardException e) {
       return "The query execution exceeds " + timeoutMinutes
           + " minutes. Consider using the neo4j shell instead of this service.";
     } finally {
       guard.stop();
+    }
+  }
+
+  // TODO similar to ResultSerializer.java from golrLoader
+  private void resultSerializer(JsonGenerator generator, String fieldName, Object value)
+      throws IOException {
+    if (value instanceof Node) {
+      Node n = (Node) value;
+
+      generator.writeFieldName(fieldName);
+      generator.writeStartObject();
+      for (String k : n.getPropertyKeys()) {
+        resultSerializer(generator, k, n.getProperty(k));
+      }
+
+      generator.writeArrayFieldStart("Neo4jLabel");
+      for (Label l : n.getLabels()) {
+        generator.writeString(l.name());
+      }
+      generator.writeEndArray();
+
+      generator.writeEndObject();
+    } else if (value instanceof Relationship) {
+      Relationship r = (Relationship) value;
+
+      generator.writeFieldName(fieldName);
+      generator.writeStartObject();
+      generator.writeStringField("type", r.getType().name());
+      for (String k : r.getPropertyKeys()) {
+        resultSerializer(generator, k, r.getProperty(k));
+      }
+      generator.writeEndObject();
+
+    } else if (value instanceof org.neo4j.graphdb.Path) {
+      org.neo4j.graphdb.Path p = (org.neo4j.graphdb.Path) value;
+      Iterator<PropertyContainer> it = p.iterator();
+
+      generator.writeFieldName(fieldName);
+      generator.writeStartObject();
+
+      generator.writeArrayFieldStart("details");
+      while (it.hasNext()) {
+        PropertyContainer pc = it.next();
+        generator.writeStartObject();
+        for (String k : pc.getPropertyKeys()) {
+          resultSerializer(generator, k, pc.getProperty(k));
+        }
+        generator.writeEndObject();
+      }
+      generator.writeEndArray();
+
+      generator.writeStringField("overview", p.toString());
+
+      generator.writeEndObject();
+
+    } else if (value instanceof String) {
+      generator.writeStringField(fieldName, (String) value);
+    } else if (value instanceof Boolean) {
+      generator.writeBooleanField(fieldName, (Boolean) value);
+    } else if (value instanceof Integer) {
+      generator.writeNumberField(fieldName, (Integer) value);
+    } else if (value instanceof Long) {
+      generator.writeNumberField(fieldName, (Long) value);
+    } else if (value instanceof Float) {
+      generator.writeNumberField(fieldName, (Float) value);
+    } else if (value instanceof Double) {
+      generator.writeNumberField(fieldName, (Double) value);
+    } else if (value instanceof Iterable) {
+      generator.writeArrayFieldStart(fieldName);
+      for (String v : (List<String>) value) {
+        generator.writeString(v);
+      }
+      generator.writeEndArray();
+    } else if (value.getClass().isArray()) {
+      List<String> arr = Arrays.asList((String[]) value);
+      generator.writeArrayFieldStart(fieldName);
+      for (String v : arr) {
+        generator.writeString(v);
+      }
+      generator.writeEndArray();
+    } else {
+      throw new IllegalArgumentException("Don't know how to serialize " + value.getClass());
     }
   }
 
