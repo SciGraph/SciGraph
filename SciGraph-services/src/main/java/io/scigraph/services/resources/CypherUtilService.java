@@ -119,7 +119,8 @@ public class CypherUtilService extends BaseResource {
     guard.startTimeout(timeoutMinutes * 60 * 1000);
 
     try {
-      if (JaxRsUtil.getVariant(request.get()).getMediaType() == MediaType.APPLICATION_JSON_TYPE) {
+      if (JaxRsUtil.getVariant(request.get()) != null
+          && JaxRsUtil.getVariant(request.get()).getMediaType() == MediaType.APPLICATION_JSON_TYPE) {
         try (Transaction tx = graphDb.beginTx()) {
           Result result = cypherUtil.execute(replacedStartCurie);
           // System.out.println(result.resultAsString());
