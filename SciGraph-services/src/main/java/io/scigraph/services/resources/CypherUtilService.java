@@ -160,44 +160,30 @@ public class CypherUtilService extends BaseResource {
       Node n = (Node) value;
 
       generator.writeFieldName(fieldName);
-      generator.writeStartObject();
-      for (String k : n.getPropertyKeys()) {
-        resultSerializer(generator, k, n.getProperty(k));
-      }
 
-      generator.writeArrayFieldStart("Neo4jLabel");
-      for (Label l : n.getLabels()) {
-        generator.writeString(l.name());
-      }
-      generator.writeEndArray();
-
-      generator.writeEndObject();
+      nodeGeneration(generator, n);
     } else if (value instanceof Relationship) {
       Relationship r = (Relationship) value;
 
       generator.writeFieldName(fieldName);
-      generator.writeStartObject();
-      generator.writeStringField("type", r.getType().name());
-      for (String k : r.getPropertyKeys()) {
-        resultSerializer(generator, k, r.getProperty(k));
-      }
-      generator.writeEndObject();
 
+      relationshipGeneration(generator, r);
     } else if (value instanceof org.neo4j.graphdb.Path) {
       org.neo4j.graphdb.Path p = (org.neo4j.graphdb.Path) value;
-      Iterator<PropertyContainer> it = p.iterator();
+
+      Iterator<Node> nodes = p.nodes().iterator();
+      Iterator<Relationship> relationships = p.relationships().iterator();
 
       generator.writeFieldName(fieldName);
       generator.writeStartObject();
 
       generator.writeArrayFieldStart("details");
-      while (it.hasNext()) {
-        PropertyContainer pc = it.next();
-        generator.writeStartObject();
-        for (String k : pc.getPropertyKeys()) {
-          resultSerializer(generator, k, pc.getProperty(k));
+      while (nodes.hasNext()) {
+        Node n = nodes.next();
+        nodeGeneration(generator, n);
+        if (relationships.hasNext()) {
+          relationshipGeneration(generator, relationships.next());
         }
-        generator.writeEndObject();
       }
       generator.writeEndArray();
 
@@ -235,4 +221,29 @@ public class CypherUtilService extends BaseResource {
     }
   }
 
+  private void nodeGeneration(JsonGenerator generator, Node node) throws IOException {
+    generator.writeStartObject();
+    for (String k : node.getPropertyKeys()) {
+      resultSerializer(generator, k, node.getProperty(k));
+    }
+
+    generator.writeArrayFieldStart("Neo4jLabel");
+    for (Label l : node.getLabels()) {
+      generator.writeString(l.name());
+    }
+    generator.writeEndArray();
+
+    generator.writeEndObject();
+  }
+
+
+  private void relationshipGeneration(JsonGenerator generator, Relationship relationship)
+      throws IOException {
+    generator.writeStartObject();
+    generator.writeStringField("type", relationship.getType().name());
+    for (String k : relationship.getPropertyKeys()) {
+      resultSerializer(generator, k, relationship.getProperty(k));
+    }
+    generator.writeEndObject();
+  }
 }
