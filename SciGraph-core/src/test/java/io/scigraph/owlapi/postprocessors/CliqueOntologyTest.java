@@ -37,7 +37,6 @@ import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.tooling.GlobalGraphOperations;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -86,14 +85,13 @@ public class CliqueOntologyTest extends GraphTestBase {
 
   @Test
   public void edgesAreMovedToLeader() {
-    GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
     Node zfin1 = null;
     Node zfin2 = null;
     Node phenotype1 = null;
     Node phenotype2 = null;
     Node phenotype3 = null;
     try (Transaction tx = graphDb.beginTx()) {
-      for (Node n : globalGraphOperations.getAllNodes()) {
+      for (Node n : graphDb.getAllNodes()) {
         if (n.getProperty(NodeProperties.IRI).equals("http://www.ncbi.nlm.nih.gov/gene/ZG1")) {
           zfin1 = n;
         }

@@ -37,7 +37,7 @@ public class GraphBatchImplTest extends GraphTestBase<GraphBatchImpl> {
   @Override
   protected GraphBatchImpl createInstance() throws IOException {
     String path = folder.newFolder().getAbsolutePath();
-    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
+    BatchInserter inserter = BatchInserters.inserter(new File(path));
     return new GraphBatchImpl(inserter, CommonProperties.IRI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
   }

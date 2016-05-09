@@ -37,7 +37,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
@@ -77,9 +76,7 @@ public class CliqueTest extends GraphTestBase {
 
   @Test
   public void edgesAreMovedToLeader() {
-    GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
-
-    ResourceIterator<Node> allNodes = globalGraphOperations.getAllNodes().iterator();
+    ResourceIterator<Node> allNodes = graphDb.getAllNodes().iterator();
     Node n1 = getNode("http://x.org/a", allNodes);
     Node n2 = getNode("http://x.org/b", allNodes);
     Node n3 = getNode("http://x.org/c", allNodes);

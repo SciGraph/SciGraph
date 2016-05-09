@@ -41,7 +41,6 @@ import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
@@ -85,10 +84,9 @@ public class Clique implements Postprocessor {
   @Override
   public void run() {
     logger.info("Starting clique merge");
-    GlobalGraphOperations globalGraphOperations = GlobalGraphOperations.at(graphDb);
 
     Transaction tx = graphDb.beginTx();
-    ResourceIterable<Node> allNodes = globalGraphOperations.getAllNodes();
+    ResourceIterable<Node> allNodes = graphDb.getAllNodes();
     int size = Iterators.size(allNodes.iterator());
     tx.success();
     tx.close();

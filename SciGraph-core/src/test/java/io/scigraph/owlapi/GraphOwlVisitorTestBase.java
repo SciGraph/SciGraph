@@ -113,7 +113,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, propertyMap);
     walker.walkStructure(visitor);
     graph.shutdown();
-    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
+    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(new File(path));
     tx = graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;

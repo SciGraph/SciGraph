@@ -18,8 +18,6 @@ package io.scigraph.lucene;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import io.scigraph.frames.NodeProperties;
-import io.scigraph.lucene.VocabularyIndexAnalyzer;
-import io.scigraph.lucene.VocabularyQueryAnalyzer;
 
 import java.io.IOException;
 
@@ -32,7 +30,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;

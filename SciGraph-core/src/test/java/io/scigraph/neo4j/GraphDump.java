@@ -19,7 +19,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Direction;
@@ -77,10 +76,10 @@ public class GraphDump {
   }
 
   public static void dumpGraph(GraphDatabaseService graphDb) {
-    for (Node node: GlobalGraphOperations.at(graphDb).getAllNodes()) {
+    for (Node node: graphDb.getAllNodes()) {
       dumpNode(node);
     }
-    for (Relationship relationship: GlobalGraphOperations.at(graphDb).getAllRelationships()) {
+    for (Relationship relationship: graphDb.getAllRelationships()) {
       dumpRelationship(relationship);
     }
   }

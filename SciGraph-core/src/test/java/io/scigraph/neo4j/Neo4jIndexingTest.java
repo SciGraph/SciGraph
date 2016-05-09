@@ -56,7 +56,7 @@ public class Neo4jIndexingTest {
   }
 
   GraphDatabaseService getGraphDb() {
-    return new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
+    return new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
   }
 
   void addIndexing() {
@@ -112,7 +112,7 @@ public class Neo4jIndexingTest {
 
   @Test
   public void testBatchIndexToAutoIndex() throws IOException {
-    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
+    BatchInserter inserter = BatchInserters.inserter(new File(path));
     BatchInserterIndexProvider indexProvider = new LuceneBatchInserterIndexProvider(inserter);
     BatchInserterIndex index =
         indexProvider.nodeIndex("node_auto_index", MapUtil.stringMap("type", "exact"));

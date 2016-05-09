@@ -45,7 +45,6 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.ReadableIndex;
-import org.neo4j.tooling.GlobalGraphOperations;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
@@ -65,7 +64,7 @@ public class GraphBatchImplIT {
   @Before
   public void setup() throws IOException {
     path = folder.newFolder().getAbsolutePath();
-    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
+    BatchInserter inserter = BatchInserters.inserter(new File(path));
     graph =
         new GraphBatchImpl(inserter, CommonProperties.IRI, newHashSet("prop1", "prop2"),
             newHashSet("prop1"), new IdMap(), new RelationshipMap());
@@ -74,7 +73,7 @@ public class GraphBatchImplIT {
 
   GraphDatabaseService getGraphDB() {
     graph.shutdown();
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
     graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     return graphDb;
@@ -83,7 +82,7 @@ public class GraphBatchImplIT {
   @Test
   public void testNodeCreation() {
     GraphDatabaseService graphDb = getGraphDB();
-    assertThat(size(GlobalGraphOperations.at(graphDb).getAllNodes()), is(1));
+    assertThat(size(graphDb.getAllNodes()), is(1));
     IndexHits<Node> hits = nodeIndex.query(CommonProperties.IRI + ":http\\://example.org/foo");
     assertThat(hits.getSingle().getId(), is(foo));
   }

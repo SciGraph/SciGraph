@@ -25,7 +25,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 public class OntologyGraphRuleTest {
 
@@ -39,7 +38,7 @@ public class OntologyGraphRuleTest {
   public void ontology_isLoaded() {
     GraphDatabaseService graphDb = graphRule.getGraphDb();
     try (Transaction tx = graphDb.beginTx()) {
-      assertThat(size(GlobalGraphOperations.at(graphDb).getAllNodes()), is(greaterThan(0)));
+      assertThat(size(graphDb.getAllNodes()), is(greaterThan(0)));
       tx.success();
     }
   }

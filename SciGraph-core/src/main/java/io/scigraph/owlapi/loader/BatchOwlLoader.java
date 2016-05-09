@@ -57,7 +57,6 @@ import org.apache.commons.cli.ParseException;
 import org.mapdb.DB;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
@@ -183,8 +182,8 @@ public class BatchOwlLoader {
     
     public void shutdown() {
       try (Transaction tx = graphDb.beginTx()) {
-        logger.info(size(GlobalGraphOperations.at(graphDb).getAllNodes()) + " nodes");
-        logger.info(size(GlobalGraphOperations.at(graphDb).getAllRelationships())
+        logger.info(size(graphDb.getAllNodes()) + " nodes");
+        logger.info(size(graphDb.getAllRelationships())
             + " relationships");
         tx.success();
       }

@@ -21,7 +21,6 @@ import javax.inject.Inject;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
 
@@ -38,7 +37,7 @@ public class Neo4jHealthCheck extends NamedHealthCheck {
   protected Result check() throws Exception {
     int count = 0;
     try (Transaction tx = graphDb.beginTx()) {
-      count = size(GlobalGraphOperations.at(graphDb).getAllNodes());
+      count = size(graphDb.getAllNodes());
       tx.success();
     }
 

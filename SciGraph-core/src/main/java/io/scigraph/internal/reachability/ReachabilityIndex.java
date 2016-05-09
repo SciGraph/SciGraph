@@ -43,7 +43,6 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -192,7 +191,7 @@ public final class ReachabilityIndex {
 
       // ...cleanup the index.
       int counter = 0;
-      for (Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
+      for (Node n : graphDb.getAllNodes()) {
         n.removeProperty(IN_LIST_PROPERTY);
         n.removeProperty(OUT_LIST_PROPERTY);
         tx = batchTransactions(tx, counter++);
@@ -223,7 +222,7 @@ public final class ReachabilityIndex {
         });
 
     try (Transaction tx = graphDb.beginTx()) {
-      for (Node n : GlobalGraphOperations.at(graphDb).getAllNodes()) {
+      for (Node n : graphDb.getAllNodes()) {
         if (n.getId() > 0) {
           int relationshipCount = nodePredicate.apply(n) ? size(n.getRelationships()) : -1;
           nodeSet.add(new AbstractMap.SimpleEntry<Long, Integer>(n.getId(), relationshipCount));

@@ -18,12 +18,12 @@ package io.scigraph.lucene;
 import java.io.Reader;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.KeywordTokenizer;
-import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.util.Version;
 
 public final class ExactAnalyzer extends Analyzer {
@@ -37,6 +37,12 @@ public final class ExactAnalyzer extends Analyzer {
     result = new ASCIIFoldingFilter(result);
     result = new PatternReplaceFilter(result, pattern, "", true);
     return result;
+  }
+
+  @Override
+  protected TokenStreamComponents createComponents(String fieldName) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

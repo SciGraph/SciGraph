@@ -46,7 +46,7 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.GraphDatabaseAPI;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.guard.Guard;
 import org.neo4j.kernel.guard.GuardException;
 

@@ -120,7 +120,7 @@ public class Neo4jModule extends AbstractModule {
   GraphDatabaseService getGraphDatabaseService() throws IOException {
     try {
       GraphDatabaseBuilder graphDatabaseBuilder =
-          new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(configuration.getLocation())
+          new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(configuration.getLocation()))
               .setConfig(configuration.getNeo4jConfig());
       if (readOnly) {
         graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, "true");
