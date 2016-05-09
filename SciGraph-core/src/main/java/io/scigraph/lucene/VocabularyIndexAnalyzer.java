@@ -19,7 +19,6 @@ import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,26 +59,28 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
 
     static SynonymMap map = Suppliers.memoize(new SynonymMapSupplier()).get();
 
-    @SuppressWarnings("deprecation")
     @Override
-    public TokenStream tokenStream(String fieldName, Reader reader) {
-      Tokenizer tokenizer = new WhitespaceTokenizer(LuceneUtils.getVersion(), reader);
-      TokenStream result = new PatternReplaceFilter(tokenizer, Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2", true);
+    protected TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer tokenizer = new WhitespaceTokenizer();
+      TokenStream result =
+          new PatternReplaceFilter(tokenizer,
+              Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2",
+              true);
       result = new PatternReplaceFilter(result, Pattern.compile("'s"), "s", true);
       result = new BolEolFilter(result);
       result = new SynonymFilter(result, map, true);
-      result = new StopFilter(false, result, LuceneUtils.caseSensitiveStopSet);
-      result = new LowerCaseFilter(LuceneUtils.getVersion(), result);
+      result = new StopFilter(result, LuceneUtils.caseSensitiveStopSet);
+      result = new LowerCaseFilter(result);
       result = new ASCIIFoldingFilter(result);
 
-      return result;
+      return new TokenStreamComponents(tokenizer, result);
     }
 
   }
 
   @Override
-  public TokenStream tokenStream(String fieldName, Reader reader) {
-    return analyzer.tokenStream(fieldName, reader);
+  protected TokenStreamComponents createComponents(String fieldName) {
+    return analyzer.getReuseStrategy().getReusableComponents(analyzer, fieldName);
   }
 
 }

@@ -26,6 +26,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -37,7 +38,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -55,8 +55,8 @@ public class VocabularyAnalyzerTest {
   @Before
   public void setupIndex() throws Exception {
     Directory dir = new RAMDirectory();
-    IndexWriterConfig conf = new IndexWriterConfig(Version.LUCENE_36, new VocabularyIndexAnalyzer());
-    try( IndexWriter writer = new IndexWriter(dir, conf)) {
+    IndexWriterConfig conf = new IndexWriterConfig(new VocabularyIndexAnalyzer());
+    try (IndexWriter writer = new IndexWriter(dir, conf)) {
       addDoc(writer, "hippocampus");
       addDoc(writer, "hippocampal structures");
       addDoc(writer, "structure of the hippocampus");
@@ -64,9 +64,9 @@ public class VocabularyAnalyzerTest {
       writer.commit();
     }
 
-    IndexReader reader = IndexReader.open(dir);
+    IndexReader reader = DirectoryReader.open(dir);
     searcher = new IndexSearcher(reader);
-    parser = new QueryParser(Version.LUCENE_36, NodeProperties.LABEL, new VocabularyQueryAnalyzer());
+    parser = new QueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
   }
 
   @Test

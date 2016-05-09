@@ -44,13 +44,14 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.queryParser.analyzing.AnalyzingQueryParser;
+import org.apache.lucene.queryparser.analyzing.AnalyzingQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -60,7 +61,6 @@ import org.apache.lucene.search.spell.LuceneDictionary;
 import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -84,19 +84,22 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   private final NodeTransformer transformer;
 
   @Inject
-  public VocabularyNeo4jImpl(GraphDatabaseService graph, @Nullable @IndicatesNeo4jGraphLocation String neo4jLocation,
-      CurieUtil curieUtil, NodeTransformer transformer) throws IOException {
+  public VocabularyNeo4jImpl(GraphDatabaseService graph,
+      @Nullable @IndicatesNeo4jGraphLocation String neo4jLocation, CurieUtil curieUtil,
+      NodeTransformer transformer) throws IOException {
     this.graph = graph;
     this.curieUtil = curieUtil;
     this.transformer = transformer;
     if (null != neo4jLocation) {
       Directory indexDirectory =
-          FSDirectory.open(new File(new File(neo4jLocation), "index/lucene/node/node_auto_index"));
+          FSDirectory.open((new File(new File(neo4jLocation), "index/lucene/node/node_auto_index"))
+              .toPath());
       Directory spellDirectory =
-          FSDirectory.open(new File(new File(neo4jLocation), "index/lucene/spellchecker"));
+          FSDirectory.open((new File(new File(neo4jLocation), "index/lucene/spellchecker"))
+              .toPath());
       spellChecker = new SpellChecker(spellDirectory);
-      try (IndexReader reader = IndexReader.open(indexDirectory)) {
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new KeywordAnalyzer());
+      try (IndexReader reader = DirectoryReader.open(indexDirectory)) {
+        IndexWriterConfig config = new IndexWriterConfig(new KeywordAnalyzer());
         spellChecker.indexDictionary(new LuceneDictionary(reader, NodeProperties.LABEL
             + LuceneUtils.EXACT_SUFFIX), config, true);
       }
@@ -106,8 +109,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   static QueryParser getQueryParser() {
-    return new AnalyzingQueryParser(Version.LUCENE_36, NodeProperties.LABEL,
-        new VocabularyQueryAnalyzer());
+    return new AnalyzingQueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
   }
 
   static String formatQuery(String format, Object... args) {
@@ -132,7 +134,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     BooleanQuery prefixQueries = new BooleanQuery();
     for (String curie : query.getPrefixes()) {
       String prefix = curieUtil.getExpansion(curie);
-      prefixQueries.add(new WildcardQuery(new Term(CommonProperties.IRI, prefix + "*")), Occur.SHOULD);
+      prefixQueries.add(new WildcardQuery(new Term(CommonProperties.IRI, prefix + "*")),
+          Occur.SHOULD);
     }
     if (!query.getPrefixes().isEmpty()) {
       indexQuery.add(new BooleanClause(prefixQueries, Occur.MUST));
@@ -147,7 +150,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
           @Override
           public boolean apply(Concept concept) {
             return !concept.isDeprecated();
-          }});
+          }
+        });
       }
       Iterable<Concept> limitedHits = limit(concepts, query.getLimit());
       List<Concept> ret = newArrayList(limitedHits);
@@ -161,7 +165,9 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     String idQuery = StringUtils.strip(query.getInput(), "\"");
     idQuery = curieUtil.getIri(idQuery).or(idQuery);
     try (Transaction tx = graph.beginTx()) {
-      Node node = graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.IRI, idQuery).getSingle();
+      Node node =
+          graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.IRI, idQuery)
+              .getSingle();
       tx.success();
       Concept concept = null;
       if (null != node) {
@@ -191,9 +197,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
                 query.getInput())), Occur.SHOULD);
       }
       if (query.isIncludeAbbreviations()) {
-        subQuery.add(
-            parser.parse(formatQuery("%s%s:%s*", Concept.ABREVIATION, LuceneUtils.EXACT_SUFFIX,
-                query.getInput())), Occur.SHOULD);
+        subQuery.add(parser.parse(formatQuery("%s%s:%s*", Concept.ABREVIATION,
+            LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
       }
       if (query.isIncludeAcronyms()) {
         subQuery.add(
@@ -288,7 +293,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     return Suppliers.memoize(new Supplier<Set<String>>() {
       @Override
       public Set<String> get() {
-        Result result = graph.execute("START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
+        Result result =
+            graph.execute("START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
         Set<String> categories = new HashSet<>();
         while (result.hasNext()) {
           Map<String, Object> col = result.next();
