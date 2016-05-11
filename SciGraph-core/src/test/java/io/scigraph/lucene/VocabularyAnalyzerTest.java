@@ -20,8 +20,10 @@ import io.scigraph.frames.NodeProperties;
 import java.io.IOException;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -45,14 +47,15 @@ public class VocabularyAnalyzerTest {
 
   static void addDoc(IndexWriter writer, String term) throws CorruptIndexException, IOException {
     Document doc = new Document();
-    doc.add(new StringField(NodeProperties.LABEL, "hippocampus", Store.YES));
+    //doc.add(new Field(NodeProperties.LABEL, term, Store.YES, Index.ANALYZED));
+    doc.add(new TextField(NodeProperties.LABEL, term, Store.YES));
     writer.addDocument(doc);
   }
 
   @Before
   public void setupIndex() throws Exception {
     Directory dir = new RAMDirectory();
-    IndexWriterConfig conf = new IndexWriterConfig(new VocabularyIndexAnalyzer());
+    IndexWriterConfig conf = new IndexWriterConfig(new VocabularyIndexAnalyzer().getAnalyzer());
     try (IndexWriter writer = new IndexWriter(dir, conf)) {
       addDoc(writer, "hippocampus");
       addDoc(writer, "hippocampal structures");
@@ -63,7 +66,7 @@ public class VocabularyAnalyzerTest {
 
     IndexReader reader = DirectoryReader.open(dir);
     searcher = new IndexSearcher(reader);
-    parser = new QueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
+    parser = new QueryParser(NodeProperties.LABEL, (new VocabularyQueryAnalyzer()).getAnalyzer());
   }
 
   @Test

@@ -109,7 +109,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   static QueryParser getQueryParser() {
-    return new AnalyzingQueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
+    return new AnalyzingQueryParser(NodeProperties.LABEL, (new VocabularyQueryAnalyzer()).getAnalyzer());
   }
 
   static String formatQuery(String format, Object... args) {

@@ -36,7 +36,7 @@ import org.apache.lucene.analysis.synonym.SynonymMap;
 
 import com.google.common.base.Suppliers;
 
-public final class VocabularyIndexAnalyzer extends Analyzer {
+public final class VocabularyIndexAnalyzer {
 
   private final Analyzer analyzer;
 
@@ -76,9 +76,8 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
 
   }
 
-  @Override
-  protected TokenStreamComponents createComponents(String fieldName) {
-    return analyzer.getReuseStrategy().getReusableComponents(analyzer, fieldName);
+  public Analyzer getAnalyzer() {
+    return analyzer;
   }
 
 }
