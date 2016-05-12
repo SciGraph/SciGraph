@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Singleton;
 
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.neo4j.graphdb.GraphDatabaseService;

@@ -55,6 +55,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spell.LuceneDictionary;
@@ -109,7 +110,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   }
 
   static QueryParser getQueryParser() {
-    return new AnalyzingQueryParser(NodeProperties.LABEL, (new VocabularyQueryAnalyzer()).getAnalyzer());
+    return new AnalyzingQueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
   }
 
   static String formatQuery(String format, Object... args) {
@@ -257,28 +258,36 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public List<Concept> getConceptsFromTerm(Query query) {
     QueryParser parser = getQueryParser();
-    String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
-    BooleanQuery finalQuery = new BooleanQuery();
+    //String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
+    String exactQuery = String.format("\" %s \"", query.getInput());
+    Builder finalQueryBuilder = new BooleanQuery.Builder();
     try {
       if (query.isIncludeSynonyms() || query.isIncludeAbbreviations() || query.isIncludeAcronyms()) {
-        BooleanQuery subQuery = new BooleanQuery();
-        subQuery.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
+        Builder subQueryBuilder = new BooleanQuery.Builder();
+        //subQuery.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
+        subQueryBuilder.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
         if (query.isIncludeSynonyms()) {
-          subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
+          //subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
+          subQueryBuilder.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
         }
         if (query.isIncludeAbbreviations()) {
-          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + exactQuery), Occur.SHOULD);
+          //subQuery.add(parser.parse(Concept.ABREVIATION + ":" + exactQuery), Occur.SHOULD);
+          subQueryBuilder.add(parser.parse(Concept.ABREVIATION + ":" + exactQuery), Occur.SHOULD);
         }
         if (query.isIncludeAcronyms()) {
-          subQuery.add(parser.parse(Concept.ACRONYM + ":" + exactQuery), Occur.SHOULD);
+          //subQuery.add(parser.parse(Concept.ACRONYM + ":" + exactQuery), Occur.SHOULD);
+          subQueryBuilder.add(parser.parse(Concept.ACRONYM + ":" + exactQuery), Occur.SHOULD);
         }
-        finalQuery.add(subQuery, Occur.MUST);
+        //finalQuery.add(subQuery, Occur.MUST);
+        finalQueryBuilder.add(subQueryBuilder.build(), Occur.MUST);
       } else {
-        finalQuery.add(parser.parse(exactQuery), Occur.MUST);
+        //finalQuery.add(parser.parse(exactQuery), Occur.MUST);
+        finalQueryBuilder.add(parser.parse(exactQuery), Occur.MUST);
       }
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parse query", e);
     }
+    BooleanQuery finalQuery = finalQueryBuilder.build();
     addCommonConstraints(finalQuery, query);
     logger.finest(finalQuery.toString());
     try (Transaction tx = graph.beginTx()) {

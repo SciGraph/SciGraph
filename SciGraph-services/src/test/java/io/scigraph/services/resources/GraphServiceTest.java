@@ -37,7 +37,6 @@ import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -59,7 +58,7 @@ public class GraphServiceTest {
   public void setup() {
     when(api.getAllPropertyKeys()).thenReturn(newArrayList("foo", "bar"));
     when(api.getAllRelationshipTypes()).thenReturn(
-        newArrayList((RelationshipType)DynamicRelationshipType.withName("foo"), (RelationshipType)DynamicRelationshipType.withName("bar")));
+        newArrayList(RelationshipType.withName("foo"), RelationshipType.withName("bar")));
     when(graphDb.beginTx()).thenReturn(tx);
     when(api.getEdges(any(RelationshipType.class), anyBoolean(), anyLong(), anyLong())).thenReturn(new TinkerGraph());
   }

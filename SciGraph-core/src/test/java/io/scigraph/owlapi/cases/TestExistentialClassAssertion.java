@@ -22,7 +22,6 @@ import io.scigraph.frames.CommonProperties;
 import io.scigraph.neo4j.GraphUtil;
 
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -35,7 +34,7 @@ public class TestExistentialClassAssertion extends OwlTestCase {
   public void testSubclass() {
     Node i = getNode("http://example.org/i");
     Node c = getNode("http://example.org/c");
-    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
+    RelationshipType p = RelationshipType.withName("http://example.org/p");
 
     Relationship r = getOnlyElement(GraphUtil.getRelationships(i, c, p, true));
     assertThat(GraphUtil.getProperty(r, CommonProperties.CONVENIENCE, Boolean.class),

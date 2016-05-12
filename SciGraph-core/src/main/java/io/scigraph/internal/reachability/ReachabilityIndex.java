@@ -57,7 +57,7 @@ public final class ReachabilityIndex {
 
   private static final Logger logger = Logger.getLogger(ReachabilityIndex.class.getName());
 
-  private static final Label REACHABILITY_METADATA = DynamicLabel.label("ReachabilityIndex");
+  private static final Label REACHABILITY_METADATA = Label.label("ReachabilityIndex");
 
   private static final String INDEX_EXISTS_PROPERTY = "ReachablilityIndexExists";
   private static final String IN_LIST_PROPERTY = "ReachablilityIndexInList";

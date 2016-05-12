@@ -26,7 +26,6 @@ import io.scigraph.internal.CypherUtil;
 import io.scigraph.internal.GraphAspect;
 import io.scigraph.owlapi.OwlRelationships;
 import io.scigraph.owlapi.curies.CurieUtil;
-import io.scigraph.services.jersey.dynamic.CypherInflector;
 import io.scigraph.services.swagger.beans.resource.Apis;
 import io.scigraph.util.GraphTestBase;
 
@@ -39,7 +38,7 @@ import javax.ws.rs.core.UriInfo;
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Optional;
@@ -61,7 +60,7 @@ public class CypherInflectorTest extends GraphTestBase {
     CypherUtil cypherUtil = new CypherUtil(graphDb, curieUtil);
     addRelationship("http://x.org/#foo", "http://x.org/#fizz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
     addRelationship("http://x.org/#bar", "http://x.org/#baz", OwlRelationships.RDFS_SUB_PROPERTY_OF);
-    addRelationship("http://x.org/#1", "http://x.org/#2", DynamicRelationshipType.withName("http://x.org/#fizz"));
+    addRelationship("http://x.org/#1", "http://x.org/#2", RelationshipType.withName("http://x.org/#fizz"));
     when(context.getUriInfo()).thenReturn(uriInfo);
     MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
     map.put("rel_id", newArrayList("http://x.org/#fizz"));

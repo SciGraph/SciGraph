@@ -17,6 +17,7 @@ import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,9 +37,9 @@ import org.apache.lucene.analysis.synonym.SynonymMap;
 
 import com.google.common.base.Suppliers;
 
-public final class VocabularyIndexAnalyzer {
+public final class VocabularyIndexAnalyzer extends Analyzer {
 
-  private final Analyzer analyzer;
+  private final PerFieldAnalyzerWrapper analyzer;
 
   public VocabularyIndexAnalyzer() throws IOException, URISyntaxException {
     Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
@@ -76,8 +77,22 @@ public final class VocabularyIndexAnalyzer {
 
   }
 
-  public Analyzer getAnalyzer() {
-    return analyzer;
+  // TODO using reflection is certainly not the right way to handle that
+  @Override
+  protected TokenStreamComponents createComponents(String fieldName) {
+    Class<? extends PerFieldAnalyzerWrapper> clazz = analyzer.getClass();
+    Method getWrappedAnalyzer;
+    try {
+      getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
+      getWrappedAnalyzer.setAccessible(true);
+      Analyzer currentAnalyzer =  (Analyzer) getWrappedAnalyzer.invoke(analyzer, fieldName);
+      Class<? extends Analyzer> clazz2 = currentAnalyzer.getClass();
+      Method cc = clazz2.getDeclaredMethod("createComponents", String.class);
+      cc.setAccessible(true);
+      return (TokenStreamComponents) cc.invoke(currentAnalyzer, fieldName);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
-
 }

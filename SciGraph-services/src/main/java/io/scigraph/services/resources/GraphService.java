@@ -53,7 +53,6 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -124,7 +123,7 @@ public class GraphService extends BaseResource {
         throw new BadRequestException("Unknown relationship type: " + relationshipType.get());
       }
       try {
-        RelationshipType type = DynamicRelationshipType.withName(relationshipType.get());
+        RelationshipType type = RelationshipType.withName(relationshipType.get());
         Direction dir = Direction.valueOf(direction);
         types.add(new DirectedRelationshipType(type, dir));
       } catch (Exception e) {
@@ -225,7 +224,7 @@ public class GraphService extends BaseResource {
       @QueryParam("callback") String callback) {
     Graph edgeGraph = new TinkerGraph();
     try (Transaction tx = graphDb.beginTx()) {
-      RelationshipType relationshipType = DynamicRelationshipType.withName(type);
+      RelationshipType relationshipType = RelationshipType.withName(type);
       edgeGraph = api.getEdges(relationshipType, entail.get(), skip.get(), limit.get());
       tx.success();
     }

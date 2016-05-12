@@ -24,7 +24,6 @@ import io.scigraph.owlapi.OwlRelationships;
 
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -37,7 +36,7 @@ public class TestPun extends OwlTestCase {
     Node j = getNode("http://example.org/j");
     Node k = getNode("http://example.org/k");
 
-    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
+    RelationshipType p = RelationshipType.withName("http://example.org/p");
     Relationship relationship = getOnlyElement(GraphUtil.getRelationships(i, j, p));
     assertThat("OPE edge should start with the subject.", relationship.getStartNode(), is(i));
     assertThat("OPE edge should end with the target.", relationship.getEndNode(), is(j));

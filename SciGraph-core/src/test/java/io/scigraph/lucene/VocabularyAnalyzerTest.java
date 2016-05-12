@@ -55,7 +55,7 @@ public class VocabularyAnalyzerTest {
   @Before
   public void setupIndex() throws Exception {
     Directory dir = new RAMDirectory();
-    IndexWriterConfig conf = new IndexWriterConfig(new VocabularyIndexAnalyzer().getAnalyzer());
+    IndexWriterConfig conf = new IndexWriterConfig(new VocabularyIndexAnalyzer());
     try (IndexWriter writer = new IndexWriter(dir, conf)) {
       addDoc(writer, "hippocampus");
       addDoc(writer, "hippocampal structures");
@@ -66,12 +66,13 @@ public class VocabularyAnalyzerTest {
 
     IndexReader reader = DirectoryReader.open(dir);
     searcher = new IndexSearcher(reader);
-    parser = new QueryParser(NodeProperties.LABEL, (new VocabularyQueryAnalyzer()).getAnalyzer());
+    parser = new QueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
   }
 
   @Test
   public void testStopWords() throws Exception {
-    Query query = parser.parse("\"^ hippocampus structure $\"");
+    //Query query = parser.parse("\"^ hippocampus structure $\"");
+    Query query = parser.parse("\" hippocampus structure \"");
     TopDocs docs = searcher.search(query, Integer.MAX_VALUE);
     assertThat(docs.totalHits, is(1));
   }

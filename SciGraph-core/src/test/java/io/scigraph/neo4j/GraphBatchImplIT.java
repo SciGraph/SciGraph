@@ -24,10 +24,6 @@ import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.lucene.LuceneUtils;
-import io.scigraph.neo4j.GraphBatchImpl;
-import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.neo4j.IdMap;
-import io.scigraph.neo4j.RelationshipMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,9 +32,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -53,7 +48,7 @@ public class GraphBatchImplIT {
   @Rule
   public TemporaryFolder folder = new TemporaryFolder();
 
-  static RelationshipType TYPE = DynamicRelationshipType.withName("foo");
+  static RelationshipType TYPE = RelationshipType.withName("foo");
 
   String path;
   GraphBatchImpl graph;
@@ -155,18 +150,18 @@ public class GraphBatchImplIT {
 
   @Test
   public void testSingleNodeLabel() {
-    graph.setLabel(foo, DynamicLabel.label("foo"));
+    graph.setLabel(foo, Label.label("foo"));
     getGraphDB();
-    assertThat(graphDb.getNodeById(0).getLabels(), contains(DynamicLabel.label("foo")));
+    assertThat(graphDb.getNodeById(0).getLabels(), contains(Label.label("foo")));
   }
 
   @Test
   public void testMultipleNodeLabels() {
-    graph.addLabel(foo, DynamicLabel.label("foo"));
-    graph.addLabel(foo, DynamicLabel.label("bar"));
+    graph.addLabel(foo, Label.label("foo"));
+    graph.addLabel(foo, Label.label("bar"));
     getGraphDB();
     assertThat(graphDb.getNodeById(0).getLabels(),
-        hasItems(DynamicLabel.label("foo"), DynamicLabel.label("bar")));
+        hasItems(Label.label("foo"), Label.label("bar")));
   }
 
   @Test

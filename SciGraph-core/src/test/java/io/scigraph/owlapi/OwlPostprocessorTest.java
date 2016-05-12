@@ -20,8 +20,6 @@ import static org.hamcrest.Matchers.is;
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.Concept;
 import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.owlapi.OwlPostprocessor;
-import io.scigraph.owlapi.OwlRelationships;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,8 +28,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.AutoIndexer;
@@ -80,37 +78,37 @@ public class OwlPostprocessorTest {
   @Test
   public void parentCategory_isSet() {
     assertThat(GraphUtil.getProperty(parent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat(parent.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat(parent.hasLabel(Label.label("foo")), is(true));
   }
 
   @Test
   public void childCategory_isSet() {
     assertThat(GraphUtil.getProperty(child, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat(child.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat(child.hasLabel(Label.label("foo")), is(true));
   }
 
   @Test
   public void grandChildCategory_isSet() {
     assertThat(GraphUtil.getProperty(grandChild, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat(grandChild.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat(grandChild.hasLabel(Label.label("foo")), is(true));
   }
 
   @Test
   public void equivalentCategory_isSet() {
     assertThat(GraphUtil.getProperty(equivalent, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat(equivalent.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat(equivalent.hasLabel(Label.label("foo")), is(true));
   }
 
   @Test
   public void equivalentSubclassCategory_isSet() {
     assertThat(GraphUtil.getProperty(equivalentSubclass, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat(equivalentSubclass.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat(equivalentSubclass.hasLabel(Label.label("foo")), is(true));
   }
 
   @Test
   public void instanceCategory_isSet() {
     assertThat(GraphUtil.getProperty(instance, Concept.CATEGORY, String.class), is(Optional.of("foo")));
-    assertThat(instance.hasLabel(DynamicLabel.label("foo")), is(true));
+    assertThat(instance.hasLabel(Label.label("foo")), is(true));
   }
 
 }

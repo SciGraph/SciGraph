@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -59,8 +58,8 @@ public class CliqueTest extends GraphTestBase {
     Relationship r1 = clique11.createRelationshipTo(clique12, IS_EQUIVALENT);
     Relationship r2 = clique12.createRelationshipTo(clique13, IS_EQUIVALENT);
     Relationship r3 = clique21.createRelationshipTo(clique22, IS_EQUIVALENT);
-    Relationship r4 = clique12.createRelationshipTo(clique22, DynamicRelationshipType.withName("hasPhenotype"));
-    Relationship r5 = clique13.createRelationshipTo(clique21, DynamicRelationshipType.withName("hasPhenotype"));
+    Relationship r4 = clique12.createRelationshipTo(clique22, RelationshipType.withName("hasPhenotype"));
+    Relationship r5 = clique13.createRelationshipTo(clique21, RelationshipType.withName("hasPhenotype"));
     
     CliqueConfiguration cliqueConfiguration = new CliqueConfiguration();
     Set<String> rel =  new HashSet<String>();
@@ -82,9 +81,9 @@ public class CliqueTest extends GraphTestBase {
     Node n3 = getNode("http://x.org/c", allNodes);
     Node n4 = getNode("http://x.org/d", allNodes);
     Node n5 = getNode("http://x.org/e", allNodes);
-    assertThat(n1.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(0));
-    assertThat(n2.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(1));
-    assertThat(n3.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(1));
+    assertThat(n1.getDegree(RelationshipType.withName("hasPhenotype")), is(0));
+    assertThat(n2.getDegree(RelationshipType.withName("hasPhenotype")), is(1));
+    assertThat(n3.getDegree(RelationshipType.withName("hasPhenotype")), is(1));
     assertThat(n1.getDegree(IS_EQUIVALENT), is(1));
     assertThat(n2.getDegree(IS_EQUIVALENT), is(2));
     assertThat(n3.getDegree(IS_EQUIVALENT), is(1));
@@ -93,9 +92,9 @@ public class CliqueTest extends GraphTestBase {
 
     clique.run();
 
-    assertThat(n1.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(2));
-    assertThat(n2.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(0));
-    assertThat(n3.getDegree(DynamicRelationshipType.withName("hasPhenotype")), is(0));
+    assertThat(n1.getDegree(RelationshipType.withName("hasPhenotype")), is(2));
+    assertThat(n2.getDegree(RelationshipType.withName("hasPhenotype")), is(0));
+    assertThat(n3.getDegree(RelationshipType.withName("hasPhenotype")), is(0));
     assertThat(n1.getDegree(IS_EQUIVALENT), is(2));
     assertThat(n2.getDegree(IS_EQUIVALENT), is(1));
     assertThat(n3.getDegree(IS_EQUIVALENT), is(1));

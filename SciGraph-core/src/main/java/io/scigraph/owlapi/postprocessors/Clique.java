@@ -29,8 +29,6 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -52,7 +50,7 @@ public class Clique implements Postprocessor {
   static final String ORIGINAL_REFERENCE_KEY_SOURCE = "equivalentOriginalNodeSource";
   static final String ORIGINAL_REFERENCE_KEY_TARGET = "equivalentOriginalNodeTarget";
   static final String CLIQUE_LEADER_PROPERTY = "cliqueLeader";
-  static final Label CLIQUE_LEADER_LABEL = DynamicLabel.label(CLIQUE_LEADER_PROPERTY);
+  static final Label CLIQUE_LEADER_LABEL = Label.label(CLIQUE_LEADER_PROPERTY);
   static final String REL_TO_REMOVE = "edgeToBeRemoved";
 
   private List<String> prefixLeaderPriority;
@@ -70,13 +68,13 @@ public class Clique implements Postprocessor {
 
     Set<Label> tmpLabels = new HashSet<Label>();
     for (String l : cliqueConfiguration.getLeaderForbiddenLabels()) {
-      tmpLabels.add(DynamicLabel.label(l));
+      tmpLabels.add(Label.label(l));
     }
     this.forbiddenLabels = tmpLabels;
 
     Set<RelationshipType> tmpRelationships = new HashSet<RelationshipType>();
     for (String r : cliqueConfiguration.getRelationships()) {
-      tmpRelationships.add(DynamicRelationshipType.withName(r));
+      tmpRelationships.add(RelationshipType.withName(r));
     }
     this.relationships = tmpRelationships;
   }

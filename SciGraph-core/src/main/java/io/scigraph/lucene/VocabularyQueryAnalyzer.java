@@ -16,6 +16,7 @@ package io.scigraph.lucene;
 import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -30,7 +31,7 @@ import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 
-public final class VocabularyQueryAnalyzer {
+public final class VocabularyQueryAnalyzer extends Analyzer {
 
   private final Analyzer analyzer;
 
@@ -66,8 +67,23 @@ public final class VocabularyQueryAnalyzer {
 
   }
 
-  public Analyzer getAnalyzer() {
-    return analyzer;
+  // TODO using reflection is certainly not the right way to handle that
+  @Override
+  protected TokenStreamComponents createComponents(String fieldName) {
+    Class<? extends Analyzer> clazz = analyzer.getClass();
+    Method getWrappedAnalyzer;
+    try {
+      getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
+      getWrappedAnalyzer.setAccessible(true);
+      Analyzer currentAnalyzer =  (Analyzer) getWrappedAnalyzer.invoke(analyzer, fieldName);
+      Class<? extends Analyzer> clazz2 = currentAnalyzer.getClass();
+      Method cc = clazz2.getDeclaredMethod("createComponents", String.class);
+      cc.setAccessible(true);
+      return (TokenStreamComponents) cc.invoke(currentAnalyzer, fieldName);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
 }

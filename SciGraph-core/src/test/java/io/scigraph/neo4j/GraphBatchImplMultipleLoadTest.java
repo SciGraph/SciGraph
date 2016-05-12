@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -46,7 +45,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 public class GraphBatchImplMultipleLoadTest {
 
-  private static final RelationshipType TYPE = DynamicRelationshipType.withName("type");
+  private static final RelationshipType TYPE = RelationshipType.withName("type");
 
   @Rule
   public TemporaryFolder folder = new TemporaryFolder();

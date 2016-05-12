@@ -24,15 +24,14 @@ import nl.jqno.equalsverifier.Warning;
 
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
 
 public class DirectedRelationshipTypeTest {
 
   @Test
   public void verifyEquals() {
-    RelationshipType foo = DynamicRelationshipType.withName("foo");
-    RelationshipType bar = DynamicRelationshipType.withName("bar");
+    RelationshipType foo = RelationshipType.withName("foo");
+    RelationshipType bar = RelationshipType.withName("bar");
     EqualsVerifier.forClass(DirectedRelationshipType.class)
     .withPrefabValues(RelationshipType.class, foo, bar)
     .suppress(Warning.NULL_FIELDS).verify();
@@ -40,8 +39,8 @@ public class DirectedRelationshipTypeTest {
 
   @Test
   public void testEquals() {
-    assertThat(new DirectedRelationshipType(DynamicRelationshipType.withName("foo"), Direction.INCOMING),
-        is(equalTo(new DirectedRelationshipType(DynamicRelationshipType.withName("foo"), Direction.INCOMING))));
+    assertThat(new DirectedRelationshipType(RelationshipType.withName("foo"), Direction.INCOMING),
+        is(equalTo(new DirectedRelationshipType(RelationshipType.withName("foo"), Direction.INCOMING))));
   }
 
 }

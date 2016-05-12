@@ -189,6 +189,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetConceptsFromTermWithSpecialCharacters() {
     Query query = new Vocabulary.Query.Builder("(-)-protein alpha").build();
+    System.out.println(vocabulary.getConceptsFromTerm(query));
+    System.out.println(specialChars);
     assertThat(vocabulary.getConceptsFromTerm(query), contains(specialChars));
   }
 

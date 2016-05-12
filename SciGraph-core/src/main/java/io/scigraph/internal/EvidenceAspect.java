@@ -27,7 +27,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -44,11 +43,11 @@ import com.tinkerpop.blueprints.Vertex;
  */
 public class EvidenceAspect implements GraphAspect {
 
-  static final RelationshipType HAS_SUBJECT = DynamicRelationshipType.withName("http://purl.org/oban/association_has_subject");
-  static final RelationshipType HAS_OBJECT = DynamicRelationshipType.withName("http://purl.org/oban/association_has_object");
-  static final RelationshipType EVIDENCE = DynamicRelationshipType.withName("http://purl.obolibrary.org/obo/RO_0002558");
-  static final RelationshipType SOURCE = DynamicRelationshipType.withName("http://purl.org/dc/elements/1.1/source");
-  static final RelationshipType OBJECT_PROPERTY = DynamicRelationshipType.withName("http://purl.org/oban/association_has_object_property");
+  static final RelationshipType HAS_SUBJECT = RelationshipType.withName("http://purl.org/oban/association_has_subject");
+  static final RelationshipType HAS_OBJECT = RelationshipType.withName("http://purl.org/oban/association_has_object");
+  static final RelationshipType EVIDENCE = RelationshipType.withName("http://purl.obolibrary.org/obo/RO_0002558");
+  static final RelationshipType SOURCE = RelationshipType.withName("http://purl.org/dc/elements/1.1/source");
+  static final RelationshipType OBJECT_PROPERTY = RelationshipType.withName("http://purl.org/oban/association_has_object_property");
 
   private final GraphDatabaseService graphDb;
 

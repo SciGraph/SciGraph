@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Objects;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -47,7 +46,7 @@ public final class DirectedRelationshipType {
 
   @JsonCreator
   public DirectedRelationshipType(@JsonProperty("type") String type, @JsonProperty("direction") String direction) {
-    this.type = DynamicRelationshipType.withName(type);
+    this.type = RelationshipType.withName(type);
     this.direction = Direction.valueOf(direction);
   }
 

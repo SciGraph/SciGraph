@@ -36,8 +36,6 @@ import java.util.logging.Logger;
 import javax.inject.Named;
 
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -82,7 +80,7 @@ public class OwlPostprocessor {
         for (Relationship r : svf.getRelationships(OwlRelationships.FILLER)) {
           Node object = r.getEndNode();
           String relationshipName = GraphUtil.getProperty(property, CommonProperties.IRI, String.class).get();
-          RelationshipType type = DynamicRelationshipType.withName(relationshipName);
+          RelationshipType type = RelationshipType.withName(relationshipName);
           String propertyUri = GraphUtil.getProperty(property, CommonProperties.IRI, String.class).get();
           Relationship inferred = subject.createRelationshipTo(object, type);
           inferred.setProperty(CommonProperties.IRI, propertyUri);
@@ -98,7 +96,7 @@ public class OwlPostprocessor {
   long processCategory(Node root, RelationshipType type, Direction direction, String category) {
     long count = 0;
     int batchSize = 100;
-    Label label = DynamicLabel.label(category);
+    Label label = Label.label(category);
     Transaction tx = graphDb.beginTx();
     for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst().relationships(type, direction)
         .relationships(OwlRelationships.RDF_TYPE, Direction.INCOMING).relationships(OwlRelationships.OWL_EQUIVALENT_CLASS, Direction.BOTH)
