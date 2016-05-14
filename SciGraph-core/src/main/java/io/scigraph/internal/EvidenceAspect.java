@@ -19,7 +19,6 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.owlapi.OwlRelationships;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -34,7 +33,6 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Function;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 

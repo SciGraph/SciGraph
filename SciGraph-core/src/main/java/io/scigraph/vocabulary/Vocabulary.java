@@ -35,7 +35,7 @@ import com.google.common.base.Optional;
 public interface Vocabulary {
 
   /***
-   * Get concepts that match either a compmlete IRI or a CURIE.
+   * Get concepts that match either a complete IRI or a CURIE.
    *
    * <p>
    * CURIE prefixes may be specified at runtime.

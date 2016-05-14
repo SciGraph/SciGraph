@@ -175,7 +175,7 @@ public class Clique implements Postprocessor {
   private void moveEdgesToLeader(Node leader, List<Node> clique, Transaction tx) {
     for (Node n : clique) {
       logger.fine("Processing underNode - " + n.getProperty(NodeProperties.IRI));
-      int edgesMoved = 0;
+      //      int edgesMoved = 0;
       Iterable<Relationship> rels = n.getRelationships();
       for (Relationship rel : rels) {
         if ((isOneOfType(rel, relationships)) && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader.getId())) {

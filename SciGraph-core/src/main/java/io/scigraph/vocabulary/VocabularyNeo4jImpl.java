@@ -1,17 +1,15 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package io.scigraph.vocabulary;
 
@@ -123,23 +121,25 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     }).toArray());
   }
 
-  void addCommonConstraints(BooleanQuery indexQuery, Query query) {
-    BooleanQuery categoryQueries = new BooleanQuery();
+  void addCommonConstraints(Builder indexQuery, Query query) {
+    // BooleanQuery categoryQueries = new BooleanQuery();
+    Builder categoryQueriesBuilder = new BooleanQuery.Builder();
     for (String category : query.getCategories()) {
-      categoryQueries.add(new TermQuery(new Term(Concept.CATEGORY, category)), Occur.SHOULD);
+      categoryQueriesBuilder.add(new TermQuery(new Term(Concept.CATEGORY, category)), Occur.SHOULD);
     }
     if (!query.getCategories().isEmpty()) {
-      indexQuery.add(new BooleanClause(categoryQueries, Occur.MUST));
+      indexQuery.add(new BooleanClause(categoryQueriesBuilder.build(), Occur.MUST));
     }
 
-    BooleanQuery prefixQueries = new BooleanQuery();
+    // BooleanQuery prefixQueries = new BooleanQuery();
+    Builder prefixQueriesBuilder = new BooleanQuery.Builder();
     for (String curie : query.getPrefixes()) {
       String prefix = curieUtil.getExpansion(curie);
-      prefixQueries.add(new WildcardQuery(new Term(CommonProperties.IRI, prefix + "*")),
+      prefixQueriesBuilder.add(new WildcardQuery(new Term(CommonProperties.IRI, prefix + "*")),
           Occur.SHOULD);
     }
     if (!query.getPrefixes().isEmpty()) {
-      indexQuery.add(new BooleanClause(prefixQueries, Occur.MUST));
+      indexQuery.add(new BooleanClause(prefixQueriesBuilder.build(), Occur.MUST));
     }
   }
 
@@ -181,37 +181,40 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public List<Concept> getConceptsFromPrefix(Query query) {
     QueryParser parser = getQueryParser();
-    BooleanQuery finalQuery = new BooleanQuery();
+    // BooleanQuery finalQuery = new BooleanQuery();
+    Builder finalQueryBuilder = new BooleanQuery.Builder();
     try {
-      BooleanQuery subQuery = new BooleanQuery();
-      subQuery.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL,
+      // BooleanQuery subQuery = new BooleanQuery();
+      Builder subQueryBuilder = new BooleanQuery.Builder();
+      subQueryBuilder.add(parser.parse(formatQuery("%s%s:%s*", NodeProperties.LABEL,
           LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
       Optional<String> fullUri = curieUtil.getIri(query.getInput());
       if (fullUri.isPresent()) {
-        subQuery.add(parser.parse(formatQuery("%s:%s*", NodeProperties.IRI, (fullUri.get()))),
-            Occur.SHOULD);
+        subQueryBuilder.add(
+            parser.parse(formatQuery("%s:%s*", NodeProperties.IRI, (fullUri.get()))), Occur.SHOULD);
       }
 
       if (query.isIncludeSynonyms()) {
-        subQuery.add(
+        subQueryBuilder.add(
             parser.parse(formatQuery("%s%s:%s*", Concept.SYNONYM, LuceneUtils.EXACT_SUFFIX,
                 query.getInput())), Occur.SHOULD);
       }
       if (query.isIncludeAbbreviations()) {
-        subQuery.add(parser.parse(formatQuery("%s%s:%s*", Concept.ABREVIATION,
+        subQueryBuilder.add(parser.parse(formatQuery("%s%s:%s*", Concept.ABREVIATION,
             LuceneUtils.EXACT_SUFFIX, query.getInput())), Occur.SHOULD);
       }
       if (query.isIncludeAcronyms()) {
-        subQuery.add(
+        subQueryBuilder.add(
             parser.parse(formatQuery("%s%s:%s*", Concept.ACRONYM, LuceneUtils.EXACT_SUFFIX,
                 query.getInput())), Occur.SHOULD);
       }
 
-      finalQuery.add(subQuery, Occur.MUST);
+      finalQueryBuilder.add(subQueryBuilder.build(), Occur.MUST);
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parse query", e);
     }
-    addCommonConstraints(finalQuery, query);
+    addCommonConstraints(finalQueryBuilder, query);
+    BooleanQuery finalQuery = finalQueryBuilder.build();
     IndexHits<Node> hits = null;
     try (Transaction tx = graph.beginTx()) {
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
@@ -224,31 +227,57 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public List<Concept> searchConcepts(Query query) {
     QueryParser parser = getQueryParser();
-    BooleanQuery finalQuery = new BooleanQuery();
+    // BooleanQuery finalQuery = new BooleanQuery();
+    Builder finalQueryBuilder = new BooleanQuery.Builder();
     try {
       if (query.isIncludeSynonyms() || query.isIncludeAbbreviations() || query.isIncludeAcronyms()) {
-        BooleanQuery subQuery = new BooleanQuery();
-        subQuery.add(LuceneUtils.getBoostedQuery(parser, query.getInput(), 10.0f), Occur.SHOULD);
+        // BooleanQuery subQuery = new BooleanQuery();
+        Builder subQueryBuilder = new BooleanQuery.Builder();
+        subQueryBuilder.add(LuceneUtils.getBoostedQuery(parser, query.getInput(), 10.0f),
+            Occur.SHOULD);
         String escapedQuery = QueryParser.escape(query.getInput());
         if (query.isIncludeSynonyms()) {
-          subQuery.add(parser.parse(Concept.SYNONYM + ":" + escapedQuery), Occur.SHOULD);
+          subQueryBuilder.add(parser.parse(Concept.SYNONYM + ":" + escapedQuery), Occur.SHOULD);
         }
         if (query.isIncludeAbbreviations()) {
-          subQuery.add(parser.parse(Concept.ABREVIATION + ":" + escapedQuery), Occur.SHOULD);
+          subQueryBuilder.add(parser.parse(Concept.ABREVIATION + ":" + escapedQuery), Occur.SHOULD);
         }
         if (query.isIncludeAcronyms()) {
-          subQuery.add(parser.parse(Concept.ACRONYM + ":" + escapedQuery), Occur.SHOULD);
+          subQueryBuilder.add(parser.parse(Concept.ACRONYM + ":" + escapedQuery), Occur.SHOULD);
         }
-        finalQuery.add(subQuery, Occur.MUST);
+        finalQueryBuilder.add(subQueryBuilder.build(), Occur.MUST);
       } else {
-        finalQuery.add(parser.parse(query.getInput()), Occur.MUST);
+        finalQueryBuilder.add(parser.parse(query.getInput()), Occur.MUST);
       }
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parse query", e);
     }
-    addCommonConstraints(finalQuery, query);
+    addCommonConstraints(finalQueryBuilder, query);
     IndexHits<Node> hits = null;
+    BooleanQuery finalQuery = finalQueryBuilder.build();
+    System.out.println(finalQuery);
+
+    try {
+      System.out.println("TEST");
+      Builder b = new BooleanQuery.Builder();
+      b.add(parser.parse(query.getInput()), Occur.SHOULD);
+      System.out.println(b.build());
+      try (Transaction tx = graph.beginTx()) {
+        IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(b.build());
+        tx.success();
+        while(hh.hasNext()){
+          System.out.println(hh.next());
+        }
+        
+      }
+      System.out.println("END TEST");
+    } catch (ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
     try (Transaction tx = graph.beginTx()) {
+      System.out.println(graph.index().getNodeAutoIndexer().getAutoIndexedProperties());
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
     }
@@ -258,37 +287,37 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public List<Concept> getConceptsFromTerm(Query query) {
     QueryParser parser = getQueryParser();
-    //String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
+    // String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
     String exactQuery = String.format("\" %s \"", query.getInput());
     Builder finalQueryBuilder = new BooleanQuery.Builder();
     try {
       if (query.isIncludeSynonyms() || query.isIncludeAbbreviations() || query.isIncludeAcronyms()) {
         Builder subQueryBuilder = new BooleanQuery.Builder();
-        //subQuery.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
+        // subQuery.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
         subQueryBuilder.add(LuceneUtils.getBoostedQuery(parser, exactQuery, 10.0f), Occur.SHOULD);
         if (query.isIncludeSynonyms()) {
-          //subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
+          // subQuery.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
           subQueryBuilder.add(parser.parse(Concept.SYNONYM + ":" + exactQuery), Occur.SHOULD);
         }
         if (query.isIncludeAbbreviations()) {
-          //subQuery.add(parser.parse(Concept.ABREVIATION + ":" + exactQuery), Occur.SHOULD);
+          // subQuery.add(parser.parse(Concept.ABREVIATION + ":" + exactQuery), Occur.SHOULD);
           subQueryBuilder.add(parser.parse(Concept.ABREVIATION + ":" + exactQuery), Occur.SHOULD);
         }
         if (query.isIncludeAcronyms()) {
-          //subQuery.add(parser.parse(Concept.ACRONYM + ":" + exactQuery), Occur.SHOULD);
+          // subQuery.add(parser.parse(Concept.ACRONYM + ":" + exactQuery), Occur.SHOULD);
           subQueryBuilder.add(parser.parse(Concept.ACRONYM + ":" + exactQuery), Occur.SHOULD);
         }
-        //finalQuery.add(subQuery, Occur.MUST);
+        // finalQuery.add(subQuery, Occur.MUST);
         finalQueryBuilder.add(subQueryBuilder.build(), Occur.MUST);
       } else {
-        //finalQuery.add(parser.parse(exactQuery), Occur.MUST);
+        // finalQuery.add(parser.parse(exactQuery), Occur.MUST);
         finalQueryBuilder.add(parser.parse(exactQuery), Occur.MUST);
       }
     } catch (ParseException e) {
       logger.log(Level.WARNING, "Failed to parse query", e);
     }
+    addCommonConstraints(finalQueryBuilder, query);
     BooleanQuery finalQuery = finalQueryBuilder.build();
-    addCommonConstraints(finalQuery, query);
     logger.finest(finalQuery.toString());
     try (Transaction tx = graph.beginTx()) {
       IndexHits<Node> hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
@@ -303,7 +332,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       @Override
       public Set<String> get() {
         Result result =
-            graph.execute("START n = node(*) WHERE has(n.category) RETURN distinct(n.category)");
+            graph.execute("START n = node(*) WHERE exists(n.category) RETURN distinct(n.category)");
         Set<String> categories = new HashSet<>();
         while (result.hasNext()) {
           Map<String, Object> col = result.next();

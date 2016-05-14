@@ -78,7 +78,8 @@ public class GraphBatchImplIT {
   public void testNodeCreation() {
     GraphDatabaseService graphDb = getGraphDB();
     assertThat(size(graphDb.getAllNodes()), is(1));
-    IndexHits<Node> hits = nodeIndex.query(CommonProperties.IRI + ":http\\://example.org/foo");
+    //IndexHits<Node> hits = nodeIndex.query(CommonProperties.IRI + ":http\\://example.org/foo");
+    IndexHits<Node> hits = nodeIndex.query(CommonProperties.IRI + ":http\\:\\/\\/example.org\\/foo");
     assertThat(hits.getSingle().getId(), is(foo));
   }
 

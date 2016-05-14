@@ -67,6 +67,8 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
   @Test
   public void testGetConceptsFromTerm() {
     Query query = new Vocabulary.Query.Builder("cell").build();
+    System.out.println(cell);
+    System.out.println(onCell);
     assertThat(vocabulary.searchConcepts(query), contains(cell, onCell));
   }
 

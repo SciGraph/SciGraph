@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.index.IndexManager;
