@@ -24,6 +24,7 @@ import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.lucene.LuceneUtils;
 import io.scigraph.lucene.VocabularyQueryAnalyzer;
+import io.scigraph.neo4j.GraphUtil;
 import io.scigraph.neo4j.NodeTransformer;
 import io.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
 import io.scigraph.owlapi.curies.CurieUtil;
@@ -54,6 +55,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanQuery.Builder;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spell.LuceneDictionary;
@@ -257,27 +259,37 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     BooleanQuery finalQuery = finalQueryBuilder.build();
     System.out.println(finalQuery);
 
+
     try {
       System.out.println("TEST");
+      MatchAllDocsQuery matchAll = new MatchAllDocsQuery();
+      TermQuery termQuery = new TermQuery(new Term(NodeProperties.LABEL, "cell"));
+      System.out.println(termQuery);
       Builder b = new BooleanQuery.Builder();
-      b.add(parser.parse(query.getInput()), Occur.SHOULD);
-      System.out.println(b.build());
+      // StandardQueryParser standardQueryParser = new StandardQueryParser();
+      // StandardQueryParser standardQueryParser = new StandardQueryParser(new StandardAnalyzer());
+      AnalyzingQueryParser myparser =
+          new AnalyzingQueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
+
+      b.add(myparser.parse("(synonym:hippocampus)"), Occur.MUST);
+      // b.add(parser.parse("\"Cell cell\""), Occur.MUST);
+      //System.out.println(b.build());
       try (Transaction tx = graph.beginTx()) {
-        IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(b.build());
+        // IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(b.build());
+        IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(termQuery);
         tx.success();
-        while(hh.hasNext()){
-          System.out.println(hh.next());
+        while (hh.hasNext()) {
+          System.out.println(GraphUtil.getProperty(hh.next(), NodeProperties.LABEL, String.class));
         }
-        
+
       }
       System.out.println("END TEST");
-    } catch (ParseException e) {
+    } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
     try (Transaction tx = graph.beginTx()) {
-      System.out.println(graph.index().getNodeAutoIndexer().getAutoIndexedProperties());
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
     }

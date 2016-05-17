@@ -30,6 +30,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.Lucene43StopFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
@@ -41,7 +42,7 @@ import com.google.common.base.Suppliers;
 
 public final class VocabularyIndexAnalyzer extends Analyzer {
 
-  private final PerFieldAnalyzerWrapper analyzer;
+  private final Analyzer analyzer;
 
   public VocabularyIndexAnalyzer() throws IOException, URISyntaxException {
     Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
@@ -70,7 +71,8 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
       result = new PatternReplaceFilter(result, Pattern.compile("'s"), "s", true);
       result = new BolEolFilter(result);
       result = new SynonymFilter(result, map, true);
-      result = new StopFilter(result, LuceneUtils.caseSensitiveStopSet);
+      //result = new StopFilter(result, LuceneUtils.caseSensitiveStopSet);
+      result = new Lucene43StopFilter(false, result, LuceneUtils.caseSensitiveStopSet);
       result = new LowerCaseFilter(result);
       result = new ASCIIFoldingFilter(result);
 
@@ -82,7 +84,7 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
   // TODO using reflection is certainly not the right way to handle that
   @Override
   protected TokenStreamComponents createComponents(String fieldName) {
-    Class<? extends PerFieldAnalyzerWrapper> clazz = analyzer.getClass();
+    Class<? extends Analyzer> clazz = analyzer.getClass();
     Method getWrappedAnalyzer;
     try {
       getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);

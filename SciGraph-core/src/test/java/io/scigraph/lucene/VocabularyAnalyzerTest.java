@@ -49,7 +49,6 @@ public class VocabularyAnalyzerTest {
 
   static void addDoc(IndexWriter writer, String term) throws CorruptIndexException, IOException {
     Document doc = new Document();
-    //doc.add(new Field(NodeProperties.LABEL, term, Store.YES, Index.ANALYZED));
     doc.add(new TextField(NodeProperties.LABEL, term, Store.YES));
     writer.addDocument(doc);
   }
@@ -74,7 +73,7 @@ public class VocabularyAnalyzerTest {
   @Test
   public void testStopWords() throws Exception {
     //Query query = parser.parse("\"^ hippocampus structure $\"");
-    Query query = parser.parse("\"hippocampus structure\"");
+    Query query = parser.parse("\" hippocampus structure \"");
     TopDocs docs = searcher.search(query, Integer.MAX_VALUE);
     assertThat(docs.totalHits, is(1));
   }

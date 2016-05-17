@@ -87,6 +87,7 @@ public class Neo4jModule extends AbstractModule {
       index.startAutoIndexingProperty(property);
     }
     index.setEnabled(true);
+    
   }
 
   public static void setupAutoIndexing(GraphDatabaseService graphDb, Neo4jConfiguration config) {
@@ -138,8 +139,8 @@ public class Neo4jModule extends AbstractModule {
 
       if (!readOnly) { // No need of auto-indexing in read-only mode
         setupAutoIndexing(graphDb, configuration);
-
       }
+      
       return graphDb;
     } catch (Exception e) {
       if (Throwables.getRootCause(e).getMessage().contains("lock file")) {

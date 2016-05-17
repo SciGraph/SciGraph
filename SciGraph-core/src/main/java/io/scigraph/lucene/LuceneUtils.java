@@ -98,6 +98,7 @@ public class LuceneUtils {
       while (stream.incrementToken()) {
         ret.add(token.toString());
       }
+      stream.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
