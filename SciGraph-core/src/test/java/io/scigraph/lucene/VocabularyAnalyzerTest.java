@@ -73,7 +73,7 @@ public class VocabularyAnalyzerTest {
   @Test
   public void testStopWords() throws Exception {
     //Query query = parser.parse("\"^ hippocampus structure $\"");
-    Query query = parser.parse("\" hippocampus structure \"");
+    Query query = parser.parse("\"^hippocampus structure$\"");
     TopDocs docs = searcher.search(query, Integer.MAX_VALUE);
     assertThat(docs.totalHits, is(1));
   }

@@ -307,7 +307,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   public List<Concept> getConceptsFromTerm(Query query) {
     QueryParser parser = getQueryParser();
     // String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
-    String exactQuery = String.format("\" %s \"", query.getInput());
+    String exactQuery = String.format("\"\\^ %s $\"", query.getInput());
     Builder finalQueryBuilder = new BooleanQuery.Builder();
     try {
       if (query.isIncludeSynonyms() || query.isIncludeAbbreviations() || query.isIncludeAcronyms()) {
@@ -338,6 +338,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     addCommonConstraints(finalQueryBuilder, query);
     BooleanQuery finalQuery = finalQueryBuilder.build();
     logger.finest(finalQuery.toString());
+    System.out.println(finalQuery);
     try (Transaction tx = graph.beginTx()) {
       IndexHits<Node> hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();

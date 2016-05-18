@@ -182,7 +182,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetConceptsFromTerm() {
     Query query = new Vocabulary.Query.Builder("hippocampus").build();
-    assertThat(vocabulary.getConceptsFromTerm(query), hasItems(hippocampus));
+    assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampus));
   }
 
   @Test
@@ -317,7 +317,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testLeadingAndTrailingPunctuation() {
     Query query = new Vocabulary.Query.Builder("hippocampus,").build();
     System.out.println(vocabulary.getConceptsFromTerm(query));
-    assertThat(vocabulary.getConceptsFromTerm(query), hasItems(hippocampus));
+    assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampus));
     query = new Vocabulary.Query.Builder(",hippocampal formations,").build();
     assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampalFormation));
   }
