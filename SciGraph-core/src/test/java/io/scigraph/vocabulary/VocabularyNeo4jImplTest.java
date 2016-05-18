@@ -35,6 +35,7 @@ import io.scigraph.vocabulary.Vocabulary.Query;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -181,7 +182,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testGetConceptsFromTerm() {
     Query query = new Vocabulary.Query.Builder("hippocampus").build();
-    assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampus));
+    assertThat(vocabulary.getConceptsFromTerm(query), hasItems(hippocampus));
   }
 
   @Test
@@ -247,7 +248,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   public void testGetConceptsFromPrefixWithMultipleCategories() {
     Query query =
         new Vocabulary.Query.Builder("hip").categories(newArrayList("baz", "foo")).build();
-    assertThat(vocabulary.getConceptsFromPrefix(query), contains(hippocampus, hippocampusStructure));
+    assertThat(vocabulary.getConceptsFromPrefix(query), containsInAnyOrder(hippocampus, hippocampusStructure));
   }
 
   @Test
@@ -315,7 +316,8 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
   @Test
   public void testLeadingAndTrailingPunctuation() {
     Query query = new Vocabulary.Query.Builder("hippocampus,").build();
-    assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampus));
+    System.out.println(vocabulary.getConceptsFromTerm(query));
+    assertThat(vocabulary.getConceptsFromTerm(query), hasItems(hippocampus));
     query = new Vocabulary.Query.Builder(",hippocampal formations,").build();
     assertThat(vocabulary.getConceptsFromTerm(query), contains(hippocampalFormation));
   }

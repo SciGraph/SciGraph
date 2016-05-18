@@ -1,17 +1,15 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package io.scigraph.lucene;
 
@@ -45,6 +43,7 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
   private final Analyzer analyzer;
 
   public VocabularyIndexAnalyzer() throws IOException, URISyntaxException {
+    super(PER_FIELD_REUSE_STRATEGY);
     Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
     fieldAnalyzers.put(NodeProperties.LABEL, new TermAnalyzer());
     fieldAnalyzers.put(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
@@ -71,7 +70,7 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
       result = new PatternReplaceFilter(result, Pattern.compile("'s"), "s", true);
       result = new BolEolFilter(result);
       result = new SynonymFilter(result, map, true);
-      //result = new StopFilter(result, LuceneUtils.caseSensitiveStopSet);
+      // result = new StopFilter(result, LuceneUtils.caseSensitiveStopSet);
       result = new Lucene43StopFilter(false, result, LuceneUtils.caseSensitiveStopSet);
       result = new LowerCaseFilter(result);
       result = new ASCIIFoldingFilter(result);
@@ -81,15 +80,14 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
 
   }
 
-  // TODO using reflection is certainly not the right way to handle that
+  // TODO Not sure that using reflection is the right way to handle that
   @Override
   protected TokenStreamComponents createComponents(String fieldName) {
-    Class<? extends Analyzer> clazz = analyzer.getClass();
-    Method getWrappedAnalyzer;
     try {
-      getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
+      Class<? extends Analyzer> clazz = analyzer.getClass();
+      Method getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
       getWrappedAnalyzer.setAccessible(true);
-      Analyzer currentAnalyzer =  (Analyzer) getWrappedAnalyzer.invoke(analyzer, fieldName);
+      Analyzer currentAnalyzer = (Analyzer) getWrappedAnalyzer.invoke(analyzer, fieldName);
       Class<? extends Analyzer> clazz2 = currentAnalyzer.getClass();
       Method cc = clazz2.getDeclaredMethod("createComponents", String.class);
       cc.setAccessible(true);

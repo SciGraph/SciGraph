@@ -13,8 +13,8 @@
  */
 package io.scigraph.vocabulary;
 
-import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
@@ -23,11 +23,10 @@ import io.scigraph.neo4j.GraphUtil;
 import io.scigraph.neo4j.NodeTransformer;
 import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.util.GraphTestBase;
-import io.scigraph.vocabulary.Vocabulary;
-import io.scigraph.vocabulary.VocabularyNeo4jImpl;
 import io.scigraph.vocabulary.Vocabulary.Query;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +65,8 @@ public class VocabularyNeo4jScoringTest extends GraphTestBase {
   @Test
   public void testGetConceptsFromTerm() {
     Query query = new Vocabulary.Query.Builder("cell").build();
-    assertThat(vocabulary.searchConcepts(query), contains(cell, onCell));
+    List<Concept> results = vocabulary.searchConcepts(query);
+    assertThat(results, containsInAnyOrder(cell, onCell));
   }
 
 }

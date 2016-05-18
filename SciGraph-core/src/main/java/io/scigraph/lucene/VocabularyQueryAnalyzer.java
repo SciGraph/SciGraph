@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.Lucene43StopFilter;
@@ -36,6 +37,7 @@ public final class VocabularyQueryAnalyzer extends Analyzer {
   private final Analyzer analyzer;
 
   public VocabularyQueryAnalyzer() {
+    super(PER_FIELD_REUSE_STRATEGY);
     Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
     fieldAnalyzers.put(NodeProperties.LABEL, new TermAnalyzer());
     fieldAnalyzers.put(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
@@ -68,13 +70,12 @@ public final class VocabularyQueryAnalyzer extends Analyzer {
 
   }
 
-  // TODO using reflection is certainly not the right way to handle that
+  // TODO Not sure that using reflection is the right way to handle that
   @Override
   protected TokenStreamComponents createComponents(String fieldName) {
-    Class<? extends Analyzer> clazz = analyzer.getClass();
-    Method getWrappedAnalyzer;
     try {
-      getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
+      Class<? extends Analyzer> clazz = analyzer.getClass();
+      Method getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
       getWrappedAnalyzer.setAccessible(true);
       Analyzer currentAnalyzer = (Analyzer) getWrappedAnalyzer.invoke(analyzer, fieldName);
       Class<? extends Analyzer> clazz2 = currentAnalyzer.getClass();

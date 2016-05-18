@@ -28,6 +28,7 @@ import io.scigraph.neo4j.RelationshipMap;
 import io.scigraph.owlapi.OwlLabels;
 import io.scigraph.owlapi.curies.CurieUtil;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,6 +41,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 public class GraphTestBase {
@@ -69,6 +71,7 @@ public class GraphTestBase {
   @BeforeClass
   public static void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
+    //graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File("/tmp/yo")).newGraphDatabase();
     Neo4jConfiguration config = new Neo4jConfiguration();
     config.getExactNodeProperties().addAll(newHashSet(
         NodeProperties.LABEL,

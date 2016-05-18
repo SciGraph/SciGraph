@@ -44,6 +44,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -51,6 +52,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.analyzing.AnalyzingQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -264,19 +266,24 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       System.out.println("TEST");
       MatchAllDocsQuery matchAll = new MatchAllDocsQuery();
       TermQuery termQuery = new TermQuery(new Term(NodeProperties.LABEL, "cell"));
-      System.out.println(termQuery);
       Builder b = new BooleanQuery.Builder();
-      // StandardQueryParser standardQueryParser = new StandardQueryParser();
-      // StandardQueryParser standardQueryParser = new StandardQueryParser(new StandardAnalyzer());
+      // StandardQueryParser myparser = new StandardQueryParser();
+      // StandardQueryParser myparser = new StandardQueryParser(new StandardAnalyzer());
+      // StandardQueryParser myparser = new StandardQueryParser(new VocabularyQueryAnalyzer());
       AnalyzingQueryParser myparser =
           new AnalyzingQueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
 
-      b.add(myparser.parse("(synonym:hippocampus)"), Occur.MUST);
-      // b.add(parser.parse("\"Cell cell\""), Occur.MUST);
-      //System.out.println(b.build());
+      // b.add(myparser.parse("(synonym:hippocampus)", "label"), Occur.MUST);
+      Builder b2 = new BooleanQuery.Builder();
+      org.apache.lucene.search.Query boosted = myparser.parse("cell");
+      boosted.setBoost(10.0f);
+      b2.add(boosted, Occur.SHOULD);
+      b2.add(myparser.parse(Concept.SYNONYM + ":" + "cell"), Occur.SHOULD);
+      b.add(b2.build(), Occur.MUST);
+      System.out.println(b.build());
       try (Transaction tx = graph.beginTx()) {
-        // IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(b.build());
-        IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(termQuery);
+        IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(b.build());
+        // IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(termQuery);
         tx.success();
         while (hh.hasNext()) {
           System.out.println(GraphUtil.getProperty(hh.next(), NodeProperties.LABEL, String.class));
