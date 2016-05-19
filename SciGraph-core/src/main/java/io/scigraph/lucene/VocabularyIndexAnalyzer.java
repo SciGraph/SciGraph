@@ -72,10 +72,6 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
 
   final static class TermAnalyzer extends Analyzer {
 
-    public TermAnalyzer() {
-      super(NO_REUSE_STRATEGY);
-    }
-
     static SynonymMap map = Suppliers.memoize(new SynonymMapSupplier()).get();
 
     @Override

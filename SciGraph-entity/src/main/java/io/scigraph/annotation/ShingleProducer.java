@@ -36,8 +36,8 @@ import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 /***
  * Abstracts shingle functionality for an arbitrary Lucene Analyzer.
  * <p>
- * Queues the shingles into a blocking queue so that tokenization and processing
- * can happen concurrently.
+ * Queues the shingles into a blocking queue so that tokenization and processing can happen
+ * concurrently.
  */
 @NotThreadSafe
 public class ShingleProducer implements Runnable {
@@ -69,8 +69,8 @@ public class ShingleProducer implements Runnable {
   }
 
   /***
-   * Add all subsequences of buffer to the queue. If the buffer is [A, B, C]
-   * then add A, AB, and ABC to the queue.
+   * Add all subsequences of buffer to the queue. If the buffer is [A, B, C] then add A, AB, and ABC
+   * to the queue.
    * 
    * @param buffer
    * @throws InterruptedException
@@ -88,14 +88,14 @@ public class ShingleProducer implements Runnable {
   public void run() {
     Deque<Token<String>> buffer = new LinkedList<>();
     try {
-      TokenStream stream = analyzer.tokenStream("", reader);
-      OffsetAttribute offset = stream.getAttribute(OffsetAttribute.class);
-      CharTermAttribute term = stream.getAttribute(CharTermAttribute.class);
-
       try {
+        TokenStream stream = analyzer.tokenStream("", reader);
+        stream.reset();
+        OffsetAttribute offset = stream.getAttribute(OffsetAttribute.class);
+        CharTermAttribute term = stream.getAttribute(CharTermAttribute.class);
         while (stream.incrementToken()) {
-          Token<String> token = new Token<String>(term.toString(), offset.startOffset(),
-              offset.endOffset());
+          Token<String> token =
+              new Token<String>(term.toString(), offset.startOffset(), offset.endOffset());
           buffer.offer(token);
           if (buffer.size() < shingleCount) {
             // Fill the buffer first, before offering anything to the queue
