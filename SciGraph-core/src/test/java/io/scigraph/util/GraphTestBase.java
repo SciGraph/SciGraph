@@ -71,7 +71,7 @@ public class GraphTestBase {
   @BeforeClass
   public static void setupDb() {
     graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-    //graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File("/tmp/yo")).newGraphDatabase();
+    //graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File("/tmp/lucene")).newGraphDatabase(); // convenient for debugging
     Neo4jConfiguration config = new Neo4jConfiguration();
     config.getExactNodeProperties().addAll(newHashSet(
         NodeProperties.LABEL,
@@ -102,6 +102,7 @@ public class GraphTestBase {
   public void failTransaction() {
     idMap.clear();
     tx.failure();
+    //tx.success(); // convenient for debugging
     tx.close();
   }
 

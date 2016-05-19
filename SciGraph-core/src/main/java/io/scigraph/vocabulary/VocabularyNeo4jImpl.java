@@ -1,15 +1,17 @@
 /**
  * Copyright (C) 2014 The SciGraph authors
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.scigraph.vocabulary;
 
@@ -259,42 +261,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     addCommonConstraints(finalQueryBuilder, query);
     IndexHits<Node> hits = null;
     BooleanQuery finalQuery = finalQueryBuilder.build();
-    System.out.println(finalQuery);
-
-
-    try {
-      System.out.println("TEST");
-      MatchAllDocsQuery matchAll = new MatchAllDocsQuery();
-      TermQuery termQuery = new TermQuery(new Term(NodeProperties.LABEL, "cell"));
-      Builder b = new BooleanQuery.Builder();
-      // StandardQueryParser myparser = new StandardQueryParser();
-      // StandardQueryParser myparser = new StandardQueryParser(new StandardAnalyzer());
-      // StandardQueryParser myparser = new StandardQueryParser(new VocabularyQueryAnalyzer());
-      AnalyzingQueryParser myparser =
-          new AnalyzingQueryParser(NodeProperties.LABEL, new VocabularyQueryAnalyzer());
-
-      // b.add(myparser.parse("(synonym:hippocampus)", "label"), Occur.MUST);
-      Builder b2 = new BooleanQuery.Builder();
-      org.apache.lucene.search.Query boosted = myparser.parse("cell");
-      boosted.setBoost(10.0f);
-      b2.add(boosted, Occur.SHOULD);
-      b2.add(myparser.parse(Concept.SYNONYM + ":" + "cell"), Occur.SHOULD);
-      b.add(b2.build(), Occur.MUST);
-      System.out.println(b.build());
-      try (Transaction tx = graph.beginTx()) {
-        IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(b.build());
-        // IndexHits<Node> hh = graph.index().getNodeAutoIndexer().getAutoIndex().query(termQuery);
-        tx.success();
-        while (hh.hasNext()) {
-          System.out.println(GraphUtil.getProperty(hh.next(), NodeProperties.LABEL, String.class));
-        }
-
-      }
-      System.out.println("END TEST");
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
 
     try (Transaction tx = graph.beginTx()) {
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
