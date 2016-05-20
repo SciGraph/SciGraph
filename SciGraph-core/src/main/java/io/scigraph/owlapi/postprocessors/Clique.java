@@ -92,7 +92,8 @@ public class Clique implements Postprocessor {
     logger.info(size + " nodes left to process");
 
     tx = graphDb.beginTx();
-    TraversalDescription traversalDescription = graphDb.traversalDescription().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL);
+    TraversalDescription traversalDescription =
+        graphDb.traversalDescription().breadthFirst().uniqueness(Uniqueness.NODE_GLOBAL);
     for (RelationshipType rel : relationships) {
       traversalDescription = traversalDescription.relationships(rel, Direction.BOTH);
     }
@@ -102,12 +103,12 @@ public class Clique implements Postprocessor {
     for (Node baseNode : allNodes) {
 
       size -= 1;
-      
+
       if (size % 100000 == 0) {
         logger.info(size + " nodes left to process");
       }
 
-      if (size % 10 == 0) {
+      if (size % 10000 == 0) {
         logger.fine("Node batch commit");
         tx.success();
         tx.close();
@@ -147,7 +148,7 @@ public class Clique implements Postprocessor {
 
   private void moveRelationship(Node from, Node to, Relationship rel, String property) {
     Relationship newRel = null;
-    logger.fine("create new rel between "  + rel.getOtherNode(from).getId() + " and " + to.getId());
+    logger.fine("create new rel between " + rel.getOtherNode(from).getId() + " and " + to.getId());
     if (property == ORIGINAL_REFERENCE_KEY_TARGET) {
       newRel = rel.getOtherNode(from).createRelationshipTo(to, rel.getType());
     } else {
@@ -175,54 +176,57 @@ public class Clique implements Postprocessor {
   private void moveEdgesToLeader(Node leader, List<Node> clique, Transaction tx) {
     for (Node n : clique) {
       logger.fine("Processing underNode - " + n.getProperty(NodeProperties.IRI));
-      //      int edgesMoved = 0;
+      // int edgesMoved = 0;
       Iterable<Relationship> rels = n.getRelationships();
       for (Relationship rel : rels) {
-        if ((isOneOfType(rel, relationships)) && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader.getId())) {
+        if ((isOneOfType(rel, relationships))
+            && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader
+                .getId())) {
           logger.fine("equivalence relation which is already attached to the leader, do nothing");
         } else {
           if ((rel.getEndNode().getId() == n.getId())) {
-            logger
-                .fine("MOVE TARGET " + rel.getId() + " FROM " + n.getProperty(NodeProperties.IRI) + " TO " + leader.getProperty(NodeProperties.IRI));
+            logger.fine("MOVE TARGET " + rel.getId() + " FROM " + n.getProperty(NodeProperties.IRI)
+                + " TO " + leader.getProperty(NodeProperties.IRI));
 
             moveRelationship(n, leader, rel, ORIGINAL_REFERENCE_KEY_TARGET);
           } else if ((rel.getStartNode().getId() == n.getId())) {
-            logger
-                .fine("MOVE SOURCE " + rel.getId() + " FROM " + n.getProperty(NodeProperties.IRI) + " TO " + leader.getProperty(NodeProperties.IRI));
+            logger.fine("MOVE SOURCE " + rel.getId() + " FROM " + n.getProperty(NodeProperties.IRI)
+                + " TO " + leader.getProperty(NodeProperties.IRI));
 
             moveRelationship(n, leader, rel, ORIGINAL_REFERENCE_KEY_SOURCE);
           }
         }
-//        edgesMoved += 1;
-//
-//        if (edgesMoved >= 100) { // Commit for nodes with many edges
-//          logger.fine("rel batch commit for leader " + leader.getProperty(NodeProperties.IRI) + " and peasant " + n.getProperty(NodeProperties.IRI));
-//          tx.success();
-//          tx.close();
-//          tx = graphDb.beginTx();
-//          edgesMoved = 0;
-//        }
+        // edgesMoved += 1;
+        //
+        // if (edgesMoved >= 100) { // Commit for nodes with many edges
+        // logger.fine("rel batch commit for leader " + leader.getProperty(NodeProperties.IRI) +
+        // " and peasant " + n.getProperty(NodeProperties.IRI));
+        // tx.success();
+        // tx.close();
+        // tx = graphDb.beginTx();
+        // edgesMoved = 0;
+        // }
       }
       deleteEdges(n, tx);
     }
   }
-  
+
   private void deleteEdges(Node n, Transaction tx) {
     int edgesDeleted = 0;
     Iterable<Relationship> rels = n.getRelationships();
     for (Relationship rel : rels) {
-      if(rel.hasProperty(REL_TO_REMOVE)){
+      if (rel.hasProperty(REL_TO_REMOVE)) {
         rel.delete();
         edgesDeleted += 1;
       }
-      
-      if (edgesDeleted >= 100) { // Commit for nodes with many edges
-        logger.fine("rel delete batch commit for " + n.getProperty(NodeProperties.IRI));
-        tx.success();
-        tx.close();
-        tx = graphDb.beginTx();
-        edgesDeleted = 0;
-      }
+
+      // if (edgesDeleted >= 100) { // Commit for nodes with many edges
+      // logger.fine("rel delete batch commit for " + n.getProperty(NodeProperties.IRI));
+      // tx.success();
+      // tx.close();
+      // tx = graphDb.beginTx();
+      // edgesDeleted = 0;
+      // }
     }
   }
 
@@ -231,9 +235,11 @@ public class Clique implements Postprocessor {
     // Move rdfs:label if non-existing on leader
     if (!leader.hasProperty(NodeProperties.LABEL)) {
       for (Node n : clique) {
-        if (n.hasProperty(NodeProperties.LABEL) && n.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")) {
+        if (n.hasProperty(NodeProperties.LABEL)
+            && n.hasProperty("http://www.w3.org/2000/01/rdf-schema#label")) {
           leader.setProperty(NodeProperties.LABEL, n.getProperty(NodeProperties.LABEL));
-          leader.setProperty("http://www.w3.org/2000/01/rdf-schema#label", n.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
+          leader.setProperty("http://www.w3.org/2000/01/rdf-schema#label",
+              n.getProperty("http://www.w3.org/2000/01/rdf-schema#label"));
           return;
         }
       }
@@ -249,7 +255,8 @@ public class Clique implements Postprocessor {
   public Node electCliqueLeader(List<Node> clique, List<String> prefixLeaderPriority) {
     List<Node> designatedLeaders = designatedLeader(clique);
     if (designatedLeaders.size() > 1) {
-      logger.severe("More than one node in a clique designated as leader. Using failover strategy to elect a leader.");
+      logger
+          .severe("More than one node in a clique designated as leader. Using failover strategy to elect a leader.");
       for (Node n : designatedLeaders) {
         logger.severe(n.getProperty(NodeProperties.IRI).toString());
       }
@@ -284,8 +291,10 @@ public class Clique implements Postprocessor {
         }
       }
       if (filteredByPrefix.isEmpty()) {
-        filteredByPrefix.add(filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())));
-        //filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())); // TODO handle this case
+        filteredByPrefix.add(filterByPrefix(clique,
+            leaderPriorityIri.subList(1, leaderPriorityIri.size())));
+        // filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())); // TODO
+        // handle this case
       }
     }
 
