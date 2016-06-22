@@ -50,6 +50,7 @@ Applications
  * the [Monarch Initiative](http://monarchinitiative.org/) uses SciGraph for both ontologies and biological data modeling
  * [SciCrunch](http://scicrunch.org/) uses SciGraph for vocabulary and annotation services
  * [CINERGI](http://earthcube.org/group/cinergi) uses SciGraph for vocabulary and annotation services
+ * the [Human Brain project](https://nip.humanbrainproject.eu/) uses SciGraph for vocabulary and annotation services
 
 Additional Documentation
 ------------------------
