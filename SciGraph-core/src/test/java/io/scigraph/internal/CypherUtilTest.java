@@ -201,7 +201,6 @@ public class CypherUtilTest extends GraphTestBase {
   public void resolveStartQueryWithMultipleMatches() {
     String cypher =
         "START n = node:node_auto_index(iri='FOO:foo') match (n) UNION START m = node:node_auto_index(iri='FOO:fizz') match (m) return n,m";
-    System.out.println(util.resolveStartQuery(cypher));
     assertThat(
         util.resolveStartQuery(cypher),
         IsEqual

@@ -88,7 +88,7 @@ public class Neo4jModule extends AbstractModule {
       index.startAutoIndexingProperty(property);
     }
     index.setEnabled(true);
-    
+
   }
 
   public static void setupAutoIndexing(GraphDatabaseService graphDb, Neo4jConfiguration config) {
@@ -116,19 +116,19 @@ public class Neo4jModule extends AbstractModule {
         .make();
   }
 
-  @SuppressWarnings("deprecation")
   @Provides
   @Singleton
   GraphDatabaseService getGraphDatabaseService() throws IOException {
     try {
       GraphDatabaseBuilder graphDatabaseBuilder =
-          new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(configuration.getLocation()))
-              .setConfig(configuration.getNeo4jConfig());
+          new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(
+              new File(configuration.getLocation())).setConfig(configuration.getNeo4jConfig());
       if (readOnly) {
-        graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, "true");
+        graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, Settings.TRUE);
       }
       if (enableGuard) {
-        graphDatabaseBuilder.setConfig( GraphDatabaseSettings.execution_guard_enabled, Settings.TRUE);
+        graphDatabaseBuilder
+            .setConfig(GraphDatabaseSettings.execution_guard_enabled, Settings.TRUE);
       }
       final GraphDatabaseService graphDb = graphDatabaseBuilder.newGraphDatabase();
       Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -141,7 +141,7 @@ public class Neo4jModule extends AbstractModule {
       if (!readOnly) { // No need of auto-indexing in read-only mode
         setupAutoIndexing(graphDb, configuration);
       }
-      
+
       return graphDb;
     } catch (Exception e) {
       if (Throwables.getRootCause(e).getMessage().contains("lock file")) {

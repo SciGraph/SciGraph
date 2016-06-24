@@ -304,7 +304,6 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     addCommonConstraints(finalQueryBuilder, query);
     BooleanQuery finalQuery = finalQueryBuilder.build();
     logger.finest(finalQuery.toString());
-    System.out.println(finalQuery);
     try (Transaction tx = graph.beginTx()) {
       IndexHits<Node> hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
