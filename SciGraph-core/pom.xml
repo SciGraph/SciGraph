@@ -63,7 +63,7 @@
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi-distribution</artifactId>
-      <version>3.5.1</version>
+      <version>4.2.5</version>
     </dependency>
 
     <dependency>

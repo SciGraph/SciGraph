@@ -39,6 +39,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.parameters.ChangeApplied;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.util.OWLClassExpressionVisitorAdapter;
@@ -72,28 +73,33 @@ public class ReasonerUtil {
     return reasoner;
   }
 
-  Collection<OWLOntologyChange> removeAxioms(AxiomType<?> type) {
-    Collection<OWLOntologyChange> removals = new HashSet<>();
+  /**
+   * @param type
+   * @return if any change has been performed
+   */
+  boolean removeAxioms(AxiomType<?> type) {
+    boolean ontologyChanged = false;
     for (OWLOntology importedOnt: ont.getImportsClosure()) {
       Set<? extends OWLAxiom> axioms = importedOnt.getAxioms(type);
-      removals.addAll(manager.removeAxioms(importedOnt, axioms));
+      ChangeApplied changeApplied = manager.removeAxioms(importedOnt, axioms);
+      ontologyChanged = ontologyChanged || (ChangeApplied.SUCCESSFULLY == changeApplied);        
     }
-    return removals;
+    return ontologyChanged;
   }
 
   /***
    * Remove all axioms that would generate extra unsatisfiable classes for the reasoner
    */
-  Collection<OWLOntologyChange> removeUnsatisfiableClasses() {
-    Collection<OWLOntologyChange> removals = new HashSet<>();
-    removals.addAll(removeAxioms(AxiomType.DISJOINT_CLASSES));
-    removals.addAll(removeAxioms(AxiomType.DATA_PROPERTY_DOMAIN));
-    removals.addAll(removeAxioms(AxiomType.DATA_PROPERTY_RANGE));
-    if (removals.size() > 0) {
+  boolean removeUnsatisfiableClasses() {
+    boolean ontologyChanged = false;
+    ontologyChanged = ontologyChanged || removeAxioms(AxiomType.DISJOINT_CLASSES);
+    ontologyChanged = ontologyChanged || removeAxioms(AxiomType.DATA_PROPERTY_DOMAIN);
+    ontologyChanged = ontologyChanged || removeAxioms(AxiomType.DATA_PROPERTY_RANGE);
+    if (ontologyChanged) {
       reasoner.flush();
     }
-    logger.info("Removed " + removals.size() + " axioms to prevent unsatisfiable classes");
-    return removals;
+    logger.info("Removed some axioms to prevent unsatisfiable classes");
+    return ontologyChanged;
   }
 
   Collection<OWLClass> getUnsatisfiableClasses() {

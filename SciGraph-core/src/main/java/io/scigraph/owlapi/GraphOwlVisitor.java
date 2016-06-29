@@ -71,6 +71,7 @@ import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitor;
 
@@ -81,7 +82,7 @@ import com.google.common.collect.Collections2;
 /***
  * The core of the code for translating owlapi axioms into Neo4j structure.
  */
-public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
+public class GraphOwlVisitor extends OWLOntologyWalkerVisitor {
 
   private static final Logger logger = Logger.getLogger(GraphOwlVisitor.class.getName());
 
@@ -115,7 +116,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   @Override
-  public Void visit(OWLOntology ontology) {
+  public void visit(OWLOntology ontology) {
     this.ontology = Optional.of(ontology);
     this.definingOntology = OwlApiUtils.getIri(ontology);
     OWLOntologyID id = ontology.getOntologyID();
@@ -124,7 +125,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     } else {
       getOrCreateNode(id.getOntologyIRI().toString(), OwlLabels.OWL_ONTOLOGY);
     }
-    return null;
   }
 
   private long addDefinedBy(Long node) {
@@ -160,31 +160,28 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   @Override
-  public Void visit(OWLClass desc) {
+  public void visit(OWLClass desc) {
     String iri = getIri(desc);
     getOrCreateNode(iri, OwlLabels.OWL_CLASS);
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectProperty property) {
+  public void visit(OWLObjectProperty property) {
     String iri = getIri(property);
     getOrCreateNode(iri, OwlLabels.OWL_OBJECT_PROPERTY);
-    return null;
   }
 
   @Override
-  public Void visit(OWLNamedIndividual individual) {
+  public void visit(OWLNamedIndividual individual) {
     String iri = getIri(individual);
     long individualNode = getOrCreateNode(iri, OwlLabels.OWL_NAMED_INDIVIDUAL);
     if (individual.isAnonymous()) {
       graph.addLabel(individualNode, OwlLabels.OWL_ANONYMOUS);
     }
-    return null;
   }
 
   @Override
-  public Void visit(OWLDeclarationAxiom axiom) {
+  public void visit(OWLDeclarationAxiom axiom) {
     String iri = getIri(axiom);
     long node = getOrCreateNode(iri);
     addDefinedBy(node);
@@ -197,9 +194,9 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         graph.addLabel(node, OwlLabels.OWL_OBJECT_PROPERTY);
         if (ontology.isPresent()) {
           OWLObjectProperty property = (OWLObjectProperty) axiom.getEntity();
-          graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !property.isAsymmetric(ontology.get()));
-          graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, property.isReflexive(ontology.get()));
-          graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, property.isTransitive(ontology.get()));
+          graph.setNodeProperty(node, EdgeProperties.SYMMETRIC, !EntitySearcher.isAsymmetric(property, ontology.get()));
+          graph.setNodeProperty(node, EdgeProperties.REFLEXIVE, EntitySearcher.isReflexive(property, ontology.get()));
+          graph.setNodeProperty(node, EdgeProperties.TRANSITIVE, EntitySearcher.isTransitive(property, ontology.get()));
         }
       }
     } else if (axiom.getEntity() instanceof OWLDataProperty) {
@@ -207,11 +204,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     } else {
       //logger.warning("Unhandled declaration type " + axiom.getEntity().getClass().getName());
     }
-    return null;
   }
 
   @Override
-  public Void visit(OWLAnnotationAssertionAxiom axiom) {
+  public void visit(OWLAnnotationAssertionAxiom axiom) {
     if ((axiom.getSubject() instanceof IRI)  || (axiom.getSubject() instanceof OWLAnonymousIndividual)) {
       long subject = 0L;
       if (axiom.getSubject() instanceof IRI) {
@@ -247,19 +243,17 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     } else {
       logger.info("Ignoring assertion axiom: " + axiom);
     }
-    return null;
   }
 
   @Override
-  public Void visit(OWLSubAnnotationPropertyOfAxiom axiom) {
+  public void visit(OWLSubAnnotationPropertyOfAxiom axiom) {
     long subProperty = getOrCreateNode(getIri(axiom.getSubProperty()), OwlLabels.OWL_ANNOTATION_PROPERTY);
     long superProperty = getOrCreateNode(getIri(axiom.getSuperProperty()), OwlLabels.OWL_ANNOTATION_PROPERTY);
     getOrCreateRelationship(subProperty, superProperty, OwlRelationships.RDFS_SUB_PROPERTY_OF);
-    return null;
   }
 
   @Override
-  public Void visit(OWLSameIndividualAxiom axiom) {
+  public void visit(OWLSameIndividualAxiom axiom) {
     List<Long> nodes = transform(axiom.getIndividualsAsList(), new Function<OWLIndividual, Long>() {
       @Override
       public Long apply(OWLIndividual individual) {
@@ -267,11 +261,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       }
     });
     getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_SAME_AS);
-    return null;
   }
 
   @Override
-  public Void visit(OWLDifferentIndividualsAxiom axiom) {
+  public void visit(OWLDifferentIndividualsAxiom axiom) {
     List<Long> nodes = transform(axiom.getIndividualsAsList(), new Function<OWLIndividual, Long>() {
       @Override
       public Long apply(OWLIndividual individual) {
@@ -279,22 +272,20 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       }
     });
     getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_DIFFERENT_FROM);
-    return null;
   }
 
   @Override
-  public Void visit(OWLClassAssertionAxiom axiom) {
+  public void visit(OWLClassAssertionAxiom axiom) {
     long individual = getOrCreateNode(getIri(axiom.getIndividual()));
     if (axiom.getIndividual().isAnonymous()) {
       graph.addLabel(individual, OwlLabels.OWL_ANONYMOUS);
     }
     long type = getOrCreateNode(getIri(axiom.getClassExpression()));
     getOrCreateRelationship(individual, type, OwlRelationships.RDF_TYPE);
-    return null;
   }
 
   @Override
-  public Void visit(OWLDataPropertyAssertionAxiom axiom) {
+  public void visit(OWLDataPropertyAssertionAxiom axiom) {
     long individual = getOrCreateNode(getIri(axiom.getSubject()));
     OWLDataProperty property = axiom.getProperty().asOWLDataProperty();
     // TODO: fix this Set<OWLDataRange> ranges = property.getRanges(ontology);
@@ -308,11 +299,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         graph.addNodeProperty(individual, mappedProperties.get(propertyName), literal.get());
       }
     }
-    return null;
   }
 
   @Override
-  public Void visit(OWLSubClassOfAxiom axiom) {
+  public void visit(OWLSubClassOfAxiom axiom) {
     long subclass = getOrCreateNode(getIri(axiom.getSubClass()));
     long superclass = getOrCreateNode(getIri(axiom.getSuperClass()));
     long relationship = getOrCreateRelationship(subclass, superclass, OwlRelationships.RDFS_SUBCLASS_OF);
@@ -326,27 +316,24 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         }
       }
     }
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectIntersectionOf desc) {
+  public void visit(OWLObjectIntersectionOf desc) {
     long subject = getOrCreateNode(getIri(desc), OwlLabels.OWL_INTERSECTION_OF, OwlLabels.OWL_ANONYMOUS);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getIri(expression));
       getOrCreateRelationship(subject, object, OwlRelationships.OPERAND);
     }
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectUnionOf desc) {
+  public void visit(OWLObjectUnionOf desc) {
     long subject = getOrCreateNode(getIri(desc), OwlLabels.OWL_UNION_OF, OwlLabels.OWL_ANONYMOUS);
     for (OWLClassExpression expression : desc.getOperands()) {
       long object = getOrCreateNode(getIri(expression));
       getOrCreateRelationship(subject, object, OwlRelationships.OPERAND);
     }
-    return null;
   }
 
   long getObjectPropertyRelationship(
@@ -362,13 +349,12 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   @Override
-  public Void visit(OWLObjectPropertyAssertionAxiom axiom) {
+  public void visit(OWLObjectPropertyAssertionAxiom axiom) {
     getObjectPropertyRelationship(axiom);
-    return null;
   }
 
   @Override
-  public Void visit(OWLEquivalentClassesAxiom axiom) {
+  public void visit(OWLEquivalentClassesAxiom axiom) {
     logger.fine(axiom.toString());
     List<Long> nodes =
         transform(axiom.getClassExpressionsAsList(), new Function<OWLClassExpression, Long>() {
@@ -380,11 +366,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         });
 
     getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_EQUIVALENT_CLASS);
-    return null;
   }
 
   @Override
-  public Void visit(OWLDisjointClassesAxiom axiom) {
+  public void visit(OWLDisjointClassesAxiom axiom) {
     List<Long> nodes =
         transform(axiom.getClassExpressionsAsList(), new Function<OWLClassExpression, Long>() {
 
@@ -395,27 +380,24 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         });
 
     getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_DISJOINT_WITH);
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectComplementOf desc) {
+  public void visit(OWLObjectComplementOf desc) {
     long subject = getOrCreateNode(getIri(desc), OwlLabels.OWL_COMPLEMENT_OF, OwlLabels.OWL_ANONYMOUS);
     long operand = getOrCreateNode(getIri(desc.getOperand()));
     getOrCreateRelationship(subject, operand, OwlRelationships.OPERAND);
-    return null;
   }
 
   @Override
-  public Void visit(OWLSubObjectPropertyOfAxiom axiom) {
+  public void visit(OWLSubObjectPropertyOfAxiom axiom) {
     long subProperty = getOrCreateNode(getIri(axiom.getSubProperty()));
     long superProperty = getOrCreateNode(getIri(axiom.getSuperProperty()));
     getOrCreateRelationship(subProperty, superProperty, OwlRelationships.RDFS_SUB_PROPERTY_OF);
-    return null;
   }
 
   @Override
-  public Void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
+  public void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
     Collection<Long> nodes =
         Collections2.transform(axiom.getObjectPropertiesInSignature(), new Function<OWLObjectProperty, Long>() {
 
@@ -426,11 +408,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
         });
 
     getOrCreateRelationshipPairwise(nodes, OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
-    return null;
   }
 
   @Override
-  public Void visit(OWLSubPropertyChainOfAxiom axiom) {
+  public void visit(OWLSubPropertyChainOfAxiom axiom) {
     long chain = getOrCreateNode(getIri(axiom.getSuperProperty()));
     int i = 0;
     for (OWLObjectPropertyExpression property : axiom.getPropertyChain()) {
@@ -439,7 +420,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
           getOrCreateRelationship(chain, link, OwlRelationships.OWL_PROPERTY_CHAIN_AXIOM);
       graph.setRelationshipProperty(relationship, "order", i++);
     }
-    return null;
   }
 
   long addCardinalityRestriction(OWLObjectCardinalityRestriction desc) {
@@ -453,28 +433,25 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   @Override
-  public Void visit(OWLObjectMaxCardinality desc) {
+  public void visit(OWLObjectMaxCardinality desc) {
     long restriction = addCardinalityRestriction(desc);
     graph.addLabel(restriction, OwlLabels.OWL_MAX_CARDINALITY);
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectMinCardinality desc) {
+  public void visit(OWLObjectMinCardinality desc) {
     long restriction = addCardinalityRestriction(desc);
     graph.addLabel(restriction, OwlLabels.OWL_MIN_CARDINALITY);
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectExactCardinality desc) {
+  public void visit(OWLObjectExactCardinality desc) {
     long restriction = addCardinalityRestriction(desc);
     graph.addLabel(restriction, OwlLabels.OWL_QUALIFIED_CARDINALITY);
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectSomeValuesFrom desc) {
+  public void visit(OWLObjectSomeValuesFrom desc) {
     long restriction = getOrCreateNode(getIri(desc), OwlLabels.OWL_SOME_VALUES_FROM, OwlLabels.OWL_ANONYMOUS);
     if (!desc.getProperty().isAnonymous()) {
       long property = getOrCreateNode(getIri(desc.getProperty()));
@@ -482,11 +459,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       long cls = getOrCreateNode(getIri(desc.getFiller()));
       getOrCreateRelationship(restriction, cls, OwlRelationships.FILLER);
     }
-    return null;
   }
 
   @Override
-  public Void visit(OWLObjectAllValuesFrom desc) {
+  public void visit(OWLObjectAllValuesFrom desc) {
     long restriction = getOrCreateNode(getIri(desc), OwlLabels.OWL_ALL_VALUES_FROM, OwlLabels.OWL_ANONYMOUS);
     if (!desc.getProperty().isAnonymous()) {
       long property = getOrCreateNode(getIri(desc.getProperty()));
@@ -494,7 +470,6 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       long cls = getOrCreateNode(getIri(desc.getFiller()));
       getOrCreateRelationship(restriction, cls, OwlRelationships.FILLER);
     }
-    return null;
   }
 
 }

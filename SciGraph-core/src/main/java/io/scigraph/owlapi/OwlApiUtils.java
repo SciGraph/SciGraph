@@ -22,8 +22,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.validator.routines.UrlValidator;
-import org.coode.owlapi.obo12.parser.OBO12ParserFactory;
-import org.coode.owlapi.oboformat.OBOFormatParserFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLParserFactory;
 import org.semanticweb.owlapi.io.OWLParserFactoryRegistry;
@@ -186,14 +184,17 @@ public class OwlApiUtils {
       handler.setLevel(Level.SEVERE);
     }*/
     // TODO: Why does this cause a concurrent modification exception if not synchronized
-    OWLParserFactoryRegistry registry = OWLParserFactoryRegistry.getInstance();
-    List<OWLParserFactory> factories = registry.getParserFactories();
-    for (OWLParserFactory factory : factories) {
-      if (factory instanceof OBOFormatParserFactory ||
-          factory instanceof OBO12ParserFactory) {
-        registry.unregisterParserFactory(factory);
-      }
-    }
+
+   // TODO Jeremy: Check if this is still needed
+//    OWLParserFactoryRegistry registry = OWLParserFactoryRegistry.getInstance();
+//    List<OWLParserFactory> factories = registry.getParserFactories();
+//    for (OWLParserFactory factory : factories) {
+//      if (factory instanceof OBOFormatParserFactory ||
+//          factory instanceof OBO12ParserFactory) {
+//        registry.unregisterParserFactory(factory);
+//      }
+//    }
+    
     silencedParser = true;
   }
 }
