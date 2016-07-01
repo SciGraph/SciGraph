@@ -111,7 +111,7 @@ public class Clique implements Postprocessor {
         logger.info(size + " nodes left to process");
       }
 
-      if (size % 10 == 0) {
+      if (size % 10000 == 0) {
         logger.fine("Node batch commit");
         tx.success();
         tx.close();
