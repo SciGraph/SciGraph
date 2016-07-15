@@ -17,6 +17,7 @@ package io.scigraph.owlapi.curies;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import io.scigraph.neo4j.bindings.IndicatesCurieMapping;
+import io.scigraph.owlapi.curies.trie.Trie;
 
 import java.util.Collection;
 import java.util.Map;
@@ -32,6 +33,7 @@ import com.google.common.collect.ImmutableBiMap;
 public class CurieUtil {
 
   private final ImmutableBiMap<String, String> curieMap;
+  private final Trie trie;
 
   /***
    * @param curieMap A map from CURIE prefix to IRI prefix
@@ -39,6 +41,10 @@ public class CurieUtil {
   @Inject
   public CurieUtil(@IndicatesCurieMapping Map<String, String> curieMap) {
     this.curieMap = ImmutableBiMap.copyOf(checkNotNull(curieMap));
+    this.trie = new Trie();
+    for (String key : this.curieMap.inverse().keySet()) {
+      this.trie.insert(key);
+    }
   }
 
   /***
@@ -65,17 +71,13 @@ public class CurieUtil {
    * @return An {@link Optional} CURIE
    */
   public Optional<String> getCurie(String iri) {
-    Optional<String> candidate = Optional.absent();
-    for (String prefix: curieMap.inverse().keySet()) {
-      if (checkNotNull(iri).startsWith(prefix) &&
-          candidate.or("").length() < prefix.length()) {
-        candidate = Optional.of(prefix);
-      }
-    }
-    if (candidate.isPresent()) {
-      return Optional.of(String.format("%s:%s", curieMap.inverse().get(candidate.get()), iri.substring(candidate.get().length(), iri.length())));
-    } else {
+    String prefix = trie.getMatchingPrefix(iri);
+    if (prefix.equals("")) {
       return Optional.absent();
+    } else {
+      String curiePrefix = curieMap.inverse().get(prefix);
+      return Optional.of(String.format("%s:%s", curiePrefix,
+          iri.substring(prefix.length(), iri.length())));
     }
   }
 
@@ -90,12 +92,13 @@ public class CurieUtil {
     if (parts.length > 1) {
       String prefix = parts[0];
       if (curieMap.containsKey(prefix)) {
-        return Optional.of(String.format("%s%s", curieMap.get(prefix), curie.substring(curie.indexOf(':') + 1)));
+        return Optional.of(String.format("%s%s", curieMap.get(prefix),
+            curie.substring(curie.indexOf(':') + 1)));
       }
     }
     return Optional.absent();
   }
-  
+
   /***
    * Returns the curie map.
    * 
@@ -103,6 +106,6 @@ public class CurieUtil {
    */
   public Map<String, String> getCurieMap() {
     return curieMap;
-  } 
+  }
 
 }
