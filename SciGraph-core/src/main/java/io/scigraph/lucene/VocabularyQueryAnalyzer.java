@@ -18,20 +18,20 @@ package io.scigraph.lucene;
 import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
 
-import java.io.Reader;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.KeywordAnalyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
-import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.Lucene43StopFilter;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 
 public final class VocabularyQueryAnalyzer extends Analyzer {
 
@@ -52,24 +52,40 @@ public final class VocabularyQueryAnalyzer extends Analyzer {
 
   final static class TermAnalyzer extends Analyzer {
 
-    @SuppressWarnings("deprecation")
     @Override
-    public TokenStream tokenStream(String fieldName, Reader reader) {
-      Tokenizer tokenizer = new WhitespaceTokenizer(LuceneUtils.getVersion(), reader);
-      TokenStream result = new PatternReplaceFilter(tokenizer, Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2", true);
+    protected TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer tokenizer = new WhitespaceTokenizer();
+      TokenStream result =
+          new PatternReplaceFilter(tokenizer,
+              Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2",
+              true);
       result = new PatternReplaceFilter(result, Pattern.compile("'s"), "s", true);
-      result = new StopFilter(false, result, LuceneUtils.caseSensitiveStopSet);
-      result = new LowerCaseFilter(LuceneUtils.getVersion(), result);
+      // result = new StopFilter(result, LuceneUtils.caseSensitiveStopSet);
+      result = new Lucene43StopFilter(false, result, LuceneUtils.caseSensitiveStopSet);
+      result = new LowerCaseFilter(result);
       result = new ASCIIFoldingFilter(result);
 
-      return result;
+      return new TokenStreamComponents(tokenizer, result);
     }
 
   }
 
+  // TODO Not sure that using reflection is the right way to handle that
   @Override
-  public TokenStream tokenStream(String fieldName, Reader reader) {
-    return analyzer.tokenStream(fieldName, reader);
+  protected TokenStreamComponents createComponents(String fieldName) {
+    try {
+      Class<? extends Analyzer> clazz = analyzer.getClass();
+      Method getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
+      getWrappedAnalyzer.setAccessible(true);
+      Analyzer currentAnalyzer = (Analyzer) getWrappedAnalyzer.invoke(analyzer, fieldName);
+      Class<? extends Analyzer> clazz2 = currentAnalyzer.getClass();
+      Method cc = clazz2.getDeclaredMethod("createComponents", String.class);
+      cc.setAccessible(true);
+      return (TokenStreamComponents) cc.invoke(currentAnalyzer, fieldName);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
 }

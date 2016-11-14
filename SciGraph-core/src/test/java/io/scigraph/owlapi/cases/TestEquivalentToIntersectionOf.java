@@ -24,7 +24,6 @@ import io.scigraph.owlapi.OwlLabels;
 import io.scigraph.owlapi.OwlRelationships;
 
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -38,7 +37,7 @@ public class TestEquivalentToIntersectionOf extends OwlTestCase {
     Node anonymousClass = graphDb.findNodes(OwlLabels.OWL_INTERSECTION_OF).next();
     Node fillerClass = getNode("http://example.org/fillerClass");
 
-    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
+    RelationshipType p = RelationshipType.withName("http://example.org/p");
     Relationship r = getOnlyElement(GraphUtil.getRelationships(anonymousClass, fillerClass, p));
 
     assertThat(GraphUtil.getProperty(r, CommonProperties.CONVENIENCE, Boolean.class),

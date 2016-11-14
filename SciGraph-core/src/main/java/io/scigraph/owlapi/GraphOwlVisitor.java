@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.semanticweb.owlapi.model.IRI;
@@ -238,7 +237,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
           object = getOrCreateNode(OwlApiUtils.getIri((OWLAnonymousIndividual)axiom.getValue()));
         }
         long assertion =
-            getOrCreateRelationship(subject, object, DynamicRelationshipType.withName(property));
+            getOrCreateRelationship(subject, object, RelationshipType.withName(property));
         graph.setRelationshipProperty(assertion, CommonProperties.IRI, property);
         graph.setRelationshipProperty(assertion, CommonProperties.OWL_TYPE,
             OwlRelationships.OWL_ANNOTATION.name());
@@ -355,7 +354,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     long subject = getOrCreateNode(getIri(axiom.getSubject()));
     String property = getIri(axiom.getProperty());
     long object = getOrCreateNode(getIri(axiom.getObject()));
-    RelationshipType type = DynamicRelationshipType.withName(property.toString());
+    RelationshipType type = RelationshipType.withName(property.toString());
 
     long relationship = getOrCreateRelationship(subject, object, type);
     graph.setRelationshipProperty(relationship, CommonProperties.IRI, property.toString());

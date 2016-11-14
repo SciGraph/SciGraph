@@ -22,8 +22,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionFailureException;
 
@@ -58,7 +58,7 @@ public class Neo4jModuleTest {
     GraphDatabaseService graphDb = injectorReadOnly.getInstance(GraphDatabaseService.class);
     Transaction tx = graphDb.beginTx();
     try {
-      graphDb.createNode(DynamicLabel.label("test"));
+      graphDb.createNode(Label.label("test"));
     } finally {
       tx.close();
     }

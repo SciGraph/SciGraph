@@ -81,7 +81,7 @@ public class OwlApiUtils {
       if (literal.hasLang() && !literal.getLang().startsWith("en")) {
         if (!unknownLanguages.contains(literal.getLang())) {
           unknownLanguages.add(literal.getLang());
-          logger.warning("Ignoring *all* literals with unsupported langauge: \"" + literal.getLang() + "\".");
+          logger.warning("Ignoring *all* literals with unsupported language: \"" + literal.getLang() + "\".");
         }
         return Optional.absent();
       }

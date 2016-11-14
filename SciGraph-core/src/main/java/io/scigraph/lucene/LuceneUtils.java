@@ -19,15 +19,15 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.StopAnalyzer;
-import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.StopAnalyzer;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
 
@@ -42,24 +42,24 @@ public class LuceneUtils {
    * @return The current Lucene version in use across the application
    */
   public static Version getVersion() {
-    return Version.LUCENE_36;
+    return Version.LUCENE_5_5_0;
   }
 
-  public static final Set<?> caseSensitiveStopSet;
+  public static final CharArraySet caseSensitiveStopSet;
 
   static {
     List<String> stopWords = Lists.newArrayList();
-    for (Iterator<?> stopWord = StopAnalyzer.ENGLISH_STOP_WORDS_SET.iterator(); stopWord.hasNext(); ) {
-      String word = new String((char[])stopWord.next());
+    for (Iterator<?> stopWord = StopAnalyzer.ENGLISH_STOP_WORDS_SET.iterator(); stopWord.hasNext();) {
+      String word = new String((char[]) stopWord.next());
       stopWords.add(word);
       stopWords.add(Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase());
     }
-    caseSensitiveStopSet = StopFilter.makeStopSet(getVersion(), stopWords, false);
+    caseSensitiveStopSet = StopFilter.makeStopSet(stopWords, false);
   }
 
   public static boolean isStopword(String word) {
-    for (Iterator<?> stopWord = StopAnalyzer.ENGLISH_STOP_WORDS_SET.iterator(); stopWord.hasNext(); ) {
-      String stopword = new String((char[])stopWord.next());
+    for (Iterator<?> stopWord = StopAnalyzer.ENGLISH_STOP_WORDS_SET.iterator(); stopWord.hasNext();) {
+      String stopword = new String((char[]) stopWord.next());
       if (stopword.equalsIgnoreCase(word)) {
         return true;
       }
@@ -68,7 +68,7 @@ public class LuceneUtils {
   }
 
   public static boolean isAllStopwords(List<String> words) {
-    for (String word: words) {
+    for (String word : words) {
       if (!isStopword(word)) {
         return false;
       }
@@ -76,7 +76,8 @@ public class LuceneUtils {
     return true;
   }
 
-  public static Query getBoostedQuery(QueryParser parser, String queryString, float boost) throws ParseException {
+  public static Query getBoostedQuery(QueryParser parser, String queryString, float boost)
+      throws ParseException {
     Query query = parser.parse(queryString);
     query.setBoost(boost);
     return query;
@@ -97,6 +98,7 @@ public class LuceneUtils {
       while (stream.incrementToken()) {
         ret.add(token.toString());
       }
+      stream.close();
     } catch (IOException e) {
       e.printStackTrace();
     }

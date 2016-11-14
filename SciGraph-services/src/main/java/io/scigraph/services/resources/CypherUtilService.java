@@ -46,7 +46,7 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.GraphDatabaseAPI;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.guard.Guard;
 import org.neo4j.kernel.guard.GuardException;
 
@@ -113,10 +113,11 @@ public class CypherUtilService extends BaseResource {
 
     String sanitizedCypherQuery = cypherQuery.replaceAll(";", "") + " LIMIT " + limit;
     String replacedStartCurie = cypherUtil.resolveStartQuery(sanitizedCypherQuery);
-    Guard guard =
-        ((GraphDatabaseAPI) graphDb).getDependencyResolver().resolveDependency(Guard.class);
 
-    guard.startTimeout(timeoutMinutes * 60 * 1000);
+    // TODO I didn't find a way to time out a single query in 3.0. However it becomes easier in 3.1
+//    Guard guard =
+//        ((GraphDatabaseAPI) graphDb).getDependencyResolver().resolveDependency(Guard.class);
+    //guard.startTimeout(timeoutMinutes * 60 * 1000);
 
     try {
       if (JaxRsUtil.getVariant(request.get()) != null
@@ -150,7 +151,7 @@ public class CypherUtilService extends BaseResource {
       return "The query execution exceeds " + timeoutMinutes
           + " minutes. Consider using the neo4j shell instead of this service.";
     } finally {
-      guard.stop();
+      //guard.stop();
     }
   }
 

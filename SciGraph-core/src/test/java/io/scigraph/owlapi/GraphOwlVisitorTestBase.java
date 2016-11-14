@@ -45,7 +45,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -113,7 +112,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
     GraphOwlVisitor visitor = new GraphOwlVisitor(walker, graph, propertyMap);
     walker.walkStructure(visitor);
     graph.shutdown();
-    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
+    graphDb = new TestGraphDatabaseFactory().newEmbeddedDatabase(new File(path));
     tx = graphDb.beginTx();
     nodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
     builtGraph = true;
@@ -218,7 +217,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   public void nonLiteralAnnotationAssertionAxiom() {
     Node person = getNode(ROOT + "/Person");
     Node fazz = getNode(ROOT + "/Fazz");
-    Relationship relationship = getOnlyElement(GraphUtil.getRelationships(person, fazz, DynamicRelationshipType.withName(ROOT + "/fizz"), true));
+    Relationship relationship = getOnlyElement(GraphUtil.getRelationships(person, fazz, RelationshipType.withName(ROOT + "/fizz"), true));
     assertThat(GraphUtil.getProperty(relationship, CommonProperties.IRI, String.class).get(),
         is(ROOT + "/fizz"));
   }
@@ -261,7 +260,7 @@ public abstract class GraphOwlVisitorTestBase<T extends Graph> {
   public void objectPropertyAssertions() {
     Node susan = getNode(ROOT + "/Susan");
     Node meg = getNode(ROOT + "/Meg");
-    assertThat(hasDirectedRelationship(susan, meg, DynamicRelationshipType.withName(ROOT + "/#hasAncestor")), is(true));
+    assertThat(hasDirectedRelationship(susan, meg, RelationshipType.withName(ROOT + "/#hasAncestor")), is(true));
   }
 
   @Test

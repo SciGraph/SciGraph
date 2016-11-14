@@ -35,7 +35,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
@@ -101,7 +100,7 @@ public class CypherUtil {
       relationshipTypes = transform(relationshipNames, new Function<String, RelationshipType>() {
         @Override
         public RelationshipType apply(String name) {
-          return DynamicRelationshipType.withName(name);
+          return RelationshipType.withName(name);
         }
       });
       tx.success();

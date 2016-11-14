@@ -27,7 +27,6 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -38,7 +37,7 @@ import com.google.common.base.Predicate;
 
 public class ReachabilityIndexTest {
 
-  static final RelationshipType type = DynamicRelationshipType.withName("foo");
+  static final RelationshipType type = RelationshipType.withName("foo");
 
   static ReachabilityIndex index;
   static Node a, b, c, d, e, f;

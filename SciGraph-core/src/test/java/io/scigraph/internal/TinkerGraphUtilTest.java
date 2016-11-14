@@ -25,7 +25,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import io.scigraph.frames.CommonProperties;
-import io.scigraph.internal.TinkerGraphUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,12 +33,11 @@ import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Direction;
@@ -65,7 +63,7 @@ public class TinkerGraphUtilTest {
   Relationship mockRealtionship(Node start, Node end) {
     Relationship r = mock(Relationship.class);
     when(r.getPropertyKeys()).thenReturn(Collections.<String>emptySet());
-    when(r.getType()).thenReturn(DynamicRelationshipType.withName("FOO"));
+    when(r.getType()).thenReturn(RelationshipType.withName("FOO"));
     when(r.getStartNode()).thenReturn(start);
     when(r.getEndNode()).thenReturn(end);
     return r;
@@ -142,7 +140,7 @@ public class TinkerGraphUtilTest {
   @SuppressWarnings("unchecked")
   @Test
   public void labelsAreTranslated() {
-    Label label = DynamicLabel.label("label");
+    Label label = Label.label("label");
     when(node.getLabels()).thenReturn(newHashSet(label));
     Vertex v = TinkerGraphUtil.addNode(graph, node);
     assertThat((Iterable<String>)v.getProperty("types"), IsIterableContainingInAnyOrder.containsInAnyOrder("label"));
@@ -155,7 +153,7 @@ public class TinkerGraphUtilTest {
     Relationship relationship = mock(Relationship.class);
     when(relationship.getEndNode()).thenReturn(node);
     when(relationship.getStartNode()).thenReturn(otherNode);
-    when(relationship.getType()).thenReturn(DynamicRelationshipType.withName("foo"));
+    when(relationship.getType()).thenReturn(RelationshipType.withName("foo"));
     when(relationship.getPropertyKeys()).thenReturn(newHashSet("bar"));
     when(relationship.getProperty("bar")).thenReturn("baz");
     Edge edge = TinkerGraphUtil.addEdge(graph, relationship);

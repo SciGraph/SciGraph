@@ -40,7 +40,6 @@ import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
-import org.neo4j.tooling.GlobalGraphOperations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -146,7 +145,7 @@ public class GraphApi {
   public Collection<RelationshipType> getAllRelationshipTypes() {
     Set<RelationshipType> relationships = new HashSet<>();
     try (Transaction tx = graphDb.beginTx()) {
-      relationships.addAll(newHashSet(GlobalGraphOperations.at(graphDb).getAllRelationshipTypes()));
+      relationships.addAll(newHashSet(graphDb.getAllRelationshipTypes()));
       tx.success();
     }
     return relationships;
@@ -158,7 +157,7 @@ public class GraphApi {
   public Collection<String> getAllPropertyKeys() {
     Set<String> propertyKeys = new HashSet<>();
     try (Transaction tx = graphDb.beginTx()) {
-      propertyKeys.addAll(newHashSet(GlobalGraphOperations.at(graphDb).getAllPropertyKeys()));
+      propertyKeys.addAll(newHashSet(graphDb.getAllPropertyKeys()));
       tx.success();
     }
     return propertyKeys;

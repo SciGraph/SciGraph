@@ -17,16 +17,21 @@ package io.scigraph.services.resources;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import io.scigraph.internal.CypherUtil;
-import io.scigraph.services.resources.CypherUtilService;
 
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.neo4j.kernel.configuration.Settings;
+import org.neo4j.kernel.guard.Guard;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.test.TestGraphDatabaseFactory;
 
 public class CypherUtilServiceTest {
 
@@ -53,6 +58,16 @@ public class CypherUtilServiceTest {
     assertThat(
         resources.client().target("/cypher/resolve?cypherQuery=foo!").request().get(String.class),
         equalTo("foo"));
+  }
+
+  @Test
+  public void guardAvailibityTest() {
+    GraphDatabaseAPI db =
+        (GraphDatabaseAPI) new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+            .setConfig(GraphDatabaseSettings.execution_guard_enabled, Settings.TRUE)
+            .newGraphDatabase();
+    Guard guard = db.getDependencyResolver().resolveDependency(Guard.class);
+    assertNotNull(guard);
   }
 
 }

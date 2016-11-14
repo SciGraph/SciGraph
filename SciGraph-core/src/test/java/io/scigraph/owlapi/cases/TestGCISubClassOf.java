@@ -24,7 +24,6 @@ import io.scigraph.owlapi.OwlRelationships;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -32,7 +31,7 @@ import org.neo4j.graphdb.RelationshipType;
 public class TestGCISubClassOf extends OwlTestCase {
 
   Node subclass, superclass;
-  RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
+  RelationshipType p = RelationshipType.withName("http://example.org/p");
   
   @Before
   public void setup() {

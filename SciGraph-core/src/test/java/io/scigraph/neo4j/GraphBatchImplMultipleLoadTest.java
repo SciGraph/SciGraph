@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -41,13 +40,12 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.ReadableIndex;
-import org.neo4j.tooling.GlobalGraphOperations;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 public class GraphBatchImplMultipleLoadTest {
 
-  private static final RelationshipType TYPE = DynamicRelationshipType.withName("type");
+  private static final RelationshipType TYPE = RelationshipType.withName("type");
 
   @Rule
   public TemporaryFolder folder = new TemporaryFolder();
@@ -64,13 +62,13 @@ public class GraphBatchImplMultipleLoadTest {
   }
 
   Graph getBatchGraph() throws IOException {
-    BatchInserter inserter = BatchInserters.inserter(new File(path).toString());
+    BatchInserter inserter = BatchInserters.inserter(new File(path));
     return new GraphBatchImpl(inserter, "uri", Collections.<String>emptySet(), Collections.<String>emptySet(),
         new IdMap(maker), new RelationshipMap(maker));
   }
 
   GraphDatabaseService getGraphDB() {
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path).toString());
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
     return graphDb;
   }
 
@@ -88,9 +86,9 @@ public class GraphBatchImplMultipleLoadTest {
     batchGraph.shutdown();
     GraphDatabaseService graphDb = getGraphDB();
     try (Transaction tx = graphDb.beginTx()) {
-      Iterable<Node> nodes = GlobalGraphOperations.at(graphDb).getAllNodes();
+      Iterable<Node> nodes = graphDb.getAllNodes();
       assertThat(size(nodes), is(3));
-      Iterable<Relationship> relationships = GlobalGraphOperations.at(graphDb).getAllRelationships();
+      Iterable<Relationship> relationships = graphDb.getAllRelationships();
       assertThat(size(relationships), is(2));
       tx.success();
     }

@@ -20,6 +20,7 @@ import io.scigraph.neo4j.GraphBatchImpl;
 import io.scigraph.neo4j.IdMap;
 import io.scigraph.neo4j.RelationshipMap;
 
+import java.io.File;
 import java.util.Collections;
 
 import org.neo4j.unsafe.batchinsert.BatchInserter;
@@ -29,7 +30,7 @@ public class GraphOwlVisitorBatchGraphTest extends GraphOwlVisitorTestBase<Graph
 
   @Override
   protected GraphBatchImpl createInstance() throws Exception {
-    BatchInserter inserter = BatchInserters.inserter(path);
+    BatchInserter inserter = BatchInserters.inserter(new File(path));
     return new GraphBatchImpl(inserter, CommonProperties.IRI, Collections.<String>emptySet(),
         Collections.<String>emptySet(), new IdMap(), new RelationshipMap());
   }

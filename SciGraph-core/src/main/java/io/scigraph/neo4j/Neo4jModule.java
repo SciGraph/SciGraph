@@ -45,6 +45,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.graphdb.index.AutoIndexer;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.kernel.configuration.Settings;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
@@ -87,6 +88,7 @@ public class Neo4jModule extends AbstractModule {
       index.startAutoIndexingProperty(property);
     }
     index.setEnabled(true);
+
   }
 
   public static void setupAutoIndexing(GraphDatabaseService graphDb, Neo4jConfiguration config) {
@@ -114,19 +116,19 @@ public class Neo4jModule extends AbstractModule {
         .make();
   }
 
-  @SuppressWarnings("deprecation")
   @Provides
   @Singleton
   GraphDatabaseService getGraphDatabaseService() throws IOException {
     try {
       GraphDatabaseBuilder graphDatabaseBuilder =
-          new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(configuration.getLocation())
-              .setConfig(configuration.getNeo4jConfig());
+          new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(
+              new File(configuration.getLocation())).setConfig(configuration.getNeo4jConfig());
       if (readOnly) {
-        graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, "true");
+        graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, Settings.TRUE);
       }
       if (enableGuard) {
-        graphDatabaseBuilder.setConfig("execution_guard_enabled", "true");
+        graphDatabaseBuilder
+            .setConfig(GraphDatabaseSettings.execution_guard_enabled, Settings.TRUE);
       }
       final GraphDatabaseService graphDb = graphDatabaseBuilder.newGraphDatabase();
       Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -138,8 +140,8 @@ public class Neo4jModule extends AbstractModule {
 
       if (!readOnly) { // No need of auto-indexing in read-only mode
         setupAutoIndexing(graphDb, configuration);
-
       }
+
       return graphDb;
     } catch (Exception e) {
       if (Throwables.getRootCause(e).getMessage().contains("lock file")) {

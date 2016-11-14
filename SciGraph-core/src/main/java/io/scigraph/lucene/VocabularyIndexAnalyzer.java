@@ -19,21 +19,21 @@ import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.KeywordAnalyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
-import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.Lucene43StopFilter;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.synonym.SynonymMap;
 
@@ -44,6 +44,7 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
   private final Analyzer analyzer;
 
   public VocabularyIndexAnalyzer() throws IOException, URISyntaxException {
+    super(NO_REUSE_STRATEGY);
     Map<String, Analyzer> fieldAnalyzers = new HashMap<>();
     fieldAnalyzers.put(NodeProperties.LABEL, new TermAnalyzer());
     fieldAnalyzers.put(NodeProperties.LABEL + LuceneUtils.EXACT_SUFFIX, new ExactAnalyzer());
@@ -56,30 +57,58 @@ public final class VocabularyIndexAnalyzer extends Analyzer {
     analyzer = new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), fieldAnalyzers);
   }
 
+  public static final ReuseStrategy NO_REUSE_STRATEGY = new ReuseStrategy() {
+    @Override
+    public TokenStreamComponents getReusableComponents(Analyzer analyzer, String fieldName) {
+      return null;
+    }
+
+    @Override
+    public void setReusableComponents(Analyzer analyzer, String fieldName,
+        TokenStreamComponents components) {
+      // Do nothing
+    }
+  };
+
   final static class TermAnalyzer extends Analyzer {
 
     static SynonymMap map = Suppliers.memoize(new SynonymMapSupplier()).get();
 
-    @SuppressWarnings("deprecation")
     @Override
-    public TokenStream tokenStream(String fieldName, Reader reader) {
-      Tokenizer tokenizer = new WhitespaceTokenizer(LuceneUtils.getVersion(), reader);
-      TokenStream result = new PatternReplaceFilter(tokenizer, Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2", true);
+    protected TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer tokenizer = new WhitespaceTokenizer();
+      TokenStream result =
+          new PatternReplaceFilter(tokenizer,
+              Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2",
+              true);
       result = new PatternReplaceFilter(result, Pattern.compile("'s"), "s", true);
       result = new BolEolFilter(result);
       result = new SynonymFilter(result, map, true);
-      result = new StopFilter(false, result, LuceneUtils.caseSensitiveStopSet);
-      result = new LowerCaseFilter(LuceneUtils.getVersion(), result);
+      // result = new StopFilter(result, LuceneUtils.caseSensitiveStopSet);
+      result = new Lucene43StopFilter(false, result, LuceneUtils.caseSensitiveStopSet);
+      result = new LowerCaseFilter(result);
       result = new ASCIIFoldingFilter(result);
 
-      return result;
+      return new TokenStreamComponents(tokenizer, result);
     }
 
   }
 
+  // TODO Not sure that using reflection is the right way to handle that
   @Override
-  public TokenStream tokenStream(String fieldName, Reader reader) {
-    return analyzer.tokenStream(fieldName, reader);
+  protected TokenStreamComponents createComponents(String fieldName) {
+    try {
+      Class<? extends Analyzer> clazz = analyzer.getClass();
+      Method getWrappedAnalyzer = clazz.getDeclaredMethod("getWrappedAnalyzer", String.class);
+      getWrappedAnalyzer.setAccessible(true);
+      Analyzer currentAnalyzer = (Analyzer) getWrappedAnalyzer.invoke(analyzer, fieldName);
+      Class<? extends Analyzer> clazz2 = currentAnalyzer.getClass();
+      Method cc = clazz2.getDeclaredMethod("createComponents", String.class);
+      cc.setAccessible(true);
+      return (TokenStreamComponents) cc.invoke(currentAnalyzer, fieldName);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
-
 }

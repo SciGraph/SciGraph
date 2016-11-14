@@ -21,7 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import io.scigraph.neo4j.GraphUtil;
 
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -33,7 +32,7 @@ public class TestObjectPropertyAssertion extends OwlTestCase {
     Node i = getNode("http://example.org/i");
     Node j = getNode("http://example.org/j");
 
-    RelationshipType p = DynamicRelationshipType.withName("http://example.org/p");
+    RelationshipType p = RelationshipType.withName("http://example.org/p");
     Relationship relationship = getOnlyElement(GraphUtil.getRelationships(i, j, p));
     assertThat("OPE edge should start with the subject.", relationship.getStartNode(), is(i));
     assertThat("OPE edge should start with the target.", relationship.getEndNode(), is(j));

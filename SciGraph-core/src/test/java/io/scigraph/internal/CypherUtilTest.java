@@ -38,7 +38,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 
@@ -67,7 +66,7 @@ public class CypherUtilTest extends GraphTestBase {
     addRelationship("http://x.org/#fizz", "http://x.org/#fizz_equiv",
         OwlRelationships.OWL_EQUIVALENT_OBJECT_PROPERTY);
     addRelationship("http://x.org/#1", "http://x.org/#2",
-        DynamicRelationshipType.withName("http://x.org/#fizz"));
+        RelationshipType.withName("http://x.org/#fizz"));
   }
 
   @Test
@@ -202,7 +201,6 @@ public class CypherUtilTest extends GraphTestBase {
   public void resolveStartQueryWithMultipleMatches() {
     String cypher =
         "START n = node:node_auto_index(iri='FOO:foo') match (n) UNION START m = node:node_auto_index(iri='FOO:fizz') match (m) return n,m";
-    System.out.println(util.resolveStartQuery(cypher));
     assertThat(
         util.resolveStartQuery(cypher),
         IsEqual

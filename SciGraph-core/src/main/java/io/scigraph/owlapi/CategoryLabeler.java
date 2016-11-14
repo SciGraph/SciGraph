@@ -21,7 +21,6 @@ import io.scigraph.neo4j.GraphUtil;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -41,7 +40,7 @@ public class CategoryLabeler implements Callable<Boolean> {
 
   @Override
   public Boolean call() throws Exception {
-    Label label = DynamicLabel.label(category);
+    Label label = Label.label(category);
     try (Transaction tx = graphDb.beginTx()) {
       for (Long id : ids) {
         Node node = graphDb.getNodeById(id);

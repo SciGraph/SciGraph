@@ -28,7 +28,6 @@ import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -42,7 +41,7 @@ public class GraphApiNeighborhoodTest extends GraphTestBase {
 
   GraphApi graphApi;
   Node a, b, c, d, e, f, g, h, i, j;
-  RelationshipType fizz = DynamicRelationshipType.withName("fizz");
+  RelationshipType fizz = RelationshipType.withName("fizz");
   Optional<Predicate<Node>> absent = Optional.absent();
 
   @Before

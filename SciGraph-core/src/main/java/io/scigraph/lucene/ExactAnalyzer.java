@@ -15,28 +15,26 @@
  */
 package io.scigraph.lucene;
 
-import java.io.Reader;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.KeywordTokenizer;
-import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.util.Version;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 
 public final class ExactAnalyzer extends Analyzer {
 
   private static final Pattern pattern = Pattern.compile("'");
 
   @Override
-  public TokenStream tokenStream(String fieldName, Reader reader) {
-    Tokenizer tokenizer = new KeywordTokenizer(reader);
-    TokenStream result = new LowerCaseFilter(Version.LUCENE_36, tokenizer);
+  protected TokenStreamComponents createComponents(String fieldName) {
+    Tokenizer tokenizer = new KeywordTokenizer();
+    TokenStream result = new LowerCaseFilter(tokenizer);
     result = new ASCIIFoldingFilter(result);
     result = new PatternReplaceFilter(result, pattern, "", true);
-    return result;
+    return new TokenStreamComponents(tokenizer, result);
   }
 
 }

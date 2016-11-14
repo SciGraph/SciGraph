@@ -17,7 +17,6 @@ package io.scigraph.owlapi;
 
 import static io.scigraph.owlapi.OwlApiUtils.getNeo4jName;
 
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
@@ -26,49 +25,49 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
  */
 public class OwlLabels {
 
-  public static final Label OWL_ONTOLOGY = DynamicLabel.label(getNeo4jName(OWLRDFVocabulary.OWL_ONTOLOGY));
+  public static final Label OWL_ONTOLOGY = Label.label(getNeo4jName(OWLRDFVocabulary.OWL_ONTOLOGY));
   
-  public static final Label OWL_ANONYMOUS = DynamicLabel.label("anonymous");
+  public static final Label OWL_ANONYMOUS = Label.label("anonymous");
 
-  public static final Label OWL_CLASS = DynamicLabel.label(getNeo4jName(OWLRDFVocabulary.OWL_CLASS));
+  public static final Label OWL_CLASS = Label.label(getNeo4jName(OWLRDFVocabulary.OWL_CLASS));
 
-  public static final Label OWL_INDIVIDUAL = DynamicLabel
+  public static final Label OWL_INDIVIDUAL = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_INDIVIDUAL));
 
-  public static final Label OWL_SOME_VALUES_FROM = DynamicLabel
+  public static final Label OWL_SOME_VALUES_FROM = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_SOME_VALUES_FROM));
 
-  public static final Label OWL_ALL_VALUES_FROM = DynamicLabel
+  public static final Label OWL_ALL_VALUES_FROM = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_ALL_VALUES_FROM));
 
-  public static final Label OWL_INTERSECTION_OF = DynamicLabel
+  public static final Label OWL_INTERSECTION_OF = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_INTERSECTION_OF));
 
-  public static final Label OWL_UNION_OF = DynamicLabel
+  public static final Label OWL_UNION_OF = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_UNION_OF));
 
-  public static final Label OWL_NAMED_INDIVIDUAL = DynamicLabel
+  public static final Label OWL_NAMED_INDIVIDUAL = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_NAMED_INDIVIDUAL));
 
-  public static final Label OWL_DATA_PROPERTY = DynamicLabel
+  public static final Label OWL_DATA_PROPERTY = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_DATA_PROPERTY));
 
-  public static final Label OWL_OBJECT_PROPERTY = DynamicLabel
+  public static final Label OWL_OBJECT_PROPERTY = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_OBJECT_PROPERTY));
 
-  public static final Label OWL_ANNOTATION_PROPERTY = DynamicLabel
+  public static final Label OWL_ANNOTATION_PROPERTY = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_ANNOTATION_PROPERTY));
 
-  public static final Label OWL_COMPLEMENT_OF = DynamicLabel
+  public static final Label OWL_COMPLEMENT_OF = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_COMPLEMENT_OF));
 
-  public static final Label OWL_MAX_CARDINALITY = DynamicLabel
+  public static final Label OWL_MAX_CARDINALITY = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_MAX_CARDINALITY));
 
-  public static final Label OWL_MIN_CARDINALITY = DynamicLabel
+  public static final Label OWL_MIN_CARDINALITY = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_MIN_CARDINALITY));
 
-  public static final Label OWL_QUALIFIED_CARDINALITY = DynamicLabel
+  public static final Label OWL_QUALIFIED_CARDINALITY = Label
       .label(getNeo4jName(OWLRDFVocabulary.OWL_QUALIFIED_CARDINALITY));
 
 }

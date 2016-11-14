@@ -21,12 +21,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import io.scigraph.neo4j.Graph;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -38,9 +35,9 @@ public abstract class GraphTestBase<T extends Graph> {
 
   protected abstract T createInstance() throws Exception;
 
-  static RelationshipType TYPE = DynamicRelationshipType.withName("type");
-  static Label LABEL1 = DynamicLabel.label("label1");
-  static Label LABEL2 = DynamicLabel.label("label2");
+  static RelationshipType TYPE = RelationshipType.withName("type");
+  static Label LABEL1 = Label.label("label1");
+  static Label LABEL2 = Label.label("label2");
 
   @Before
   public void setup() throws Exception {

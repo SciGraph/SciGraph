@@ -62,7 +62,7 @@ public class ReachabilityIndexPerfIT extends AbstractBenchmark {
 
   @Before
   public void setup() {
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(graph.getAbsolutePath()).toString());
+    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(graph.getAbsolutePath()));
     index = new ReachabilityIndex(graphDb);
   }
 

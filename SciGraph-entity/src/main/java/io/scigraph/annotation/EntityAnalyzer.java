@@ -24,17 +24,19 @@ import java.util.regex.Pattern;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 
 final class EntityAnalyzer extends Analyzer {
 
   @Override
-  public TokenStream tokenStream(String fieldName, Reader reader) {
-    Tokenizer tokenizer = new WhitespaceTokenizer(LuceneUtils.getVersion(), reader);
-    TokenStream result = new PatternReplaceFilter(tokenizer,
-        Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2", true);
+  protected TokenStreamComponents createComponents(String fieldName) {
+    Tokenizer tokenizer = new WhitespaceTokenizer();
+    TokenStream result =
+        new PatternReplaceFilter(tokenizer,
+            Pattern.compile("^([\\.!\\?,:;\"'\\(\\)]*)(.*?)([\\.!\\?,:;\"'\\(\\)]*)$"), "$2", true);
     result = new PatternReplaceFilter(result, Pattern.compile("'s"), "s", true);
-    return result;
+    return new TokenStreamComponents(tokenizer, result);
   }
 
 }
