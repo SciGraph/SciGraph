@@ -81,9 +81,9 @@ public class GraphApi {
   @AddCuries
   public Graph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
     TraversalDescription description = graphDb.traversalDescription()
-        .depthFirst()
+        .breadthFirst()
         .evaluator(Evaluators.toDepth(depth))
-        .uniqueness(Uniqueness.NODE_PATH);
+        .uniqueness(Uniqueness.RELATIONSHIP_RECENT);
     for (DirectedRelationshipType type: types) {
       description = description.relationships(type.getType(), type.getDirection());
     }

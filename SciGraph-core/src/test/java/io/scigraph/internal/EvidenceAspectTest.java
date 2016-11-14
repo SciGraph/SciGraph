@@ -20,9 +20,10 @@ import io.scigraph.util.GraphTestBase;
 
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -31,42 +32,51 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 public class EvidenceAspectTest extends GraphTestBase {
 
-  Node subject1, object1, object2, object3, annotation, annotation2, source, evidence;
+  Node subject1, object1, object2, object3, association, association2, source, evidence;
   Graph graph = new TinkerGraph();
   EvidenceAspect aspect;
 
   @Before
   public void setup() {
+    // Note: Do a cleaner test case, only assocation2 is relevant for now.
+    String relationName = "http://x.org/hasSomething";
+    Node relationNode = createNode(relationName);
     subject1 = createNode("http://x.org/a");
     object1 = createNode("http://x.org/b");
     object2 = createNode("http://x.org/c");
     object3 = createNode("http://x.org/d");
-    annotation = createNode("http://x.org/e");
-    annotation2 = createNode("http://x.org/f");
+    association = createNode("http://x.org/e");
+    association2 = createNode("http://x.org/f");
     source = createNode("http://x.org/g");
     evidence = createNode("http://x.org/h");
-    annotation.createRelationshipTo(subject1, EvidenceAspect.HAS_SUBJECT);
-    annotation.createRelationshipTo(object1, EvidenceAspect.HAS_OBJECT);
-    annotation.createRelationshipTo(object2, EvidenceAspect.HAS_OBJECT);
-    annotation.createRelationshipTo(source, EvidenceAspect.SOURCE);
-    annotation.createRelationshipTo(evidence, EvidenceAspect.EVIDENCE);
-    annotation2.createRelationshipTo(subject1, EvidenceAspect.HAS_SUBJECT);
-    annotation2.createRelationshipTo(object3, EvidenceAspect.HAS_OBJECT);
+    association.createRelationshipTo(subject1, EvidenceAspect.HAS_SUBJECT);
+    association.createRelationshipTo(object1, EvidenceAspect.HAS_OBJECT);
+    association.createRelationshipTo(object2, EvidenceAspect.HAS_OBJECT);
+    association.createRelationshipTo(source, EvidenceAspect.SOURCE);
+    association.createRelationshipTo(evidence, EvidenceAspect.EVIDENCE);
+
+    association2.createRelationshipTo(subject1, EvidenceAspect.HAS_SUBJECT);
+    association2.createRelationshipTo(object3, EvidenceAspect.HAS_OBJECT);
+    Relationship rel =
+        subject1.createRelationshipTo(object3, DynamicRelationshipType.withName(relationName));
+    association2.createRelationshipTo(relationNode, EvidenceAspect.OBJECT_PROPERTY);
 
     TinkerGraphUtil.addNode(graph, subject1);
     TinkerGraphUtil.addNode(graph, object1);
     TinkerGraphUtil.addNode(graph, object2);
+    TinkerGraphUtil.addNode(graph, object3);
+    TinkerGraphUtil.addNode(graph, relationNode);
+    TinkerGraphUtil.addEdge(graph, rel);
     aspect = new EvidenceAspect(graphDb);
   }
 
-  @Ignore
   @Test
   public void evidenceIsAdded() {
-    assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(3));
-    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(0));
+    assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(5));
+    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
     aspect.invoke(graph);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
-    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(5));
+    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(3));
   }
 
 

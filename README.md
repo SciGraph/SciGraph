@@ -11,7 +11,7 @@ Motivation
 SciGraph aims to represent ontologies and data described using ontologies as a Neo4j graph. SciGraph
 reads ontologies with [owlapi](http://owlapi.sourceforge.net/) and ingests
 ontology formats available to owlapi (OWL, RDF, OBO, TTL, etc).
-Have a look at [how SciGraph translates some simple ontologies](https://github.com/SciCrunch/SciGraph/wiki/Neo4jMapping).
+Have a look at [how SciGraph translates some simple ontologies](https://github.com/SciGraph/SciGraph/wiki/Neo4jMapping).
 
 Goals:
 * OWL 2 Support
@@ -50,6 +50,7 @@ Applications
  * the [Monarch Initiative](http://monarchinitiative.org/) uses SciGraph for both ontologies and biological data modeling
  * [SciCrunch](http://scicrunch.org/) uses SciGraph for vocabulary and annotation services
  * [CINERGI](http://earthcube.org/group/cinergi) uses SciGraph for vocabulary and annotation services
+ * the [Human Brain project](https://nip.humanbrainproject.eu/) uses SciGraph for vocabulary and annotation services
 
 Additional Documentation
 ------------------------

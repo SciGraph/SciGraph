@@ -47,6 +47,7 @@ public class CliqueTest extends GraphTestBase {
   Graph graph = new TinkerGraph();
   Clique clique;
   static final RelationshipType IS_EQUIVALENT = OwlRelationships.OWL_EQUIVALENT_CLASS;
+  static final String leaderAnnotation = "https://monarchinitiative.org/MONARCH_cliqueLeader";
 
   @Before
   public void setup() {
@@ -68,7 +69,7 @@ public class CliqueTest extends GraphTestBase {
     Set<String> forbidden =  new HashSet<String>();
     forbidden.add("anonymous");
     cliqueConfiguration.setLeaderForbiddenLabels(forbidden);
-    cliqueConfiguration.setLeaderAnnotation("http://www.monarchinitiative.org/MONARCH_cliqueLeader");
+    cliqueConfiguration.setLeaderAnnotation(leaderAnnotation);
 
     clique = new Clique(graphDb, cliqueConfiguration);
   }
@@ -135,9 +136,21 @@ public class CliqueTest extends GraphTestBase {
     Node b = createNode("http://x.org/b");
     Node c = createNode("http://y.org/c");
     Node d = createNode("http://z.org/d");
-    c.setProperty("http://www.monarchinitiative.org/MONARCH_cliqueLeader", true);
+    c.setProperty(leaderAnnotation, true);
     List<Node> cliqueNode = Arrays.asList(a, b, c, d);
     assertThat(clique.electCliqueLeader(cliqueNode, new ArrayList<String>()).getId(), is(c.getId()));
+  }
+
+  @Test
+  public void designatedLeaderPrioritizerOverPriorityList() {
+    Node a = createNode("http://x.org/a");
+    Node b = createNode("http://x.org/b");
+    Node c = createNode("http://y.org/c");
+    Node d = createNode("http://z.org/d");
+    c.setProperty(leaderAnnotation, true);
+    List<String> priorityList = Arrays.asList("http://z.org/", "http://x.org/");
+    List<Node> cliqueNode = Arrays.asList(a, b, c, d);
+    assertThat(clique.electCliqueLeader(cliqueNode, priorityList).getId(), is(c.getId()));
   }
 
   @Test
