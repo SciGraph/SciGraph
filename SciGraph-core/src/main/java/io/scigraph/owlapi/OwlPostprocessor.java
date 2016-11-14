@@ -95,7 +95,7 @@ public class OwlPostprocessor {
 
   long processCategory(Node root, RelationshipType type, Direction direction, String category) {
     long count = 0;
-    int batchSize = 100;
+    int batchSize = 100_000;
     Label label = Label.label(category);
     Transaction tx = graphDb.beginTx();
     for (Path position : graphDb.traversalDescription().uniqueness(Uniqueness.NODE_GLOBAL).depthFirst().relationships(type, direction)
