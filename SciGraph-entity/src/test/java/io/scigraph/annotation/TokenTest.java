@@ -33,7 +33,7 @@ public class TokenTest {
   public void verifyToString() {
     String object = "test";
     Token<?> token = new Token<>(object, 0, 1);
-    assertThat(token.toString(), is("test [0‥1]"));
+    assertThat(token.toString(), is("test [0..1]"));
   }
 
 }
