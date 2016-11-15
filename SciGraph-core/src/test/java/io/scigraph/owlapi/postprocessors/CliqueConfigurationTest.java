@@ -15,11 +15,12 @@
  */
 package io.scigraph.owlapi.postprocessors;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration;
 import io.scigraph.owlapi.loader.OwlLoadConfigurationLoader;
 
@@ -42,13 +43,15 @@ public class CliqueConfigurationTest {
   CliqueConfiguration cliqueConfiguration;
 
   @Before
-  public void setup() throws URISyntaxException, JsonParseException, JsonMappingException, IOException {
+  public void setup() throws URISyntaxException, JsonParseException, JsonMappingException,
+      IOException {
     URL url = this.getClass().getResource("/cliqueConfiguration.yaml");
     File configFile = new File(url.getFile());
 
     assertThat(configFile.exists(), is(true));
 
-    OwlLoadConfigurationLoader owlLoadConfigurationLoader = new OwlLoadConfigurationLoader(configFile);
+    OwlLoadConfigurationLoader owlLoadConfigurationLoader =
+        new OwlLoadConfigurationLoader(configFile);
     loaderConfig = owlLoadConfigurationLoader.loadConfig();
     cliqueConfiguration = loaderConfig.getCliqueConfiguration().get();
   }
@@ -76,8 +79,14 @@ public class CliqueConfigurationTest {
     List<String> leaderPriority = cliqueConfiguration.getLeaderPriority();
     assertThat(
         leaderPriority,
-        contains("http://www.ncbi.nlm.nih.gov/gene/", "http://www.ncbi.nlm.nih.gov/pubmed/", "http://purl.obolibrary.org/obo/NCBITaxon_",
-            "http://identifiers.org/ensembl/", "http://purl.obolibrary.org/obo/DOID_", "http://purl.obolibrary.org/obo/HP_"));
+        contains("http://www.ncbi.nlm.nih.gov/gene/", "http://www.ncbi.nlm.nih.gov/pubmed/",
+            "http://purl.obolibrary.org/obo/NCBITaxon_", "http://identifiers.org/ensembl/",
+            "http://purl.obolibrary.org/obo/DOID_", "http://purl.obolibrary.org/obo/HP_"));
+  }
+
+  @Test
+  public void parseBatchCommitSize() {
+    assertEquals(cliqueConfiguration.getBatchCommitSize(), 1);
   }
 
 

@@ -28,6 +28,7 @@ public class CliqueConfiguration {
   private String leaderAnnotation = "";
   private List<String> leaderPriority = new ArrayList<String>();
   private Set<String> leaderForbiddenLabels = new HashSet<String>();
+  private int batchCommitSize = 100;
 
   public Set<String> getRelationships() {
     return relationships;
@@ -59,5 +60,13 @@ public class CliqueConfiguration {
 
   public void setLeaderForbiddenLabels(Set<String> leaderForbiddenLabels) {
     this.leaderForbiddenLabels = leaderForbiddenLabels;
+  }
+
+  public int getBatchCommitSize() {
+    return batchCommitSize;
+  }
+
+  public void setBatchCommitSize(int batchCommitSize) {
+    this.batchCommitSize = batchCommitSize;
   }
 }

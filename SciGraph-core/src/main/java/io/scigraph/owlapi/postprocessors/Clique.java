@@ -57,6 +57,7 @@ public class Clique implements Postprocessor {
   private String leaderAnnotationProperty;
   private Set<Label> forbiddenLabels;
   private Set<RelationshipType> relationships;
+  private int batchCommitSize;
 
   private final GraphDatabaseService graphDb;
 
@@ -77,6 +78,8 @@ public class Clique implements Postprocessor {
       tmpRelationships.add(RelationshipType.withName(r));
     }
     this.relationships = tmpRelationships;
+
+    this.batchCommitSize = cliqueConfiguration.getBatchCommitSize();
   }
 
   @Override
@@ -108,7 +111,7 @@ public class Clique implements Postprocessor {
         logger.info(size + " nodes left to process");
       }
 
-      if (size % 10000 == 0) {
+      if (size % batchCommitSize == 0) {
         logger.fine("Node batch commit");
         tx.success();
         tx.close();

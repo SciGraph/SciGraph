@@ -68,3 +68,4 @@ cliqueConfiguration:
     - http://purl.obolibrary.org/obo/HP_
   leaderForbiddenLabels:
     - anonymous
+  batchCommitSize: 1
