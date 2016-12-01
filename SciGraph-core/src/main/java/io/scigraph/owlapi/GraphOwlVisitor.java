@@ -133,10 +133,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   }
 
   private long getOrCreateNode(String iri, Label... labels) {
-    Optional<Long> node = graph.getNode(iri.toString());
+    Optional<Long> node = graph.getNode(iri);
     if (!node.isPresent()) {
-      long nodeId = graph.createNode(iri.toString());
-      graph.setNodeProperty(nodeId, CommonProperties.IRI, iri.toString());
+      long nodeId = graph.createNode(iri);
+      graph.setNodeProperty(nodeId, CommonProperties.IRI, iri);
       node = Optional.of(nodeId);
     }
     for (Label label: labels) {

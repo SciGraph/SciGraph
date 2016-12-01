@@ -20,6 +20,8 @@ import io.scigraph.neo4j.Graph;
 import io.scigraph.neo4j.GraphBatchImpl;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
+import io.scigraph.owlapi.loader.bindings.IndicatesAddEdgeLabel;
+import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
 import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
@@ -27,7 +29,6 @@ import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
-import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
 import io.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 
@@ -68,34 +69,48 @@ public class OwlLoaderModule extends AbstractModule {
   protected void configure() {
     bind(OwlLoadConfiguration.class).toInstance(config);
     bindConstant().annotatedWith(IndicatesUniqueProperty.class).to(CommonProperties.IRI);
-    bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesIndexedProperties.class).toInstance(config.getGraphConfiguration().getIndexedNodeProperties());
-    bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesExactIndexedProperties.class).toInstance(config.getGraphConfiguration().getExactNodeProperties());
-    bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesMappedCategories.class).toInstance(config.getCategories());
-    bind(new TypeLiteral<List<MappedProperty>>() {}).annotatedWith(IndicatesMappedProperties.class).toInstance(config.getMappedProperties());
+    bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesIndexedProperties.class)
+        .toInstance(config.getGraphConfiguration().getIndexedNodeProperties());
+    bind(new TypeLiteral<Set<String>>() {}).annotatedWith(IndicatesExactIndexedProperties.class)
+        .toInstance(config.getGraphConfiguration().getExactNodeProperties());
+    bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesMappedCategories.class)
+        .toInstance(config.getCategories());
+    bind(new TypeLiteral<List<MappedProperty>>() {}).annotatedWith(IndicatesMappedProperties.class)
+        .toInstance(config.getMappedProperties());
     bind(new TypeLiteral<List<OntologySetup>>() {}).toInstance(config.getOntologies());
     bind(Graph.class).to(GraphBatchImpl.class).in(Scopes.SINGLETON);
 
-    bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>(){}).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<BlockingQueue<OntologySetup>>(){}).to(new TypeLiteral<LinkedBlockingQueue<OntologySetup>>(){}).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<BlockingQueue<OWLCompositeObject>>() {}).to(
+        new TypeLiteral<LinkedBlockingQueue<OWLCompositeObject>>() {}).in(Scopes.SINGLETON);
+    bind(new TypeLiteral<BlockingQueue<OntologySetup>>() {}).to(
+        new TypeLiteral<LinkedBlockingQueue<OntologySetup>>() {}).in(Scopes.SINGLETON);
 
-    bind(Integer.class).annotatedWith(IndicatesNumberOfConsumerThreads.class).toInstance(config.getConsumerThreadCount());
-    bind(Integer.class).annotatedWith(IndicatesNumberOfProducerThreads.class).toInstance(config.getProducerThreadCount());
+    bind(Integer.class).annotatedWith(IndicatesNumberOfConsumerThreads.class).toInstance(
+        config.getConsumerThreadCount());
+    bind(Integer.class).annotatedWith(IndicatesNumberOfProducerThreads.class).toInstance(
+        config.getProducerThreadCount());
 
-    bind(AtomicInteger.class).annotatedWith(IndicatesNumberOfShutdownProducers.class).to(AtomicInteger.class).in(Scopes.SINGLETON);
+    bind(AtomicInteger.class).annotatedWith(IndicatesNumberOfShutdownProducers.class)
+        .to(AtomicInteger.class).in(Scopes.SINGLETON);
 
-    bind(new TypeLiteral<Optional<CliqueConfiguration>>() {}).annotatedWith(IndicatesCliqueConfiguration.class).toInstance(config.getCliqueConfiguration());
+    bind(new TypeLiteral<Optional<CliqueConfiguration>>() {}).annotatedWith(
+        IndicatesCliqueConfiguration.class).toInstance(config.getCliqueConfiguration());
+    bind(new TypeLiteral<Optional<Boolean>>() {}).annotatedWith(IndicatesAddEdgeLabel.class)
+        .toInstance(config.getAddEdgeLabel());
   }
 
-  /*@Provides
-  @Singleton
-  BlockingQueue<OWLCompositeObject> getOntologyCompositeQueue(DB mapdb) {
-    return mapdb.getQueue("OntologyCompositeQueue");
-  }*/
+  /*
+   * @Provides
+   * 
+   * @Singleton BlockingQueue<OWLCompositeObject> getOntologyCompositeQueue(DB mapdb) { return
+   * mapdb.getQueue("OntologyCompositeQueue"); }
+   */
 
-  
+
   @Provides
   @Singleton
-  ExecutorService provideExecutorService(@IndicatesNumberOfConsumerThreads int consumers, @IndicatesNumberOfProducerThreads int producers) {
+  ExecutorService provideExecutorService(@IndicatesNumberOfConsumerThreads int consumers,
+      @IndicatesNumberOfProducerThreads int producers) {
     return Executors.newFixedThreadPool(consumers + producers);
   }
 
@@ -104,7 +119,8 @@ public class OwlLoaderModule extends AbstractModule {
   BatchInserter getInserter() throws IOException {
     File location = new File(config.getGraphConfiguration().getLocation());
     logger.info("Getting BatchInserter for " + location);
-    return BatchInserters.inserter(new File(location.toString()), config.getGraphConfiguration().getNeo4jConfig());
+    return BatchInserters.inserter(new File(location.toString()), config.getGraphConfiguration()
+        .getNeo4jConfig());
   }
 
 }

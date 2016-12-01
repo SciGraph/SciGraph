@@ -23,12 +23,14 @@ import io.scigraph.owlapi.OwlApiUtils;
 import io.scigraph.owlapi.OwlPostprocessor;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
+import io.scigraph.owlapi.loader.bindings.IndicatesAddEdgeLabel;
 import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
 import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
-import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 import io.scigraph.owlapi.postprocessors.Clique;
+import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
+import io.scigraph.owlapi.postprocessors.EdgeLabeler;
 
 import java.io.File;
 import java.util.HashSet;
@@ -104,10 +106,14 @@ public class BatchOwlLoader {
 
   @Inject
   ExecutorService exec;
-  
+
   @Inject
   @IndicatesCliqueConfiguration
   Optional<CliqueConfiguration> cliqueConfiguration;
+
+  @Inject
+  @IndicatesAddEdgeLabel
+  Optional<Boolean> addEdgeLabel;
 
   static {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
@@ -150,13 +156,17 @@ public class BatchOwlLoader {
     graph.shutdown();
     logger.info("Postprocessing...");
     postprocessorProvider.get().postprocess();
-    
-    if(cliqueConfiguration.isPresent()) {
+
+    if (cliqueConfiguration.isPresent()) {
       postprocessorProvider.runCliquePostprocessor(cliqueConfiguration.get());
     }
-    
+
+    if (addEdgeLabel.or(false)) {
+      postprocessorProvider.runEdgeLabelerPostprocessor();
+    }
+
     postprocessorProvider.shutdown();
-    
+
   }
 
   static class PostpostprocessorProvider implements Provider<OwlPostprocessor> {
@@ -174,17 +184,21 @@ public class BatchOwlLoader {
       graphDb = graphDbProvider.get();
       return new OwlPostprocessor(graphDb, config.getCategories());
     }
-    
+
     public void runCliquePostprocessor(CliqueConfiguration cliqueConfiguration) {
       Clique clique = new Clique(graphDb, cliqueConfiguration);
       clique.run();
     }
-    
+
+    public void runEdgeLabelerPostprocessor() {
+      EdgeLabeler edgeLabeler = new EdgeLabeler(graphDb);
+      edgeLabeler.run();
+    }
+
     public void shutdown() {
       try (Transaction tx = graphDb.beginTx()) {
         logger.info(size(graphDb.getAllNodes()) + " nodes");
-        logger.info(size(graphDb.getAllRelationships())
-            + " relationships");
+        logger.info(size(graphDb.getAllRelationships()) + " relationships");
         tx.success();
       }
       graphDb.shutdown();
@@ -192,7 +206,8 @@ public class BatchOwlLoader {
 
   }
 
-  public static void load(OwlLoadConfiguration config) throws InterruptedException, ExecutionException {
+  public static void load(OwlLoadConfiguration config) throws InterruptedException,
+      ExecutionException {
     Injector i =
         Guice.createInjector(new OwlLoaderModule(config),
             new Neo4jModule(config.getGraphConfiguration()));
