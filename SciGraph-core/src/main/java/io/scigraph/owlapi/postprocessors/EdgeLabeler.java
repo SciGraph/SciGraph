@@ -34,7 +34,6 @@ import org.neo4j.graphdb.Transaction;
 public class EdgeLabeler implements Postprocessor {
 
   private static final Logger logger = Logger.getLogger(EdgeLabeler.class.getName());
-  static final String graphPath = "/home/jnguyenxuan/workspace/SciGraph-playground/graph";
   private final GraphDatabaseService graphDb;
   private final int batchCommitSize = 100_000;
 
