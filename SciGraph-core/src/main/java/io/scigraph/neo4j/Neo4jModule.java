@@ -130,6 +130,10 @@ public class Neo4jModule extends AbstractModule {
         graphDatabaseBuilder
             .setConfig(GraphDatabaseSettings.execution_guard_enabled, Settings.TRUE);
       }
+
+      // #198 - do not keep transaction logs
+      graphDatabaseBuilder.setConfig(GraphDatabaseSettings.keep_logical_logs, Settings.FALSE);
+
       final GraphDatabaseService graphDb = graphDatabaseBuilder.newGraphDatabase();
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override
