@@ -36,6 +36,7 @@ public class EdgeLabeler implements Postprocessor {
   private static final Logger logger = Logger.getLogger(EdgeLabeler.class.getName());
   private final GraphDatabaseService graphDb;
   private final int batchCommitSize = 100_000;
+  public static final String edgeProperty = "lbl"; // TinkerGraph edge property "label" is reserved. 
 
   @Inject
   public EdgeLabeler(GraphDatabaseService graphDb) {
@@ -61,7 +62,7 @@ public class EdgeLabeler implements Postprocessor {
 
       String relName = rel.getType().name();
       if (map.containsKey(relName)) {
-        rel.setProperty(NodeProperties.LABEL, map.get(relName));
+        rel.setProperty(edgeProperty, map.get(relName));
       } else {
         String relLabel = relName;
         String query = "START n = node:node_auto_index(iri='" + relName + "') match (n) return n";
@@ -73,7 +74,7 @@ public class EdgeLabeler implements Postprocessor {
                 GraphUtil.getProperties(n, NodeProperties.LABEL, String.class).iterator().next();
           }
         }
-        rel.setProperty(NodeProperties.LABEL, relLabel);
+        rel.setProperty(edgeProperty, relLabel);
         map.put(relName, relLabel);
       }
 

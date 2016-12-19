@@ -15,18 +15,23 @@
  */
 package io.scigraph.owlapi.postprocessors;
 
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.util.GraphTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.ResourceIterator;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.internal.TinkerGraphUtil;
+import io.scigraph.neo4j.GraphUtil;
+import io.scigraph.util.GraphTestBase;
 
 public class EdgeLabelerTest extends GraphTestBase {
 
@@ -59,8 +64,8 @@ public class EdgeLabelerTest extends GraphTestBase {
   public void edgeWithLabeledNodeIsTagged() {
     Relationship rel =
         n1.getRelationships(RelationshipType.withName(relationshipType1)).iterator().next();
-    assertThat(rel.hasProperty(NodeProperties.LABEL), is(true));
-    assertThat(GraphUtil.getProperty(rel, NodeProperties.LABEL, String.class).get(),
+    assertThat(rel.hasProperty(EdgeLabeler.edgeProperty), is(true));
+    assertThat(GraphUtil.getProperty(rel, EdgeLabeler.edgeProperty, String.class).get(),
         is(relationshipType1Label));
   }
 
@@ -68,8 +73,8 @@ public class EdgeLabelerTest extends GraphTestBase {
   public void edgeWithNodeIsTaggedWithType() {
     Relationship rel =
         n1.getRelationships(RelationshipType.withName(relationshipType2)).iterator().next();
-    assertThat(rel.hasProperty(NodeProperties.LABEL), is(true));
-    assertThat(GraphUtil.getProperty(rel, NodeProperties.LABEL, String.class).get(),
+    assertThat(rel.hasProperty(EdgeLabeler.edgeProperty), is(true));
+    assertThat(GraphUtil.getProperty(rel, EdgeLabeler.edgeProperty, String.class).get(),
         is(relationshipType2));
   }
 
@@ -77,8 +82,21 @@ public class EdgeLabelerTest extends GraphTestBase {
   public void edgeWithoutNodeIsTaggedWithType() {
     Relationship rel =
         n1.getRelationships(RelationshipType.withName(relationshipType3)).iterator().next();
-    assertThat(rel.hasProperty(NodeProperties.LABEL), is(true));
-    assertThat(GraphUtil.getProperty(rel, NodeProperties.LABEL, String.class).get(),
+    assertThat(rel.hasProperty(EdgeLabeler.edgeProperty), is(true));
+    assertThat(GraphUtil.getProperty(rel, EdgeLabeler.edgeProperty, String.class).get(),
         is(relationshipType3));
+  }
+
+  @Test
+  public void canBeTransformedToTinkerGraph() {
+    Graph tg = new TinkerGraph();
+    ResourceIterator<Node> nodes = graphDb.getAllNodes().iterator();
+    while (nodes.hasNext()) {
+      TinkerGraphUtil.addElement(tg, nodes.next());
+    }
+    ResourceIterator<Relationship> relationships = graphDb.getAllRelationships().iterator();
+    while (relationships.hasNext()) {
+      TinkerGraphUtil.addElement(tg, relationships.next());
+    }
   }
 }
