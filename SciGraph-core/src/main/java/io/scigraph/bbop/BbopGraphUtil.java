@@ -16,10 +16,6 @@
 package io.scigraph.bbop;
 
 import static com.google.common.collect.Iterables.getFirst;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.internal.TinkerGraphUtil;
-import io.scigraph.owlapi.curies.CurieUtil;
 
 import java.util.Collection;
 
@@ -31,12 +27,19 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.internal.TinkerGraphUtil;
+import io.scigraph.owlapi.curies.CurieUtil;
+
 public class BbopGraphUtil {
 
   private final CurieUtil curieUtil;
 
   private static final ImmutableSet<String> IGNORED_PROPERTY_KEYS =
       ImmutableSet.of(CommonProperties.IRI, NodeProperties.LABEL, CommonProperties.CURIE);
+  private static final ImmutableSet<String> IGNORED_PROPERTY_KEYS_FOR_EDGES =
+      ImmutableSet.of(CommonProperties.IRI);
 
   @Inject
   public BbopGraphUtil(CurieUtil curieUtil) {
@@ -44,22 +47,23 @@ public class BbopGraphUtil {
   }
 
   String getCurieOrIri(Vertex vertex) {
-    String iri = (String)vertex.getProperty(CommonProperties.IRI);
+    String iri = (String) vertex.getProperty(CommonProperties.IRI);
     return curieUtil.getCurie(iri).or(iri);
   }
-  
+
   /***
    * @param graph The graph to convert
    * @return a bbop representation of a {@link Graph}
    */
   public BbopGraph convertGraph(Graph graph) {
     BbopGraph bbopGraph = new BbopGraph();
-    for (Vertex vertex: graph.getVertices()) {
+    for (Vertex vertex : graph.getVertices()) {
       BbopNode bbopNode = new BbopNode();
       bbopNode.setId(getCurieOrIri(vertex));
-      String label = getFirst(TinkerGraphUtil.getProperties(vertex, NodeProperties.LABEL, String.class), null);
+      String label =
+          getFirst(TinkerGraphUtil.getProperties(vertex, NodeProperties.LABEL, String.class), null);
       bbopNode.setLbl(label);
-      for (String key: vertex.getPropertyKeys()) {
+      for (String key : vertex.getPropertyKeys()) {
         if (IGNORED_PROPERTY_KEYS.contains(key)) {
           continue;
         }
@@ -68,13 +72,20 @@ public class BbopGraphUtil {
       }
       bbopGraph.getNodes().add(bbopNode);
     }
-    for (Edge edge: graph.getEdges()) {
+    for (Edge edge : graph.getEdges()) {
       BbopEdge bbopEdge = new BbopEdge();
-      Vertex subject= edge.getVertex(Direction.OUT);
-      Vertex object= edge.getVertex(Direction.IN);
+      Vertex subject = edge.getVertex(Direction.OUT);
+      Vertex object = edge.getVertex(Direction.IN);
       bbopEdge.setSub(getCurieOrIri(subject));
       bbopEdge.setObj(getCurieOrIri(object));
       bbopEdge.setPred(edge.getLabel());
+      for (String key : edge.getPropertyKeys()) {
+        if (IGNORED_PROPERTY_KEYS_FOR_EDGES.contains(key)) {
+          continue;
+        }
+        Collection<Object> values = TinkerGraphUtil.getProperties(edge, key, Object.class);
+        bbopEdge.getMeta().put(key, values);
+      }
       bbopGraph.getEdges().add(bbopEdge);
     }
     return bbopGraph;
