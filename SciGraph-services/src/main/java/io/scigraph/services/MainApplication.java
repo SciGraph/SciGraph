@@ -91,7 +91,7 @@ public class MainApplication extends Application<ApplicationConfiguration> {
     SwaggerConfig config = ConfigFactory.config();
     config.setApiVersion("1.0.1");
     // TODO: Fix this so the swagger client generator can work correctly
-    config.setBasePath("../../" + basePath);
+    config.setBasePath("/" + basePath);
   }
 
   void configureCors(Environment environment) {
