@@ -19,22 +19,6 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.sort;
-import io.dropwizard.jersey.caching.CacheControl;
-import io.dropwizard.jersey.params.BooleanParam;
-import io.dropwizard.jersey.params.IntParam;
-import io.dropwizard.jersey.params.LongParam;
-import io.scigraph.frames.Concept;
-import io.scigraph.internal.GraphApi;
-import io.scigraph.internal.TinkerGraphUtil;
-import io.scigraph.neo4j.DirectedRelationshipType;
-import io.scigraph.owlapi.OwlLabels;
-import io.scigraph.services.api.graph.ArrayPropertyTransformer;
-import io.scigraph.services.jersey.BadRequestException;
-import io.scigraph.services.jersey.BaseResource;
-import io.scigraph.services.jersey.CustomMediaTypes;
-import io.scigraph.services.jersey.JaxRsUtil;
-import io.scigraph.services.jersey.UnknownClassException;
-import io.scigraph.vocabulary.Vocabulary;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -69,6 +53,25 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
+import io.dropwizard.jersey.caching.CacheControl;
+import io.dropwizard.jersey.params.BooleanParam;
+import io.dropwizard.jersey.params.IntParam;
+import io.dropwizard.jersey.params.LongParam;
+import io.scigraph.frames.Concept;
+import io.scigraph.internal.CypherUtil;
+import io.scigraph.internal.GraphApi;
+import io.scigraph.internal.TinkerGraphUtil;
+import io.scigraph.neo4j.DirectedRelationshipType;
+import io.scigraph.owlapi.OwlLabels;
+import io.scigraph.owlapi.curies.CurieUtil;
+import io.scigraph.services.api.graph.ArrayPropertyTransformer;
+import io.scigraph.services.jersey.BadRequestException;
+import io.scigraph.services.jersey.BaseResource;
+import io.scigraph.services.jersey.CustomMediaTypes;
+import io.scigraph.services.jersey.JaxRsUtil;
+import io.scigraph.services.jersey.UnknownClassException;
+import io.scigraph.vocabulary.Vocabulary;
+
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")
 public class GraphService extends BaseResource {
@@ -76,12 +79,17 @@ public class GraphService extends BaseResource {
   private final Vocabulary vocabulary;
   private final GraphDatabaseService graphDb;
   private final GraphApi api;
+  private final CurieUtil curieUtil;
+  private final CypherUtil cypherUtil;
 
   @Inject
-  GraphService(Vocabulary vocabulary, GraphDatabaseService graphDb, GraphApi api) {
+  GraphService(Vocabulary vocabulary, GraphDatabaseService graphDb, GraphApi api,
+      CurieUtil curieUtil, CypherUtil cypherUtil) {
     this.vocabulary = vocabulary;
     this.graphDb = graphDb;
     this.api = api;
+    this.curieUtil = curieUtil;
+    this.cypherUtil = cypherUtil;
   }
 
   @GET
@@ -89,27 +97,27 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get neighbors", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
-    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
-    CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
-    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
+      MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML,
+      CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV,
+      CustomMediaTypes.TEXT_TSV, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNeighborsFromMultipleRoots(
-      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
-      @QueryParam("id") Set<String> ids,
-      @ApiParam(value = "How far to traverse neighbors", required = false)
-      @QueryParam("depth") @DefaultValue("1") IntParam depth,
-      @ApiParam(value = "Traverse blank nodes", required = false)
-      @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
-      @ApiParam(value = "Which relationship to traverse", required = false)
-      @QueryParam("relationshipType") Optional<String> relationshipType,
-      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false, allowableValues = DocumentationStrings.DIRECTION_ALLOWED)
-      @QueryParam("direction") @DefaultValue("BOTH") String direction,
-      @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
-      @QueryParam("project") @DefaultValue("*") Set<String> projection,
-      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC,
+          required = true) @QueryParam("id") Set<String> ids,
+      @ApiParam(value = "How far to traverse neighbors",
+          required = false) @QueryParam("depth") @DefaultValue("1") IntParam depth,
+      @ApiParam(value = "Traverse blank nodes",
+          required = false) @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
+      @ApiParam(value = "Which relationship to traverse",
+          required = false) @QueryParam("relationshipType") Optional<String> relationshipType,
+      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false,
+          allowableValues = DocumentationStrings.DIRECTION_ALLOWED) @QueryParam("direction") @DefaultValue("BOTH") String direction,
+      @ApiParam(value = DocumentationStrings.PROJECTION_DOC,
+          required = false) @QueryParam("project") @DefaultValue("*") Set<String> projection,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC,
+          required = false) @QueryParam("callback") String callback) {
     Set<Concept> roots = new HashSet<>();
-    for (String id: ids) {
+    for (String id : ids) {
       Vocabulary.Query query = new Vocabulary.Query.Builder(id).build();
       Optional<Concept> concept = vocabulary.getConceptFromId(query);
       if (!concept.isPresent()) {
@@ -119,13 +127,32 @@ public class GraphService extends BaseResource {
     }
     Set<DirectedRelationshipType> types = new HashSet<>();
     if (relationshipType.isPresent()) {
-      if (!getRelationshipTypeNames().contains(relationshipType.get())) {
-        throw new BadRequestException("Unknown relationship type: " + relationshipType.get());
+      String relationshipTypeString = relationshipType.get();
+      boolean requireEntailment = relationshipTypeString.contains("!");
+      if (requireEntailment) {
+        relationshipTypeString = relationshipTypeString.replaceAll("!", "");
       }
+      relationshipTypeString = curieUtil.getIri(relationshipTypeString).or(relationshipTypeString);
+      if (!getRelationshipTypeNames().contains(relationshipTypeString)) {
+        throw new BadRequestException("Unknown relationship type: " + relationshipTypeString);
+      }
+
+      Direction dir = Direction.valueOf(direction);
       try {
-        RelationshipType type = RelationshipType.withName(relationshipType.get());
-        Direction dir = Direction.valueOf(direction);
-        types.add(new DirectedRelationshipType(type, dir));
+        if (requireEntailment) {
+          Set<RelationshipType> relationshipTypes =
+              cypherUtil.getEntailedRelationshipTypes(newHashSet(relationshipTypeString));
+          types = newHashSet(transform(relationshipTypes,
+              new Function<RelationshipType, DirectedRelationshipType>() {
+                @Override
+                public DirectedRelationshipType apply(RelationshipType type) {
+                  return new DirectedRelationshipType(type, dir);
+                }
+              }));
+        } else {
+          RelationshipType type = RelationshipType.withName(relationshipTypeString);
+          types.add(new DirectedRelationshipType(type, dir));
+        }
       } catch (Exception e) {
         throw new BadRequestException("Unknown direction: " + direction);
       }
@@ -144,8 +171,9 @@ public class GraphService extends BaseResource {
           @Override
           public boolean apply(Node node) {
             return !(Iterables.contains(node.getLabels(), OwlLabels.OWL_ANONYMOUS));
-          }};
-          nodePredicate = Optional.of(predicate);
+          }
+        };
+        nodePredicate = Optional.of(predicate);
       }
       tg = api.getNeighbors(newHashSet(nodes), depth.get(), types, nodePredicate);
       tx.success();
@@ -161,26 +189,27 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get neighbors", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
-    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
-    CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
-    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
+      MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML,
+      CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV,
+      CustomMediaTypes.TEXT_TSV, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNeighbors(
-      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
-      @PathParam("id") String id,
-      @ApiParam(value = "How far to traverse neighbors", required = false)
-      @QueryParam("depth") @DefaultValue("1") IntParam depth,
-      @ApiParam(value = "Traverse blank nodes", required = false)
-      @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
-      @ApiParam(value = "Which relationship to traverse", required = false)
-      @QueryParam("relationshipType") Optional<String> relationshipType,
-      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false, allowableValues = DocumentationStrings.DIRECTION_ALLOWED)
-      @QueryParam("direction") @DefaultValue("BOTH") String direction,
-      @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
-      @QueryParam("project") @DefaultValue("*") Set<String> projection,
-      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false )
-      @QueryParam("callback") String callback) {
-    return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes, relationshipType, direction, projection, callback);
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC,
+          required = true) @PathParam("id") String id,
+      @ApiParam(value = "How far to traverse neighbors",
+          required = false) @QueryParam("depth") @DefaultValue("1") IntParam depth,
+      @ApiParam(value = "Traverse blank nodes",
+          required = false) @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
+      @ApiParam(value = "Which relationship to traverse",
+          required = false) @QueryParam("relationshipType") Optional<String> relationshipType,
+      @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false,
+          allowableValues = DocumentationStrings.DIRECTION_ALLOWED) @QueryParam("direction") @DefaultValue("BOTH") String direction,
+      @ApiParam(value = DocumentationStrings.PROJECTION_DOC,
+          required = false) @QueryParam("project") @DefaultValue("*") Set<String> projection,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC,
+          required = false) @QueryParam("callback") String callback) {
+    return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes,
+        relationshipType, direction, projection, callback);
   }
 
   @GET
@@ -188,18 +217,19 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get all properties of a node", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
-    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
-    CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
-    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
+      MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML,
+      CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV,
+      CustomMediaTypes.TEXT_TSV, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getNode(
-      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC, required = true)
-      @PathParam("id") String id,
-      @ApiParam(value = DocumentationStrings.PROJECTION_DOC, required = false)
-      @QueryParam("project") @DefaultValue("*") Set<String> projection,
-      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") String callback) {
-    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>absent(), null, projection, callback);
+      @ApiParam(value = DocumentationStrings.GRAPH_ID_DOC,
+          required = true) @PathParam("id") String id,
+      @ApiParam(value = DocumentationStrings.PROJECTION_DOC,
+          required = false) @QueryParam("project") @DefaultValue("*") Set<String> projection,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC,
+          required = false) @QueryParam("callback") String callback) {
+    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>absent(),
+        null, projection, callback);
   }
 
   @GET
@@ -207,21 +237,20 @@ public class GraphService extends BaseResource {
   @ApiOperation(value = "Get nodes connected by an edge type", response = Graph.class)
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
-  @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
-    MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML, CustomMediaTypes.APPLICATION_XGMML,
-    CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV, CustomMediaTypes.TEXT_TSV,
-    CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
+      MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML,
+      CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV,
+      CustomMediaTypes.TEXT_TSV, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
   public Object getEdges(
-      @ApiParam(value = "The type of the edge", required = true)
-      @PathParam("type") String type,
-      @ApiParam(value = "Should subproperties and equivalent properties be included", required = false)
-      @QueryParam("entail") @DefaultValue("true") BooleanParam entail,
-      @ApiParam(value = "The number of edges to be returned", required = false)
-      @QueryParam("limit") @DefaultValue("100") LongParam limit,
-      @ApiParam(value = "The number of edges to skip", required = false)
-      @QueryParam("skip") @DefaultValue("0") LongParam skip,
-      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") String callback) {
+      @ApiParam(value = "The type of the edge", required = true) @PathParam("type") String type,
+      @ApiParam(value = "Should subproperties and equivalent properties be included",
+          required = false) @QueryParam("entail") @DefaultValue("true") BooleanParam entail,
+      @ApiParam(value = "The number of edges to be returned",
+          required = false) @QueryParam("limit") @DefaultValue("100") LongParam limit,
+      @ApiParam(value = "The number of edges to skip",
+          required = false) @QueryParam("skip") @DefaultValue("0") LongParam skip,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC,
+          required = false) @QueryParam("callback") String callback) {
     Graph edgeGraph = new TinkerGraph();
     try (Transaction tx = graphDb.beginTx()) {
       RelationshipType relationshipType = RelationshipType.withName(type);
@@ -234,40 +263,43 @@ public class GraphService extends BaseResource {
 
   // TODO: Move this to scigraph-core
   List<String> getRelationshipTypeNames() {
-    return newArrayList(transform(api.getAllRelationshipTypes(), new Function<RelationshipType, String>() {
-      @Override
-      public String apply(RelationshipType type) {
-        return type.name();
-      }
-    }));
+    return newArrayList(
+        transform(api.getAllRelationshipTypes(), new Function<RelationshipType, String>() {
+          @Override
+          public String apply(RelationshipType type) {
+            return type.name();
+          }
+        }));
   }
 
   @GET
   @Path("/relationship_types")
-  @ApiOperation(value = "Get all relationship types", response = String.class, responseContainer="List")
+  @ApiOperation(value = "Get all relationship types", response = String.class,
+      responseContainer = "List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON})
-  public Object getRelationships(
-      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") String callback) {
+  public Object getRelationships(@ApiParam(value = DocumentationStrings.JSONP_DOC,
+      required = false) @QueryParam("callback") String callback) {
     List<String> relationships = getRelationshipTypeNames();
     sort(relationships);
-    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {}, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(relationships) {},
+        callback);
   }
 
   @GET
   @Path("/properties")
-  @ApiOperation(value = "Get all property keys", response = String.class, responseContainer="List")
+  @ApiOperation(value = "Get all property keys", response = String.class,
+      responseContainer = "List")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.APPLICATION_JSON})
-  public Object getProperties(
-      @ApiParam(value = DocumentationStrings.JSONP_DOC, required = false)
-      @QueryParam("callback") String callback) {
+  public Object getProperties(@ApiParam(value = DocumentationStrings.JSONP_DOC,
+      required = false) @QueryParam("callback") String callback) {
     List<String> propertyKeys = new ArrayList<>(api.getAllPropertyKeys());
     sort(propertyKeys);
-    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(propertyKeys) {}, callback);
+    return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(propertyKeys) {},
+        callback);
   }
-  
+
 }
