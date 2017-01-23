@@ -112,6 +112,8 @@ public class GraphService extends BaseResource {
           required = false) @QueryParam("relationshipType") Optional<String> relationshipType,
       @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false,
           allowableValues = DocumentationStrings.DIRECTION_ALLOWED) @QueryParam("direction") @DefaultValue("BOTH") String direction,
+      @ApiParam(value = "Should subproperties and equivalent properties be included",
+          required = false) @QueryParam("entail") @DefaultValue("true") BooleanParam entail,
       @ApiParam(value = DocumentationStrings.PROJECTION_DOC,
           required = false) @QueryParam("project") @DefaultValue("*") Set<String> projection,
       @ApiParam(value = DocumentationStrings.JSONP_DOC,
@@ -128,10 +130,6 @@ public class GraphService extends BaseResource {
     Set<DirectedRelationshipType> types = new HashSet<>();
     if (relationshipType.isPresent()) {
       String relationshipTypeString = relationshipType.get();
-      boolean requireEntailment = relationshipTypeString.contains("!");
-      if (requireEntailment) {
-        relationshipTypeString = relationshipTypeString.replaceAll("!", "");
-      }
       relationshipTypeString = curieUtil.getIri(relationshipTypeString).or(relationshipTypeString);
       if (!getRelationshipTypeNames().contains(relationshipTypeString)) {
         throw new BadRequestException("Unknown relationship type: " + relationshipTypeString);
@@ -139,7 +137,7 @@ public class GraphService extends BaseResource {
 
       Direction dir = Direction.valueOf(direction);
       try {
-        if (requireEntailment) {
+        if (entail.get()) {
           Set<RelationshipType> relationshipTypes =
               cypherUtil.getEntailedRelationshipTypes(newHashSet(relationshipTypeString));
           types = newHashSet(transform(relationshipTypes,
@@ -204,12 +202,14 @@ public class GraphService extends BaseResource {
           required = false) @QueryParam("relationshipType") Optional<String> relationshipType,
       @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false,
           allowableValues = DocumentationStrings.DIRECTION_ALLOWED) @QueryParam("direction") @DefaultValue("BOTH") String direction,
+      @ApiParam(value = "Should subproperties and equivalent properties be included",
+          required = false) @QueryParam("entail") @DefaultValue("true") BooleanParam entail,
       @ApiParam(value = DocumentationStrings.PROJECTION_DOC,
           required = false) @QueryParam("project") @DefaultValue("*") Set<String> projection,
       @ApiParam(value = DocumentationStrings.JSONP_DOC,
           required = false) @QueryParam("callback") String callback) {
     return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes,
-        relationshipType, direction, projection, callback);
+        relationshipType, direction, entail, projection, callback);
   }
 
   @GET
@@ -229,7 +229,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.JSONP_DOC,
           required = false) @QueryParam("callback") String callback) {
     return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>absent(),
-        null, projection, callback);
+        null, new BooleanParam("false"), projection, callback);
   }
 
   @GET
