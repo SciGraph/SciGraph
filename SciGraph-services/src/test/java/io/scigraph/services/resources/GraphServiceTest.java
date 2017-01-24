@@ -24,10 +24,6 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import io.dropwizard.testing.junit.ResourceTestRule;
-import io.scigraph.internal.GraphApi;
-import io.scigraph.services.resources.GraphService;
-import io.scigraph.vocabulary.Vocabulary;
 
 import java.util.List;
 
@@ -43,16 +39,24 @@ import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
+import io.dropwizard.testing.junit.ResourceTestRule;
+import io.scigraph.internal.CypherUtil;
+import io.scigraph.internal.GraphApi;
+import io.scigraph.owlapi.curies.CurieUtil;
+import io.scigraph.vocabulary.Vocabulary;
+
 public class GraphServiceTest {
 
   private static final Vocabulary vocabulary = mock(Vocabulary.class);
   private static final GraphDatabaseService graphDb = mock(GraphDatabaseService.class);
   private static final GraphApi api = mock(GraphApi.class);
   private static final Transaction tx = mock(Transaction.class);
+  private static final CurieUtil curieUtil = mock(CurieUtil.class);
+  private static final CypherUtil cypherUtil = mock(CypherUtil.class);
 
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
-  .addResource(new GraphService(vocabulary, graphDb, api)).build();
+      .addResource(new GraphService(vocabulary, graphDb, api, curieUtil, cypherUtil)).build();
 
   @Before
   public void setup() {
@@ -60,34 +64,32 @@ public class GraphServiceTest {
     when(api.getAllRelationshipTypes()).thenReturn(
         newArrayList(RelationshipType.withName("foo"), RelationshipType.withName("bar")));
     when(graphDb.beginTx()).thenReturn(tx);
-    when(api.getEdges(any(RelationshipType.class), anyBoolean(), anyLong(), anyLong())).thenReturn(new TinkerGraph());
+    when(api.getEdges(any(RelationshipType.class), anyBoolean(), anyLong(), anyLong()))
+        .thenReturn(new TinkerGraph());
   }
 
   @Test
   public void smokeConstructor() {
-    new GraphService(vocabulary, graphDb, api);
+    new GraphService(vocabulary, graphDb, api, curieUtil, cypherUtil);
   }
 
   @Test
   public void propertyKeys_areSorted() {
-    assertThat(
-        resources.client().target("/graph/properties").request().get(new GenericType<List<String>>(){}),
-        contains("bar", "foo"));
+    assertThat(resources.client().target("/graph/properties").request()
+        .get(new GenericType<List<String>>() {}), contains("bar", "foo"));
     verify(api).getAllPropertyKeys();
   }
 
   @Test
   public void relationshipTypes_areSorted() {
-    assertThat(
-        resources.client().target("/graph/relationship_types").request().get(new GenericType<List<String>>(){}),
-        contains("bar", "foo"));
+    assertThat(resources.client().target("/graph/relationship_types").request()
+        .get(new GenericType<List<String>>() {}), contains("bar", "foo"));
     verify(api).getAllRelationshipTypes();
   }
 
   @Test
   public void edges_areReturned() {
-    assertThat(
-        resources.client().target("/graph/edges/subClassOf").request().get(String.class), 
+    assertThat(resources.client().target("/graph/edges/subClassOf").request().get(String.class),
         StringContains.containsString("\"vertices\":[]"));
   }
 
