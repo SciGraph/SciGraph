@@ -2,7 +2,8 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Swagger UI</title>
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+  <title>SciGraph - REST Services</title>
   <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
   <link href='css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
@@ -16,7 +17,7 @@
   <script src='lib/jquery.slideto.min.js' type='text/javascript'></script>
   <script src='lib/jquery.wiggle.min.js' type='text/javascript'></script>
   <script src='lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
-  <script src='lib/handlebars-2.0.0.js' type='text/javascript'></script>
+  <script src='lib/handlebars-4.0.5.js' type='text/javascript'></script>
   <script src='lib/lodash.min.js' type='text/javascript'></script>
   <script src='lib/backbone-min.js' type='text/javascript'></script>
   <script src='swagger-ui.js' type='text/javascript'></script>
@@ -26,7 +27,7 @@
   <script src='lib/marked.js' type='text/javascript'></script>
   <script src='lib/swagger-oauth.js' type='text/javascript'></script>
   <script src='lib/URI.js' type='text/javascript'></script>
-  
+
   <!-- Some basic translations -->
   <!-- <script src='lang/translator.js' type='text/javascript'></script> -->
   <!-- <script src='lang/ru.js' type='text/javascript'></script> -->
@@ -34,8 +35,7 @@
 
   <script type="text/javascript">
     $(function () {
-      var url = new URI("/../api-docs/", location.href);
-      console.log(url.normalize().toString());
+      var url = new URI("../api-docs/", location.href).normalize().toString();
 
       hljs.configure({
         highlightSizeThreshold: 5000
@@ -46,7 +46,7 @@
         window.SwaggerTranslator.translate();
       }
       window.swaggerUi = new SwaggerUi({
-        url: "/scigraph/api-docs/",
+        url: url,
         dom_id: "swagger-ui-container",
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
         onComplete: function(swaggerApi, swaggerUi){
@@ -56,7 +56,7 @@
               clientSecret: "your-client-secret-if-required",
               realm: "your-realms",
               appName: "your-app-name",
-              scopeSeparator: ",",
+              scopeSeparator: " ",
               additionalQueryStringParams: {}
             });
           }
@@ -71,7 +71,8 @@
         docExpansion: "none",
         jsonEditor: false,
         defaultModelRendering: 'schema',
-        showRequestHeaders: false
+        showRequestHeaders: false,
+        showOperationIds: false
       });
 
       window.swaggerUi.load();
@@ -89,7 +90,7 @@
 <div id='header'>
   <div class="swagger-ui-wrap">
     <a id="logo" href="http://swagger.io"><img class="logo__img" alt="swagger" height="30" width="30" src="images/logo_small.png" /><span class="logo__title">SciGraph - REST Services</span></a>
-<!--     <form id='api_selector'>
+    <!-- <form id='api_selector'>
       <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>
       <div id='auth_container'></div>
       <div class='input'><a id="explore" class="header__btn" href="#" data-sw-translate>Explore</a></div>
