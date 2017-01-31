@@ -29,7 +29,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
 
-@Path("/api-docs//dynamic")
+@Path("/api-docs/dynamic")
 @Produces(MediaType.APPLICATION_JSON)
 public class DynamicSwaggerService {
 
@@ -46,7 +46,7 @@ public class DynamicSwaggerService {
     Resource resource = new Resource();
     resource.setApiVersion("1.0.1");
     resource.setSwaggerVersion("1.2");
-    resource.setBasePath("../../scigraph");
+    resource.setBasePath("/scigraph");
     resource.setResourcePath("/dynamic");
     resource.setProduces(newArrayList(MediaType.APPLICATION_JSON));
 
