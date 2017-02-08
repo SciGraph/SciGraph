@@ -162,28 +162,6 @@ public class OwlPostprocessor {
     pool.awaitTermination(10, TimeUnit.DAYS);
     tx.success();
     tx.close();
-    
-
-
-    tx = graphDb.beginTx();
-    // TODO find where this belongs to and how to make it generic
-    // Tagging all the nodes with a generic Label
-    Set<Long> allNodeIds = new HashSet<Long>();
-    ResourceIterator<Node> allNodeIt = graphDb.getAllNodes().iterator();
-    while (allNodeIt.hasNext()) {
-      allNodeIds.add(allNodeIt.next().getId());
-    }
-    toTag.put("Node", allNodeIds);
-    // Adding the index
-    Schema schema = graphDb.schema();
-    IndexDefinition indexDefinition = schema.indexFor(Label.label("Node")).on("iri").create();
-    tx.success();
-    tx.close();
-    
-    tx = graphDb.beginTx();
-    schema.awaitIndexOnline(indexDefinition, 2, TimeUnit.MINUTES);
-    tx.success();
-    tx.close();
 
     tx = graphDb.beginTx();
     for (Entry<String, Set<Long>> t : toTag.entrySet()) {
