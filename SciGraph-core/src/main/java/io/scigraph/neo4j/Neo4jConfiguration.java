@@ -62,6 +62,10 @@ public class Neo4jConfiguration {
     return exactNodeProperties;
   }
   
+  public void setSchemaIndexes(Map<String, Set<String>> schemaIndexes) {
+    this.schemaIndexes = schemaIndexes;
+  }
+  
   public Map<String, Set<String>> getSchemaIndexes() {
     return schemaIndexes;
   }
