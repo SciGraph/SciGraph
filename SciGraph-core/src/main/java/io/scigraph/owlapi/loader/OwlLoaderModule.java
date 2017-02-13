@@ -15,23 +15,6 @@
  */
 package io.scigraph.owlapi.loader;
 
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.neo4j.Graph;
-import io.scigraph.neo4j.GraphBatchImpl;
-import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
-import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
-import io.scigraph.owlapi.loader.bindings.IndicatesAddEdgeLabel;
-import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
-import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
-import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
-import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
-import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
-import io.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
-import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -54,6 +37,24 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
+
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.neo4j.Graph;
+import io.scigraph.neo4j.GraphBatchImpl;
+import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
+import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
+import io.scigraph.owlapi.loader.bindings.IndicatesAddEdgeLabel;
+import io.scigraph.owlapi.loader.bindings.IndicatesAllNodesLabel;
+import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
+import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesMappedCategories;
+import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
+import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
+import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
+import io.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
+import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 
 public class OwlLoaderModule extends AbstractModule {
 
@@ -97,6 +98,8 @@ public class OwlLoaderModule extends AbstractModule {
         IndicatesCliqueConfiguration.class).toInstance(config.getCliqueConfiguration());
     bind(new TypeLiteral<Optional<Boolean>>() {}).annotatedWith(IndicatesAddEdgeLabel.class)
         .toInstance(config.getAddEdgeLabel());
+    bind(new TypeLiteral<Optional<String>>() {}).annotatedWith(IndicatesAllNodesLabel.class)
+    .toInstance(config.getAllNodesLabel());
   }
 
   /*

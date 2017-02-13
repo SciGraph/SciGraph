@@ -11,7 +11,7 @@ graphConfiguration:
       - label
       - synonym
     schemaIndexes:
-      pizza :
+      food :
         - label
     curies:
       'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
@@ -56,3 +56,7 @@ mappedProperties:
   - name: comment
     properties:
     - rdfs:comment
+
+# To label all the nodes with a specific label.
+# Useful for schema indexes.
+allNodesLabel: food
