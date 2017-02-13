@@ -35,6 +35,8 @@ public class Neo4jConfiguration {
 
   private Set<String> indexedNodeProperties = new HashSet<>();
   private Set<String> exactNodeProperties = new HashSet<>();
+  
+  private Map<String, Set<String>> schemaIndexes = new HashMap<>();
 
   public String getLocation() {
     return location;
@@ -58,6 +60,14 @@ public class Neo4jConfiguration {
 
   public Set<String> getExactNodeProperties() {
     return exactNodeProperties;
+  }
+  
+  public void setSchemaIndexes(Map<String, Set<String>> schemaIndexes) {
+    this.schemaIndexes = schemaIndexes;
+  }
+  
+  public Map<String, Set<String>> getSchemaIndexes() {
+    return schemaIndexes;
   }
 
 }

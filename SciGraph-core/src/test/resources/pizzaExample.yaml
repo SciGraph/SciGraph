@@ -10,6 +10,9 @@ graphConfiguration:
     exactNodeProperties:
       - label
       - synonym
+    schemaIndexes:
+      food :
+        - label
     curies:
       'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
       'rdfs' : 'http://www.w3.org/2000/01/rdf-schema#'
@@ -53,3 +56,7 @@ mappedProperties:
   - name: comment
     properties:
     - rdfs:comment
+
+# To label all the nodes with a specific label.
+# Useful for schema indexes.
+allNodesLabel: food

@@ -34,6 +34,15 @@ public class OwlLoadConfiguration {
   private List<MappedProperty> mappedProperties = new ArrayList<>();
   private Optional<CliqueConfiguration> cliqueConfiguration = Optional.absent();
   private Optional<Boolean> addEdgeLabel = Optional.absent();
+  private Optional<String> allNodesLabel = Optional.absent();
+
+  public Optional<String> getAllNodesLabel() {
+    return allNodesLabel;
+  }
+
+  public void setAllNodesLabel(String allNodesLabel) {
+    this.allNodesLabel = Optional.of(allNodesLabel);
+  }
 
   public Optional<Boolean> getAddEdgeLabel() {
     return addEdgeLabel;
