@@ -29,7 +29,6 @@ import io.scigraph.lucene.VocabularyQueryAnalyzer;
 import io.scigraph.neo4j.GraphUtil;
 import io.scigraph.neo4j.NodeTransformer;
 import io.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
-import io.scigraph.owlapi.curies.CurieUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,6 +77,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
+import org.prefixcommons.CurieUtil;
 
 public class VocabularyNeo4jImpl implements Vocabulary {
 

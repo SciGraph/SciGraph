@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.owlapi.curies.CurieAdder;
-import io.scigraph.owlapi.curies.CurieUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +32,7 @@ import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.prefixcommons.CurieUtil;
 
 public class CurieAdderTest {
 

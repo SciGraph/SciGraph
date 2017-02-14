@@ -131,6 +131,11 @@
       <artifactId>mapdb</artifactId>
       <version>1.0.9</version>
     </dependency>
+    <dependency>
+      <groupId>org.prefixcommons</groupId>
+      <artifactId>curie-util</artifactId>
+      <version>0.0.1</version>
+    </dependency>
   </dependencies>
 
   <build>

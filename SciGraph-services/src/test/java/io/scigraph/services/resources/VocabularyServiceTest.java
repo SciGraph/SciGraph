@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import io.scigraph.frames.Concept;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.services.resources.VocabularyService;
 import io.scigraph.vocabulary.Vocabulary;
 
@@ -35,6 +34,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
+import org.prefixcommons.CurieUtil;
 
 public class VocabularyServiceTest {
 

@@ -26,7 +26,6 @@ import io.scigraph.neo4j.Neo4jConfiguration;
 import io.scigraph.neo4j.Neo4jModule;
 import io.scigraph.neo4j.RelationshipMap;
 import io.scigraph.owlapi.OwlLabels;
-import io.scigraph.owlapi.curies.CurieUtil;
 
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +40,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
+import org.prefixcommons.CurieUtil;
 
 public class GraphTestBase {
 

@@ -30,7 +30,7 @@ import com.tinkerpop.blueprints.Vertex;
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.internal.TinkerGraphUtil;
-import io.scigraph.owlapi.curies.CurieUtil;
+import org.prefixcommons.CurieUtil;
 
 public class BbopGraphUtil {
 

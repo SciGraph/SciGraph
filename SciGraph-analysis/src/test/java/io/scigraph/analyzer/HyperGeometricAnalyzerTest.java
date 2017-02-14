@@ -26,7 +26,6 @@ import io.scigraph.frames.NodeProperties;
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.owlapi.GraphOwlVisitor;
 import io.scigraph.owlapi.OwlPostprocessor;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.util.GraphTestBase;
 
@@ -38,6 +37,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
+import org.prefixcommons.CurieUtil;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

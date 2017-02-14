@@ -19,7 +19,6 @@ import static com.google.common.base.Joiner.on;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
-import io.scigraph.owlapi.curies.CurieUtil;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,6 +43,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.prefixcommons.CurieUtil;
 
 /***
  * A utility for more expressive Cypher queries.

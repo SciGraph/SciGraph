@@ -15,7 +15,6 @@
  */
 package io.scigraph.owlapi.loader;
 
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 import java.io.File;
@@ -30,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Optional;
+import org.prefixcommons.CurieUtil;
 
 public class OwlLoadConfigurationLoader {
 

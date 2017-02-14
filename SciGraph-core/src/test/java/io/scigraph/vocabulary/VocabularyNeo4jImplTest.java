@@ -31,7 +31,6 @@ import io.scigraph.frames.NodeProperties;
 import io.scigraph.lucene.LuceneUtils;
 import io.scigraph.neo4j.GraphUtil;
 import io.scigraph.neo4j.NodeTransformer;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.util.GraphTestBase;
 import io.scigraph.vocabulary.Vocabulary.Query;
 
@@ -45,6 +44,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.prefixcommons.CurieUtil;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Optional;

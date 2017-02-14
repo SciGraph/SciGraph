@@ -20,7 +20,6 @@ import io.scigraph.internal.CypherUtil;
 import io.scigraph.internal.GraphAspect;
 import io.scigraph.internal.TinkerGraphUtil;
 import io.scigraph.owlapi.curies.AddCuries;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.services.api.graph.ArrayPropertyTransformer;
 import io.scigraph.services.jersey.MultivaluedMapUtils;
 import io.scigraph.services.swagger.beans.resource.Apis;
@@ -44,6 +43,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.assistedinject.Assisted;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.prefixcommons.CurieUtil;
 
 class CypherInflector implements Inflector<ContainerRequestContext, Response> {
 
