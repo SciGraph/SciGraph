@@ -16,19 +16,20 @@
 package io.scigraph.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import io.scigraph.util.GraphTestBase;
 
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+
+import io.scigraph.util.GraphTestBase;
 
 public class EvidenceAspectTest extends GraphTestBase {
 
@@ -58,8 +59,8 @@ public class EvidenceAspectTest extends GraphTestBase {
     association2.createRelationshipTo(subject1, EvidenceAspect.HAS_SUBJECT);
     association2.createRelationshipTo(object3, EvidenceAspect.HAS_OBJECT);
     Relationship rel =
-        subject1.createRelationshipTo(object3, DynamicRelationshipType.withName(relationName));
-    association2.createRelationshipTo(relationNode, EvidenceAspect.OBJECT_PROPERTY);
+        subject1.createRelationshipTo(object3, RelationshipType.withName(relationName));
+    association2.createRelationshipTo(relationNode, EvidenceAspect.HAS_PREDICATE);
 
     TinkerGraphUtil.addNode(graph, subject1);
     TinkerGraphUtil.addNode(graph, object1);

@@ -43,16 +43,16 @@ import com.tinkerpop.blueprints.Vertex;
 public class EvidenceAspect implements GraphAspect {
   private static final Logger logger = Logger.getLogger(EvidenceAspect.class.getName());
 
-  static final RelationshipType HAS_SUBJECT = RelationshipType
-      .withName("http://purl.org/oban/association_has_subject");
-  static final RelationshipType HAS_OBJECT = RelationshipType
-      .withName("http://purl.org/oban/association_has_object");
-  static final RelationshipType EVIDENCE = RelationshipType
-      .withName("http://purl.obolibrary.org/obo/RO_0002558");
-  static final RelationshipType SOURCE = RelationshipType
-      .withName("http://purl.org/dc/elements/1.1/source");
-  static final RelationshipType OBJECT_PROPERTY = RelationshipType
-      .withName("http://purl.org/oban/association_has_predicate");
+  static final RelationshipType HAS_SUBJECT =
+      RelationshipType.withName("http://purl.org/oban/association_has_subject");
+  static final RelationshipType HAS_OBJECT =
+      RelationshipType.withName("http://purl.org/oban/association_has_object");
+  static final RelationshipType EVIDENCE =
+      RelationshipType.withName("http://purl.obolibrary.org/obo/RO_0002558");
+  static final RelationshipType SOURCE =
+      RelationshipType.withName("http://purl.org/dc/elements/1.1/source");
+  static final RelationshipType HAS_PREDICATE =
+      RelationshipType.withName("http://purl.org/oban/association_has_predicate");
 
   private final GraphDatabaseService graphDb;
 
@@ -74,13 +74,13 @@ public class EvidenceAspect implements GraphAspect {
         Node subject = graphDb.getNodeById(Long.parseLong((String) vertex.getId()));
         for (Relationship hasSubject : subject.getRelationships(HAS_SUBJECT, Direction.INCOMING)) {
           Node association = hasSubject.getOtherNode(subject);
-          for (Relationship hasObject : association
-              .getRelationships(HAS_OBJECT, Direction.OUTGOING)) {
+          for (Relationship hasObject : association.getRelationships(HAS_OBJECT,
+              Direction.OUTGOING)) {
             Node object = hasObject.getOtherNode(association);
             if (nodeIds.contains(object.getId())) {
               // check of the relationship is in the graph
               Iterator<Relationship> objectProperty =
-                  association.getRelationships(OBJECT_PROPERTY, Direction.OUTGOING).iterator();
+                  association.getRelationships(HAS_PREDICATE, Direction.OUTGOING).iterator();
               if (objectProperty.hasNext()) {
                 // an association has to have 1 and only 1 object property
                 Node relationshipNode = objectProperty.next().getOtherNode(association);
@@ -111,10 +111,9 @@ public class EvidenceAspect implements GraphAspect {
                   }
                 }
               } else {
-                logger
-                    .severe(GraphUtil.getProperty(association, NodeProperties.IRI, String.class)
-                        .or(Long.toString(association.getId()))
-                        + " does not have the relation 'http://purl.org/oban/association_has_predicate'. Ignoring this association.");
+                logger.severe(GraphUtil.getProperty(association, NodeProperties.IRI, String.class)
+                    .or(Long.toString(association.getId())) + " does not have the relation '"
+                    + HAS_PREDICATE.name() + "'. Ignoring this association.");
               }
             }
           }
