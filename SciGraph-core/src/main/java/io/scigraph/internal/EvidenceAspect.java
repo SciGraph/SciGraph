@@ -52,7 +52,7 @@ public class EvidenceAspect implements GraphAspect {
   static final RelationshipType SOURCE = RelationshipType
       .withName("http://purl.org/dc/elements/1.1/source");
   static final RelationshipType OBJECT_PROPERTY = RelationshipType
-      .withName("http://purl.org/oban/association_has_object_property");
+      .withName("http://purl.org/oban/association_has_predicate");
 
   private final GraphDatabaseService graphDb;
 
@@ -114,7 +114,7 @@ public class EvidenceAspect implements GraphAspect {
                 logger
                     .severe(GraphUtil.getProperty(association, NodeProperties.IRI, String.class)
                         .or(Long.toString(association.getId()))
-                        + " does not have the relation 'http://purl.org/oban/association_has_object_property'. Ignoring this association.");
+                        + " does not have the relation 'http://purl.org/oban/association_has_predicate'. Ignoring this association.");
               }
             }
           }
