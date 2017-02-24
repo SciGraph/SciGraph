@@ -45,6 +45,7 @@ import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 import io.scigraph.owlapi.loader.bindings.IndicatesAddEdgeLabel;
 import io.scigraph.owlapi.loader.bindings.IndicatesAllNodesLabel;
+import io.scigraph.owlapi.loader.bindings.IndicatesAnonymousNodeProperty;
 import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
 import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
@@ -100,6 +101,8 @@ public class OwlLoaderModule extends AbstractModule {
         .toInstance(config.getAddEdgeLabel());
     bind(new TypeLiteral<Optional<String>>() {}).annotatedWith(IndicatesAllNodesLabel.class)
     .toInstance(config.getAllNodesLabel());
+    bind(new TypeLiteral<Optional<String>>() {}).annotatedWith(IndicatesAnonymousNodeProperty.class)
+    .toInstance(config.getAnonymousNodeProperty());
   }
 
   /*

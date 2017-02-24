@@ -35,6 +35,15 @@ public class OwlLoadConfiguration {
   private Optional<CliqueConfiguration> cliqueConfiguration = Optional.absent();
   private Optional<Boolean> addEdgeLabel = Optional.absent();
   private Optional<String> allNodesLabel = Optional.absent();
+  private Optional<String> anonymousNodeProperty = Optional.absent();
+
+  public Optional<String> getAnonymousNodeProperty() {
+    return anonymousNodeProperty;
+  }
+
+  public void setAnonymousNodeProperty(String anonymousNodeProperty) {
+    this.anonymousNodeProperty = Optional.of(anonymousNodeProperty);
+  }
 
   public Optional<String> getAllNodesLabel() {
     return allNodesLabel;
