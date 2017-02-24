@@ -17,46 +17,46 @@ package io.scigraph.owlapi.postprocessors;
 
 import java.util.logging.Logger;
 
-import javax.inject.Inject;
-
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Transaction;
 
-public class AllNodesLabeler implements Postprocessor {
+import io.scigraph.owlapi.OwlLabels;
 
-  private static final Logger logger = Logger.getLogger(AllNodesLabeler.class.getName());
+public class AnonymousNodeTagger implements Postprocessor {
+
+  private static final Logger logger = Logger.getLogger(AnonymousNodeTagger.class.getName());
   private final GraphDatabaseService graphDb;
-  private final Label label;
+  private final String anonymousProperty;
   private final int batchCommitSize = 100_000;
 
-  @Inject
-  public AllNodesLabeler(String label, GraphDatabaseService graphDb) {
-    this.label = Label.label(label);
+
+  public AnonymousNodeTagger(String anonymousProperty, GraphDatabaseService graphDb) {
+    this.anonymousProperty = anonymousProperty;
     this.graphDb = graphDb;
   }
 
   @Override
   public void run() {
-    logger.info("Starting all nodes labeling...");
-    int processedNodes = 0;
-
+    logger.info("Starting anonymous nodes tagger...");
+    int taggedNodes = 0;
     Transaction tx = graphDb.beginTx();
 
     ResourceIterable<Node> allNodes = graphDb.getAllNodes();
     for (Node n : allNodes) {
-      n.addLabel(label);
-      if (processedNodes % batchCommitSize == 0) {
+      if (n.hasProperty(anonymousProperty)) {
+        n.addLabel(OwlLabels.OWL_ANONYMOUS);
+        taggedNodes++;
+      }
+      if (taggedNodes % batchCommitSize == 0) {
         tx.success();
         tx.close();
         tx = graphDb.beginTx();
       }
-      processedNodes++;
     }
 
-    logger.info(processedNodes + " nodes labeled.");
+    logger.info(taggedNodes + " nodes tagged.");
     tx.success();
     tx.close();
   }

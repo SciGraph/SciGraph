@@ -182,9 +182,8 @@ public class Clique implements Postprocessor {
       // int edgesMoved = 0;
       Iterable<Relationship> rels = n.getRelationships();
       for (Relationship rel : rels) {
-        if ((isOneOfType(rel, relationships))
-            && (rel.getStartNode().getId() == leader.getId() || rel.getEndNode().getId() == leader
-                .getId())) {
+        if ((isOneOfType(rel, relationships)) && (rel.getStartNode().getId() == leader.getId()
+            || rel.getEndNode().getId() == leader.getId())) {
           logger.fine("equivalence relation which is already attached to the leader, do nothing");
         } else {
           if ((rel.getEndNode().getId() == n.getId())) {
@@ -258,8 +257,8 @@ public class Clique implements Postprocessor {
   public Node electCliqueLeader(List<Node> clique, List<String> prefixLeaderPriority) {
     List<Node> designatedLeaders = designatedLeader(clique);
     if (designatedLeaders.size() > 1) {
-      logger
-          .severe("More than one node in a clique designated as leader. Using failover strategy to elect a leader.");
+      logger.severe(
+          "More than one node in a clique designated as leader. Using failover strategy to elect a leader.");
       for (Node n : designatedLeaders) {
         logger.severe(n.getProperty(NodeProperties.IRI).toString());
       }
@@ -274,10 +273,8 @@ public class Clique implements Postprocessor {
   private List<Node> designatedLeader(List<Node> clique) {
     List<Node> designatedNodes = new ArrayList<Node>();
     for (Node n : clique) {
-      for (String k : n.getPropertyKeys()) {
-        if (leaderAnnotationProperty.equals(k)) {
-          designatedNodes.add(n);
-        }
+      if (n.hasProperty(leaderAnnotationProperty)) {
+        designatedNodes.add(n);
       }
     }
     return designatedNodes;
@@ -294,8 +291,8 @@ public class Clique implements Postprocessor {
         }
       }
       if (filteredByPrefix.isEmpty()) {
-        filteredByPrefix.add(filterByPrefix(clique,
-            leaderPriorityIri.subList(1, leaderPriorityIri.size())));
+        filteredByPrefix
+            .add(filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())));
         // filterByPrefix(clique, leaderPriorityIri.subList(1, leaderPriorityIri.size())); // TODO
         // handle this case
       }

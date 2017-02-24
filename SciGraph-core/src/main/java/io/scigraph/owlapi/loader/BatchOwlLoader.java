@@ -59,11 +59,13 @@ import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 import io.scigraph.owlapi.loader.bindings.IndicatesAddEdgeLabel;
 import io.scigraph.owlapi.loader.bindings.IndicatesAllNodesLabel;
+import io.scigraph.owlapi.loader.bindings.IndicatesAnonymousNodeProperty;
 import io.scigraph.owlapi.loader.bindings.IndicatesCliqueConfiguration;
 import io.scigraph.owlapi.loader.bindings.IndicatesMappedProperties;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfConsumerThreads;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfProducerThreads;
 import io.scigraph.owlapi.postprocessors.AllNodesLabeler;
+import io.scigraph.owlapi.postprocessors.AnonymousNodeTagger;
 import io.scigraph.owlapi.postprocessors.Clique;
 import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 import io.scigraph.owlapi.postprocessors.EdgeLabeler;
@@ -117,10 +119,14 @@ public class BatchOwlLoader {
   @Inject
   @IndicatesAddEdgeLabel
   Optional<Boolean> addEdgeLabel;
-  
+
   @Inject
   @IndicatesAllNodesLabel
   Optional<String> allNodesLabel;
+
+  @Inject
+  @IndicatesAnonymousNodeProperty
+  Optional<String> anonymousNodeProperty;
 
   static {
     System.setProperty("entityExpansionLimit", Integer.toString(1_000_000));
@@ -171,11 +177,15 @@ public class BatchOwlLoader {
     if (addEdgeLabel.or(false)) {
       postprocessorProvider.runEdgeLabelerPostprocessor();
     }
-    
-    if(allNodesLabel.isPresent()) {
+
+    if (allNodesLabel.isPresent()) {
       postprocessorProvider.runAllNodesLabeler(allNodesLabel.get());
     }
-    
+
+    if (anonymousNodeProperty.isPresent()) {
+      postprocessorProvider.runAnonymousNodeTagger(anonymousNodeProperty.get());
+    }
+
     postprocessorProvider.shutdown();
 
   }
@@ -209,6 +219,11 @@ public class BatchOwlLoader {
     public void runAllNodesLabeler(String label) {
       AllNodesLabeler allNodesLabeler = new AllNodesLabeler(label, graphDb);
       allNodesLabeler.run();
+    }
+
+    public void runAnonymousNodeTagger(String anonymousProperty) {
+      AnonymousNodeTagger anonymousNodeTagger = new AnonymousNodeTagger(anonymousProperty, graphDb);
+      anonymousNodeTagger.run();
     }
 
     public void shutdown() {
