@@ -170,6 +170,10 @@ public class BatchOwlLoader {
     logger.info("Postprocessing...");
     postprocessorProvider.get().postprocess();
 
+    if (anonymousNodeProperty.isPresent()) {
+      postprocessorProvider.runAnonymousNodeTagger(anonymousNodeProperty.get());
+    }
+    
     if (cliqueConfiguration.isPresent()) {
       postprocessorProvider.runCliquePostprocessor(cliqueConfiguration.get());
     }
@@ -180,10 +184,6 @@ public class BatchOwlLoader {
 
     if (allNodesLabel.isPresent()) {
       postprocessorProvider.runAllNodesLabeler(allNodesLabel.get());
-    }
-
-    if (anonymousNodeProperty.isPresent()) {
-      postprocessorProvider.runAnonymousNodeTagger(anonymousNodeProperty.get());
     }
 
     postprocessorProvider.shutdown();
