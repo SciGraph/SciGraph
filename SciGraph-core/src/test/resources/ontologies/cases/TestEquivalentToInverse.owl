@@ -1,0 +1,10 @@
+Prefix(:=<http://example.org/>)
+
+## This is a more verbose way of stating: p inverseOf q
+## https://github.com/SciGraph/SciGraph/issues/217
+
+Ontology(:TestClassAssertion
+Declaration(ObjectProperty(:p))
+Declaration(ObjectProperty(:q))
+EquivalentObjectProperties(:p ObjectInverseOf(:q))
+)

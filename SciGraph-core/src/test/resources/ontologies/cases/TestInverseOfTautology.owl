@@ -1,0 +1,9 @@
+Prefix(:=<http://example.org/>)
+
+## This statement is a tautology
+## https://github.com/SciGraph/SciGraph/issues/217
+
+Ontology(:TestClassAssertion
+Declaration(ObjectProperty(:p))
+InverseObjectProperties(:p ObjectInverseOf(:p))
+)
