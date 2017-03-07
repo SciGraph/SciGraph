@@ -1,0 +1,6 @@
+Prefix(:=<http://example.org/>)
+
+Ontology(:TestClassAssertion
+Declaration(ObjectProperty(:p))
+InverseObjectProperties(:p ObjectInverseOf(:p))
+)
