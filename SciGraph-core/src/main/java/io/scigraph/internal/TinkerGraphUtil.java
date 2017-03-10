@@ -16,6 +16,8 @@
 package io.scigraph.internal;
 
 import static com.google.common.collect.Sets.newHashSet;
+
+import com.google.inject.Inject;
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.NodeProperties;
 
@@ -35,6 +37,7 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
 
+import org.prefixcommons.CurieUtil;
 import scala.collection.convert.Wrappers.SeqWrapper;
 
 import com.google.common.base.Optional;
@@ -49,13 +52,39 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 /***
  * Utilities for building TinkerGraphs from Neo4j objects
  */
-public final class TinkerGraphUtil {
+public class TinkerGraphUtil {
 
   static final Logger logger = Logger.getLogger(TinkerGraphUtil.class.getName());
 
   static final ImmutableSet<String> PROTECTED_PROPERTY_KEYS = ImmutableSet.of(CommonProperties.IRI, CommonProperties.CURIE);
 
-  static void copyProperties(PropertyContainer container, Element element) {
+  private final CurieUtil curieUtil;
+  private Graph graph;
+
+  @Inject
+  public TinkerGraphUtil(CurieUtil curieUtil) {
+    this.curieUtil = curieUtil;
+    this.graph = new TinkerGraph();
+  }
+
+  public TinkerGraphUtil(Graph graph, CurieUtil curieUtil) {
+    this.graph = graph;
+    this.curieUtil = curieUtil;
+  }
+
+  public CurieUtil getCurieUtil() {
+    return curieUtil;
+  }
+
+  public Graph getGraph() {
+    return graph;
+  }
+
+  public void setGraph(Graph graph) {
+    this.graph = graph;
+  }
+
+  void copyProperties(PropertyContainer container, Element element) {
     for (String key : container.getPropertyKeys()) {
       Object property = container.getProperty(key);
       if (property.getClass().isArray()) {
@@ -65,11 +94,14 @@ public final class TinkerGraphUtil {
         }
         property = propertyList;
       }
+      else if (key.equals(CommonProperties.IRI) && String.class.isAssignableFrom(property.getClass())) {
+        property = curieUtil.getCurie((String)property).or((String)property);
+      }
       element.setProperty(key, property);
     }
   }
 
-  static Vertex addNode(Graph graph, Node node) {
+  Vertex addNode(Node node) {
     Vertex vertex = graph.getVertex(node.getId());
     if (null == vertex) {
       vertex = graph.addVertex(node.getId());
@@ -83,21 +115,21 @@ public final class TinkerGraphUtil {
     return vertex;
   }
 
-  static Edge addEdge(Graph graph, Relationship relationship) {
+  Edge addEdge(Relationship relationship) {
     Edge edge = graph.getEdge(relationship.getId());
     if (null == edge) {
-      Vertex outVertex = addNode(graph, relationship.getStartNode());
-      Vertex inVertex = addNode(graph, relationship.getEndNode());
+      Vertex outVertex = addNode(relationship.getStartNode());
+      Vertex inVertex = addNode(relationship.getEndNode());
       String label = relationship.getType().name();
-      // TODO #152 add CurieUtil to resolve IRI to Curie
-      edge = graph.addEdge(relationship.getId(), outVertex, inVertex, label);
+      Optional<String> curieLabel = curieUtil.getCurie(label);
+      edge = graph.addEdge(relationship.getId(), outVertex, inVertex, curieLabel.or(label));
       copyProperties(relationship, edge);
     }
     return edge;
   }
 
   // TODO unit test that
-  static boolean removeEdge(Graph graph, Relationship relationship) {
+  boolean removeEdge(Relationship relationship) {
     Edge edge = graph.getEdge(relationship.getId());
     if (null != edge) {
       graph.removeEdge(edge);
@@ -107,17 +139,17 @@ public final class TinkerGraphUtil {
     }
   }
 
-  public static Element addElement(Graph graph, PropertyContainer container) {
+  public Element addElement(PropertyContainer container) {
     if (container instanceof Node) {
-      return addNode(graph, (Node) container);
+      return addNode((Node) container);
     } else {
-      return addEdge(graph, (Relationship) container);
+      return addEdge((Relationship) container);
     }
   }
 
-  public static void addPath(Graph graph, Iterable<PropertyContainer> path) {
+  public void addPath(Iterable<PropertyContainer> path) {
     for (PropertyContainer container : path) {
-      addElement(graph, container);
+      addElement(container);
     }
   }
 
@@ -135,7 +167,7 @@ public final class TinkerGraphUtil {
     }
   }
 
-  static Vertex addNode(Graph graph, Vertex node) {
+  Vertex addNode(Vertex node) {
     Vertex vertex = graph.getVertex(node.getId());
     if (null == vertex) {
       vertex = graph.addVertex(node.getId());
@@ -144,11 +176,11 @@ public final class TinkerGraphUtil {
     return vertex;
   }
 
-  static Edge addEdge(Graph graph, Edge edge) {
+  Edge addEdge(Edge edge) {
     Edge newEdge = graph.getEdge(edge.getId());
     if (null == newEdge) {
-      Vertex outVertex = addNode(graph, edge.getVertex(Direction.OUT));
-      Vertex inVertex = addNode(graph, edge.getVertex(Direction.IN));
+      Vertex outVertex = addNode(edge.getVertex(Direction.OUT));
+      Vertex inVertex = addNode(edge.getVertex(Direction.IN));
       String label = edge.getLabel();
       newEdge = graph.addEdge(edge.getId(), outVertex, inVertex, label);
       copyProperties(edge, edge);
@@ -157,32 +189,32 @@ public final class TinkerGraphUtil {
   }
 
 
-  public static Element addElement(Graph graph, Element element) {
+  public Element addElement(Element element) {
     if (element instanceof Vertex) {
-      return addNode(graph, (Vertex) element);
+      return addNode((Vertex) element);
     } else {
-      return addEdge(graph, (Edge) element);
+      return addEdge((Edge) element);
     }
   }
 
-  public static void addGraph(Graph graph, Graph addition) {
+  public void addGraph(Graph addition) {
     for (Vertex vertex : addition.getVertices()) {
-      addElement(graph, vertex);
+      addElement(vertex);
     }
     for (Edge edge : addition.getEdges()) {
-      addElement(graph, edge);
+      addElement(edge);
     }
   }
 
-  public static Graph combineGraphs(Graph graph1, Graph graph2) {
-    Graph graph = new TinkerGraph();
-    addGraph(graph, graph1);
-    addGraph(graph, graph2);
-    return graph;
+  public Graph combineGraphs(Graph graph2) {
+    TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+    tgu.addGraph(graph);
+    tgu.addGraph(graph2);
+    return tgu.getGraph();
   }
 
-  public static TinkerGraph resultToGraph(Result result) {
-    TinkerGraph graph = new TinkerGraph();
+  public Graph resultToGraph(Result result) {
+    graph = new TinkerGraph();
     while (result.hasNext()) {
       Map<String, Object> map = result.next();
       for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -191,15 +223,15 @@ public final class TinkerGraphUtil {
         if (null == value) {
           continue;
         } else if (value instanceof PropertyContainer) {
-          addElement(graph, (PropertyContainer) value);
+          addElement((PropertyContainer) value);
         } else if (value instanceof Path) {
           for (PropertyContainer container : (Path) value) {
-            addElement(graph, container);
+            addElement(container);
           }
         } else if (value instanceof SeqWrapper) {
           for (Object thing : (SeqWrapper<?>) value) {
             if (thing instanceof PropertyContainer) {
-              addElement(graph, (PropertyContainer) thing);
+              addElement((PropertyContainer) thing);
             }
           }
         } else if (value instanceof Boolean) {
@@ -251,7 +283,7 @@ public final class TinkerGraphUtil {
     return set;
   }
 
-  public static void project(Graph graph, Collection<String> projection) {
+  public void project(Collection<String> projection) {
     if (projection.contains("*")) {
       return;
     }

@@ -47,6 +47,7 @@ public class GraphTestBase {
   protected static GraphDatabaseService graphDb;
   protected static CypherUtil cypherUtil;
   protected static Graph graph;
+  protected static CurieUtil curieUtil;
   static ConcurrentHashMap<String, Long> idMap = new ConcurrentHashMap<>();
 
   Transaction tx;
@@ -80,7 +81,8 @@ public class GraphTestBase {
             Concept.ACRONYM));
     Neo4jModule.setupAutoIndexing(graphDb, config);
     graph = new GraphTransactionalImpl(graphDb, idMap, new RelationshipMap());
-    cypherUtil = new CypherUtil(graphDb, new CurieUtil(Collections.<String, String>emptyMap()));
+    curieUtil = new CurieUtil(Collections.<String, String>emptyMap());
+    cypherUtil = new CypherUtil(graphDb, curieUtil);
   }
 
   @AfterClass

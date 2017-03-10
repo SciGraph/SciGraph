@@ -176,7 +176,8 @@ public class GraphService extends BaseResource {
       tg = api.getNeighbors(newHashSet(nodes), depth.get(), types, nodePredicate);
       tx.success();
     }
-    TinkerGraphUtil.project(tg, projection);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(tg, curieUtil);
+    tgu.project(projection);
     ArrayPropertyTransformer.transform(tg);
     GenericEntity<Graph> response = new GenericEntity<Graph>(tg) {};
     return JaxRsUtil.wrapJsonp(request.get(), response, callback);

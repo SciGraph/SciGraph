@@ -62,13 +62,14 @@ public class EvidenceAspectTest extends GraphTestBase {
         subject1.createRelationshipTo(object3, RelationshipType.withName(relationName));
     association2.createRelationshipTo(relationNode, EvidenceAspect.HAS_PREDICATE);
 
-    TinkerGraphUtil.addNode(graph, subject1);
-    TinkerGraphUtil.addNode(graph, object1);
-    TinkerGraphUtil.addNode(graph, object2);
-    TinkerGraphUtil.addNode(graph, object3);
-    TinkerGraphUtil.addNode(graph, relationNode);
-    TinkerGraphUtil.addEdge(graph, rel);
-    aspect = new EvidenceAspect(graphDb);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
+    tgu.addNode(subject1);
+    tgu.addNode(object1);
+    tgu.addNode(object2);
+    tgu.addNode(object3);
+    tgu.addNode(relationNode);
+    tgu.addEdge(rel);
+    aspect = new EvidenceAspect(graphDb, curieUtil);
   }
 
   @Test

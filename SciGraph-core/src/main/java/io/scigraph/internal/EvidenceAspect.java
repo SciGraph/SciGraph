@@ -36,6 +36,7 @@ import org.neo4j.graphdb.Transaction;
 import com.google.common.base.Function;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+import org.prefixcommons.CurieUtil;
 
 /***
  * Add "evidence" to a graph
@@ -55,10 +56,12 @@ public class EvidenceAspect implements GraphAspect {
       RelationshipType.withName("http://purl.org/oban/association_has_predicate");
 
   private final GraphDatabaseService graphDb;
+  private final CurieUtil curieUtil;
 
   @Inject
-  EvidenceAspect(GraphDatabaseService graphDb) {
+  EvidenceAspect(GraphDatabaseService graphDb, CurieUtil curieUtil) {
     this.graphDb = graphDb;
+    this.curieUtil = curieUtil;
   }
 
   @Override
@@ -99,15 +102,16 @@ public class EvidenceAspect implements GraphAspect {
 
                 if (isEdgeInGraph) { // means that the relationship exists between the subject and
                                      // object
-                  TinkerGraphUtil.addEdge(graph, hasSubject);
-                  TinkerGraphUtil.addEdge(graph, hasObject);
+                  TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
+                  tgu.addEdge(hasSubject);
+                  tgu.addEdge(hasObject);
                   for (Relationship evidence : association.getRelationships(EVIDENCE,
                       Direction.OUTGOING)) {
-                    TinkerGraphUtil.addEdge(graph, evidence);
+                    tgu.addEdge(evidence);
                   }
                   for (Relationship source : association.getRelationships(SOURCE,
                       Direction.OUTGOING)) {
-                    TinkerGraphUtil.addEdge(graph, source);
+                    tgu.addEdge(source);
                   }
                 }
               } else {

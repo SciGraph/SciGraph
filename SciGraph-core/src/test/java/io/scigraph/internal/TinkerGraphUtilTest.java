@@ -27,7 +27,9 @@ import static org.mockito.Mockito.when;
 import io.scigraph.frames.CommonProperties;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.hamcrest.collection.IsIterableWithSize;
@@ -45,12 +47,14 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.prefixcommons.CurieUtil;
 
 public class TinkerGraphUtilTest {
 
   TinkerGraph graph;
   Node node, otherNode;
   Relationship relationship;
+  CurieUtil curieUtil;
 
   Node mockNode(long id) {
     Node node = mock(Node.class);
@@ -75,25 +79,31 @@ public class TinkerGraphUtilTest {
     otherNode = mockNode(1L);
     graph = new TinkerGraph();
     relationship = mockRealtionship(node, otherNode);
+    Map<String,String> iri2curie = new HashMap<>();
+    iri2curie.put("B", "http://x.org/B_");
+    curieUtil = new CurieUtil(iri2curie);
   }
 
   @Test
   public void idsAreTranslated() {
-    Vertex v = TinkerGraphUtil.addNode(graph, node);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
+    Vertex v = tgu.addNode(node);
     assertThat(v.getId(), is((Object)"0"));
   }
 
   @Test
   public void addNodeIsIdempotent() {
-    Vertex v1 = TinkerGraphUtil.addNode(graph, node);
-    Vertex v2 = TinkerGraphUtil.addNode(graph, node);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
+    Vertex v1 = tgu.addNode(node);
+    Vertex v2 = tgu.addNode(node);
     assertThat(v1, is(v2));
   }
 
   @Test
   public void pathsAreTranslated() {
     Iterable<PropertyContainer> path = newArrayList(node, relationship, otherNode);
-    TinkerGraphUtil.addPath(graph, path);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
+    tgu.addPath(path);
     assertThat(graph.getVertices(), is(IsIterableWithSize.<Vertex>iterableWithSize(2)));
     assertThat(graph.getEdges(), is(IsIterableWithSize.<Edge>iterableWithSize(1)));
   }
@@ -103,7 +113,8 @@ public class TinkerGraphUtilTest {
     when(node.getPropertyKeys()).thenReturn(newHashSet("foo", "baz"));
     when(node.getProperty("foo")).thenReturn("bar");
     when(node.getProperty("baz")).thenReturn(true);
-    Vertex v = TinkerGraphUtil.addNode(graph, node);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+    Vertex v = tgu.addNode(node);
     assertThat(v.getProperty("foo"), is((Object)"bar"));
     assertThat(v.getProperty("baz"), is((Object)true));
   }
@@ -132,7 +143,8 @@ public class TinkerGraphUtilTest {
     when(node.getPropertyKeys()).thenReturn(newHashSet("foo", "bar"));
     when(node.getProperty("foo")).thenReturn(new String[]{"elt1", "elt2"});
     when(node.getProperty("bar")).thenReturn(new int[]{1,2});
-    Vertex v = TinkerGraphUtil.addNode(graph, node);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+    Vertex v = tgu.addNode(node);
     assertThat(v.getProperty("foo"), is((Object)newArrayList("elt1", "elt2")));
     assertThat(v.getProperty("bar"), is((Object)newArrayList(1, 2)));
   }
@@ -142,26 +154,28 @@ public class TinkerGraphUtilTest {
   public void labelsAreTranslated() {
     Label label = Label.label("label");
     when(node.getLabels()).thenReturn(newHashSet(label));
-    Vertex v = TinkerGraphUtil.addNode(graph, node);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+    Vertex v = tgu.addNode(node);
     assertThat((Iterable<String>)v.getProperty("types"), IsIterableContainingInAnyOrder.containsInAnyOrder("label"));
   }
 
   @Test
   public void relationshipsAreTranslated() {
-    Vertex u = TinkerGraphUtil.addNode(graph, node);
-    Vertex v = TinkerGraphUtil.addNode(graph, otherNode);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+    Vertex u = tgu.addNode(node);
+    Vertex v = tgu.addNode(otherNode);
     Relationship relationship = mock(Relationship.class);
     when(relationship.getEndNode()).thenReturn(node);
     when(relationship.getStartNode()).thenReturn(otherNode);
     when(relationship.getType()).thenReturn(RelationshipType.withName("foo"));
     when(relationship.getPropertyKeys()).thenReturn(newHashSet("bar"));
     when(relationship.getProperty("bar")).thenReturn("baz");
-    Edge edge = TinkerGraphUtil.addEdge(graph, relationship);
+    Edge edge = tgu.addEdge(relationship);
     assertThat(edge.getVertex(Direction.IN), is(u));
     assertThat(edge.getVertex(Direction.OUT), is(v));
     assertThat(edge.getLabel(), is("foo"));
     assertThat((String)edge.getProperty("bar"), is("baz"));
-    Edge edge2 = TinkerGraphUtil.addEdge(graph, relationship);
+    Edge edge2 = tgu.addEdge(relationship);
     assertThat(edge, is(edge2));
   }
 
@@ -175,7 +189,8 @@ public class TinkerGraphUtilTest {
     Vertex g2v1 = graph2.addVertex(1);
     Vertex g2v2 = graph2.addVertex(2);
     Edge g2e1 = graph1.addEdge(1, g2v1, g2v2, "test2");
-    Graph graph = TinkerGraphUtil.combineGraphs(graph1, graph2);
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph1, curieUtil);
+    Graph graph = tgu.combineGraphs(graph2);
     assertThat(graph.getVertices(), containsInAnyOrder(g1v1, g1v2, g2v2));
     assertThat(graph.getEdges(), containsInAnyOrder(g1e1, g2e1));
   }
@@ -209,7 +224,8 @@ public class TinkerGraphUtilTest {
     v.setProperty(CommonProperties.IRI, "http://x.org/a");
     v.setProperty("foo", "fizz");
     v.setProperty("bar", "baz");
-    TinkerGraphUtil.project(graph, newHashSet("foo"));
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
+    tgu.project(newHashSet("foo"));
     assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", CommonProperties.IRI));
   }
 
@@ -220,7 +236,8 @@ public class TinkerGraphUtilTest {
     v.setProperty(CommonProperties.IRI, "http://x.org/a");
     v.setProperty("foo", "fizz");
     v.setProperty("bar", "baz");
-    TinkerGraphUtil.project(graph, newHashSet("*"));
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
+    tgu.project(newHashSet("*"));
     assertThat(v.getPropertyKeys(), containsInAnyOrder("foo", "bar", CommonProperties.IRI));
   }
 

@@ -89,14 +89,14 @@ public class EdgeLabelerTest extends GraphTestBase {
 
   @Test
   public void canBeTransformedToTinkerGraph() {
-    Graph tg = new TinkerGraph();
+    TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
     ResourceIterator<Node> nodes = graphDb.getAllNodes().iterator();
     while (nodes.hasNext()) {
-      TinkerGraphUtil.addElement(tg, nodes.next());
+      tgu.addElement(nodes.next());
     }
     ResourceIterator<Relationship> relationships = graphDb.getAllRelationships().iterator();
     while (relationships.hasNext()) {
-      TinkerGraphUtil.addElement(tg, relationships.next());
+      tgu.addElement(relationships.next());
     }
   }
 }
