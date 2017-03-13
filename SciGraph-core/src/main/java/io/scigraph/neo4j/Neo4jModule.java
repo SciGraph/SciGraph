@@ -57,6 +57,7 @@ import io.scigraph.neo4j.bindings.IndicatesCurieMapping;
 import io.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
 import io.scigraph.vocabulary.Vocabulary;
 import io.scigraph.vocabulary.VocabularyNeo4jImpl;
+import org.prefixcommons.CurieUtil;
 
 public class Neo4jModule extends AbstractModule {
 
@@ -79,6 +80,7 @@ public class Neo4jModule extends AbstractModule {
   protected void configure() {
     bind(String.class).annotatedWith(IndicatesNeo4jGraphLocation.class)
         .toInstance(configuration.getLocation());
+    bind(CurieUtil.class).toInstance(new CurieUtil(configuration.getCuries()));
     bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(IndicatesCurieMapping.class)
         .toInstance(configuration.getCuries());
     bind(Vocabulary.class).to(VocabularyNeo4jImpl.class).in(Singleton.class);

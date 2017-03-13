@@ -19,7 +19,6 @@ import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.NodeProperties;
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.neo4j.Graph;
-import io.scigraph.owlapi.curies.CurieUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +39,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.base.Optional;
+import org.prefixcommons.CurieUtil;
 
 public class HyperGeometricAnalyzer {
 

@@ -25,7 +25,6 @@ import io.scigraph.annotation.Entity;
 import io.scigraph.annotation.EntityFormatConfiguration;
 import io.scigraph.annotation.EntityRecognizer;
 import io.scigraph.frames.Concept;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.vocabulary.Vocabulary;
 import io.scigraph.vocabulary.Vocabulary.Query;
 
@@ -35,6 +34,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.prefixcommons.CurieUtil;
 
 public class EntityRecognizerTest {
 

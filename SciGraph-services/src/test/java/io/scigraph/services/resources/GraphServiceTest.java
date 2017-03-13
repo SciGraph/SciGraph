@@ -42,8 +42,8 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.internal.GraphApi;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.vocabulary.Vocabulary;
+import org.prefixcommons.CurieUtil;
 
 public class GraphServiceTest {
 

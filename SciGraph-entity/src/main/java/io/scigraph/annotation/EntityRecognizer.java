@@ -19,7 +19,6 @@ import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.disjoint;
 import io.scigraph.frames.Concept;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.vocabulary.Vocabulary;
 import io.scigraph.vocabulary.Vocabulary.Query;
 
@@ -31,6 +30,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import com.google.common.base.Optional;
+import org.prefixcommons.CurieUtil;
 
 public class EntityRecognizer {
 

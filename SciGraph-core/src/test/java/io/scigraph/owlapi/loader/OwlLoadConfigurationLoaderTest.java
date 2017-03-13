@@ -18,7 +18,6 @@ package io.scigraph.owlapi.loader;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration;
 import io.scigraph.owlapi.loader.OwlLoadConfigurationLoader;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
@@ -36,6 +35,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.prefixcommons.CurieUtil;
 
 public class OwlLoadConfigurationLoaderTest {
 

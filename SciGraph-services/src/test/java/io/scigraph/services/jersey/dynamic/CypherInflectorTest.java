@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.internal.GraphAspect;
 import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.services.swagger.beans.resource.Apis;
 import io.scigraph.util.GraphTestBase;
 
@@ -45,6 +44,7 @@ import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.prefixcommons.CurieUtil;
 
 public class CypherInflectorTest extends GraphTestBase {
 

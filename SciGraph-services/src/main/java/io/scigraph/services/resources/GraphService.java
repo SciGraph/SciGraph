@@ -63,7 +63,6 @@ import io.scigraph.internal.GraphApi;
 import io.scigraph.internal.TinkerGraphUtil;
 import io.scigraph.neo4j.DirectedRelationshipType;
 import io.scigraph.owlapi.OwlLabels;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.services.api.graph.ArrayPropertyTransformer;
 import io.scigraph.services.jersey.BadRequestException;
 import io.scigraph.services.jersey.BaseResource;
@@ -71,6 +70,7 @@ import io.scigraph.services.jersey.CustomMediaTypes;
 import io.scigraph.services.jersey.JaxRsUtil;
 import io.scigraph.services.jersey.UnknownClassException;
 import io.scigraph.vocabulary.Vocabulary;
+import org.prefixcommons.CurieUtil;
 
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")

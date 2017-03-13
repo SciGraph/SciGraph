@@ -16,7 +16,6 @@
 package io.scigraph.services.jersey.writers;
 
 import io.scigraph.bbop.BbopGraphUtil;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.services.jersey.writers.BbopJsGraphWriter;
 
 import java.util.Collections;
@@ -24,6 +23,7 @@ import java.util.Collections;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import com.tinkerpop.blueprints.Graph;
+import org.prefixcommons.CurieUtil;
 
 public class BbopJsGraphWriterTest extends GraphWriterTestBase {
 

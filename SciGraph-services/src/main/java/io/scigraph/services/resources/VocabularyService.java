@@ -24,7 +24,6 @@ import io.dropwizard.jersey.params.IntParam;
 import io.scigraph.frames.Concept;
 import io.scigraph.lucene.ExactAnalyzer;
 import io.scigraph.lucene.LuceneUtils;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.services.api.graph.ConceptDTO;
 import io.scigraph.services.api.graph.ConceptDTOLite;
 import io.scigraph.services.api.vocabulary.Completion;
@@ -61,6 +60,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import org.prefixcommons.CurieUtil;
 
 @Path("/vocabulary") 
 @Api(value = "/vocabulary", description = "Vocabulary services")

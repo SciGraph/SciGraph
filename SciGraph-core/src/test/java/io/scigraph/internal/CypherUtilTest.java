@@ -26,7 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.util.GraphTestBase;
 
 import java.util.Collection;
@@ -45,6 +44,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.prefixcommons.CurieUtil;
 
 public class CypherUtilTest extends GraphTestBase {
 

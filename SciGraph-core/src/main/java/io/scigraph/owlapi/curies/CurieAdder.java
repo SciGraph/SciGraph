@@ -25,6 +25,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+import org.prefixcommons.CurieUtil;
 
 final class CurieAdder implements MethodInterceptor {
 

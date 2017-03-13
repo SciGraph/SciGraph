@@ -23,7 +23,6 @@ import io.scigraph.frames.NodeProperties;
 import io.scigraph.lucene.LuceneUtils;
 import io.scigraph.neo4j.GraphUtil;
 import io.scigraph.neo4j.NodeTransformer;
-import io.scigraph.owlapi.curies.CurieUtil;
 import io.scigraph.util.GraphTestBase;
 import io.scigraph.vocabulary.Vocabulary.Query;
 
@@ -33,6 +32,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
+import org.prefixcommons.CurieUtil;
 
 /***
  * TODO: Some of these tests should be moved directly to the analyzer
