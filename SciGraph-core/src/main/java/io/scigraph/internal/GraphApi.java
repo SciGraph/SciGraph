@@ -45,16 +45,19 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.prefixcommons.CurieUtil;
 
 public class GraphApi {
 
   private final GraphDatabaseService graphDb;
   private final CypherUtil cypherUtil;
+  private final CurieUtil curieUtil;
 
   @Inject
-  public GraphApi(GraphDatabaseService graphDb, CypherUtil cypherUtil) {
+  public GraphApi(GraphDatabaseService graphDb, CypherUtil cypherUtil, CurieUtil curieUtil) {
     this.graphDb = graphDb;
     this.cypherUtil = cypherUtil;
+    this.curieUtil = curieUtil;
   }
 
   /***
@@ -100,16 +103,17 @@ public class GraphApi {
       });
     }
     Graph graph = new TinkerGraph();
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
     for (Path path: description.traverse(nodes)) {
       Relationship relationship = path.lastRelationship();
       if (null != relationship) {
-        TinkerGraphUtil.addEdge(graph, relationship);
+        tgu.addEdge(relationship);
       }
     }
     if (isEmpty(graph.getEdges())) { 
       // If nothing was added to the graph add the root nodes
       for (Node node: nodes) {
-        TinkerGraphUtil.addNode(graph, node);
+        tgu.addNode(node);
       }
     }
     return graph;
@@ -125,13 +129,14 @@ public class GraphApi {
         + " SKIP " + skip 
         + " LIMIT " + limit;
     Graph graph = new TinkerGraph();
+    TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
     Result result;
     try {
       result = cypherUtil.execute(query);
       while (result.hasNext()) {
         Map<String, Object> map = result.next();
         Path path = (Path) map.get("path");
-        TinkerGraphUtil.addPath(graph, path);
+        tgu.addPath(path);
       }
     } catch (ArrayIndexOutOfBoundsException e) {
       // Return and empty graph if the limit is too high...

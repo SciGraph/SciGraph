@@ -16,6 +16,8 @@
 package io.scigraph.services.jersey.dynamic;
 
 import static com.google.common.collect.Iterables.getFirst;
+
+import com.tinkerpop.blueprints.Graph;
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.internal.GraphAspect;
 import io.scigraph.internal.TinkerGraphUtil;
@@ -77,7 +79,9 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
       Result result = cypherUtil.execute(config.getQuery(), paramMap);
       logger.fine((System.currentTimeMillis() - start) + " to execute query" );
       start = System.currentTimeMillis();
-      TinkerGraph graph = TinkerGraphUtil.resultToGraph(result);
+      TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+      Graph graph = tgu.resultToGraph(result);
+      tgu.setGraph(graph);
       logger.fine((System.currentTimeMillis() - start) + " to convert to graph" );
       start = System.currentTimeMillis();
       for (String key: aspectMap.keySet()) {
@@ -88,7 +92,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
       if (paramMap.containsKey("project")) {
         @SuppressWarnings("unchecked")
         Collection<String> projection = (Collection<String>)(Collection<?>)paramMap.get("project");
-        TinkerGraphUtil.project(graph, projection);
+        tgu.project(projection);
       }
       ArrayPropertyTransformer.transform(graph);
       tx.success();

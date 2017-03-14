@@ -49,7 +49,7 @@ public class GraphApiTest extends GraphTestBase {
     c = graphDb.createNode();
     b.createRelationshipTo(a, OwlRelationships.RDFS_SUBCLASS_OF);
     c.createRelationshipTo(b, OwlRelationships.OWL_EQUIVALENT_CLASS);
-    graphApi = new GraphApi(graphDb, cypherUtil);
+    graphApi = new GraphApi(graphDb, cypherUtil, curieUtil);
   }
 
   @Test
