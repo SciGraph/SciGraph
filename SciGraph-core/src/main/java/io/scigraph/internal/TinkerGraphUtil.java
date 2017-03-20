@@ -59,6 +59,7 @@ public class TinkerGraphUtil {
   static final ImmutableSet<String> PROTECTED_PROPERTY_KEYS = ImmutableSet.of(CommonProperties.IRI, CommonProperties.CURIE);
 
   private final CurieUtil curieUtil;
+  
   private Graph graph;
 
   @Inject

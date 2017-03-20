@@ -19,11 +19,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.neo4j.bindings.IndicatesCurieMapping;
-import io.scigraph.services.swagger.beans.resource.Apis;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -32,19 +29,21 @@ import javax.ws.rs.core.UriInfo;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
+import org.prefixcommons.CurieUtil;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+
+import io.scigraph.services.swagger.beans.resource.Apis;
 
 public class DynamicResourceModuleIT {
 
@@ -62,7 +61,7 @@ public class DynamicResourceModuleIT {
     protected void configure() {
       install(new DynamicResourceModule());
       bind(GraphDatabaseService.class).toInstance(graphDb);
-      bind(new TypeLiteral<Map<String, String>>(){}).annotatedWith(IndicatesCurieMapping.class).toInstance(new HashMap<String, String>());
+      bind(CurieUtil.class).toInstance(new CurieUtil(new HashMap<String, String>()));
     }
 
   }
@@ -72,7 +71,7 @@ public class DynamicResourceModuleIT {
     try (Transaction tx = graphDb.beginTx()) {
       Node node = graphDb.createNode();
       Node node2 = graphDb.createNode();
-      node.createRelationshipTo(node2, DynamicRelationshipType.withName("foo"));
+      node.createRelationshipTo(node2, RelationshipType.withName("foo"));
       node.setProperty("foo", "bar");
       tx.success();
     }
