@@ -319,7 +319,8 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "The type of the edge", required = true) @PathParam("id") String id,
       @ApiParam(value = "A label hint to find the start node.",
           required = false) @QueryParam("hint") Optional<String> hint,
-      @ApiParam(value = "A list of relationships to traverse, in order.",
+      @ApiParam(
+          value = "A list of relationships to traverse, in order. Supports cypher operations such as relA|relB or relA*.",
           required = false) @QueryParam("relationships") List<String> relationships,
       @ApiParam(value = "A list of node labels to filter.",
           required = false) @QueryParam("lbls") Set<String> lbls,
