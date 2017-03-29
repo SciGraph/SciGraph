@@ -17,18 +17,18 @@ package io.scigraph.internal;
 
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Sets.newHashSet;
-import io.scigraph.neo4j.DirectedRelationshipType;
-import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.owlapi.curies.AddCuries;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -40,12 +40,18 @@ import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
+import org.prefixcommons.CurieUtil;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.neo4j.DirectedRelationshipType;
+import io.scigraph.owlapi.OwlRelationships;
+import io.scigraph.owlapi.curies.AddCuries;
 
 public class GraphApi {
 
@@ -66,12 +72,12 @@ public class GraphApi {
    * @param traverseEquivalentEdges
    * @return the entailment
    */
-  public Collection<Node> getEntailment(Node parent, DirectedRelationshipType relationship, boolean traverseEquivalentEdges) {
+  public Collection<Node> getEntailment(Node parent, DirectedRelationshipType relationship,
+      boolean traverseEquivalentEdges) {
     Set<Node> entailment = new HashSet<>();
     TraversalDescription description = graphDb.traversalDescription().depthFirst()
         .relationships(relationship.getType(), relationship.getDirection())
-        .evaluator(Evaluators.fromDepth(0))
-        .evaluator(Evaluators.all());
+        .evaluator(Evaluators.fromDepth(0)).evaluator(Evaluators.all());
     if (traverseEquivalentEdges) {
       description = description.relationships(OwlRelationships.OWL_EQUIVALENT_CLASS);
     }
@@ -82,12 +88,11 @@ public class GraphApi {
   }
 
   @AddCuries
-  public Graph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types, final Optional<Predicate<Node>> includeNode) {
-    TraversalDescription description = graphDb.traversalDescription()
-        .breadthFirst()
-        .evaluator(Evaluators.toDepth(depth))
-        .uniqueness(Uniqueness.RELATIONSHIP_RECENT);
-    for (DirectedRelationshipType type: types) {
+  public Graph getNeighbors(Set<Node> nodes, int depth, Set<DirectedRelationshipType> types,
+      final Optional<Predicate<Node>> includeNode) {
+    TraversalDescription description = graphDb.traversalDescription().breadthFirst()
+        .evaluator(Evaluators.toDepth(depth)).uniqueness(Uniqueness.RELATIONSHIP_RECENT);
+    for (DirectedRelationshipType type : types) {
       description = description.relationships(type.getType(), type.getDirection());
     }
     if (includeNode.isPresent()) {
@@ -104,15 +109,15 @@ public class GraphApi {
     }
     Graph graph = new TinkerGraph();
     TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
-    for (Path path: description.traverse(nodes)) {
+    for (Path path : description.traverse(nodes)) {
       Relationship relationship = path.lastRelationship();
       if (null != relationship) {
         tgu.addEdge(relationship);
       }
     }
-    if (isEmpty(graph.getEdges())) { 
+    if (isEmpty(graph.getEdges())) {
       // If nothing was added to the graph add the root nodes
-      for (Node node: nodes) {
+      for (Node node : nodes) {
         tgu.addNode(node);
       }
     }
@@ -120,14 +125,11 @@ public class GraphApi {
   }
 
   public Graph getEdges(RelationshipType type, boolean entail, long skip, long limit) {
-    String query = "MATCH path = (start)-[r:" + type.name() 
-        + (entail ? "!" : "")
-        + "]->(end) "
+    String query = "MATCH path = (start)-[r:" + type.name() + (entail ? "!" : "") + "]->(end) "
         + " RETURN path "
         // TODO: This slows down the query dramatically.
         // + " ORDER BY ID(r) "
-        + " SKIP " + skip 
-        + " LIMIT " + limit;
+        + " SKIP " + skip + " LIMIT " + limit;
     Graph graph = new TinkerGraph();
     TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
     Result result;
@@ -142,6 +144,68 @@ public class GraphApi {
       // Return and empty graph if the limit is too high...
     }
     return graph;
+  }
+
+  public Optional<Node> getNode(String id, Optional<String> lblHint) {
+    String iriResolved = curieUtil.getIri(id).or(id);
+    Optional<Node> node = Optional.absent();
+    if (lblHint.isPresent()) {
+      Label hintLabel = Label.label(lblHint.get());
+      Node hit = graphDb.findNode(hintLabel, NodeProperties.IRI, iriResolved);
+      if (hit != null) {
+        node = Optional.of(hit);
+      }
+    } else {
+      String startQuery =
+          "MATCH (n {" + NodeProperties.IRI + ": \"" + iriResolved + "\"}) RETURN n";
+      Result res = cypherUtil.execute(startQuery);
+      if (res.hasNext()) {
+        node = Optional.of((Node) res.next().get("n"));
+      }
+    }
+
+    return node;
+  }
+
+  public Graph getReachableNodes(Node start, List<String> rels, Set<String> lbls) {
+    Set<Node> acc = Sets.newHashSet(start);
+    if (rels.isEmpty()) {
+      Set<Node> newAcc = Sets.newHashSet();
+      String query = "MATCH (n)-[]->(m) WHERE ID(n) = " + start.getId() + " RETURN m";
+      Result res = cypherUtil.execute(query);
+      while (res.hasNext()) {
+        newAcc.add((Node) res.next().get("m"));
+      }
+      acc = newAcc;
+    } else {
+      for (String rel : rels) {
+        Set<Node> newAcc = Sets.newHashSet();
+        for (Node n : acc) {
+          String query = "MATCH (n)-[:" + rel + "]->(m) WHERE ID(n) = " + n.getId() + " RETURN m";
+          Result res = cypherUtil.execute(query);
+          while (res.hasNext()) {
+            newAcc.add((Node) res.next().get("m"));
+          }
+        }
+        acc = newAcc;
+      }
+    }
+
+    TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+    for (Node n : acc) {
+      if (lbls.isEmpty()) {
+        tgu.addNode(n);
+      } else {
+        Set<String> nodeLabels =
+            Sets.newHashSet(n.getLabels()).stream().map(l -> l.name()).collect(Collectors.toSet());
+        nodeLabels.retainAll(lbls);
+        if (!nodeLabels.isEmpty()) {
+          tgu.addNode(n);
+        }
+      }
+    }
+
+    return tgu.getGraph();
   }
 
   /***
@@ -167,5 +231,5 @@ public class GraphApi {
     }
     return propertyKeys;
   }
-  
+
 }

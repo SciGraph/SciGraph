@@ -100,7 +100,7 @@ Also browse the [generated REST documentation](http://localhost:9000/scigraph/do
 to see some of the other resources.
 
 -------
-<img src="http://github.nfsdb.org/images/yklogo.png" />
+<img src="https://www.yourkit.com/images/yklogo.png" />
 -------
 Thanks to YourKit for providing an Open Source license.
 

@@ -35,12 +35,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
+import org.prefixcommons.CurieUtil;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Function;
@@ -70,7 +72,6 @@ import io.scigraph.services.jersey.CustomMediaTypes;
 import io.scigraph.services.jersey.JaxRsUtil;
 import io.scigraph.services.jersey.UnknownClassException;
 import io.scigraph.vocabulary.Vocabulary;
-import org.prefixcommons.CurieUtil;
 
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")
@@ -301,6 +302,42 @@ public class GraphService extends BaseResource {
     sort(propertyKeys);
     return JaxRsUtil.wrapJsonp(request.get(), new GenericEntity<List<String>>(propertyKeys) {},
         callback);
+  }
+
+  @GET
+  @Path("/reachablefrom/{id}")
+  @ApiOperation(
+      value = "Get all the nodes reachable from a starting point, traversing the provided edges.",
+      response = Graph.class, responseContainer = "List")
+  @Timed
+  @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
+  @Produces({MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_GRAPHSON,
+      MediaType.APPLICATION_XML, CustomMediaTypes.APPLICATION_GRAPHML,
+      CustomMediaTypes.APPLICATION_XGMML, CustomMediaTypes.TEXT_GML, CustomMediaTypes.TEXT_CSV,
+      CustomMediaTypes.TEXT_TSV, CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
+  public Object reachableFrom(
+      @ApiParam(value = "The type of the edge", required = true) @PathParam("id") String id,
+      @ApiParam(value = "A label hint to find the start node.",
+          required = false) @QueryParam("hint") Optional<String> hint,
+      @ApiParam(value = "A list of relationships to traverse, in order.",
+          required = false) @QueryParam("relationships") List<String> relationships,
+      @ApiParam(value = "A list of node labels to filter.",
+          required = false) @QueryParam("lbls") Set<String> lbls,
+      @ApiParam(value = DocumentationStrings.JSONP_DOC,
+          required = false) @QueryParam("callback") String callback) {
+    Graph graph = new TinkerGraph();
+
+    try (Transaction tx = graphDb.beginTx()) {
+      Optional<Node> startNode = api.getNode(id, hint);
+      if (!startNode.isPresent()) {
+        return Response.status(Response.Status.NOT_FOUND).build();
+      } else {
+        graph = api.getReachableNodes(startNode.get(), relationships, lbls);
+      }
+      tx.success();
+    }
+    GenericEntity<Graph> response = new GenericEntity<Graph>(graph) {};
+    return JaxRsUtil.wrapJsonp(request.get(), response, callback);
   }
 
 }

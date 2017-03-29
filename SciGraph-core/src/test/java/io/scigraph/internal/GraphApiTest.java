@@ -18,13 +18,10 @@ package io.scigraph.internal;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Iterables.size;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import io.scigraph.internal.GraphApi;
-import io.scigraph.neo4j.DirectedRelationshipType;
-import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.util.GraphTestBase;
 
 import java.util.Collection;
 
@@ -32,9 +29,18 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
+
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.neo4j.DirectedRelationshipType;
+import io.scigraph.owlapi.OwlRelationships;
+import io.scigraph.util.GraphTestBase;
+import jersey.repackaged.com.google.common.collect.Lists;
+import jersey.repackaged.com.google.common.collect.Sets;
 
 public class GraphApiTest extends GraphTestBase {
 
@@ -44,9 +50,13 @@ public class GraphApiTest extends GraphTestBase {
   @Before
   public void addNodes() throws Exception {
     a = graphDb.createNode();
+    a.setProperty(NodeProperties.IRI, "a");
     a.setProperty("foo", "bar");
+    a.addLabel(Label.label("alabel"));
     b = graphDb.createNode();
+    b.setProperty(NodeProperties.IRI, "b");
     c = graphDb.createNode();
+    c.setProperty(NodeProperties.IRI, "c");
     b.createRelationshipTo(a, OwlRelationships.RDFS_SUBCLASS_OF);
     c.createRelationshipTo(b, OwlRelationships.OWL_EQUIVALENT_CLASS);
     graphApi = new GraphApi(graphDb, cypherUtil, curieUtil);
@@ -54,26 +64,30 @@ public class GraphApiTest extends GraphTestBase {
 
   @Test
   public void entailment_isReturned() {
-    Collection<Node> entailment = graphApi.getEntailment(a, new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING), false);
+    Collection<Node> entailment = graphApi.getEntailment(a,
+        new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING), false);
     assertThat(entailment, contains(a, b));
   }
 
   @Test
   public void equivalentEntailment_isReturned() {
-    Collection<Node> entailment = graphApi.getEntailment(a, new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING), true);
+    Collection<Node> entailment = graphApi.getEntailment(a,
+        new DirectedRelationshipType(OwlRelationships.RDFS_SUBCLASS_OF, Direction.INCOMING), true);
     assertThat(entailment, contains(a, b, c));
   }
 
   @Test
   public void allPropertyKeys_areReturned() {
-    assertThat(graphApi.getAllPropertyKeys(), contains("foo"));
+    assertThat(graphApi.getAllPropertyKeys(), hasItems("foo"));
   }
 
   @Test
   public void allRelationshipTypes_areReturned() {
     // TODO: RelationshipTypeTokens don't equal RelationshipTypes
-    assertThat(getFirst(graphApi.getAllRelationshipTypes(), null).name(), is(OwlRelationships.RDFS_SUBCLASS_OF.name()));
-    assertThat(getLast(graphApi.getAllRelationshipTypes()).name(), is(OwlRelationships.OWL_EQUIVALENT_CLASS.name()));
+    assertThat(getFirst(graphApi.getAllRelationshipTypes(), null).name(),
+        is(OwlRelationships.RDFS_SUBCLASS_OF.name()));
+    assertThat(getLast(graphApi.getAllRelationshipTypes()).name(),
+        is(OwlRelationships.OWL_EQUIVALENT_CLASS.name()));
   }
 
   @Test
@@ -88,6 +102,79 @@ public class GraphApiTest extends GraphTestBase {
     Graph graph = graphApi.getEdges(OwlRelationships.RDFS_SUBCLASS_OF, true, 0L, 1L);
     assertThat(size(graph.getVertices()), is(2));
     assertThat(size(graph.getEdges()), is(1));
+  }
+
+  @Test
+  public void getReachableNodes_areReturned() {
+    Graph graph = graphApi.getReachableNodes(b,
+        Lists.newArrayList(OwlRelationships.RDFS_SUBCLASS_OF.name()), Sets.newHashSet());
+    assertThat(size(graph.getVertices()), is(1));
+    assertThat(size(graph.getEdges()), is(0));
+    graph = graphApi.getReachableNodes(c,
+        Lists.newArrayList(OwlRelationships.OWL_EQUIVALENT_CLASS.name(),
+            OwlRelationships.RDFS_SUBCLASS_OF.name()),
+        Sets.newHashSet());
+    assertThat(size(graph.getVertices()), is(1));
+    assertThat(size(graph.getEdges()), is(0));
+  }
+
+  @Test
+  public void getReachableNodes_nothingReturnedForFakeLabel() {
+    Graph graph = graphApi.getReachableNodes(c,
+        Lists.newArrayList(OwlRelationships.OWL_EQUIVALENT_CLASS.name(),
+            OwlRelationships.RDFS_SUBCLASS_OF.name()),
+        Sets.newHashSet("fakeLabel"));
+    assertThat(size(graph.getVertices()), is(0));
+    assertThat(size(graph.getEdges()), is(0));
+  }
+
+  @Test
+  public void getReachableNodes_traverseAllRels() {
+    Graph graph = graphApi.getReachableNodes(c, Lists.newArrayList(), Sets.newHashSet());
+    assertThat(size(graph.getVertices()), is(1));
+    assertThat(size(graph.getEdges()), is(0));
+  }
+  
+  @Test
+  public void getReachableNodes_fetchesAll() {
+    Graph graph = graphApi.getReachableNodes(c, Lists.newArrayList("*"), Sets.newHashSet());
+    assertThat(size(graph.getVertices()), is(2));
+    assertThat(size(graph.getEdges()), is(0));
+  }
+  
+  @Test
+  public void getReachableNodes_filtersCorrectly() {
+    Graph graph = graphApi.getReachableNodes(c, Lists.newArrayList("*"), Sets.newHashSet("alabel"));
+    assertThat(size(graph.getVertices()), is(1));
+    assertThat(size(graph.getEdges()), is(0));
+  }
+  
+  @Test
+  public void getNode_isReturned() {
+    Optional<String> empty = Optional.absent();
+    Optional<Node> node = graphApi.getNode("a", empty);
+    assertThat(node.isPresent(), is(true));
+    assertThat(node.get(), is(a));
+  }
+
+  @Test
+  public void getNode_nothingReturnedForFakeLabel() {
+    Optional<Node> node = graphApi.getNode("a", Optional.of("fakeLabel"));
+    assertThat(node.isPresent(), is(false));
+  }
+
+  @Test
+  public void getNode_nodeReturnedForValidLabel() {
+    Optional<Node> node = graphApi.getNode("a", Optional.of("alabel"));
+    assertThat(node.isPresent(), is(true));
+    assertThat(node.get(), is(a));
+  }
+
+  @Test
+  public void getNode_nothingReturnedForNonExisting() {
+    Optional<String> empty = Optional.absent();
+    Optional<Node> node = graphApi.getNode("z", empty);
+    assertThat(node.isPresent(), is(false));
   }
 
   @Test
