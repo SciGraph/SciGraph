@@ -25,28 +25,42 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 
-import com.google.common.base.Optional;
+import java.security.Principal;
+import java.util.Optional;
 
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;
 
-public class BasicAuthenticator implements Authenticator<BasicCredentials, Subject> {
+public class BasicAuthenticator implements Authenticator<BasicCredentials, Principal> {
 
   private static final Logger logger = Logger.getLogger(BasicAuthenticator.class.getName());
   
   @Override
-  public Optional<Subject> authenticate(BasicCredentials credentials) throws AuthenticationException {
+  public java.util.Optional<Principal> authenticate(BasicCredentials credentials) throws AuthenticationException {
     Subject subject = SecurityUtils.getSubject();
     try {
       subject.login(new UsernamePasswordToken(credentials.getUsername(), credentials.getPassword(), false));
-      return Optional.of(subject);
+      User user = new User(subject);
+      return Optional.of(user);
     } catch (UnknownAccountException | IncorrectCredentialsException | LockedAccountException e) {
       logger.log(Level.WARNING, e.getMessage(), e);
     } catch (org.apache.shiro.authc.AuthenticationException ae) {
       logger.log(Level.WARNING, ae.getMessage(), ae);
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
+  public static class User implements Principal {
+	    private final Subject subject;
+	    public User(Subject subject) {
+	        this.subject = subject;
+	    }
+	    public String getName() {
+	        return subject.getPrincipal().toString();
+	    }
+	    public Subject getSubject() {
+	        return subject;
+	    }
+	}
 }
