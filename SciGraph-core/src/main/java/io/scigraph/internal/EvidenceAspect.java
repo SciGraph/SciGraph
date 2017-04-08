@@ -90,10 +90,13 @@ public class EvidenceAspect implements GraphAspect {
                 String objectPropertyRelationship =
                     GraphUtil.getProperty(relationshipNode, NodeProperties.IRI, String.class).get();
 
+                String objectPropertyRelationshipCurie =
+                    curieUtil.getCurie(objectPropertyRelationship).or(objectPropertyRelationship);
+
                 boolean isEdgeInGraph = false;
                 Iterator<Vertex> connectedVertices =
                     vertex.getVertices(com.tinkerpop.blueprints.Direction.BOTH,
-                        objectPropertyRelationship).iterator();
+                        objectPropertyRelationshipCurie).iterator();
                 while (connectedVertices.hasNext()) {
                   if (Long.parseLong((String) connectedVertices.next().getId()) == object.getId()) {
                     isEdgeInGraph = true;
