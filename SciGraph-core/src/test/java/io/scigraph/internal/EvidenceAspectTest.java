@@ -32,6 +32,8 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import io.scigraph.util.GraphTestBase;
 
 public class EvidenceAspectTest extends GraphTestBase {
+  
+  // TODO test with a curieUtil
 
   Node subject1, object1, object2, object3, association, association2, source, evidence;
   Graph graph = new TinkerGraph();
