@@ -108,7 +108,8 @@ public abstract class GraphTestBase<T extends Graph> {
   public void nodeProperty_castException() {
     long node = graph.createNode("foo");
     graph.setNodeProperty(node, "bar", "baz");
-    graph.getNodeProperty(node, "bar", Integer.class).get();
+    @SuppressWarnings("unused")
+    Integer unused = graph.getNodeProperty(node, "bar", Integer.class).get();
   }
 
   @Test
