@@ -66,25 +66,26 @@ public class SwaggerFilter implements Filter {
     // Capture the output of the filter chain
     ByteArrayResponseWrapper wrappedResp = new ByteArrayResponseWrapper((HttpServletResponse) response);
     chain.doFilter(request, wrappedResp);
-    if (isGzip(request)) {
-      try (InputStream is = new ByteArrayInputStream(wrappedResp.getBytes());
-          GZIPInputStream gis = new GZIPInputStream(is);
-          ByteArrayOutputStream bs = new ByteArrayOutputStream();
-          GZIPOutputStream gzos = new GZIPOutputStream(bs)) {
-        byte[] newApi = writeDynamicResource(gis);
-        gzos.write(newApi);
-        gzos.close();
-        byte[] output = bs.toByteArray();
-        response.setContentLength(output.length);
-        response.getOutputStream().write(output);
-      }
-    } else {
+    // TODO investigate why the request accept gzip but the stream is not.
+//    if (isGzip(request)) {
+//      try (InputStream is = new ByteArrayInputStream(wrappedResp.getBytes());
+//          GZIPInputStream gis = new GZIPInputStream(is);
+//          ByteArrayOutputStream bs = new ByteArrayOutputStream();
+//          GZIPOutputStream gzos = new GZIPOutputStream(bs)) {
+//        byte[] newApi = writeDynamicResource(gis);
+//        gzos.write(newApi);
+//        gzos.close();
+//        byte[] output = bs.toByteArray();
+//        response.setContentLength(output.length);
+//        response.getOutputStream().write(output);
+//      }
+//    } else {
       try (InputStream is = new ByteArrayInputStream(wrappedResp.getBytes());
           ByteArrayOutputStream bs = new ByteArrayOutputStream()) {
         byte[] newApi = writeDynamicResource(is);
         response.setContentLength(newApi.length);
         response.getOutputStream().write(newApi);
-      }
+//      }
       
     }
   }
