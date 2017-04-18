@@ -19,6 +19,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.core.GenericEntity;
@@ -28,7 +29,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
 
 import com.fasterxml.jackson.databind.util.JSONWrappedObject;
-import com.google.common.base.Optional;
 
 public class JaxRsUtil {
 
@@ -71,7 +71,7 @@ public class JaxRsUtil {
    */
   public static Object wrapJsonp(Request request, GenericEntity<?> response, @Nullable String callback) {
     if (JaxRsUtil.isVariant(request, CustomMediaTypes.APPLICATION_JSONP_TYPE) || !isNullOrEmpty(callback)) {
-      callback = Optional.fromNullable(callback).or(DEFAULT_JSONP_CALLBACK);
+      callback = Optional.ofNullable(callback).orElse(DEFAULT_JSONP_CALLBACK);
       
       return new JSONWrappedObject(format("%s(", callback), ");", response.getEntity());
     } else {

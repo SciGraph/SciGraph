@@ -21,11 +21,10 @@ import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.base.Optional;
 import org.prefixcommons.CurieUtil;
 
 public class CurieUtilTest {
@@ -75,7 +74,7 @@ public class CurieUtilTest {
 
   @Test
   public void noCurie_whenMappingIsNotPresent() {
-    assertThat(util.getCurie("http://none.org/none"), is(Optional.<String>absent()));
+    assertThat(util.getCurie("http://none.org/none"), is(Optional.<String>empty()));
   }
 
   @Test

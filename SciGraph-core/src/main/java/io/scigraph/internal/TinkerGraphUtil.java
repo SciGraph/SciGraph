@@ -17,16 +17,13 @@ package io.scigraph.internal;
 
 import static com.google.common.collect.Sets.newHashSet;
 
-import com.google.inject.Inject;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.frames.NodeProperties;
-
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -36,18 +33,20 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
-
 import org.prefixcommons.CurieUtil;
-import scala.collection.convert.Wrappers.SeqWrapper;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.NodeProperties;
+import scala.collection.convert.Wrappers.SeqWrapper;
 
 /***
  * Utilities for building TinkerGraphs from Neo4j objects
@@ -96,7 +95,7 @@ public class TinkerGraphUtil {
         property = propertyList;
       }
       else if (key.equals(CommonProperties.IRI) && String.class.isAssignableFrom(property.getClass())) {
-        property = curieUtil.getCurie((String)property).or((String)property);
+        property = curieUtil.getCurie((String)property).orElse((String)property);
       }
       element.setProperty(key, property);
     }
@@ -123,7 +122,7 @@ public class TinkerGraphUtil {
       Vertex inVertex = addNode(relationship.getEndNode());
       String label = relationship.getType().name();
       Optional<String> curieLabel = curieUtil.getCurie(label);
-      edge = graph.addEdge(relationship.getId(), outVertex, inVertex, curieLabel.or(label));
+      edge = graph.addEdge(relationship.getId(), outVertex, inVertex, curieLabel.orElse(label));
       copyProperties(relationship, edge);
     }
     return edge;
@@ -250,7 +249,7 @@ public class TinkerGraphUtil {
   }
 
   static public <T> Optional<T> getProperty(Element container, String property, Class<T> type) {
-    Optional<T> value = Optional.<T>absent();
+    Optional<T> value = Optional.<T>empty();
     if (container.getPropertyKeys().contains(property)) {
       value = Optional.<T>of(type.cast(container.getProperty(property)));
     }

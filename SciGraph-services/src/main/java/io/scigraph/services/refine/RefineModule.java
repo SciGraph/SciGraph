@@ -15,7 +15,8 @@
  */
 package io.scigraph.services.refine;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
+
 import com.google.inject.AbstractModule;
 
 public class RefineModule extends AbstractModule {

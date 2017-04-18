@@ -15,16 +15,16 @@
  */
 package io.scigraph.owlapi.loader;
 
-import io.scigraph.neo4j.Neo4jConfiguration;
-import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
+
+import io.scigraph.neo4j.Neo4jConfiguration;
+import io.scigraph.owlapi.postprocessors.CliqueConfiguration;
 
 public class OwlLoadConfiguration {
 
@@ -32,10 +32,10 @@ public class OwlLoadConfiguration {
   private List<OntologySetup> ontologies = new ArrayList<>();
   private Map<String, String> categories = new HashMap<>();
   private List<MappedProperty> mappedProperties = new ArrayList<>();
-  private Optional<CliqueConfiguration> cliqueConfiguration = Optional.absent();
-  private Optional<Boolean> addEdgeLabel = Optional.absent();
-  private Optional<String> allNodesLabel = Optional.absent();
-  private Optional<String> anonymousNodeProperty = Optional.absent();
+  private Optional<CliqueConfiguration> cliqueConfiguration = Optional.empty();
+  private Optional<Boolean> addEdgeLabel = Optional.empty();
+  private Optional<String> allNodesLabel = Optional.empty();
+  private Optional<String> anonymousNodeProperty = Optional.empty();
 
   public Optional<String> getAnonymousNodeProperty() {
     return anonymousNodeProperty;
@@ -122,7 +122,7 @@ public class OwlLoadConfiguration {
 
     String url;
 
-    Optional<ReasonerConfiguration> reasonerConfiguration = Optional.absent();
+    Optional<ReasonerConfiguration> reasonerConfiguration = Optional.empty();
 
     boolean skipImports = false;
 

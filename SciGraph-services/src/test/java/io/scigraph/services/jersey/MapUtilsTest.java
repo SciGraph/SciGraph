@@ -20,14 +20,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.services.jersey.MultivaluedMapUtils;
+
+import java.util.Optional;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.junit.Test;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 
 public class MapUtilsTest {

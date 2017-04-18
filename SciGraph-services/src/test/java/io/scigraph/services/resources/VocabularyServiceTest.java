@@ -21,10 +21,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import io.dropwizard.testing.junit.ResourceTestRule;
-import io.scigraph.frames.Concept;
-import io.scigraph.services.resources.VocabularyService;
-import io.scigraph.vocabulary.Vocabulary;
+
+import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 
@@ -32,9 +30,11 @@ import org.dozer.DozerBeanMapper;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-
-import com.google.common.base.Optional;
 import org.prefixcommons.CurieUtil;
+
+import io.dropwizard.testing.junit.ResourceTestRule;
+import io.scigraph.frames.Concept;
+import io.scigraph.vocabulary.Vocabulary;
 
 public class VocabularyServiceTest {
 
@@ -52,7 +52,7 @@ public class VocabularyServiceTest {
   @Before
   public void setup() {
     hippocampus.getLabels().add("Hippocampus");
-    when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>empty());
   }
 
   @Test

@@ -20,15 +20,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import io.scigraph.neo4j.GraphUtil;
+
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.test.TestGraphDatabaseFactory;
-
-import com.google.common.base.Optional;
 
 public class GraphUtilTest {
 
@@ -72,7 +71,7 @@ public class GraphUtilTest {
 
   @Test
   public void testUnknownProperty() {
-    assertThat(GraphUtil.getProperty(node, "nothing", String.class), is(Optional.<String> absent()));
+    assertThat(GraphUtil.getProperty(node, "nothing", String.class), is(Optional.<String>empty()));
   }
 
   @Test(expected = ClassCastException.class)

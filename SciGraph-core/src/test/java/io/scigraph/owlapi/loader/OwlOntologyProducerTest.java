@@ -18,12 +18,8 @@ package io.scigraph.owlapi.loader;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
-import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.owlapi.loader.OWLCompositeObject;
-import io.scigraph.owlapi.loader.OwlOntologyProducer;
-import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
-import io.scigraph.util.GraphTestBase;
 
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,7 +37,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import com.google.common.base.Optional;
+import io.scigraph.owlapi.OwlRelationships;
+import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
+import io.scigraph.util.GraphTestBase;
 
 public class OwlOntologyProducerTest extends GraphTestBase {
 

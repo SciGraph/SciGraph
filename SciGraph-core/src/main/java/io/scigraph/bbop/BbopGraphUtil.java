@@ -48,7 +48,7 @@ public class BbopGraphUtil {
 
   String getCurieOrIri(Vertex vertex) {
     String iri = (String) vertex.getProperty(CommonProperties.IRI);
-    return curieUtil.getCurie(iri).or(iri);
+    return curieUtil.getCurie(iri).orElse(iri);
   }
 
   /***

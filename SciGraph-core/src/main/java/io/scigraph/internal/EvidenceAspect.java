@@ -91,7 +91,7 @@ public class EvidenceAspect implements GraphAspect {
                     GraphUtil.getProperty(relationshipNode, NodeProperties.IRI, String.class).get();
 
                 String objectPropertyRelationshipCurie =
-                    curieUtil.getCurie(objectPropertyRelationship).or(objectPropertyRelationship);
+                    curieUtil.getCurie(objectPropertyRelationship).orElse(objectPropertyRelationship);
 
                 boolean isEdgeInGraph = false;
                 Iterator<Vertex> connectedVertices =
@@ -119,7 +119,7 @@ public class EvidenceAspect implements GraphAspect {
                 }
               } else {
                 logger.severe(GraphUtil.getProperty(association, NodeProperties.IRI, String.class)
-                    .or(Long.toString(association.getId())) + " does not have the relation '"
+                    .orElse(Long.toString(association.getId())) + " does not have the relation '"
                     + HAS_PREDICATE.name() + "'. Ignoring this association.");
               }
             }

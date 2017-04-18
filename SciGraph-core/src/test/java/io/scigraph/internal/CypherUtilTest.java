@@ -24,11 +24,9 @@ import static org.hamcrest.Matchers.isOneOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.internal.CypherUtil;
-import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.util.GraphTestBase;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hamcrest.collection.IsMapContaining;
@@ -39,12 +37,14 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
+import org.prefixcommons.CurieUtil;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.owlapi.OwlRelationships;
+import io.scigraph.util.GraphTestBase;
 
 public class CypherUtilTest extends GraphTestBase {
 
@@ -56,7 +56,7 @@ public class CypherUtilTest extends GraphTestBase {
   @Before
   public void setup() {
     CurieUtil curieUtil = mock(CurieUtil.class);
-    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>empty());
     when(curieUtil.getIri("FOO:foo")).thenReturn(Optional.of("http://x.org/#foo"));
     when(curieUtil.getIri("FOO:fizz")).thenReturn(Optional.of("http://x.org/#fizz"));
     util = new CypherUtil(graphDb, curieUtil);

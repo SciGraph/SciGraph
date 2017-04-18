@@ -22,17 +22,18 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.owlapi.curies.CurieAdder;
+
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.prefixcommons.CurieUtil;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.frames.CommonProperties;
 
 public class CurieAdderTest {
 
@@ -42,7 +43,7 @@ public class CurieAdderTest {
 
   @Before
   public void setup() {
-    when(util.getCurie(anyString())).thenReturn(Optional.<String>absent());
+    when(util.getCurie(anyString())).thenReturn(Optional.<String>empty());
     when(util.getCurie("http://x.org/foo")).thenReturn(Optional.of("x:foo"));
     adder.curieUtil = util;
   }

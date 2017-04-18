@@ -18,15 +18,12 @@ package io.scigraph.owlapi;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.transform;
 import static io.scigraph.owlapi.OwlApiUtils.getIri;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.frames.EdgeProperties;
-import io.scigraph.neo4j.Graph;
-import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -76,8 +73,12 @@ import org.semanticweb.owlapi.util.OWLOntologyWalker;
 import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitor;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
+
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.EdgeProperties;
+import io.scigraph.neo4j.Graph;
+import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 /***
  * The core of the code for translating owlapi axioms into Neo4j structure.
@@ -88,7 +89,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
 
   private final Graph graph;
 
-  private Optional<OWLOntology> ontology = Optional.absent();
+  private Optional<OWLOntology> ontology = Optional.empty();
 
   private String definingOntology;
 

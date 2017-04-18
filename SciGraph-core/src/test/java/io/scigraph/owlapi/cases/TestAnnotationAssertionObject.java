@@ -18,16 +18,17 @@ package io.scigraph.owlapi.cases;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.owlapi.OwlRelationships;
+
+import java.util.Optional;
 
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 
-import com.google.common.base.Optional;
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.neo4j.GraphUtil;
+import io.scigraph.owlapi.OwlRelationships;
 
 /***
  * See https://github.com/SciCrunch/SciGraph/wiki/MappingToOWL#subclassof-axioms

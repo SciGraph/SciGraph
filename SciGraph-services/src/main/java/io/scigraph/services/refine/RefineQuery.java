@@ -18,18 +18,17 @@ package io.scigraph.services.refine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 public class RefineQuery {
 
   String query;
 
-  Optional<Integer> limit = Optional.absent();
+  Optional<Integer> limit = Optional.empty();
 
-  Optional<String> type = Optional.absent();
+  Optional<String> type = Optional.empty();
 
-  Optional<String> type_strict = Optional.absent();
+  Optional<String> type_strict = Optional.empty();
 
   Map<String, Object> properties = new HashMap<>();
 

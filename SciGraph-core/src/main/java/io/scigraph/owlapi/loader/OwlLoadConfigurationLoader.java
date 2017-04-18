@@ -15,21 +15,22 @@
  */
 package io.scigraph.owlapi.loader;
 
-import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.prefixcommons.CurieUtil;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.common.base.Optional;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 public class OwlLoadConfigurationLoader {
 
@@ -54,7 +55,7 @@ public class OwlLoadConfigurationLoader {
 		for (Map.Entry<String, String> entry : config.getCategories()
 				.entrySet()) {
 			Optional<String> iriOpt = curieUtil.getIri(entry.getKey());
-			resolvedCategories.put(iriOpt.or(entry.getKey()), entry.getValue());
+			resolvedCategories.put(iriOpt.orElse(entry.getKey()), entry.getValue());
 		}
 		config.setCategories(resolvedCategories);
 
@@ -65,7 +66,7 @@ public class OwlLoadConfigurationLoader {
 					mappedProperty.name);
 			List<String> resolvedProperties = new ArrayList<String>();
 			for (String property : mappedProperty.getProperties()) {
-				resolvedProperties.add(curieUtil.getIri(property).or(property));
+				resolvedProperties.add(curieUtil.getIri(property).orElse(property));
 			}
 			resolvedMappedProperty.setProperties(resolvedProperties);
 			resolvedMappedProperties.add(resolvedMappedProperty);

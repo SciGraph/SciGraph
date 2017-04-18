@@ -20,6 +20,7 @@ import static java.util.Collections.emptySet;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -32,7 +33,6 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
-import com.google.common.base.Optional;
 
 public class GraphTransactionalImpl implements Graph {
 
@@ -77,7 +77,7 @@ public class GraphTransactionalImpl implements Graph {
     if (idMap.containsKey(id)) {
       return Optional.of(idMap.get(id));
     } else {
-      return Optional.absent();
+      return Optional.empty();
     }
   }
 
@@ -125,7 +125,7 @@ public class GraphTransactionalImpl implements Graph {
     if (relationshipMap.containsKey(start, end, type)) {
       return Optional.of(relationshipMap.get(start, end, type));
     } else {
-      return Optional.absent();
+      return Optional.empty();
     }
   }
 
@@ -161,7 +161,7 @@ public class GraphTransactionalImpl implements Graph {
   public <T> Optional<T> getNodeProperty(long nodeId, String property, Class<T> type) {
     try (Transaction tx = graphDb.beginTx()) {
       Node node = graphDb.getNodeById(nodeId);
-      Optional<T> value = Optional.<T> absent();
+      Optional<T> value = Optional.<T> empty();
       if (node.hasProperty(property)) {
         value = Optional.<T> of(type.cast(node.getProperty(property)));
       }
@@ -216,7 +216,7 @@ public class GraphTransactionalImpl implements Graph {
       Class<T> type) {
     try (Transaction tx = graphDb.beginTx()) {
       Relationship relationship = graphDb.getRelationshipById(relationshipId);
-      Optional<T> value = Optional.<T> absent();
+      Optional<T> value = Optional.<T>empty();
       if (relationship.hasProperty(property)) {
         value = Optional.<T> of(type.cast(relationship.getProperty(property)));
       }

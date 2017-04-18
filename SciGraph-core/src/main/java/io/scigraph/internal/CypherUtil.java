@@ -135,7 +135,7 @@ public class CypherUtil {
             new Function<String, String>() {
               @Override
               public String apply(String type) {
-                return curieUtil.getIri(type).or(type);
+                return curieUtil.getIri(type).orElse(type);
               }
             });
     if (entail) {
@@ -160,7 +160,7 @@ public class CypherUtil {
     Matcher m = p.matcher(cypher);
     while (m.find()) {
       String curie = m.group(1);
-      String iri = curieUtil.getIri(curie).or(curie);
+      String iri = curieUtil.getIri(curie).orElse(curie);
       resolvedCypher = resolvedCypher.replace(curie, iri);
     }
 
@@ -195,7 +195,7 @@ public class CypherUtil {
                   throw new IllegalArgumentException(
                       "Cypher relationship templates must not contain spaces");
                 }
-                return curieUtil.getIri(input.toString()).or(input.toString());
+                return curieUtil.getIri(input.toString()).orElse(input.toString());
               }
 
             });

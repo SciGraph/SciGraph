@@ -24,12 +24,12 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.frames.CommonProperties;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.hamcrest.collection.IsIterableWithSize;
@@ -40,14 +40,15 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.prefixcommons.CurieUtil;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.frames.CommonProperties;
 
 public class TinkerGraphUtilTest {
 
@@ -199,7 +200,7 @@ public class TinkerGraphUtilTest {
   public void primitivePropertiesAreReturned() {
     TinkerGraph graph = new TinkerGraph();
     Vertex v = graph.addVertex(1);
-    assertThat(TinkerGraphUtil.getProperty(v, "foo", String.class), is(Optional.<String>absent()));
+    assertThat(TinkerGraphUtil.getProperty(v, "foo", String.class), is(Optional.<String>empty()));
     v.setProperty("foo", "bar");
     assertThat(TinkerGraphUtil.getProperty(v, "foo", String.class), is(Optional.of("bar")));
   }

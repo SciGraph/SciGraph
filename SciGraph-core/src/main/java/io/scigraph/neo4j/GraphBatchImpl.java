@@ -19,11 +19,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Collections.emptyList;
-import io.scigraph.lucene.LuceneUtils;
-import io.scigraph.lucene.VocabularyIndexAnalyzer;
-import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
-import io.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -48,9 +44,14 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+
+import io.scigraph.lucene.LuceneUtils;
+import io.scigraph.lucene.VocabularyIndexAnalyzer;
+import io.scigraph.owlapi.loader.bindings.IndicatesExactIndexedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesIndexedProperties;
+import io.scigraph.owlapi.loader.bindings.IndicatesUniqueProperty;
 
 @ThreadSafe
 public class GraphBatchImpl implements Graph {
@@ -108,7 +109,7 @@ public class GraphBatchImpl implements Graph {
     if (idMap.containsKey(id)) {
       return Optional.of(idMap.get(id));
     } else {
-      return Optional.absent();
+      return Optional.empty();
     }
   }
 
@@ -129,7 +130,7 @@ public class GraphBatchImpl implements Graph {
     if (relationshipMap.containsKey(start, end, type)) {
       return Optional.of(relationshipMap.get(start, end, type));
     } else {
-      return Optional.absent();
+      return Optional.empty();
     }
   }
 
@@ -196,7 +197,7 @@ public class GraphBatchImpl implements Graph {
     if (propertyMap.containsKey(property)) {
       return Optional.<T> of(type.cast(propertyMap.get(property)));
     } else {
-      return Optional.absent();
+      return Optional.empty();
     }
   }
 
@@ -253,7 +254,7 @@ public class GraphBatchImpl implements Graph {
     if (propertyMap.containsKey(property)) {
       return Optional.<T> of(type.cast(propertyMap.get(property)));
     } else {
-      return Optional.absent();
+      return Optional.empty();
     }
   }
 

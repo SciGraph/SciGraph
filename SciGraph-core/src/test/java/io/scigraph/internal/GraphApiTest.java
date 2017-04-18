@@ -24,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -32,7 +33,6 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
 
 import io.scigraph.frames.NodeProperties;
@@ -151,7 +151,7 @@ public class GraphApiTest extends GraphTestBase {
   
   @Test
   public void getNode_isReturned() {
-    Optional<String> empty = Optional.absent();
+    Optional<String> empty = Optional.empty();
     Optional<Node> node = graphApi.getNode("a", empty);
     assertThat(node.isPresent(), is(true));
     assertThat(node.get(), is(a));
@@ -172,7 +172,7 @@ public class GraphApiTest extends GraphTestBase {
 
   @Test
   public void getNode_nothingReturnedForNonExisting() {
-    Optional<String> empty = Optional.absent();
+    Optional<String> empty = Optional.empty();
     Optional<Node> node = graphApi.getNode("z", empty);
     assertThat(node.isPresent(), is(false));
   }

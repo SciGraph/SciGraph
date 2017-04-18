@@ -26,17 +26,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.frames.Concept;
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.lucene.LuceneUtils;
-import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.neo4j.NodeTransformer;
-import io.scigraph.util.GraphTestBase;
-import io.scigraph.vocabulary.Vocabulary.Query;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -47,7 +40,14 @@ import org.neo4j.graphdb.Transaction;
 import org.prefixcommons.CurieUtil;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
-import com.google.common.base.Optional;
+import io.scigraph.frames.Concept;
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.lucene.LuceneUtils;
+import io.scigraph.neo4j.GraphUtil;
+import io.scigraph.neo4j.NodeTransformer;
+import io.scigraph.util.GraphTestBase;
+import io.scigraph.vocabulary.Vocabulary.Query;
+
 
 /***
  * TODO: Some of these tests should be moved directly to the analyzer
@@ -124,7 +124,7 @@ public class VocabularyNeo4jImplTest extends GraphTestBase {
     when(curieUtil.getPrefixes()).thenReturn(newHashSet("H", "S"));
     when(curieUtil.getExpansion("H")).thenReturn("http://example.org/#h");
     when(curieUtil.getExpansion("S")).thenReturn("http://example.org/#s");
-    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>empty());
     when(curieUtil.getIri("HP:0008")).thenReturn(Optional.of("http://example.org/#hippocampus"));
     vocabulary = new VocabularyNeo4jImpl(graphDb, null, curieUtil, new NodeTransformer());
   }

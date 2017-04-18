@@ -17,15 +17,15 @@ package io.scigraph.services.jersey;
 
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
-import jersey.repackaged.com.google.common.base.Splitter;
-
-import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+
+import jersey.repackaged.com.google.common.base.Splitter;
 
 public class MultivaluedMapUtils {
 
@@ -57,7 +57,7 @@ public class MultivaluedMapUtils {
    * @return the new multimap
    */
   public static Multimap<String, Object> multivaluedMapToMultimap(MultivaluedMap<String, String> map) {
-    return multivaluedMapToMultimap(map, Optional.<Character>absent());
+    return multivaluedMapToMultimap(map, Optional.<Character>empty());
   }
 
   /***

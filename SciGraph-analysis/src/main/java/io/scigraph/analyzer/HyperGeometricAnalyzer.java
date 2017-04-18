@@ -15,11 +15,6 @@
  */
 package io.scigraph.analyzer;
 
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.internal.CypherUtil;
-import io.scigraph.neo4j.Graph;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -37,9 +33,12 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-
-import com.google.common.base.Optional;
 import org.prefixcommons.CurieUtil;
+
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.internal.CypherUtil;
+import io.scigraph.neo4j.Graph;
 
 public class HyperGeometricAnalyzer {
 
@@ -206,7 +205,7 @@ public class HyperGeometricAnalyzer {
             hypergeometricDistribution.upperCumulativeProbability((int) n.getCount())
                 * bonferroniCoeff;
         String iri = graph.getNodeProperty(n.getNodeId(), CommonProperties.IRI, String.class).get();
-        String curie = curieUtil.getCurie(iri).or(iri);
+        String curie = curieUtil.getCurie(iri).orElse(iri);
         String labels =
             StringUtils.join(
                 graph.getNodeProperties(n.getNodeId(), NodeProperties.LABEL, String.class), ", ");

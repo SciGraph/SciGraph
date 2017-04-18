@@ -16,10 +16,6 @@
 package io.scigraph.services.jersey.writers;
 
 import static com.google.common.collect.Lists.newArrayList;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.frames.Concept;
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.services.jersey.CustomMediaTypes;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -33,6 +29,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +43,6 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.collections15.Transformer;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
@@ -60,6 +56,10 @@ import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout;
 import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.Concept;
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.services.jersey.CustomMediaTypes;
 
 @Produces({CustomMediaTypes.IMAGE_JPEG, CustomMediaTypes.IMAGE_PNG})
 @Provider
@@ -167,9 +167,9 @@ public class ImageWriter extends GraphWriter {
   @Override
   public void writeTo(Graph data, Class<?> type, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> headers, OutputStream out) throws IOException {
-    Integer width = Integer.parseInt(Optional.fromNullable(request.getParameter("width")).or(DEFAULT_WIDTH));
-    Integer height = Integer.parseInt(Optional.fromNullable(request.getParameter("height")).or(DEFAULT_HEIGHT));
-    String layoutName = Optional.fromNullable(request.getParameter("layout")).or(DEFAULT_LAYOUT);
+    Integer width = Integer.parseInt(Optional.ofNullable(request.getParameter("width")).orElse(DEFAULT_WIDTH));
+    Integer height = Integer.parseInt(Optional.ofNullable(request.getParameter("height")).orElse(DEFAULT_HEIGHT));
+    String layoutName = Optional.ofNullable(request.getParameter("layout")).orElse(DEFAULT_LAYOUT);
 
     GraphJung<Graph> graph = new GraphJung<Graph>(data);
     AbstractLayout<Vertex, Edge> layout = getLayout(graph, layoutName);

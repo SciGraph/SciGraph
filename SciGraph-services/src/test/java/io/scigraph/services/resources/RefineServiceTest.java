@@ -21,15 +21,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.dropwizard.testing.junit.ResourceTestRule;
-import io.scigraph.frames.Concept;
-import io.scigraph.services.refine.RefineResults;
-import io.scigraph.services.refine.ServiceMetadata;
-import io.scigraph.services.resources.RefineService;
-import io.scigraph.vocabulary.Vocabulary;
-import io.scigraph.vocabulary.Vocabulary.Query;
 
 import java.net.URLEncoder;
+import java.util.Optional;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -37,7 +31,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
+
+import io.dropwizard.testing.junit.ResourceTestRule;
+import io.scigraph.frames.Concept;
+import io.scigraph.services.refine.RefineResults;
+import io.scigraph.services.refine.ServiceMetadata;
+import io.scigraph.vocabulary.Vocabulary;
+import io.scigraph.vocabulary.Vocabulary.Query;
 
 public class RefineServiceTest {
 
@@ -88,7 +88,7 @@ public class RefineServiceTest {
 
   @Test
   public void preview_returns404_whenNotFound() {
-    when(vocabulary.getConceptFromId(any(Query.class))).thenReturn(Optional.<Concept>absent());
+    when(vocabulary.getConceptFromId(any(Query.class))).thenReturn(Optional.<Concept>empty());
     assertThat(
         resources.client().target("/refine/preview/foo").request().get().getStatus(), is(404));
   }

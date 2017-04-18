@@ -15,19 +15,19 @@
  */
 package io.scigraph.services.configuration;
 
-import io.dropwizard.Configuration;
-import io.scigraph.neo4j.Neo4jConfiguration;
-import io.scigraph.services.refine.ServiceMetadata;
-import io.scigraph.services.swagger.beans.resource.Apis;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
+
+import io.dropwizard.Configuration;
+import io.scigraph.neo4j.Neo4jConfiguration;
+import io.scigraph.services.refine.ServiceMetadata;
+import io.scigraph.services.swagger.beans.resource.Apis;
 
 public class ApplicationConfiguration extends Configuration {
 
@@ -42,11 +42,11 @@ public class ApplicationConfiguration extends Configuration {
 
   @Valid
   @JsonProperty(required=false)
-  private Optional<ApiConfiguration> apiConfiguration = Optional.absent();
+  private Optional<ApiConfiguration> apiConfiguration = Optional.empty();
 
   @Valid
   @JsonProperty(required=false)
-  private Optional<ServiceMetadata> serviceMetadata = Optional.absent();
+  private Optional<ServiceMetadata> serviceMetadata = Optional.empty();
 
   @Valid
   @JsonProperty(required=false)

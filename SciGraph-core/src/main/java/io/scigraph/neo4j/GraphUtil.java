@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.lucene.analysis.core.StopAnalyzer;
@@ -32,7 +33,6 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
 /***
@@ -112,7 +112,7 @@ public class GraphUtil {
    */
   static public <T> Optional<T> getProperty(PropertyContainer container, String property,
       Class<T> type) {
-    Optional<T> value = Optional.<T> absent();
+    Optional<T> value = Optional.<T>empty();
     if (container.hasProperty(property)) {
       value = Optional.<T> of(type.cast(container.getProperty(property)));
     }
