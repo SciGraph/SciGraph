@@ -119,7 +119,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
   public Void visit(OWLOntology ontology) {
     this.ontology = Optional.of(ontology);
     this.definingOntology = OwlApiUtils.getIri(ontology);
-    Long VersionNodeID = null;
+    Long versionNodeID = null;
     Long ontologyNodeID = null;
     OWLOntologyID id = ontology.getOntologyID();
     if (null == id.getOntologyIRI()) {
@@ -128,10 +128,10 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
       ontologyNodeID = getOrCreateNode(id.getOntologyIRI().toString(), OwlLabels.OWL_ONTOLOGY);
     }
     if (null != id.getVersionIRI()){
-       VersionNodeID = getOrCreateNode(id.getVersionIRI().toString(), OwlLabels.OWL_ONTOLOGY);
+      versionNodeID = getOrCreateNode(id.getVersionIRI().toString(), OwlLabels.OWL_ONTOLOGY);
     }
-    if (null != ontologyNodeID && null != VersionNodeID) {
-        graph.createRelationship(ontologyNodeID, VersionNodeID, OwlRelationships.OWL_VERSION_IRI);
+    if (null != ontologyNodeID && null != versionNodeID) {
+      graph.createRelationship(ontologyNodeID, versionNodeID, OwlRelationships.OWL_VERSION_IRI);
     }
     return null;
   }

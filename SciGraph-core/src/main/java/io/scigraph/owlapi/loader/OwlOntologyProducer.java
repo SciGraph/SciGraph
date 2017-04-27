@@ -38,7 +38,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -99,18 +98,18 @@ final class OwlOntologyProducer implements Callable<Long> {
       }
             
       for (OWLObject object : ontology.getAxioms()) { // only in the current ontology
-          queue.put(new OWLCompositeObject(ontologyIri, object));
-          objectCount++;
-        }
+        queue.put(new OWLCompositeObject(ontologyIri, object));
+        objectCount++;
+      }
       
       for (OWLAnnotation annotation : ontology.getAnnotations()) { // Get annotations on ontology iri
-          OWLAnnotationSubject ontologySubject = IRI.create(ontologyIri);
-          OWLAnnotationAssertionAxiom object = 
-                  new OWLAnnotationAssertionAxiomImpl(ontologySubject,
-                          annotation.getProperty(), annotation.getValue(),
-                          new ArrayList<OWLAnnotation>());
-          queue.put(new OWLCompositeObject(ontologyIri, object));
-          objectCount++;
+        OWLAnnotationSubject ontologySubject = IRI.create(ontologyIri);
+        OWLAnnotationAssertionAxiom object = 
+                new OWLAnnotationAssertionAxiomImpl(ontologySubject,
+                        annotation.getProperty(), annotation.getValue(),
+                        new ArrayList<OWLAnnotation>());
+        queue.put(new OWLCompositeObject(ontologyIri, object));
+        objectCount++;
       }
     }
     Thread.currentThread().setName(origThreadName);
