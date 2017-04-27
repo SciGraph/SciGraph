@@ -26,6 +26,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.models.Path;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,8 +44,6 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
-import io.scigraph.services.swagger.beans.resource.Apis;
-
 public class DynamicResourceModuleIT {
 
   static GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
@@ -53,7 +52,7 @@ public class DynamicResourceModuleIT {
   static UriInfo uriInfo = mock(UriInfo.class);
 
   Injector i = Guice.createInjector(new TestModule());
-  Apis config = new Apis();
+  Path path = new Path();
   
   static class TestModule extends AbstractModule {
 
@@ -84,8 +83,8 @@ public class DynamicResourceModuleIT {
 
   @Test
   public void nodesAreReturned() {
-    config.setQuery("MATCH (n) RETURN n");
-    CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
+    path.setVendorExtension("x-query", "MATCH (n) RETURN n");
+    CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create("foo", path);
     Graph graph = (Graph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(0));
@@ -93,8 +92,8 @@ public class DynamicResourceModuleIT {
 
   @Test
   public void edgesAreReturned() {
-    config.setQuery("MATCH (n)-[r]-(m) RETURN n, r, m");
-    CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
+    path.setVendorExtension("x-query", "MATCH (n)-[r]-(m) RETURN n, r, m");
+    CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create("foo", path);
     Graph graph = (Graph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(1));
@@ -102,8 +101,8 @@ public class DynamicResourceModuleIT {
   
   @Test
   public void propertiesAreSubstituted() {
-    config.setQuery("MATCH (n)-[r]-(m) WHERE n.foo = {foo} RETURN n, r, m");
-    CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create(config);
+    path.setVendorExtension("x-query", "MATCH (n)-[r]-(m) WHERE n.foo = {foo} RETURN n, r, m");
+    CypherInflector inflector = i.getInstance(CypherInflectorFactory.class).create("foo", path);
     Graph graph = (Graph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), Matchers.<Vertex>iterableWithSize(2));
     assertThat(graph.getEdges(), Matchers.<Edge>iterableWithSize(1));

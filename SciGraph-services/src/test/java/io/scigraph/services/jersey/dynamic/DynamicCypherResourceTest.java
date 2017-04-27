@@ -19,38 +19,35 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.services.jersey.dynamic.CypherInflector;
-import io.scigraph.services.jersey.dynamic.CypherInflectorFactory;
-import io.scigraph.services.jersey.dynamic.DynamicCypherResource;
-import io.scigraph.services.swagger.beans.resource.Apis;
 
+import io.swagger.models.Path;
 import org.glassfish.jersey.server.model.ResourceMethod;
 import org.junit.Before;
 import org.junit.Test;
 
 public class DynamicCypherResourceTest {
 
-  Apis config = new Apis();
+  Path path = new Path();
   CypherInflectorFactory factory = mock(CypherInflectorFactory.class);
 
   @Before
   public void setup() {
-    CypherInflector inflector = new CypherInflector(null, null, null, null, null);
-    when(factory.create(any(Apis.class))).thenReturn(inflector);
+    CypherInflector inflector = new CypherInflector(null, null, null, "foo", null, null);
+    when(factory.create(eq("foo"), any(Path.class))).thenReturn(inflector);
   }
 
   @Test
   public void pathIsCorrectlySet() {
-    config.setPath("foo");
-    DynamicCypherResource resource = new DynamicCypherResource(factory, config);
+    DynamicCypherResource resource = new DynamicCypherResource(factory, "foo", path);
     assertThat(resource.getBuilder().build().getPath(), is("foo"));
   }
 
   @Test
   public void resourceMethodsAreAdded() {
-    DynamicCypherResource resource = new DynamicCypherResource(factory, config);
+    DynamicCypherResource resource = new DynamicCypherResource(factory, "foo", path);
     ResourceMethod method = getOnlyElement(resource.getBuilder().build().getResourceMethods());
     assertThat(method.getHttpMethod(), is("GET"));
   }

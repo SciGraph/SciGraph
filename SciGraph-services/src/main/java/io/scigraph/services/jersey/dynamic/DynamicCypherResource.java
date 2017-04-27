@@ -16,13 +16,13 @@
 package io.scigraph.services.jersey.dynamic;
 
 import io.scigraph.services.jersey.CustomMediaTypes;
-import io.scigraph.services.swagger.beans.resource.Apis;
 
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.models.Path;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.model.ResourceMethod;
@@ -36,16 +36,16 @@ public class DynamicCypherResource extends ResourceConfig {
   final Resource.Builder resourceBuilder = Resource.builder();
 
   @Inject
-  DynamicCypherResource(CypherInflectorFactory factory, @Assisted Apis config) {
-    logger.info("Building dynamic resoure at " + config.getPath());
-    resourceBuilder.path(config.getPath());
+  DynamicCypherResource(CypherInflectorFactory factory, @Assisted String pathName, @Assisted Path path) {
+    logger.info("Building dynamic resource at " + pathName);
+    resourceBuilder.path(pathName);
     ResourceMethod.Builder methodBuilder = resourceBuilder.addMethod("GET");
     methodBuilder.produces(
         MediaType.APPLICATION_JSON_TYPE, CustomMediaTypes.APPLICATION_JSONP_TYPE, CustomMediaTypes.APPLICATION_GRAPHSON_TYPE,
         MediaType.APPLICATION_XML_TYPE, CustomMediaTypes.APPLICATION_GRAPHML_TYPE, CustomMediaTypes.APPLICATION_XGMML_TYPE,
         CustomMediaTypes.TEXT_GML_TYPE, CustomMediaTypes.TEXT_CSV_TYPE, CustomMediaTypes.TEXT_TSV_TYPE,
         CustomMediaTypes.IMAGE_JPEG_TYPE, CustomMediaTypes.IMAGE_PNG_TYPE)
-        .handledBy(factory.create(config));
+        .handledBy(factory.create(pathName, path));
   }
 
   public Resource.Builder getBuilder() {

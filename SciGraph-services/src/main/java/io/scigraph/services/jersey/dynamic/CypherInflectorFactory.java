@@ -15,10 +15,10 @@
  */
 package io.scigraph.services.jersey.dynamic;
 
-import io.scigraph.services.swagger.beans.resource.Apis;
+import io.swagger.models.Path;
 
 interface CypherInflectorFactory {
 
-  CypherInflector create(Apis config);
+  CypherInflector create(String pathName, Path path);
 
 }

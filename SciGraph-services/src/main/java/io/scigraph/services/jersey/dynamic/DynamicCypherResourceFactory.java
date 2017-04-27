@@ -15,10 +15,10 @@
  */
 package io.scigraph.services.jersey.dynamic;
 
-import io.scigraph.services.swagger.beans.resource.Apis;
+import io.swagger.models.Path;
 
 public interface DynamicCypherResourceFactory {
 
-  DynamicCypherResource create(Apis config);
+  DynamicCypherResource create(String name, Path path);
 
 }

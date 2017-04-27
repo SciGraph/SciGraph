@@ -17,6 +17,17 @@ package io.scigraph.services.jersey.dynamic;
 
 import static com.google.common.collect.Iterables.getFirst;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.TextNode;
+import com.tinkerpop.blueprints.Graph;
+import io.scigraph.internal.CypherUtil;
+import io.scigraph.internal.GraphAspect;
+import io.scigraph.internal.TinkerGraphUtil;
+import io.scigraph.owlapi.curies.AddCuries;
+import io.scigraph.services.api.graph.ArrayPropertyTransformer;
+import io.scigraph.services.jersey.MultivaluedMapUtils;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,8 +36,10 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
+import io.swagger.models.Path;
 import org.glassfish.jersey.process.Inflector;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
@@ -36,7 +49,7 @@ import org.prefixcommons.CurieUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.assistedinject.Assisted;
-import com.tinkerpop.blueprints.Graph;
+import org.prefixcommons.CurieUtil;
 
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.internal.GraphAspect;
@@ -44,7 +57,6 @@ import io.scigraph.internal.TinkerGraphUtil;
 import io.scigraph.owlapi.curies.AddCuries;
 import io.scigraph.services.api.graph.ArrayPropertyTransformer;
 import io.scigraph.services.jersey.MultivaluedMapUtils;
-import io.scigraph.services.swagger.beans.resource.Apis;
 
 class CypherInflector implements Inflector<ContainerRequestContext, Response> {
 
@@ -52,16 +64,18 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
 
   private final GraphDatabaseService graphDb;
   private final CypherUtil cypherUtil;
-  private final Apis config;
+  private final String pathName;
+  private final Path path;
   private final CurieUtil curieUtil;
   private final Map<String, GraphAspect> aspectMap;
 
   @Inject
   CypherInflector(GraphDatabaseService graphDb, CypherUtil cypherUtil, CurieUtil curieUtil,
-      @Assisted Apis config, Map<String, GraphAspect> aspectMap) {
+      @Assisted String pathName, @Assisted Path path, Map<String, GraphAspect> aspectMap) {
     this.graphDb = graphDb;
     this.cypherUtil = cypherUtil;
-    this.config = config;
+    this.pathName = pathName;
+    this.path = path;
     this.curieUtil = curieUtil;
     this.aspectMap = aspectMap;
   }
@@ -75,7 +89,7 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
     try (Transaction tx = graphDb.beginTx()) {
       long start = System.currentTimeMillis();
       start = System.currentTimeMillis();
-      Result result = cypherUtil.execute(config.getQuery(), paramMap);
+      Result result = cypherUtil.execute((String)path.getVendorExtensions().get("x-query"), paramMap);
       logger.fine((System.currentTimeMillis() - start) + " to execute query" );
       start = System.currentTimeMillis();
       TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
@@ -95,7 +109,17 @@ class CypherInflector implements Inflector<ContainerRequestContext, Response> {
       }
       ArrayPropertyTransformer.transform(graph);
       tx.success();
-      return Response.ok(graph).cacheControl(config.getCacheControl()).build();
+      Object cacheControlNode = path.getVendorExtensions().get("x-cacheControl");
+      if (cacheControlNode != null) {
+          try {
+            CacheControl cacheControl = new ObjectMapper().readValue(cacheControlNode.toString(), CacheControl.class);
+            return Response.ok(graph).cacheControl(cacheControl).build();
+          }
+          catch (Throwable e) {
+            return Response.ok(graph).cacheControl(null).build();
+          }
+      }
+      return Response.ok(graph).cacheControl(null).build();
     }
   }
 

@@ -33,12 +33,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 
 @Path("/lexical")
 @Api(value = "/lexical", description = "Lexical services")
+@SwaggerDefinition(tags = {@Tag(name="lexical", description="Lexical services")})
 @Produces({ MediaType.APPLICATION_JSON })
 public class LexicalService extends BaseResource {
 

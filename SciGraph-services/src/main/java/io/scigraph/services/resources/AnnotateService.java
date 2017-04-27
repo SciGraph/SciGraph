@@ -59,12 +59,15 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ForwardingList;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 
 @Path("/annotations")
 @Api(value = "/annotations", description = "Annotation services")
+@SwaggerDefinition(tags = {@Tag(name="annotations", description="Annotation services")})
 @Produces({ MediaType.APPLICATION_JSON })
 public class AnnotateService extends BaseResource {
 
