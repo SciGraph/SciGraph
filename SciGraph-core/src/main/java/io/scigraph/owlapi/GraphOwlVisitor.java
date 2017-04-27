@@ -127,9 +127,7 @@ public class GraphOwlVisitor extends OWLOntologyWalkerVisitor<Void> {
     } else {
       ontologyNodeID = getOrCreateNode(id.getOntologyIRI().toString(), OwlLabels.OWL_ONTOLOGY);
     }
-    if (null == id.getVersionIRI()){
-        
-    } else {
+    if (null != id.getVersionIRI()){
        VersionNodeID = getOrCreateNode(id.getVersionIRI().toString(), OwlLabels.OWL_ONTOLOGY);
     }
     if (null != ontologyNodeID && null != VersionNodeID) {
