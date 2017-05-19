@@ -21,14 +21,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.frames.Concept;
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.lucene.LuceneUtils;
-import io.scigraph.lucene.VocabularyQueryAnalyzer;
-import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.neo4j.NodeTransformer;
-import io.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +28,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +38,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -53,12 +45,10 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.analyzing.AnalyzingQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanQuery.Builder;
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spell.LuceneDictionary;
@@ -70,14 +60,21 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexHits;
+import org.prefixcommons.CurieUtil;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.Concept;
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.lucene.LuceneUtils;
+import io.scigraph.lucene.VocabularyQueryAnalyzer;
+import io.scigraph.neo4j.NodeTransformer;
+import io.scigraph.neo4j.bindings.IndicatesNeo4jGraphLocation;
 
 public class VocabularyNeo4jImpl implements Vocabulary {
 
@@ -170,7 +167,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
   @Override
   public Optional<Concept> getConceptFromId(Query query) {
     String idQuery = StringUtils.strip(query.getInput(), "\"");
-    idQuery = curieUtil.getIri(idQuery).or(idQuery);
+    idQuery = curieUtil.getIri(idQuery).orElse(idQuery);
     try (Transaction tx = graph.beginTx()) {
       Node node =
           graph.index().getNodeAutoIndexer().getAutoIndex().get(CommonProperties.IRI, idQuery)
@@ -180,7 +177,7 @@ public class VocabularyNeo4jImpl implements Vocabulary {
       if (null != node) {
         concept = transformer.apply(node);
       }
-      return Optional.fromNullable(concept);
+      return Optional.ofNullable(concept);
     }
   }
 

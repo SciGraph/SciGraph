@@ -23,6 +23,7 @@ import static java.util.Collections.sort;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +47,6 @@ import org.prefixcommons.CurieUtil;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Graph;
@@ -131,7 +131,7 @@ public class GraphService extends BaseResource {
     Set<DirectedRelationshipType> types = new HashSet<>();
     if (relationshipType.isPresent()) {
       String relationshipTypeString = relationshipType.get();
-      relationshipTypeString = curieUtil.getIri(relationshipTypeString).or(relationshipTypeString);
+      relationshipTypeString = curieUtil.getIri(relationshipTypeString).orElse(relationshipTypeString);
       if (!getRelationshipTypeNames().contains(relationshipTypeString)) {
         throw new BadRequestException("Unknown relationship type: " + relationshipTypeString);
       }
@@ -164,7 +164,7 @@ public class GraphService extends BaseResource {
           return graphDb.getNodeById(concept.getId());
         }
       });
-      Optional<Predicate<Node>> nodePredicate = Optional.absent();
+      Optional<Predicate<Node>> nodePredicate = Optional.empty();
       if (!traverseBlankNodes.get()) {
         Predicate<Node> predicate = new Predicate<Node>() {
           @Override
@@ -230,7 +230,7 @@ public class GraphService extends BaseResource {
           required = false) @QueryParam("project") @DefaultValue("*") Set<String> projection,
       @ApiParam(value = DocumentationStrings.JSONP_DOC,
           required = false) @QueryParam("callback") String callback) {
-    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>absent(),
+    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>empty(),
         null, new BooleanParam("false"), projection, callback);
   }
 

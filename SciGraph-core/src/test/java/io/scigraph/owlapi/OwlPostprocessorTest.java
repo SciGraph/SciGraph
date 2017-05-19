@@ -17,13 +17,11 @@ package io.scigraph.owlapi;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import io.scigraph.frames.CommonProperties;
-import io.scigraph.frames.Concept;
-import io.scigraph.neo4j.GraphUtil;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
@@ -35,7 +33,9 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.AutoIndexer;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
-import com.google.common.base.Optional;
+import io.scigraph.frames.CommonProperties;
+import io.scigraph.frames.Concept;
+import io.scigraph.neo4j.GraphUtil;
 
 public class OwlPostprocessorTest {
 

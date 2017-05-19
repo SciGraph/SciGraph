@@ -15,17 +15,18 @@
  */
 package io.scigraph.owlapi.curies;
 
-import io.scigraph.frames.CommonProperties;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.prefixcommons.CurieUtil;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.frames.CommonProperties;
 
 final class CurieAdder implements MethodInterceptor {
 

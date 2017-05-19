@@ -17,9 +17,9 @@ package io.scigraph.owlapi;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import io.scigraph.owlapi.OwlApiUtils;
 
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
@@ -36,8 +36,6 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-import com.google.common.base.Optional;
 
 public class OwlApiUtilsTest {
 
@@ -80,7 +78,7 @@ public class OwlApiUtilsTest {
     OWLLiteral literalEnLang = factory.getOWLLiteral("hello", "en");
     OWLLiteral literalEsLang = factory.getOWLLiteral("hello", "es");
     assertThat((String) OwlApiUtils.getTypedLiteralValue(literalEnLang).get(), is("hello"));
-    assertThat(OwlApiUtils.getTypedLiteralValue(literalEsLang), is(Optional.absent()));
+    assertThat(OwlApiUtils.getTypedLiteralValue(literalEsLang), is(Optional.empty()));
   }
 
   @Test

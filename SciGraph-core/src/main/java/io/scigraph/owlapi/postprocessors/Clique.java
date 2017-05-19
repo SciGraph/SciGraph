@@ -15,14 +15,12 @@
  */
 package io.scigraph.owlapi.postprocessors;
 
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.neo4j.GraphUtil;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -40,8 +38,10 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
+
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.neo4j.GraphUtil;
 
 public class Clique implements Postprocessor {
   private static final Logger logger = Logger.getLogger(Clique.class.getName());

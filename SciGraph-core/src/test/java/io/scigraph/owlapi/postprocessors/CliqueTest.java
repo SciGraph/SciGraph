@@ -17,17 +17,13 @@ package io.scigraph.owlapi.postprocessors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import io.scigraph.frames.NodeProperties;
-import io.scigraph.neo4j.GraphUtil;
-import io.scigraph.owlapi.OwlLabels;
-import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.util.GraphTestBase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -37,9 +33,14 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+
+import io.scigraph.frames.NodeProperties;
+import io.scigraph.neo4j.GraphUtil;
+import io.scigraph.owlapi.OwlLabels;
+import io.scigraph.owlapi.OwlRelationships;
+import io.scigraph.util.GraphTestBase;
 
 public class CliqueTest extends GraphTestBase {
 

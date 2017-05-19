@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,6 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Uniqueness;
 import org.prefixcommons.CurieUtil;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Graph;
@@ -147,8 +147,8 @@ public class GraphApi {
   }
 
   public Optional<Node> getNode(String id, Optional<String> lblHint) {
-    String iriResolved = curieUtil.getIri(id).or(id);
-    Optional<Node> node = Optional.absent();
+    String iriResolved = curieUtil.getIri(id).orElse(id);
+    Optional<Node> node = Optional.empty();
     if (lblHint.isPresent()) {
       Label hintLabel = Label.label(lblHint.get());
       Node hit = graphDb.findNode(hintLabel, NodeProperties.IRI, iriResolved);

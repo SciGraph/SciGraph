@@ -22,13 +22,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import io.scigraph.internal.CypherUtil;
-import io.scigraph.internal.GraphAspect;
-import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.services.swagger.beans.resource.Apis;
-import io.scigraph.util.GraphTestBase;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -39,12 +35,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
+import org.prefixcommons.CurieUtil;
 
-import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.prefixcommons.CurieUtil;
+
+import io.scigraph.internal.CypherUtil;
+import io.scigraph.internal.GraphAspect;
+import io.scigraph.owlapi.OwlRelationships;
+import io.scigraph.services.swagger.beans.resource.Apis;
+import io.scigraph.util.GraphTestBase;
 
 public class CypherInflectorTest extends GraphTestBase {
 
@@ -68,8 +69,8 @@ public class CypherInflectorTest extends GraphTestBase {
     map = new MultivaluedHashMap<>();
     map.put("pathParam", newArrayList("pathValue"));
     when(uriInfo.getPathParameters()).thenReturn(map);
-    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>absent());
-    when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>absent());
+    when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>empty());
+    when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>empty());
     when(curieUtil.getIri("X:foo")).thenReturn(Optional.of("http://x.org/#foo"));
     inflector = new CypherInflector(graphDb, cypherUtil, curieUtil, config, new HashMap<String, GraphAspect>());
   }

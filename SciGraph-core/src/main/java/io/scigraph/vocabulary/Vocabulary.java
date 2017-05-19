@@ -16,15 +16,16 @@
 package io.scigraph.vocabulary;
 
 import static com.google.common.collect.Sets.newHashSet;
-import io.scigraph.frames.Concept;
-import io.scigraph.frames.NodeProperties;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import com.google.common.base.Optional;
+import io.scigraph.frames.Concept;
+import io.scigraph.frames.NodeProperties;
+
 
 /***
  * A vocabulary allows interaction with a backing store of terms, ids, categories, and ontologies.

@@ -18,6 +18,7 @@ package io.scigraph.owlapi;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -42,7 +43,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -83,7 +83,7 @@ public class OwlApiUtils {
           unknownLanguages.add(literal.getLang());
           logger.warning("Ignoring *all* literals with unsupported language: \"" + literal.getLang() + "\".");
         }
-        return Optional.absent();
+        return Optional.empty();
       }
       literalValue = literal.getLiteral();
     }

@@ -16,26 +16,13 @@
 package io.scigraph.services.resources;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import io.dropwizard.jersey.caching.CacheControl;
-import io.scigraph.frames.Concept;
-import io.scigraph.services.jersey.BaseResource;
-import io.scigraph.services.jersey.CustomMediaTypes;
-import io.scigraph.services.jersey.JSONProcessingException;
-import io.scigraph.services.jersey.JaxRsUtil;
-import io.scigraph.services.refine.ConceptView;
-import io.scigraph.services.refine.RefineQueries;
-import io.scigraph.services.refine.RefineQuery;
-import io.scigraph.services.refine.RefineResult;
-import io.scigraph.services.refine.RefineResults;
-import io.scigraph.services.refine.RefineUtil;
-import io.scigraph.services.refine.ServiceMetadata;
-import io.scigraph.vocabulary.Vocabulary;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -51,10 +38,24 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+
+import io.dropwizard.jersey.caching.CacheControl;
+import io.scigraph.frames.Concept;
+import io.scigraph.services.jersey.BaseResource;
+import io.scigraph.services.jersey.CustomMediaTypes;
+import io.scigraph.services.jersey.JSONProcessingException;
+import io.scigraph.services.jersey.JaxRsUtil;
+import io.scigraph.services.refine.ConceptView;
+import io.scigraph.services.refine.RefineQueries;
+import io.scigraph.services.refine.RefineQuery;
+import io.scigraph.services.refine.RefineResult;
+import io.scigraph.services.refine.RefineResults;
+import io.scigraph.services.refine.RefineUtil;
+import io.scigraph.services.refine.ServiceMetadata;
+import io.scigraph.vocabulary.Vocabulary;
 
 @Path("/refine") 
 @Api(value = "/refine", 

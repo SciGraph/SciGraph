@@ -21,6 +21,7 @@ import static java.lang.String.format;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionService;
@@ -46,7 +47,6 @@ import org.mapdb.DB;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -178,7 +178,7 @@ public class BatchOwlLoader {
       postprocessorProvider.runCliquePostprocessor(cliqueConfiguration.get());
     }
 
-    if (addEdgeLabel.or(false)) {
+    if (addEdgeLabel.orElse(false)) {
       postprocessorProvider.runEdgeLabelerPostprocessor();
     }
 

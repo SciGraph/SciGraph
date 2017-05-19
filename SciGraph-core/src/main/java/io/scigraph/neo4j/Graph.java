@@ -16,11 +16,11 @@
 package io.scigraph.neo4j;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 
-import com.google.common.base.Optional;
 
 /***
  * Abstract methods for dealing with an underlying graph.

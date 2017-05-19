@@ -22,6 +22,7 @@ import static java.util.Collections.enumeration;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Optional;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -34,7 +35,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.codec.binary.Base64;
 
-import com.google.common.base.Optional;
 import com.google.common.net.HttpHeaders;
 
 /***
@@ -54,7 +54,7 @@ public class BasicAuthFilter implements Filter {
   public static final String DEFAULT_API_KEY = "defaultApiKey";
 
   private static String keyParam = "apikey";
-  private static Optional<String> defaultApiKey = Optional.absent();
+  private static Optional<String> defaultApiKey = Optional.empty();
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {

@@ -18,19 +18,20 @@ package io.scigraph.annotation;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.disjoint;
-import io.scigraph.frames.Concept;
-import io.scigraph.vocabulary.Vocabulary;
-import io.scigraph.vocabulary.Vocabulary.Query;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Optional;
 import org.prefixcommons.CurieUtil;
+
+import io.scigraph.frames.Concept;
+import io.scigraph.vocabulary.Vocabulary;
+import io.scigraph.vocabulary.Vocabulary.Query;
 
 public class EntityRecognizer {
 
@@ -73,7 +74,7 @@ public class EntityRecognizer {
     for (Concept term : terms) {
       if (shouldAnnotate(term, config)) {
         Optional<String> id = curieUtil.getCurie(term.getIri());
-        entities.add(new Entity(term.getLabels(), id.or(term.getIri()), term.getCategories()));
+        entities.add(new Entity(term.getLabels(), id.orElse(term.getIri()), term.getCategories()));
       }
     }
 

@@ -22,12 +22,12 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
-
-import com.google.common.base.Optional;
 
 public abstract class GraphTestBase<T extends Graph> {
 
@@ -46,7 +46,7 @@ public abstract class GraphTestBase<T extends Graph> {
 
   @Test
   public void nonExistantNodesAreAbsent() {
-    assertThat(graph.getNode("foo"), is(Optional.<Long>absent()));
+    assertThat(graph.getNode("foo"), is(Optional.<Long>empty()));
   }
 
   @Test
@@ -65,7 +65,7 @@ public abstract class GraphTestBase<T extends Graph> {
   @Test
   public void absentNodesProperties_areAbsent() {
     long node = graph.createNode("foo");
-    assertThat(graph.getNodeProperty(node, "bar", String.class), is(Optional.<String>absent()));
+    assertThat(graph.getNodeProperty(node, "bar", String.class), is(Optional.<String>empty()));
   }
 
   @Test
@@ -124,7 +124,7 @@ public abstract class GraphTestBase<T extends Graph> {
   public void absentRelationships_areAbsent() {
     long start = graph.createNode("foo");
     long end = graph.createNode("bar");
-    assertThat(graph.getRelationship(start, end, TYPE), is(Optional.<Long>absent()));
+    assertThat(graph.getRelationship(start, end, TYPE), is(Optional.<Long>empty()));
   }
 
   @Test
@@ -148,7 +148,7 @@ public abstract class GraphTestBase<T extends Graph> {
   @Test
   public void absentRelationshipProperties_areAbsent() {
     long node = graph.createNode("foo");
-    assertThat(graph.getNodeProperty(node, "bar", String.class), is(Optional.<String>absent()));
+    assertThat(graph.getNodeProperty(node, "bar", String.class), is(Optional.<String>empty()));
   }
 
   @Test

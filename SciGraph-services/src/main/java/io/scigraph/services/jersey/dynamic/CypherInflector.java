@@ -17,18 +17,10 @@ package io.scigraph.services.jersey.dynamic;
 
 import static com.google.common.collect.Iterables.getFirst;
 
-import com.tinkerpop.blueprints.Graph;
-import io.scigraph.internal.CypherUtil;
-import io.scigraph.internal.GraphAspect;
-import io.scigraph.internal.TinkerGraphUtil;
-import io.scigraph.owlapi.curies.AddCuries;
-import io.scigraph.services.api.graph.ArrayPropertyTransformer;
-import io.scigraph.services.jersey.MultivaluedMapUtils;
-import io.scigraph.services.swagger.beans.resource.Apis;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -39,13 +31,20 @@ import org.glassfish.jersey.process.Inflector;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.prefixcommons.CurieUtil;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.assistedinject.Assisted;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.prefixcommons.CurieUtil;
+import com.tinkerpop.blueprints.Graph;
+
+import io.scigraph.internal.CypherUtil;
+import io.scigraph.internal.GraphAspect;
+import io.scigraph.internal.TinkerGraphUtil;
+import io.scigraph.owlapi.curies.AddCuries;
+import io.scigraph.services.api.graph.ArrayPropertyTransformer;
+import io.scigraph.services.jersey.MultivaluedMapUtils;
+import io.scigraph.services.swagger.beans.resource.Apis;
 
 class CypherInflector implements Inflector<ContainerRequestContext, Response> {
 
