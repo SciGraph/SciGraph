@@ -6,9 +6,14 @@
  <Ontology
    xml:base="http://example.com/owl/families/"
    ontologyIRI="http://example.com/owl/families"
+   versionIRI="http://example.com/owl/families/2017-10-05/family.owl"
    xmlns="http://www.w3.org/2002/07/owl#">
    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
    <Prefix name="otherOnt" IRI="http://example.org/otherOntologies/families/"/>
+   <Annotation>
+     <AnnotationProperty abbreviatedIRI="owl:versionInfo"/>
+     <Literal>version 4.0</Literal>
+   </Annotation>
 
    <Declaration>
      <NamedIndividual IRI="John"/>

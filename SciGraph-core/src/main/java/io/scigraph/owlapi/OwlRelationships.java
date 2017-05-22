@@ -57,6 +57,9 @@ public class OwlRelationships {
   
   public static final RelationshipType RDFS_IS_DEFINED_BY = RelationshipType
       .withName(getNeo4jName(OWLRDFVocabulary.RDFS_IS_DEFINED_BY));
+  
+  public static final RelationshipType OWL_VERSION_IRI = RelationshipType
+          .withName(getNeo4jName(OWLRDFVocabulary.OWL_VERSION_IRI));
 
   public static final RelationshipType FILLER = RelationshipType.withName("filler");
 

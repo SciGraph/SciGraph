@@ -22,7 +22,10 @@ import io.scigraph.owlapi.OwlRelationships;
 import io.scigraph.owlapi.ReasonerUtil;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 import io.scigraph.owlapi.loader.bindings.IndicatesNumberOfShutdownProducers;
+import uk.ac.manchester.cs.owl.owlapi.OWLAnnotationAssertionAxiomImpl;
+import org.semanticweb.owlapi.model.OWLAnnotationSubject;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -33,6 +36,8 @@ import java.util.logging.Logger;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -81,6 +86,7 @@ final class OwlOntologyProducer implements Callable<Long> {
     long objectCount = 0;
     for (OWLOntology ontology : manager.getOntologies()) {
       String ontologyIri = OwlApiUtils.getIri(ontology);
+      queue.put(new OWLCompositeObject(ontologyIri, ontology));
 
       for (OWLObject object : ontology.getNestedClassExpressions()) {
         queue.put(new OWLCompositeObject(ontologyIri, object));
@@ -90,7 +96,18 @@ final class OwlOntologyProducer implements Callable<Long> {
         queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
+            
       for (OWLObject object : ontology.getAxioms()) { // only in the current ontology
+        queue.put(new OWLCompositeObject(ontologyIri, object));
+        objectCount++;
+      }
+      
+      for (OWLAnnotation annotation : ontology.getAnnotations()) { // Get annotations on ontology iri
+        OWLAnnotationSubject ontologySubject = IRI.create(ontologyIri);
+        OWLAnnotationAssertionAxiom object = 
+                new OWLAnnotationAssertionAxiomImpl(ontologySubject,
+                        annotation.getProperty(), annotation.getValue(),
+                        new ArrayList<OWLAnnotation>());
         queue.put(new OWLCompositeObject(ontologyIri, object));
         objectCount++;
       }
