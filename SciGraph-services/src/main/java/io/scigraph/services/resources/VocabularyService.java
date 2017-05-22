@@ -36,6 +36,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.dozer.DozerBeanMapper;
@@ -44,11 +51,7 @@ import org.prefixcommons.CurieUtil;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import org.prefixcommons.CurieUtil;
 
 import io.dropwizard.jersey.caching.CacheControl;
 import io.dropwizard.jersey.params.BooleanParam;
@@ -65,6 +68,7 @@ import io.scigraph.vocabulary.Vocabulary.Query;
 
 @Path("/vocabulary") 
 @Api(value = "/vocabulary", description = "Vocabulary services")
+@SwaggerDefinition(tags = {@Tag(name="vocabulary", description="Vocabulary services")})
 @Produces({ MediaType.APPLICATION_JSON })
 public class VocabularyService extends BaseResource {
 

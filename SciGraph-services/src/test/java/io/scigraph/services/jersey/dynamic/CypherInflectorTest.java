@@ -22,6 +22,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import io.scigraph.internal.CypherUtil;
+import io.scigraph.internal.GraphAspect;
+import io.scigraph.owlapi.OwlRelationships;
+import io.scigraph.util.GraphTestBase;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -30,6 +34,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.models.Path;
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,12 +49,11 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import io.scigraph.internal.CypherUtil;
 import io.scigraph.internal.GraphAspect;
 import io.scigraph.owlapi.OwlRelationships;
-import io.scigraph.services.swagger.beans.resource.Apis;
 import io.scigraph.util.GraphTestBase;
 
 public class CypherInflectorTest extends GraphTestBase {
 
-  Apis config = new Apis();
+  Path path = new Path();
   ContainerRequestContext context = mock(ContainerRequestContext.class);
   UriInfo uriInfo = mock(UriInfo.class);
   Transaction tx = mock(Transaction.class);
@@ -72,33 +76,33 @@ public class CypherInflectorTest extends GraphTestBase {
     when(curieUtil.getIri(anyString())).thenReturn(Optional.<String>empty());
     when(curieUtil.getCurie(anyString())).thenReturn(Optional.<String>empty());
     when(curieUtil.getIri("X:foo")).thenReturn(Optional.of("http://x.org/#foo"));
-    inflector = new CypherInflector(graphDb, cypherUtil, curieUtil, config, new HashMap<String, GraphAspect>());
+    inflector = new CypherInflector(graphDb, cypherUtil, curieUtil, "dynamic", path, new HashMap<String, GraphAspect>());
   }
 
   @Test
   public void inflectorAppliesCorrectly() {
-    config.setQuery("MATCH (n) RETURN n");
+    path.setVendorExtension("x-query", "MATCH (n) RETURN n");
     TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
   }
 
   @Test
   public void inflectorAppliesCorrectly_withRelationshipEntailment() {
-    config.setQuery("MATCH (n)-[r:X:foo!]-(m) RETURN n, r, m");
+    path.setVendorExtension("x-query", "MATCH (n)-[r:X:foo!]-(m) RETURN n, r, m");
     TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("http://x.org/#fizz"));
   }
 
   @Test
   public void inflectorAppliesCorrectly_withVariableRelationship() {
-    config.setQuery("MATCH (n)-[r:${rel_id}]-(m) RETURN n, r, m");
+    path.setVendorExtension("x-query","MATCH (n)-[r:${rel_id}]-(m) RETURN n, r, m");
     TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(getOnlyElement(graph.getEdges()).getLabel(), is("http://x.org/#fizz"));
   }
 
   @Test
   public void pathsAreReturnedCorrectly() {
-    config.setQuery("MATCH (n {iri:'http://x.org/#foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
+    path.setVendorExtension("x-query","MATCH (n {iri:'http://x.org/#foo'})-[path:subPropertyOf*]-(m) RETURN n, path, m");
     TinkerGraph graph = (TinkerGraph) inflector.apply(context).getEntity();
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
   }

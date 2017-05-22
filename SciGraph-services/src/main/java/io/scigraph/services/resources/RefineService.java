@@ -38,9 +38,11 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 
 import io.dropwizard.jersey.caching.CacheControl;
 import io.scigraph.frames.Concept;
@@ -60,6 +62,7 @@ import io.scigraph.vocabulary.Vocabulary;
 @Path("/refine") 
 @Api(value = "/refine", 
 description = "OpenRefine Reconciliation Services")
+@SwaggerDefinition(tags = {@Tag(name="refine", description="OpenRefine Reconciliation Services")})
 // *NOTE* OpenRefine requires a JSONP response - don't remove it.
 @Produces({ MediaType.APPLICATION_JSON, CustomMediaTypes.APPLICATION_JSONP})
 public class RefineService extends BaseResource {

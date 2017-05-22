@@ -35,12 +35,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 
 @Path("/analyzer")
 @Api(value = "/analyzer", description = "Analysis services")
+@SwaggerDefinition(tags = {@Tag(name="analyzer", description="Analysis services")})
 @Produces({ MediaType.APPLICATION_JSON })
 public class AnalyzerService extends BaseResource {
 

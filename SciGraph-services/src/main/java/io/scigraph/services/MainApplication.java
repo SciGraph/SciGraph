@@ -15,6 +15,7 @@
  */
 package io.scigraph.services;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
@@ -25,8 +26,8 @@ import io.scigraph.services.configuration.ApplicationConfiguration;
 import io.scigraph.services.jersey.MediaTypeMappings;
 import io.scigraph.services.jersey.dynamic.DynamicCypherResourceFactory;
 import io.scigraph.services.jersey.dynamic.SwaggerFilter;
+import io.scigraph.services.resources.SwaggerJsonBareService;
 import io.scigraph.services.swagger.SwaggerDocUrlFilter;
-import io.scigraph.services.swagger.beans.resource.Apis;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -37,6 +38,10 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 
+import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.jaxrs.listing.ApiListingResource;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
+import io.swagger.models.Path;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.message.MessageProperties;
 import org.glassfish.jersey.server.filter.UriConnegFilter;
@@ -45,15 +50,8 @@ import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
-import com.wordnik.swagger.config.ConfigFactory;
-import com.wordnik.swagger.config.ScannerFactory;
-import com.wordnik.swagger.config.SwaggerConfig;
-import com.wordnik.swagger.jaxrs.config.DefaultJaxrsScanner;
-import com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider;
-import com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON;
-import com.wordnik.swagger.jaxrs.listing.ResourceListingProvider;
-import com.wordnik.swagger.jaxrs.reader.DefaultJaxrsApiReader;
-import com.wordnik.swagger.reader.ClassReaders;
+import io.swagger.config.ScannerFactory;
+import io.swagger.jaxrs.config.DefaultJaxrsScanner;
 
 public class MainApplication extends Application<ApplicationConfiguration> {
 
@@ -83,13 +81,18 @@ public class MainApplication extends Application<ApplicationConfiguration> {
    * @param environment
    */
   void configureSwagger(Environment environment, String basePath) {
-    environment.jersey().register(new ApiListingResourceJSON());
-    environment.jersey().register(new ApiDeclarationProvider());
-    environment.jersey().register(new ResourceListingProvider());
+    environment.jersey().register(new ApiListingResource());
+    environment.jersey().register(new SwaggerJsonBareService());
+    environment.jersey().register(new SwaggerSerializers());
     ScannerFactory.setScanner(new DefaultJaxrsScanner());
-    ClassReaders.setReader(new DefaultJaxrsApiReader());
-    SwaggerConfig config = ConfigFactory.config();
-    config.setApiVersion("1.0.1");
+    environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    BeanConfig config = new BeanConfig();
+
+    // api specific configuration
+    config.setTitle("SciGraph");
+    config.setVersion("1.0.1");
+    config.setResourcePackage("io.scigraph.services.resources");
+    config.setScan(true);
     // TODO: Fix this so the swagger client generator can work correctly
     config.setBasePath("/" + basePath);
   }
@@ -125,15 +128,16 @@ public class MainApplication extends Application<ApplicationConfiguration> {
 
     //TODO: This path should not be hard coded.
     configureSwagger(environment, "scigraph");
-    environment.servlets().addFilter("Swagger Filter", factory.getInjector().getInstance(SwaggerFilter.class))
-    .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/api-docs/");
+    environment.servlets().
+            addFilter("Swagger Filter", factory.getInjector().getInstance(SwaggerFilter.class))
+    .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/swagger.json", "/swagger");
 
     environment.servlets().addFilter("swaggerDocResolver", new SwaggerDocUrlFilter())
     .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), false, "/*");
 
     DynamicCypherResourceFactory cypherFactory = factory.getInjector().getInstance(DynamicCypherResourceFactory.class);
-    for (Apis config: configuration.getCypherResources()) {
-      environment.jersey().getResourceConfig().registerResources(cypherFactory.create(config).getBuilder().build());
+    for (Map.Entry<String,Path> config: configuration.getCypherResources().entrySet()) {
+      environment.jersey().getResourceConfig().registerResources(cypherFactory.create(config.getKey(), config.getValue()).getBuilder().build());
     }
   }
 

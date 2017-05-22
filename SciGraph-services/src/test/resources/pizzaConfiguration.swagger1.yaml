@@ -22,24 +22,21 @@ graphConfiguration:
     - synonym
 
 cypherResources:
-  /dynamic/toppings:
-    x-query: |
-              MATCH path = (pizza)-[:pizza:hasTopping]->(topping)
-              WHERE pizza.iri = {pizza_id}
-              RETURN path
-    get:
-      operationId: toppings
-      summary: Get toppings for a pizza
-      description: Note that this uses additional convenience edges
-      parameters:
-        - name: pizza_id
-          description: The ID of the pizza
-          required: true
-          type: string
-          in: query
-      responses:
-        default:
-          description: success
+  - path: /dynamic/toppings
+    query: |
+            MATCH path = (pizza)-[:pizza:hasTopping]->(topping)
+            WHERE pizza.iri = {pizza_id}
+            RETURN path
+    operations:
+      - nickname: toppings
+        summary: Get toppings for a pizza
+        notes: Note that this uses additional convenience edges
+        parameters:
+          - name: pizza_id
+            description: The ID of the pizza
+            required: true
+            type: string
+            paramType: query
 
 serviceMetadata:
   name: 'Pizza Reconciliation Service'

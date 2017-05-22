@@ -38,6 +38,11 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -51,9 +56,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 
 import io.dropwizard.jersey.caching.CacheControl;
 import io.dropwizard.jersey.params.BooleanParam;
@@ -75,6 +77,7 @@ import io.scigraph.vocabulary.Vocabulary;
 
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")
+@SwaggerDefinition(tags = {@Tag(name="graph", description="Graph services")})
 public class GraphService extends BaseResource {
 
   private final Vocabulary vocabulary;

@@ -39,6 +39,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -53,12 +58,10 @@ import org.neo4j.kernel.guard.GuardException;
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/cypher")
 @Api(value = "/cypher", description = "Cypher utility services")
+@SwaggerDefinition(tags = {@Tag(name="cypher", description="Cypher utility services")})
 @Produces({MediaType.TEXT_PLAIN})
 public class CypherUtilService extends BaseResource {
 
