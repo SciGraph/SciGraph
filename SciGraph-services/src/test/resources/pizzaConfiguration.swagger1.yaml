@@ -34,7 +34,7 @@ cypherResources:
         parameters:
           - name: pizza_id
             description: The ID of the pizza
-            required: true
+            required: false
             type: string
             paramType: query
 
