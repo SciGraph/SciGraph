@@ -147,8 +147,12 @@ public class Neo4jModule extends AbstractModule {
   @Singleton
   GraphDatabaseService getGraphDatabaseService() throws IOException {
     try {
+      GraphDatabaseSettings.BoltConnector bolt = GraphDatabaseSettings.boltConnector( "0" );
       GraphDatabaseBuilder graphDatabaseBuilder = new GraphDatabaseFactory()
           .newEmbeddedDatabaseBuilder(new File(configuration.getLocation()))
+          .setConfig( bolt.type, "BOLT" )
+          .setConfig( bolt.enabled, "true" )
+          .setConfig( bolt.address, "localhost:7688" )
           .setConfig(configuration.getNeo4jConfig());
       if (readOnly) {
         graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, Settings.TRUE);

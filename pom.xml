@@ -259,6 +259,11 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.neo4j</groupId>
+      <artifactId>neo4j-bolt</artifactId>
+      <version>3.2</version>
+    </dependency>
   </dependencies>
 
   <reporting>
