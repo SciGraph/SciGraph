@@ -264,6 +264,11 @@
       <artifactId>neo4j-bolt</artifactId>
       <version>3.2.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.neo4j</groupId>
+      <artifactId>neo4j-bolt</artifactId>
+      <version>3.0.7</version>
+    </dependency>
   </dependencies>
 
   <reporting>
