@@ -148,15 +148,16 @@ public class CypherUtil {
   /**
    * 
    * @param cypher
-   * @return cypher with resolved STARTs
+   * @return cypher with resolved Node IRIs
    * 
-   *         Resolves CURIEs to full IRIs in the section between a START and a MATCH. e.g. from
-   *         START n = node:node_auto_index(iri='DOID:4') match (n) return n to START n =
-   *         node:node_auto_index(iri='http://purl.obolibrary.org/obo/DOID_4') match (n) return n
+   *         Resolves CURIEs to full IRIs in MATCH clauses. e.g. from
+   *         MATCH (p:Node{iri:'pizza:FourSeasons'}) RETURN p to
+   *         MATCH (p:Node{iri:'http://www.co-ode.org/ontologies/pizza/
+   *         pizza.owl#FourSeasons'}) RETURN p
    */
-  public String resolveStartQuery(String cypher) {
+  public String resolveNodeIris(String cypher) {
     String resolvedCypher = cypher;
-    Pattern p = Pattern.compile("\\(\\s*iri\\s*=\\s*['|\"]([\\w:/\\?=]+)['|\"]\\s*\\)");
+    Pattern p = Pattern.compile("\\{\\s*iri\\s*:\\s*['|\"]([\\w:/\\?=]+)['|\"]\\s*\\}");
     Matcher m = p.matcher(cypher);
     while (m.find()) {
       String curie = m.group(1);
