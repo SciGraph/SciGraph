@@ -16,8 +16,6 @@
 package io.scigraph.owlapi.loader;
 
 import io.scigraph.neo4j.Neo4jConfiguration;
-import io.scigraph.owlapi.loader.BatchOwlLoader;
-import io.scigraph.owlapi.loader.OwlLoadConfiguration;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.OntologySetup;
 
 import java.io.File;

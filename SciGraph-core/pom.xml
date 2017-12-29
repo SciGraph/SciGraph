@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-graphviz</artifactId>
-      <version>${neo4j.version}</version>
+      <version>${neo4j-graphviz.version}</version>
     </dependency>
     <dependency>
       <groupId>org.neo4j</groupId>

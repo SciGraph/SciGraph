@@ -19,8 +19,6 @@ import io.scigraph.neo4j.Graph;
 import io.scigraph.neo4j.GraphTransactionalImpl;
 import io.scigraph.neo4j.IdMap;
 import io.scigraph.neo4j.RelationshipMap;
-import io.scigraph.owlapi.GraphOwlVisitor;
-import io.scigraph.owlapi.OwlApiUtils;
 import io.scigraph.owlapi.loader.OwlLoadConfiguration.MappedProperty;
 
 import java.util.Collections;

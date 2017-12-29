@@ -44,16 +44,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.PropertyContainer;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.guard.Guard;
-import org.neo4j.kernel.guard.GuardException;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -150,7 +143,7 @@ public class CypherUtilService extends BaseResource {
       } else {
         return cypherUtil.execute(replacedStartCurie).resultAsString();
       }
-    } catch (GuardException e) {
+    } catch (QueryExecutionException e) {
       return "The query execution exceeds " + timeoutMinutes
           + " minutes. Consider using the neo4j shell instead of this service.";
     } finally {

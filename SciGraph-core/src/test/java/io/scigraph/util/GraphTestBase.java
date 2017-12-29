@@ -30,21 +30,20 @@ import io.scigraph.owlapi.OwlLabels;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.junit.*;
+
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import org.prefixcommons.CurieUtil;
 
 public class GraphTestBase {
 
-  protected static GraphDatabaseService graphDb;
+  @ClassRule
+  public static ImpermanentDatabaseRule graphDb = new ImpermanentDatabaseRule();
+
   protected static CypherUtil cypherUtil;
   protected static Graph graph;
   protected static CurieUtil curieUtil;
@@ -70,7 +69,6 @@ public class GraphTestBase {
 
   @BeforeClass
   public static void setupDb() {
-    graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
     // graphDb = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new
     // File("/tmp/lucene")).newGraphDatabase(); // convenient for debugging
     Neo4jConfiguration config = new Neo4jConfiguration();

@@ -76,7 +76,8 @@
     <dropwizard.version>1.1.0</dropwizard.version>
     <guice.version>4.0</guice.version>
     <blueprints.version>2.6.0</blueprints.version>
-    <neo4j.version>3.0.7</neo4j.version>
+    <neo4j.version>3.3.1</neo4j.version>
+    <neo4j-graphviz.version>3.1.1</neo4j-graphviz.version>
   </properties>
 
   <build>
@@ -255,6 +256,13 @@
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-io</artifactId>
+      <version>${neo4j.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.neo4j.test</groupId>
+      <artifactId>neo4j-harness</artifactId>
       <version>${neo4j.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

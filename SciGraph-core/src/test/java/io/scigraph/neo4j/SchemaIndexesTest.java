@@ -24,25 +24,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 public class SchemaIndexesTest {
 
-  GraphDatabaseService graphDb;
+  @Rule
+  public ImpermanentDatabaseRule graphDb = new ImpermanentDatabaseRule();
 
   @Rule
   public TemporaryFolder graphPath = new TemporaryFolder();
-
-  @Before
-  public void setup() {
-    graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();
-  }
 
   @Test
   public void supportEmptySchemaDefinition() {

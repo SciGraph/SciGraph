@@ -24,19 +24,20 @@ import static org.hamcrest.Matchers.empty;
 import java.util.Optional;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 public class GraphUtilTest {
 
-  GraphDatabaseService graphDb;
+  @Rule
+  public ImpermanentDatabaseRule graphDb = new ImpermanentDatabaseRule();
+
   Node node;
 
   @Before
   public void setup() {
-    graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     graphDb.beginTx();
     node = graphDb.createNode();
     node.setProperty("foo", "bar");
