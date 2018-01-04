@@ -46,7 +46,6 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.NodeProperties;
-import scala.collection.convert.Wrappers.SeqWrapper;
 
 /***
  * Utilities for building TinkerGraphs from Neo4j objects
@@ -228,8 +227,8 @@ public class TinkerGraphUtil {
           for (PropertyContainer container : (Path) value) {
             addElement(container);
           }
-        } else if (value instanceof SeqWrapper) {
-          for (Object thing : (SeqWrapper<?>) value) {
+        } else if (value instanceof ArrayList) {
+          for (Object thing : (ArrayList<?>) value) {
             if (thing instanceof PropertyContainer) {
               addElement((PropertyContainer) thing);
             }

@@ -82,7 +82,6 @@ public class CliqueTest extends GraphTestBase {
     Node n3 = getNode("http://x.org/c", graphDb.getAllNodes().iterator());
     Node n4 = getNode("http://x.org/d", graphDb.getAllNodes().iterator());
     Node n5 = getNode("http://x.org/e", graphDb.getAllNodes().iterator());
-    System.out.println(n2);
     assertThat(n1.getDegree(RelationshipType.withName("hasPhenotype")), is(0));
     assertThat(n2.getDegree(RelationshipType.withName("hasPhenotype")), is(1));
     assertThat(n3.getDegree(RelationshipType.withName("hasPhenotype")), is(1));
