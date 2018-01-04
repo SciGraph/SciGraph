@@ -29,12 +29,14 @@ import javax.ws.rs.core.UriInfo;
 import io.swagger.models.Path;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import org.prefixcommons.CurieUtil;
 
 import com.google.inject.AbstractModule;
@@ -46,7 +48,8 @@ import com.tinkerpop.blueprints.Vertex;
 
 public class DynamicResourceModuleIT {
 
-  static GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
+  @ClassRule
+  public static ImpermanentDatabaseRule graphDb = new ImpermanentDatabaseRule();
 
   static ContainerRequestContext context = mock(ContainerRequestContext.class);
   static UriInfo uriInfo = mock(UriInfo.class);

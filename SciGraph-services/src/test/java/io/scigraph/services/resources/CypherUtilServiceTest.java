@@ -61,13 +61,14 @@ public class CypherUtilServiceTest {
   }
 
   @Test
-  public void guardAvailibityTest() {
+  public void guardAvailibilityTest() {
     GraphDatabaseAPI db =
         (GraphDatabaseAPI) new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
             .setConfig(GraphDatabaseSettings.execution_guard_enabled, Settings.TRUE)
             .newGraphDatabase();
     Guard guard = db.getDependencyResolver().resolveDependency(Guard.class);
     assertNotNull(guard);
+    db.shutdown();
   }
 
 }
