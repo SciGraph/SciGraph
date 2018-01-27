@@ -190,36 +190,46 @@ public class CypherUtilTest extends GraphTestBase {
   }
 
   @Test
-  public void resolveStartQueryWithSingleMatch() {
-    String cypher = "START n = node:node_auto_index(iri='FOO:foo') match (n) return n";
-    assertThat(util.resolveStartQuery(cypher),
+  public void resolveMatchQueryWithSingleMatch() {
+    String cypher = "MATCH (n{iri:'FOO:foo'}) RETURN n";
+    assertThat(util.resolveNodeIris(cypher),
         IsEqual
-            .equalTo("START n = node:node_auto_index(iri='http://x.org/#foo') match (n) return n"));
+            .equalTo("MATCH (n{iri:'http://x.org/#foo'}) RETURN n"));
   }
 
   @Test
-  public void resolveStartQueryWithMultipleMatches() {
+  public void resolveMatchQueryWithMultipleNodes() {
     String cypher =
-        "START n = node:node_auto_index(iri='FOO:foo') match (n) UNION START m = node:node_auto_index(iri='FOO:fizz') match (m) return n,m";
+        "MATCH (n{iri:'FOO:foo'})-[]-(m{iri:'FOO:fizz'}) RETURN n,m";
     assertThat(
-        util.resolveStartQuery(cypher),
+        util.resolveNodeIris(cypher),
         IsEqual
-            .equalTo("START n = node:node_auto_index(iri='http://x.org/#foo') match (n) UNION START m = node:node_auto_index(iri='http://x.org/#fizz') match (m) return n,m"));
+            .equalTo("MATCH (n{iri:'http://x.org/#foo'})-[]-(m{iri:'http://x.org/#fizz'}) RETURN n,m"));
   }
 
   @Test
-  public void notResolveStartQueryWithIris() {
+  public void resolveMatchQueryWithMultipleMatches() {
     String cypher =
-        "START n = node:node_auto_index(iri='http://x.org/#foo') match (n) UNION START m = node:node_auto_index(iri='http://x.org/#fizz') match (m) return n,m";
+        "MATCH (n{iri:'FOO:foo'}) MATCH (m{iri:'FOO:fizz'}) RETURN n,m";
     assertThat(
-        util.resolveStartQuery(cypher),
+        util.resolveNodeIris(cypher),
         IsEqual
-            .equalTo("START n = node:node_auto_index(iri='http://x.org/#foo') match (n) UNION START m = node:node_auto_index(iri='http://x.org/#fizz') match (m) return n,m"));
+            .equalTo("MATCH (n{iri:'http://x.org/#foo'}) MATCH (m{iri:'http://x.org/#fizz'}) RETURN n,m"));
+  }
+
+  @Test
+  public void notResolveMatchQueryWithIris() {
+    String cypher =
+        "MATCH (n{iri:'http://x.org/#foo'})-[]-(m{iri:'http://x.org/#fizz'}) RETURN n,m";
+    assertThat(
+        util.resolveNodeIris(cypher),
+        IsEqual
+            .equalTo("MATCH (n{iri:'http://x.org/#foo'})-[]-(m{iri:'http://x.org/#fizz'}) RETURN n,m"));
   }
 
   @Test
   public void unalterRandomString() {
     String cypher = "foo";
-    assertThat(util.resolveStartQuery(cypher), IsEqual.equalTo("foo"));
+    assertThat(util.resolveNodeIris(cypher), IsEqual.equalTo("foo"));
   }
 }

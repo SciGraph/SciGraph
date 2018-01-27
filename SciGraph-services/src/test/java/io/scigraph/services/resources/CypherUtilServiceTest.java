@@ -45,7 +45,7 @@ public class CypherUtilServiceTest {
   @Before
   public void setup() {
     when(cypherUtil.resolveRelationships("foo!")).thenReturn("foo");
-    when(cypherUtil.resolveStartQuery("foo!")).thenReturn("foo!");
+    when(cypherUtil.resolveNodeIris("foo!")).thenReturn("foo!");
   }
 
   @Test

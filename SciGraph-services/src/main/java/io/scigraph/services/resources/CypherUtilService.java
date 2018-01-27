@@ -82,7 +82,7 @@ public class CypherUtilService extends BaseResource {
       notes = "Resolves curies and relationships.")
   public String resolve(
       @ApiParam(value = "The cypher query to resolve", required = true) @QueryParam("cypherQuery") String cypherQuery) {
-    return cypherUtil.resolveRelationships(cypherUtil.resolveStartQuery(cypherQuery));
+    return cypherUtil.resolveRelationships(cypherUtil.resolveNodeIris(cypherQuery));
   }
 
 
@@ -115,7 +115,7 @@ public class CypherUtilService extends BaseResource {
 
 
     String sanitizedCypherQuery = cypherQuery.replaceAll(";", "") + " LIMIT " + limit;
-    String replacedStartCurie = cypherUtil.resolveStartQuery(sanitizedCypherQuery);
+    String replacedStartCurie = cypherUtil.resolveNodeIris(sanitizedCypherQuery);
 
     // TODO I didn't find a way to time out a single query in 3.0. However it becomes easier in 3.1
 //    Guard guard =
