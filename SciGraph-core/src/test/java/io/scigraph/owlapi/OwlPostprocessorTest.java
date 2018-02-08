@@ -56,7 +56,6 @@ public class OwlPostprocessorTest {
 
   @Before
   public void setup() throws InterruptedException, ExecutionException {
-    //graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     Transaction tx = graphDb.beginTx();
     enableIndexing();
     parent = graphDb.createNode();

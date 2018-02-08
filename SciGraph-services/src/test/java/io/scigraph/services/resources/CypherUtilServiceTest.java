@@ -60,15 +60,4 @@ public class CypherUtilServiceTest {
         equalTo("foo"));
   }
 
-  @Test
-  public void guardAvailibilityTest() {
-    GraphDatabaseAPI db =
-        (GraphDatabaseAPI) new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-            .setConfig(GraphDatabaseSettings.execution_guard_enabled, Settings.TRUE)
-            .newGraphDatabase();
-    Guard guard = db.getDependencyResolver().resolveDependency(Guard.class);
-    assertNotNull(guard);
-    db.shutdown();
-  }
-
 }

@@ -44,7 +44,7 @@ public class Neo4jModuleTest {
     configuration.setLocation(graphPath.getRoot().getAbsolutePath());
 
     injector = Guice.createInjector(new Neo4jModule(configuration));
-    injectorReadOnly = Guice.createInjector(new Neo4jModule(configuration, true, true));
+    injectorReadOnly = Guice.createInjector(new Neo4jModule(configuration, true));
   }
 
   @Test
