@@ -10,6 +10,8 @@ logging:
   level: INFO
 
 graphConfiguration:
+  neo4jConfig:
+     dbms.transaction.timeout: 5m
   location: ../SciGraph-core/target/pizzaGraph
   curies:
     'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'

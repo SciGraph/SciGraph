@@ -104,17 +104,13 @@ public class CypherUtilService extends BaseResource {
       @ApiParam(value = "Limit", required = true) @QueryParam("limit") @DefaultValue("10") IntParam limit)
       throws IOException {
 
-    // Set default to 5
-    long timeoutMinutes = 5;
-
     String sanitizedCypherQuery = cypherQuery.replaceAll(";", "") + " LIMIT " + limit;
     String replacedStartCurie = cypherUtil.resolveStartQuery(sanitizedCypherQuery);
-
 
     try {
       if (JaxRsUtil.getVariant(request.get()) != null
           && JaxRsUtil.getVariant(request.get()).getMediaType() == MediaType.APPLICATION_JSON_TYPE) {
-        try (Transaction tx = graphDb.beginTx(timeoutMinutes, TimeUnit.MINUTES)) {
+        try (Transaction tx = graphDb.beginTx()) {
           Result result = cypherUtil.execute(replacedStartCurie);
           StringWriter writer = new StringWriter();
           JsonGenerator generator = new JsonFactory().createGenerator(writer);
@@ -136,11 +132,11 @@ public class CypherUtilService extends BaseResource {
           return writer.toString();
         }
       } else {
-        return cypherUtil.execute(replacedStartCurie, timeoutMinutes, TimeUnit.MINUTES).resultAsString();
+        return cypherUtil.execute(replacedStartCurie).resultAsString();
       }
     } catch (TransactionTerminatedException e) {
-      return "The query execution exceeds " + timeoutMinutes
-          + " minutes. Consider using the neo4j shell instead of this service.";
+      return "The query execution exceeds dbms.transaction.timeout configuration. " +
+              "Consider using the neo4j shell instead of this service.";
     }
   }
 
