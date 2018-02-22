@@ -60,7 +60,7 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 
-class EntityProcessorImpl implements EntityProcessor {
+public class EntityProcessorImpl implements EntityProcessor {
 
   private static final Logger logger = Logger.getLogger(EntityProcessorImpl.class.getName());
 
@@ -68,7 +68,7 @@ class EntityProcessorImpl implements EntityProcessor {
   private final EntityRecognizer recognizer;
 
   @Inject
-  protected EntityProcessorImpl(EntityRecognizer recognizer) {
+  public EntityProcessorImpl(EntityRecognizer recognizer) {
     this.recognizer = recognizer;
     analyzer = new EntityAnalyzer();
   }
