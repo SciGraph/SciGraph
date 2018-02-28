@@ -44,16 +44,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.PropertyContainer;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.kernel.guard.Guard;
-import org.neo4j.kernel.guard.GuardException;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -103,7 +95,7 @@ public class CypherUtilService extends BaseResource {
   @ApiOperation(
       value = "Execute an arbitrary Cypher query.",
       response = String.class,
-      notes = "The graph is in read-only mode, this service will fail with queries which alter the graph, like CREATE, DELETE or REMOVE. Example: START n = node:node_auto_index(iri='DOID:4') match (n) return n")
+      notes = "The graph is in read-only mode, this service will fail with queries which alter the graph, like CREATE, DELETE or REMOVE. Example: MATCH (n:Node{iri:'DOID:4'}) return n")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
@@ -111,23 +103,15 @@ public class CypherUtilService extends BaseResource {
       @ApiParam(value = "The cypher query to execute", required = true) @QueryParam("cypherQuery") String cypherQuery,
       @ApiParam(value = "Limit", required = true) @QueryParam("limit") @DefaultValue("10") IntParam limit)
       throws IOException {
-    int timeoutMinutes = 5;
-
 
     String sanitizedCypherQuery = cypherQuery.replaceAll(";", "") + " LIMIT " + limit;
     String replacedStartCurie = cypherUtil.resolveNodeIris(sanitizedCypherQuery);
-
-    // TODO I didn't find a way to time out a single query in 3.0. However it becomes easier in 3.1
-//    Guard guard =
-//        ((GraphDatabaseAPI) graphDb).getDependencyResolver().resolveDependency(Guard.class);
-    //guard.startTimeout(timeoutMinutes * 60 * 1000);
 
     try {
       if (JaxRsUtil.getVariant(request.get()) != null
           && JaxRsUtil.getVariant(request.get()).getMediaType() == MediaType.APPLICATION_JSON_TYPE) {
         try (Transaction tx = graphDb.beginTx()) {
           Result result = cypherUtil.execute(replacedStartCurie);
-          // System.out.println(result.resultAsString());
           StringWriter writer = new StringWriter();
           JsonGenerator generator = new JsonFactory().createGenerator(writer);
           generator.writeStartArray();
@@ -150,11 +134,9 @@ public class CypherUtilService extends BaseResource {
       } else {
         return cypherUtil.execute(replacedStartCurie).resultAsString();
       }
-    } catch (GuardException e) {
-      return "The query execution exceeds " + timeoutMinutes
-          + " minutes. Consider using the neo4j shell instead of this service.";
-    } finally {
-      //guard.stop();
+    } catch (TransactionTerminatedException e) {
+      return "The query execution exceeds dbms.transaction.timeout configuration. " +
+              "Consider using the neo4j shell instead of this service.";
     }
   }
 

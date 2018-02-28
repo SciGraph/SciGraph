@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -36,10 +37,14 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 import io.scigraph.frames.CommonProperties;
 import io.scigraph.frames.Concept;
 import io.scigraph.neo4j.GraphUtil;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 public class OwlPostprocessorTest {
 
-  GraphDatabaseService graphDb;
+  @Rule
+  public ImpermanentDatabaseRule graphDb = new ImpermanentDatabaseRule();
+
+  //GraphDatabaseService graphDb;
   Node parent, child, grandChild, equivalent, equivalentSubclass, instance;
   OwlPostprocessor postprocessor;
 
@@ -51,7 +56,6 @@ public class OwlPostprocessorTest {
 
   @Before
   public void setup() throws InterruptedException, ExecutionException {
-    graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     Transaction tx = graphDb.beginTx();
     enableIndexing();
     parent = graphDb.createNode();

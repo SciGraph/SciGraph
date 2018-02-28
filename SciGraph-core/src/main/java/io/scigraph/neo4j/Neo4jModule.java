@@ -63,16 +63,14 @@ public class Neo4jModule extends AbstractModule {
 
   private final Neo4jConfiguration configuration;
   private boolean readOnly = false;
-  private boolean enableGuard = false;
 
   public Neo4jModule(Neo4jConfiguration configuration) {
     this.configuration = configuration;
   }
 
-  public Neo4jModule(Neo4jConfiguration configuration, boolean readOnly, boolean enableGuard) {
+  public Neo4jModule(Neo4jConfiguration configuration, boolean readOnly) {
     this.configuration = configuration;
     this.readOnly = readOnly;
-    this.enableGuard = enableGuard;
 
   }
 
@@ -152,10 +150,6 @@ public class Neo4jModule extends AbstractModule {
           .setConfig(configuration.getNeo4jConfig());
       if (readOnly) {
         graphDatabaseBuilder.setConfig(GraphDatabaseSettings.read_only, Settings.TRUE);
-      }
-      if (enableGuard) {
-        graphDatabaseBuilder.setConfig(GraphDatabaseSettings.execution_guard_enabled,
-            Settings.TRUE);
       }
 
       // #198 - do not keep transaction logs

@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,6 +74,16 @@ public class CypherUtil {
   public CypherUtil(GraphDatabaseService graphDb, CurieUtil curieUtil) {
     this.graphDb = graphDb;
     this.curieUtil = curieUtil;
+  }
+
+  public Result execute(String query, Multimap<String, Object> params, long timeout, TimeUnit unit) {
+    query = substituteRelationships(query, params);
+    query = resolveRelationships(query);
+    return graphDb.execute(query, flattenMap(params), timeout, unit);
+  }
+
+  public Result execute(String query, long timeout, TimeUnit unit) {
+    return execute(query, HashMultimap.<String, Object>create(), timeout, unit);
   }
 
   public Result execute(String query, Multimap<String, Object> params) {

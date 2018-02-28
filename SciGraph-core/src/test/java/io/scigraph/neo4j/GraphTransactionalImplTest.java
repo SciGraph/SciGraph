@@ -15,18 +15,16 @@
  */
 package io.scigraph.neo4j;
 
-import io.scigraph.neo4j.GraphTransactionalImpl;
-import io.scigraph.neo4j.IdMap;
-import io.scigraph.neo4j.RelationshipMap;
-
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.junit.Rule;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 public class GraphTransactionalImplTest extends GraphTestBase<GraphTransactionalImpl> {
 
+  @Rule
+  public ImpermanentDatabaseRule graphDb = new ImpermanentDatabaseRule();
+
   @Override
   protected GraphTransactionalImpl createInstance() {
-    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
     IdMap idMap = new IdMap();
     RelationshipMap relationahipMap = new RelationshipMap();
     return new GraphTransactionalImpl(graphDb, idMap, relationahipMap);

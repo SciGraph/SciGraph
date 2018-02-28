@@ -77,12 +77,11 @@ public class CliqueTest extends GraphTestBase {
 
   @Test
   public void edgesAreMovedToLeader() {
-    ResourceIterator<Node> allNodes = graphDb.getAllNodes().iterator();
-    Node n1 = getNode("http://x.org/a", allNodes);
-    Node n2 = getNode("http://x.org/b", allNodes);
-    Node n3 = getNode("http://x.org/c", allNodes);
-    Node n4 = getNode("http://x.org/d", allNodes);
-    Node n5 = getNode("http://x.org/e", allNodes);
+    Node n1 = getNode("http://x.org/a", graphDb.getAllNodes().iterator());
+    Node n2 = getNode("http://x.org/b", graphDb.getAllNodes().iterator());
+    Node n3 = getNode("http://x.org/c", graphDb.getAllNodes().iterator());
+    Node n4 = getNode("http://x.org/d", graphDb.getAllNodes().iterator());
+    Node n5 = getNode("http://x.org/e", graphDb.getAllNodes().iterator());
     assertThat(n1.getDegree(RelationshipType.withName("hasPhenotype")), is(0));
     assertThat(n2.getDegree(RelationshipType.withName("hasPhenotype")), is(1));
     assertThat(n3.getDegree(RelationshipType.withName("hasPhenotype")), is(1));

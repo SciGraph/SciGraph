@@ -21,21 +21,36 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import io.scigraph.internal.reachability.ReachabilityIndex;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import com.google.common.base.Predicate;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 public class ReachabilityIndexTest {
+
+  @ClassRule
+  public static ImpermanentDatabaseRule graphDb = new ImpermanentDatabaseRule();
+
+  @ClassRule
+  public static TemporaryFolder folder = new TemporaryFolder();
+
+  static String path;
+
 
   static final RelationshipType type = RelationshipType.withName("foo");
 
@@ -43,9 +58,8 @@ public class ReachabilityIndexTest {
   static Node a, b, c, d, e, f;
 
   @BeforeClass
-  public static void setup() throws InterruptedException {
-    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-        .newGraphDatabase();
+  public static void setup() throws InterruptedException, IOException {
+    path = folder.newFolder().getAbsolutePath();
     try (Transaction tx = graphDb.beginTx()) {
       a = graphDb.createNode();
       b = graphDb.createNode();
@@ -72,19 +86,20 @@ public class ReachabilityIndexTest {
     });
   }
 
+
   @Test
   public void testEmptyGraph() {
-    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-        .newGraphDatabase();
-    new ReachabilityIndex(graphDb);
+    GraphDatabaseService testDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
+    new ReachabilityIndex(testDb);
+    testDb.shutdown();
   }
 
   @Test(expected = IllegalStateException.class)
   public void testUncreatedIndex() {
-    GraphDatabaseService graphDb = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-        .newGraphDatabase();
-    ReachabilityIndex index = new ReachabilityIndex(graphDb);
+    GraphDatabaseService testDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(path));
+    ReachabilityIndex index = new ReachabilityIndex(testDb);
     index.canReach(a, b);
+    testDb.shutdown();
   }
 
   @Test
