@@ -222,8 +222,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     try (Transaction tx = graph.beginTx()) {
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
+      return limitHits(hits, query);
     }
-    return limitHits(hits, query);
 
   }
 
@@ -262,8 +262,8 @@ public class VocabularyNeo4jImpl implements Vocabulary {
     try (Transaction tx = graph.beginTx()) {
       hits = graph.index().getNodeAutoIndexer().getAutoIndex().query(finalQuery);
       tx.success();
+      return limitHits(hits, query);
     }
-    return limitHits(hits, query);
   }
 
   @Override
