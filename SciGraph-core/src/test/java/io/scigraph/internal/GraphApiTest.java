@@ -85,9 +85,9 @@ public class GraphApiTest extends GraphTestBase {
   public void allRelationshipTypes_areReturned() {
     // TODO: RelationshipTypeTokens don't equal RelationshipTypes
     assertThat(getFirst(graphApi.getAllRelationshipTypes(), null).name(),
-        is(OwlRelationships.RDFS_SUBCLASS_OF.name()));
-    assertThat(getLast(graphApi.getAllRelationshipTypes()).name(),
         is(OwlRelationships.OWL_EQUIVALENT_CLASS.name()));
+    assertThat(getLast(graphApi.getAllRelationshipTypes()).name(),
+        is(OwlRelationships.RDFS_SUBCLASS_OF.name()));
   }
 
   @Test

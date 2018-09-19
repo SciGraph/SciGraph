@@ -58,6 +58,10 @@ local.properties
 .project
 .classpath
 
+### IntelliJ ###
+.idea/
+*.iml
+
 # External tool builders
 .externalToolBuilders/
 
