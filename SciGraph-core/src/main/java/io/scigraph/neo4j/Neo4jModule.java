@@ -99,7 +99,7 @@ public class Neo4jModule extends AbstractModule {
   public static void setupAutoIndexing(GraphDatabaseService graphDb, Neo4jConfiguration config) {
     try (Transaction tx = graphDb.beginTx()) {
       graphDb.index().forNodes("node_auto_index", INDEX_CONFIG);
-      Set<String> indexProperties = newHashSet(CommonProperties.IRI);
+      Set<String> indexProperties = newHashSet();
       indexProperties.addAll(config.getIndexedNodeProperties());
       indexProperties
           .addAll(transform(config.getExactNodeProperties(), new Function<String, String>() {
@@ -163,7 +163,7 @@ public class Neo4jModule extends AbstractModule {
         }
       });
 
-      if (!readOnly) { // No need of auto-indexing in read-only mode
+      if (!readOnly && configuration.getIndexedNodeProperties().size() > 0) { // No need of auto-indexing in read-only mode
         setupAutoIndexing(graphDb, configuration);
       }
 
