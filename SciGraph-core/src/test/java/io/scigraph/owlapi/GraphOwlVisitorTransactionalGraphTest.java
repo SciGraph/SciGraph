@@ -18,7 +18,6 @@ package io.scigraph.owlapi;
 import static com.google.common.collect.Sets.newHashSet;
 import io.scigraph.frames.Concept;
 import io.scigraph.frames.NodeProperties;
-import io.scigraph.frames.CommonProperties;
 import io.scigraph.neo4j.GraphTransactionalImpl;
 import io.scigraph.neo4j.IdMap;
 import io.scigraph.neo4j.Neo4jConfiguration;
@@ -42,7 +41,6 @@ public class GraphOwlVisitorTransactionalGraphTest extends GraphOwlVisitorTestBa
       Concept.ABREVIATION,
       Concept.ACRONYM));
     config.getIndexedNodeProperties().addAll(newHashSet(
-        CommonProperties.IRI,
         NodeProperties.LABEL,
         Concept.CATEGORY, Concept.SYNONYM,
         Concept.ABREVIATION,

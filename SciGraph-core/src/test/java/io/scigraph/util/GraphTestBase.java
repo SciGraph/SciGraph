@@ -76,8 +76,8 @@ public class GraphTestBase {
     config.getExactNodeProperties().addAll(
         newHashSet(NodeProperties.LABEL, Concept.SYNONYM, Concept.ABREVIATION, Concept.ACRONYM));
     config.getIndexedNodeProperties().addAll(
-        newHashSet(CommonProperties.IRI, NodeProperties.LABEL, Concept.CATEGORY, Concept.SYNONYM,
-                Concept.ABREVIATION, Concept.ACRONYM));
+        newHashSet(NodeProperties.LABEL, Concept.CATEGORY, Concept.SYNONYM, Concept.ABREVIATION,
+            Concept.ACRONYM));
     Neo4jModule.setupAutoIndexing(graphDb, config);
     graph = new GraphTransactionalImpl(graphDb, idMap, relMap);
     curieUtil = new CurieUtil(Collections.<String, String>emptyMap());

@@ -7,7 +7,6 @@ graphConfiguration:
       - category
       - label
       - fragment
-      - iri
     exactNodeProperties:
       - label
       - synonym

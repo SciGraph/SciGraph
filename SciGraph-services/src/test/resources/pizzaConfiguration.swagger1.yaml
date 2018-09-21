@@ -16,7 +16,7 @@ graphConfiguration:
   indexedNodeProperties:
     - category
     - label
-    - iri
+    - fragment
   exactNodeProperties:
     - label
     - synonym
