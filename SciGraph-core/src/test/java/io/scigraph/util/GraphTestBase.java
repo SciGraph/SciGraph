@@ -48,6 +48,7 @@ public class GraphTestBase {
   protected static Graph graph;
   protected static CurieUtil curieUtil;
   static ConcurrentHashMap<String, Long> idMap = new ConcurrentHashMap<>();
+  static RelationshipMap relMap = new RelationshipMap();
 
   Transaction tx;
 
@@ -78,7 +79,7 @@ public class GraphTestBase {
         newHashSet(NodeProperties.LABEL, Concept.CATEGORY, Concept.SYNONYM, Concept.ABREVIATION,
             Concept.ACRONYM));
     Neo4jModule.setupAutoIndexing(graphDb, config);
-    graph = new GraphTransactionalImpl(graphDb, idMap, new RelationshipMap());
+    graph = new GraphTransactionalImpl(graphDb, idMap, relMap);
     curieUtil = new CurieUtil(Collections.<String, String>emptyMap());
     cypherUtil = new CypherUtil(graphDb, curieUtil);
   }
@@ -96,6 +97,7 @@ public class GraphTestBase {
   @After
   public void failTransaction() {
     idMap.clear();
+    relMap.clear();
     tx.failure();
     // tx.success(); // convenient for debugging
     tx.close();
