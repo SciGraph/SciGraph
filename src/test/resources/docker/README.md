@@ -37,7 +37,7 @@ and in the /etc/environment
 
     export DISPLAY=:1
 
-##### Test that endpoints that output png
+##### Test endpoints that output images
 
  - [Visualize the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/pizza:AmericanHot.png)
 
