@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /data/scigraph/SciGraph-core
+export MAVEN_OPTS="-Xmx8g -XX:MaxPermSize=8g" && mvn exec:java -Dexec.mainClass="io.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c /data/load-configuration.yaml"
