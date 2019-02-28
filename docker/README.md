@@ -1,17 +1,32 @@
 ### Loading and Deploying SciGraph in Docker
 
-This example uses the configuration files in the resources directory.
+This example uses the configuration files in the conf directory, and requires
+starting from the parent SciGraph directory
 
 To test a different ontology edit the ontologies field in the load-configuration.yaml
-    
+
+From this directory:
+
+    cd ..
+
 #### Build SciGraph Image
-    docker build -t scigraph .
+    docker build -t scigraph -f docker/Dockerfile .
 
 #### Run SciGraph Loader
-    docker run -v /tmp/graph:/scigraph scigraph load-scigraph
+Building the graph in /tmp/graph, note that this will error if another graph exists in this directory,
+    
+    docker run \
+        -v /tmp/graph:/data \
+        -v `pwd`/docker/conf:/scigraph/conf \
+        scigraph load-scigraph load-configuration.yaml
     
 #### Run SciGraph Service
-    docker run -v /tmp/graph:/scigraph -d -p 9000:9000 --name scigraph-services scigraph start-scigraph-service
+    docker run \
+        -v /tmp/graph:/data \
+        -v `pwd`/docker/conf:/scigraph/conf \
+        -d -p 9000:9000 \
+        --name scigraph-services \
+        scigraph start-scigraph-service service-configuration.yaml
 
 Wait 60 seconds for the server to start, then:
 
@@ -42,7 +57,6 @@ and in the /etc/environment
  - [Visualize the graph neighborhood of a class](http://localhost:9000/scigraph/graph/neighbors/pizza:AmericanHot.png)
 
  - [Visualize a custom, domain specific Cypher query](http://localhost:9000/scigraph/dynamic/toppings.png?pizza_id=pizza:FourSeasons)
-
 
 
 #### Stop SciGraph

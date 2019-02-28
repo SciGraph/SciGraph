@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cd /scigraph/SciGraph-core
+
+if [ -z "$1" ]; then
+    export MAVEN_OPTS="-Xmx8g" && mvn exec:java -Dexec.mainClass="io.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c /scigraph/conf/load-configuration.yaml"
+else
+    export MAVEN_OPTS="-Xmx8g" && mvn exec:java -Dexec.mainClass="io.scigraph.owlapi.loader.BatchOwlLoader" -Dexec.args="-c /scigraph/conf/$1"
+fi

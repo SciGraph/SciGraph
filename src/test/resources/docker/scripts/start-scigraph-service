@@ -1,4 +1,0 @@
-#!/bin/sh
-
-cd /data/scigraph/SciGraph-services
-mvn exec:java -Dexec.mainClass="io.scigraph.services.MainApplication" -Dexec.args="server /data/service-configuration.yaml"

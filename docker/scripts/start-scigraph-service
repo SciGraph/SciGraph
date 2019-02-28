@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cd /scigraph/SciGraph-services
+
+if [ -z "$1" ]; then
+    mvn exec:java -Dexec.mainClass="io.scigraph.services.MainApplication" -Dexec.args="server /scigraph/conf/service-configuration.yaml"
+else
+    mvn exec:java -Dexec.mainClass="io.scigraph.services.MainApplication" -Dexec.args="server /scigraph/conf/$1"
+fi

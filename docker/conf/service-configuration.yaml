@@ -12,7 +12,7 @@ logging:
 graphConfiguration:
   neo4jConfig:
      dbms.transaction.timeout: 5m
-  location: /scigraph/graph
+  location: /data/graph
   curies:
     'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
   indexedNodeProperties:
