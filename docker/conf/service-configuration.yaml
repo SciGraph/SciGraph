@@ -1,0 +1,57 @@
+server:
+  type: simple
+  applicationContextPath: /scigraph
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 9000
+
+logging:
+  level: INFO
+
+graphConfiguration:
+  neo4jConfig:
+     dbms.transaction.timeout: 5m
+  location: /data/graph
+  curies:
+    'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
+  indexedNodeProperties:
+    - category
+    - label
+    - fragment
+  exactNodeProperties:
+    - label
+    - synonym
+
+cypherResources:
+  /dynamic/toppings:
+    x-query: |
+              MATCH path = (pizza)-[:pizza:hasTopping]->(topping)
+              WHERE pizza.iri = {pizza_id}
+              RETURN path
+    get:
+      operationId: toppings
+      summary: Get toppings for a pizza
+      description: Note that this uses additional convenience edges
+      parameters:
+        - name: pizza_id
+          description: The ID of the pizza
+          required: true
+          type: string
+          in: query
+      responses:
+        default:
+          description: success
+
+serviceMetadata:
+  name: 'Pizza Reconciliation Service'
+  identifierSpace: 'http://example.org'
+  schemaSpace: 'http://example.org'
+  view: {
+    url: 'http://localhost:9000/scigraph/refine/view/{{id}}'
+  }
+  preview: {
+    url: 'http://localhost:9000/scigraph/refine/preview/{{id}}',
+    width: 400,
+    height: 400
+  }

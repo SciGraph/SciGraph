@@ -1,0 +1,62 @@
+graphConfiguration:
+    # The location of the graph.
+    # If this location does not exist it will be created.
+    # Loading will append content to existing graphs.
+    location: /data/graph
+    indexedNodeProperties:
+      - category
+      - label
+      - fragment
+    exactNodeProperties:
+      - label
+      - synonym
+    schemaIndexes:
+      food :
+        - label
+    curies:
+      'pizza' : 'http://www.co-ode.org/ontologies/pizza/pizza.owl#'
+      'rdfs' : 'http://www.w3.org/2000/01/rdf-schema#'
+
+    # Set Neo4j configuration options
+    neo4jConfig:
+      dump_configuration : true
+      dbms.pagecache.memory : 1G
+
+# The number of threads dedicated to reading ontologies
+producerThreadCount: 2
+
+# The number of threads dedicated to processing ontology axioms
+consumerThreadCount: 2
+
+# A list of ontologies to import.
+ontologies:
+  # Files can be local paths...
+  - url: src/test/resources/ontologies/pizza.owl
+    # Or URIs
+    #- http://www.w3.org/TR/2004/REC-owl-guide-20040210/wine.rdf
+    # And can optionally include a reasoner factory
+    #reasonerConfiguration:
+    #  factory: org.semanticweb.elk.owlapi.ElkReasonerFactory
+
+# Categories are used for vocabulary term filtering and are inherited to
+# subclasses of their parent. They are also added as node labels for
+# convenience.
+# Note that previously defined curies can be used instead of IRIs.
+categories:
+    pizza:NamedPizza : pizza
+    http://www.co-ode.org/ontologies/pizza/pizza.owl#PizzaTopping : topping
+
+# All properties are stored but can optionally be added to a new node property.
+# Note that previously defined curies can be used instead of IRIs.
+mappedProperties:
+  - name: label # The name of the new property
+    properties: # The list of properties mapped to the new property
+    - rdfs:label
+    - http://www.w3.org/2004/02/skos/core#prefLabel
+  - name: comment
+    properties:
+    - rdfs:comment
+
+# To label all the nodes with a specific label.
+# Useful for schema indexes.
+allNodesLabel: food
