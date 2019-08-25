@@ -86,7 +86,8 @@ public class EvidenceAspect implements GraphAspect {
                   association.getRelationships(HAS_PREDICATE, Direction.OUTGOING).iterator();
               if (objectProperty.hasNext()) {
                 // an association has to have 1 and only 1 object property
-                Node relationshipNode = objectProperty.next().getOtherNode(association);
+                Relationship hasPredicate = objectProperty.next();
+                Node relationshipNode = hasPredicate.getOtherNode(association);
                 String objectPropertyRelationship =
                     GraphUtil.getProperty(relationshipNode, NodeProperties.IRI, String.class).get();
 
@@ -107,6 +108,7 @@ public class EvidenceAspect implements GraphAspect {
                                      // object
                   TinkerGraphUtil tgu = new TinkerGraphUtil(graph, curieUtil);
                   tgu.addEdge(hasSubject);
+                  tgu.addEdge(hasPredicate);
                   tgu.addEdge(hasObject);
                   for (Relationship evidence : association.getRelationships(EVIDENCE,
                       Direction.OUTGOING)) {
