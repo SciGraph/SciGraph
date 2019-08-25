@@ -80,7 +80,7 @@ public class EvidenceAspectTest extends GraphTestBase {
     assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(1));
     aspect.invoke(graph);
     assertThat(graph.getVertices(), IsIterableWithSize.<Vertex>iterableWithSize(6));
-    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(3));
+    assertThat(graph.getEdges(), IsIterableWithSize.<Edge>iterableWithSize(4));
   }
 
 
