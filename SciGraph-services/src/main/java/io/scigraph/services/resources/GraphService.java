@@ -77,7 +77,7 @@ import io.scigraph.vocabulary.Vocabulary;
 
 @Path("/graph")
 @Api(value = "/graph", description = "Graph services")
-@SwaggerDefinition(tags = {@Tag(name="graph", description="Graph services")})
+@SwaggerDefinition(tags = {@Tag(name = "graph", description = "Graph services")})
 public class GraphService extends BaseResource {
 
   private final Vocabulary vocabulary;
@@ -88,7 +88,7 @@ public class GraphService extends BaseResource {
 
   @Inject
   GraphService(Vocabulary vocabulary, GraphDatabaseService graphDb, GraphApi api,
-      CurieUtil curieUtil, CypherUtil cypherUtil) {
+               CurieUtil curieUtil, CypherUtil cypherUtil) {
     this.vocabulary = vocabulary;
     this.graphDb = graphDb;
     this.api = api;
@@ -113,7 +113,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "Traverse blank nodes",
           required = false) @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse",
-          required = false) @QueryParam("relationshipType") Optional<String> relationshipType,
+          required = false) @QueryParam("relationshipType") Set<String> relationshipTypes,
       @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false,
           allowableValues = DocumentationStrings.DIRECTION_ALLOWED) @QueryParam("direction") @DefaultValue("BOTH") String direction,
       @ApiParam(value = "Should subproperties and equivalent properties be included",
@@ -132,33 +132,36 @@ public class GraphService extends BaseResource {
       roots.add(concept.get());
     }
     Set<DirectedRelationshipType> types = new HashSet<>();
-    if (relationshipType.isPresent()) {
-      String relationshipTypeString = relationshipType.get();
-      relationshipTypeString = curieUtil.getIri(relationshipTypeString).orElse(relationshipTypeString);
+    Set<String> relationships = new HashSet<>();
+    for (String relationshipTypeString : relationshipTypes) {
+      relationships.add(curieUtil.getIri(relationshipTypeString).orElse(relationshipTypeString));
       if (!getRelationshipTypeNames().contains(relationshipTypeString)) {
         throw new BadRequestException("Unknown relationship type: " + relationshipTypeString);
       }
+    }
 
-      Direction dir = Direction.valueOf(direction);
-      try {
-        if (entail.get()) {
-          Set<RelationshipType> relationshipTypes =
-              cypherUtil.getEntailedRelationshipTypes(newHashSet(relationshipTypeString));
-          types = newHashSet(transform(relationshipTypes,
-              new Function<RelationshipType, DirectedRelationshipType>() {
-                @Override
-                public DirectedRelationshipType apply(RelationshipType type) {
-                  return new DirectedRelationshipType(type, dir);
-                }
-              }));
-        } else {
+    Direction dir = Direction.valueOf(direction);
+    try {
+      if (entail.get()) {
+        Set<RelationshipType> entailedRelationships =
+            cypherUtil.getEntailedRelationshipTypes(relationships);
+        types = newHashSet(transform(entailedRelationships,
+            new Function<RelationshipType, DirectedRelationshipType>() {
+              @Override
+              public DirectedRelationshipType apply(RelationshipType type) {
+                return new DirectedRelationshipType(type, dir);
+              }
+            }));
+      } else {
+        for (String relationshipTypeString : relationships) {
           RelationshipType type = RelationshipType.withName(relationshipTypeString);
           types.add(new DirectedRelationshipType(type, dir));
         }
-      } catch (Exception e) {
-        throw new BadRequestException("Unknown direction: " + direction);
       }
+    } catch (Exception e) {
+      throw new BadRequestException("Unknown direction: " + direction);
     }
+
     Graph tg = new TinkerGraph();
     try (Transaction tx = graphDb.beginTx()) {
       Iterable<Node> nodes = transform(roots, new Function<Concept, Node>() {
@@ -204,7 +207,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = "Traverse blank nodes",
           required = false) @QueryParam("blankNodes") @DefaultValue("false") BooleanParam traverseBlankNodes,
       @ApiParam(value = "Which relationship to traverse",
-          required = false) @QueryParam("relationshipType") Optional<String> relationshipType,
+          required = false) @QueryParam("relationshipType") Set<String> relationshipTypes,
       @ApiParam(value = DocumentationStrings.DIRECTION_DOC, required = false,
           allowableValues = DocumentationStrings.DIRECTION_ALLOWED) @QueryParam("direction") @DefaultValue("BOTH") String direction,
       @ApiParam(value = "Should subproperties and equivalent properties be included",
@@ -214,7 +217,7 @@ public class GraphService extends BaseResource {
       @ApiParam(value = DocumentationStrings.JSONP_DOC,
           required = false) @QueryParam("callback") String callback) {
     return getNeighborsFromMultipleRoots(newHashSet(id), depth, traverseBlankNodes,
-        relationshipType, direction, entail, projection, callback);
+        relationshipTypes, direction, entail, projection, callback);
   }
 
   @GET
@@ -233,7 +236,7 @@ public class GraphService extends BaseResource {
           required = false) @QueryParam("project") @DefaultValue("*") Set<String> projection,
       @ApiParam(value = DocumentationStrings.JSONP_DOC,
           required = false) @QueryParam("callback") String callback) {
-    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), Optional.<String>empty(),
+    return getNeighbors(id, new IntParam("0"), new BooleanParam("false"), new HashSet<String>(),
         null, new BooleanParam("false"), projection, callback);
   }
 
