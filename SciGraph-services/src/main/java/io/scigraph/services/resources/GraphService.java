@@ -134,8 +134,9 @@ public class GraphService extends BaseResource {
     Set<DirectedRelationshipType> types = new HashSet<>();
     Set<String> relationships = new HashSet<>();
     for (String relationshipTypeString : relationshipTypes) {
-      relationships.add(curieUtil.getIri(relationshipTypeString).orElse(relationshipTypeString));
-      if (!getRelationshipTypeNames().contains(relationshipTypeString)) {
+      String relationshipIri = curieUtil.getIri(relationshipTypeString).orElse(relationshipTypeString);
+      relationships.add(relationshipIri);
+      if (!getRelationshipTypeNames().contains(relationshipIri)) {
         throw new BadRequestException("Unknown relationship type: " + relationshipTypeString);
       }
     }
@@ -153,8 +154,8 @@ public class GraphService extends BaseResource {
               }
             }));
       } else {
-        for (String relationshipTypeString : relationships) {
-          RelationshipType type = RelationshipType.withName(relationshipTypeString);
+        for (String relationshipIri : relationships) {
+          RelationshipType type = RelationshipType.withName(relationshipIri);
           types.add(new DirectedRelationshipType(type, dir));
         }
       }
