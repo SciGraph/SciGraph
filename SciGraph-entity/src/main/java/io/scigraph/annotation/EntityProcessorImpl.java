@@ -90,6 +90,18 @@ public class EntityProcessorImpl implements EntityProcessor {
     }));
   }
 
+  /**
+   * Returns a list of annotations found in the provided text.
+   *
+   * @param content The text to search for annotations. This is used as a Lucene query, so any
+   *                characters that may be used by a Lucene query should be commented out. This
+   *                can be done by using <a href="https://lucene.apache.org/core/6_6_2/queryparser/org/apache/lucene/queryparser/classic/QueryParserBase.html#escape-java.lang.String-"
+   *                ><tt>QueryParserBase.escape()</tt></a>.
+   * @param config Configuration options for entity annotation. Some fields (reader, writer) are ignored,
+   *               but config.isLongestOnly() is used.
+   * @return A list of entity annotations found in this text.
+   * @throws InterruptedException Thrown if the Shingle Producer Thread created by startShingleProducer is interrupted.
+   */
   public List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config)
       throws InterruptedException {
     checkNotNull(content);
@@ -271,6 +283,14 @@ public class EntityProcessorImpl implements EntityProcessor {
     return shouldAnnotate;
   }
 
+  /**
+   * Returns a list of annotations found in the provided HTML text.
+   *
+   * @param config Configuration options for entity annotation. The HTML text to be annotated is read from the <tt>reader</tt>
+   *               variable, and annotated text is written out to the Writer in the <tt>writer</tt> variable.
+   * @return A list of entity annotations found in this text.
+   * @throws IOException Thrown if there in an error in reading the text.
+   */
   @Override
   public List<EntityAnnotation> annotateEntities(EntityFormatConfiguration config)
       throws IOException {
