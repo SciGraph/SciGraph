@@ -33,6 +33,8 @@ import io.scigraph.annotation.EntityProcessorImpl;
 import io.scigraph.annotation.EntityRecognizer;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -79,6 +81,14 @@ public class EntityProcessorImplTest {
   @Test
   public void testGetAnnotations() throws IOException, InterruptedException {
     List<EntityAnnotation> annotations = processor.getAnnotations(text, config);
+    assertThat(annotations, equalTo(expectedAnnotations));
+  }
+
+  @Test
+  public void testAnnotateEntities() throws IOException, InterruptedException {
+    when(config.getReader()).thenReturn(new StringReader(text));
+    when(config.getWriter()).thenReturn(Writer.nullWriter());
+    List<EntityAnnotation> annotations = processor.annotateEntities(config);
     assertThat(annotations, equalTo(expectedAnnotations));
   }
 
