@@ -90,7 +90,7 @@ public class EntityProcessorImpl implements EntityProcessor {
     }));
   }
 
-  protected List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config)
+  public List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config)
       throws InterruptedException {
     checkNotNull(content);
     BlockingQueue<List<Token<String>>> queue = startShingleProducer(content);
