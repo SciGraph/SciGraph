@@ -34,6 +34,7 @@ import io.scigraph.annotation.EntityRecognizer;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -86,8 +87,9 @@ public class EntityProcessorImplTest {
 
   @Test
   public void testAnnotateEntities() throws IOException, InterruptedException {
+    StringWriter annotatedOutput = new StringWriter();
+    when(config.getWriter()).thenReturn(annotatedOutput);
     when(config.getReader()).thenReturn(new StringReader(text));
-    when(config.getWriter()).thenReturn(Writer.nullWriter());
     List<EntityAnnotation> annotations = processor.annotateEntities(config);
     assertThat(annotations, equalTo(expectedAnnotations));
   }
