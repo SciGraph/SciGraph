@@ -306,8 +306,16 @@ class EntityProcessorImpl implements EntityProcessor {
             try {
               List<EntityAnnotation> annotationList = getAnnotations(segment.toString(), config);
 
-              entities.addAll(annotationList);
               config.getWriter().write(insertSpans(annotationList, segment.toString(), config));
+
+              // These annotations have indexes relative to the start of the segment, not the start
+              // of the document. We correct that by adding the beginning index of the segment.
+              annotationList.stream().map(ann -> new EntityAnnotation(
+                ann.getToken(),
+                ann.getStart() + segment.getBegin(),
+                ann.getEnd() + segment.getBegin()
+              )).forEach(ann -> entities.add(ann));
+
             } catch (IOException e) {
               config.getWriter().write(segment.toString());
               logger.warning(e.getMessage());
