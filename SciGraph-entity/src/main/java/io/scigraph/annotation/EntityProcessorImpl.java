@@ -90,7 +90,16 @@ public class EntityProcessorImpl implements EntityProcessor {
     }));
   }
 
-  protected List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config)
+  /***
+   * Identify annotations within the provided text.
+   *
+   * @param content
+   *    The string to identify annotations within.
+   * @param config
+   *    Configuration settings for identifying annotations.
+   * @return A list of entity annotations from this text.
+   */
+  public List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config)
       throws InterruptedException {
     checkNotNull(content);
     BlockingQueue<List<Token<String>>> queue = startShingleProducer(content);
