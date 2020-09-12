@@ -99,29 +99,34 @@ public class EntityProcessorImpl implements EntityProcessor {
    *    Configuration settings for identifying annotations.
    * @return A list of entity annotations from this text.
    */
-  public List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config)
-      throws InterruptedException {
+  @Override
+  public List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config) {
     checkNotNull(content);
     BlockingQueue<List<Token<String>>> queue = startShingleProducer(content);
     List<EntityAnnotation> annotations = new ArrayList<>();
     while (true) {
-      List<Token<String>> tokens = queue.take();
-      if (tokens.equals(ShingleProducer.END_TOKEN)) {
-        break;
-      }
-      if (LuceneUtils.isStopword(getFirst(tokens, null).getToken())
-          || LuceneUtils.isStopword(getLast(tokens).getToken())) {
-        continue;
-      }
+      try {
+        List<Token<String>> tokens = queue.take();
+        if (tokens.equals(ShingleProducer.END_TOKEN)) {
+          break;
+        }
+        if (LuceneUtils.isStopword(getFirst(tokens, null).getToken())
+                || LuceneUtils.isStopword(getLast(tokens).getToken())) {
+          continue;
+        }
 
-      String candidate = combineTokens(tokens);
-      if (candidate.length() < config.getMinLength()) {
-        continue;
-      }
-      int start = tokens.get(0).getStart();
-      int end = tokens.get(tokens.size() - 1).getEnd();
-      for (Entity entity : recognizer.getEntities(candidate, config)) {
-        annotations.add(new EntityAnnotation(entity, start, end));
+        String candidate = combineTokens(tokens);
+        if (candidate.length() < config.getMinLength()) {
+          continue;
+        }
+        int start = tokens.get(0).getStart();
+        int end = tokens.get(tokens.size() - 1).getEnd();
+        for (Entity entity : recognizer.getEntities(candidate, config)) {
+          annotations.add(new EntityAnnotation(entity, start, end));
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return new LinkedList<>();
       }
     }
 
@@ -328,8 +333,6 @@ public class EntityProcessorImpl implements EntityProcessor {
             } catch (IOException e) {
               config.getWriter().write(segment.toString());
               logger.warning(e.getMessage());
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
             }
           } else {
             config.getWriter().write(segment.toString());
