@@ -51,7 +51,7 @@ public class EvidenceAspect implements GraphAspect {
   static final RelationshipType EVIDENCE =
       RelationshipType.withName("http://purl.obolibrary.org/obo/RO_0002558");
   static final RelationshipType SOURCE =
-      RelationshipType.withName("http://purl.org/dc/elements/1.1/source");
+      RelationshipType.withName("http://purl.org/dc/terms/source");
   static final RelationshipType HAS_PREDICATE =
       RelationshipType.withName("http://purl.org/oban/association_has_predicate");
 
