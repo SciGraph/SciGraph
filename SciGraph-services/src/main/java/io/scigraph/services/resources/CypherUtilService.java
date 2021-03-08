@@ -26,6 +26,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +57,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 @SwaggerDefinition(tags = {@Tag(name="cypher", description="Cypher utility services")})
 @Produces({MediaType.TEXT_PLAIN})
 public class CypherUtilService extends BaseResource {
+
+  private static final Logger logger = Logger.getLogger(CypherUtilService.class.getName());
 
   final private CypherUtil cypherUtil;
   final private GraphDatabaseService graphDb;
@@ -134,6 +137,10 @@ public class CypherUtilService extends BaseResource {
       } else {
         return cypherUtil.execute(replacedStartCurie).resultAsString();
       }
+    } catch (QueryExecutionException e) {
+      String errorMsg = "QueryExecutionException: " + e.getMessage();
+      logger.warning(errorMsg);
+      return Response.status(400).entity(errorMsg).build();
     } catch (TransactionTerminatedException e) {
       return "The query execution exceeds dbms.transaction.timeout configuration. " +
               "Consider using the neo4j shell instead of this service.";
