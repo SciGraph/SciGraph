@@ -32,15 +32,17 @@ import org.neo4j.kernel.configuration.Settings;
 import org.neo4j.kernel.guard.Guard;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
+import org.prefixcommons.CurieUtil;
 
 public class CypherUtilServiceTest {
 
   private static final CypherUtil cypherUtil = mock(CypherUtil.class);
   private static final GraphDatabaseService graphDb = mock(GraphDatabaseService.class);
+  private static final CurieUtil curieUtil = mock(CurieUtil.class);
 
   @ClassRule
   public static final ResourceTestRule resources = ResourceTestRule.builder()
-      .addResource(new CypherUtilService(cypherUtil, graphDb)).build();
+      .addResource(new CypherUtilService(cypherUtil, graphDb, curieUtil)).build();
 
   @Before
   public void setup() {
@@ -50,7 +52,7 @@ public class CypherUtilServiceTest {
 
   @Test
   public void smokeConstructor() {
-    new CypherUtilService(cypherUtil, graphDb);
+    new CypherUtilService(cypherUtil, graphDb, curieUtil);
   }
 
   @Test

@@ -51,6 +51,12 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 
+import org.prefixcommons.CurieUtil;
+import io.scigraph.internal.TinkerGraphUtil;
+import javax.ws.rs.core.Response;
+import io.scigraph.services.api.graph.ArrayPropertyTransformer;
+import com.tinkerpop.blueprints.Graph;
+
 @Path("/cypher")
 @Api(value = "/cypher", description = "Cypher utility services")
 @SwaggerDefinition(tags = {@Tag(name="cypher", description="Cypher utility services")})
@@ -59,11 +65,13 @@ public class CypherUtilService extends BaseResource {
 
   final private CypherUtil cypherUtil;
   final private GraphDatabaseService graphDb;
+  final private CurieUtil curieUtil;
 
   @Inject
-  CypherUtilService(CypherUtil cypherUtil, GraphDatabaseService graphDb) {
+  CypherUtilService(CypherUtil cypherUtil, GraphDatabaseService graphDb, CurieUtil curieUtil) {
     this.cypherUtil = cypherUtil;
     this.graphDb = graphDb;
+    this.curieUtil = curieUtil;
   }
 
   @GET
@@ -94,12 +102,12 @@ public class CypherUtilService extends BaseResource {
   @Path("/execute")
   @ApiOperation(
       value = "Execute an arbitrary Cypher query.",
-      response = String.class,
+      response = Response.class,
       notes = "The graph is in read-only mode, this service will fail with queries which alter the graph, like CREATE, DELETE or REMOVE. Example: MATCH (n:Node{iri:'DOID:4'}) return n")
   @Timed
   @CacheControl(maxAge = 2, maxAgeUnit = TimeUnit.HOURS)
   @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
-  public String execute(
+  public Response execute(
       @ApiParam(value = "The cypher query to execute", required = true) @QueryParam("cypherQuery") String cypherQuery,
       @ApiParam(value = "Limit", required = true) @QueryParam("limit") @DefaultValue("10") IntParam limit)
       throws IOException {
@@ -112,31 +120,20 @@ public class CypherUtilService extends BaseResource {
           && JaxRsUtil.getVariant(request.get()).getMediaType() == MediaType.APPLICATION_JSON_TYPE) {
         try (Transaction tx = graphDb.beginTx()) {
           Result result = cypherUtil.execute(replacedStartCurie);
-          StringWriter writer = new StringWriter();
-          JsonGenerator generator = new JsonFactory().createGenerator(writer);
-          generator.writeStartArray();
-          while (result.hasNext()) {
-            Map<String, Object> row = result.next();
-            generator.writeStartObject();
-            for (Entry<String, Object> entry : row.entrySet()) {
-              String key = entry.getKey();
-              Object value = entry.getValue();
-              resultSerializer(generator, key, value);
-            }
-            generator.writeEndObject();
-          }
-          generator.writeEndArray();
-          generator.close();
 
-          tx.close();
-          return writer.toString();
+      TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
+      Graph graph = tgu.resultToGraph(result);
+      tgu.setGraph(graph);
+      ArrayPropertyTransformer.transform(graph);
+      tx.success();
+      return Response.ok(graph).cacheControl(null).build();
         }
       } else {
-        return cypherUtil.execute(replacedStartCurie).resultAsString();
+          return Response.ok(cypherUtil.execute(replacedStartCurie).resultAsString()).cacheControl(null).build();
       }
     } catch (TransactionTerminatedException e) {
-      return "The query execution exceeds dbms.transaction.timeout configuration. " +
-              "Consider using the neo4j shell instead of this service.";
+        return Response.ok("The query execution exceeds dbms.transaction.timeout configuration. " +
+                           "Consider using the neo4j shell instead of this service.").build();
     }
   }
 
@@ -222,7 +219,6 @@ public class CypherUtilService extends BaseResource {
 
     generator.writeEndObject();
   }
-
 
   private void relationshipGeneration(JsonGenerator generator, Relationship relationship)
       throws IOException {
