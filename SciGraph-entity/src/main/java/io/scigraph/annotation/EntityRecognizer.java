@@ -39,7 +39,7 @@ public class EntityRecognizer {
   private final CurieUtil curieUtil;
 
   @Inject
-  EntityRecognizer(Vocabulary vocabulary, CurieUtil curieUtil) throws IOException {
+  public EntityRecognizer(Vocabulary vocabulary, CurieUtil curieUtil) throws IOException {
     this.vocabulary = vocabulary;
     this.curieUtil = curieUtil;
   }

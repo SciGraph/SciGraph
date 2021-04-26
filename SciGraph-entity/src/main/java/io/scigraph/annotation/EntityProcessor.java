@@ -24,7 +24,21 @@ import java.util.List;
 public interface EntityProcessor {
 
   /***
-   * @param configuration
+   * Identify annotations within the provided plain text.
+   *
+   * @param content
+   *    The string to identify annotations within.
+   * @param config
+   *    Configuration settings for identifying annotations. Note that the `config.reader`
+   *    setting will be involved.
+   * @return A list of entity annotations from this text.
+   */
+  List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config);
+
+  /***
+   * Identify (and possibly tag) annotations within the provided HTML text.
+   *
+   * @param configuration Configuration settings for identifying annotations.
    * @return A list of entities found in the content
    * @throws IOException
    */

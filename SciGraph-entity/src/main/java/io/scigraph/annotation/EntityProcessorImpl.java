@@ -60,7 +60,7 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 
-class EntityProcessorImpl implements EntityProcessor {
+public class EntityProcessorImpl implements EntityProcessor {
 
   private static final Logger logger = Logger.getLogger(EntityProcessorImpl.class.getName());
 
@@ -68,7 +68,7 @@ class EntityProcessorImpl implements EntityProcessor {
   private final EntityRecognizer recognizer;
 
   @Inject
-  protected EntityProcessorImpl(EntityRecognizer recognizer) {
+  public EntityProcessorImpl(EntityRecognizer recognizer) {
     this.recognizer = recognizer;
     analyzer = new EntityAnalyzer();
   }
@@ -90,29 +90,43 @@ class EntityProcessorImpl implements EntityProcessor {
     }));
   }
 
-  protected List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config)
-      throws InterruptedException {
+  /***
+   * Identify annotations within the provided text.
+   *
+   * @param content
+   *    The string to identify annotations within.
+   * @param config
+   *    Configuration settings for identifying annotations.
+   * @return A list of entity annotations from this text.
+   */
+  @Override
+  public List<EntityAnnotation> getAnnotations(String content, EntityFormatConfiguration config) {
     checkNotNull(content);
     BlockingQueue<List<Token<String>>> queue = startShingleProducer(content);
     List<EntityAnnotation> annotations = new ArrayList<>();
     while (true) {
-      List<Token<String>> tokens = queue.take();
-      if (tokens.equals(ShingleProducer.END_TOKEN)) {
-        break;
-      }
-      if (LuceneUtils.isStopword(getFirst(tokens, null).getToken())
-          || LuceneUtils.isStopword(getLast(tokens).getToken())) {
-        continue;
-      }
+      try {
+        List<Token<String>> tokens = queue.take();
+        if (tokens.equals(ShingleProducer.END_TOKEN)) {
+          break;
+        }
+        if (LuceneUtils.isStopword(getFirst(tokens, null).getToken())
+                || LuceneUtils.isStopword(getLast(tokens).getToken())) {
+          continue;
+        }
 
-      String candidate = combineTokens(tokens);
-      if (candidate.length() < config.getMinLength()) {
-        continue;
-      }
-      int start = tokens.get(0).getStart();
-      int end = tokens.get(tokens.size() - 1).getEnd();
-      for (Entity entity : recognizer.getEntities(candidate, config)) {
-        annotations.add(new EntityAnnotation(entity, start, end));
+        String candidate = combineTokens(tokens);
+        if (candidate.length() < config.getMinLength()) {
+          continue;
+        }
+        int start = tokens.get(0).getStart();
+        int end = tokens.get(tokens.size() - 1).getEnd();
+        for (Entity entity : recognizer.getEntities(candidate, config)) {
+          annotations.add(new EntityAnnotation(entity, start, end));
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return new LinkedList<>();
       }
     }
 
@@ -319,8 +333,6 @@ class EntityProcessorImpl implements EntityProcessor {
             } catch (IOException e) {
               config.getWriter().write(segment.toString());
               logger.warning(e.getMessage());
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
             }
           } else {
             config.getWriter().write(segment.toString());
