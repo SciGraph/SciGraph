@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +40,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,6 +60,9 @@ import io.scigraph.internal.TinkerGraphUtil;
 import javax.ws.rs.core.Response;
 import io.scigraph.services.api.graph.ArrayPropertyTransformer;
 import com.tinkerpop.blueprints.Graph;
+import io.scigraph.services.jersey.MultivaluedMapUtils;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.ArrayListMultimap;
 
 @Path("/cypher")
 @Api(value = "/cypher", description = "Cypher utility services")
@@ -66,6 +73,8 @@ public class CypherUtilService extends BaseResource {
   final private CypherUtil cypherUtil;
   final private GraphDatabaseService graphDb;
   final private CurieUtil curieUtil;
+
+  private static final Logger logger = Logger.getLogger(CypherUtilService.class.getName());
 
   @Inject
   CypherUtilService(CypherUtil cypherUtil, GraphDatabaseService graphDb, CurieUtil curieUtil) {
@@ -109,9 +118,13 @@ public class CypherUtilService extends BaseResource {
   @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
   public Response execute(
       @ApiParam(value = "The cypher query to execute", required = true) @QueryParam("cypherQuery") String cypherQuery,
-      @ApiParam(value = "Limit", required = true) @QueryParam("limit") @DefaultValue("10") IntParam limit)
+      @ApiParam(value = "Limit", required = true) @QueryParam("limit") @DefaultValue("10") IntParam limit,
+      @Context UriInfo uriInfo)
       throws IOException {
 
+    Multimap<String, Object> paramMap = MultivaluedMapUtils.merge(uriInfo);
+    paramMap = resolveCuries(paramMap);
+    logger.info(paramMap.toString());
     String sanitizedCypherQuery = cypherQuery.replaceAll(";", "") + " LIMIT " + limit;
     String replacedStartCurie = cypherUtil.resolveNodeIris(sanitizedCypherQuery);
 
@@ -119,7 +132,7 @@ public class CypherUtilService extends BaseResource {
       if (JaxRsUtil.getVariant(request.get()) != null
           && JaxRsUtil.getVariant(request.get()).getMediaType() == MediaType.APPLICATION_JSON_TYPE) {
         try (Transaction tx = graphDb.beginTx()) {
-          Result result = cypherUtil.execute(replacedStartCurie);
+          Result result = cypherUtil.execute(replacedStartCurie, paramMap);
 
       TinkerGraphUtil tgu = new TinkerGraphUtil(curieUtil);
       Graph graph = tgu.resultToGraph(result);
@@ -129,12 +142,29 @@ public class CypherUtilService extends BaseResource {
       return Response.ok(graph).cacheControl(null).build();
         }
       } else {
-          return Response.ok(cypherUtil.execute(replacedStartCurie).resultAsString()).cacheControl(null).build();
+          return Response.ok(cypherUtil.execute(replacedStartCurie, paramMap).resultAsString()).cacheControl(null).build();
       }
     } catch (TransactionTerminatedException e) {
         return Response.ok("The query execution exceeds dbms.transaction.timeout configuration. " +
                            "Consider using the neo4j shell instead of this service.").build();
     }
+  }
+
+  Multimap<String, Object> resolveCuries(Multimap<String, Object> paramMap) {
+    Multimap<String, Object> map = ArrayListMultimap.create();
+    for (Entry<String, Object> entry: paramMap.entries()) {
+      if (entry.getValue() instanceof String) {
+        Optional<String> iri = curieUtil.getIri((String)entry.getValue());
+        if (iri.isPresent()) {
+          map.put(entry.getKey(), iri.get());
+        } else {
+          map.put(entry.getKey(), entry.getValue());
+        }
+      } else {
+        map.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return map;
   }
 
   // TODO similar to ResultSerializer.java from golrLoader
